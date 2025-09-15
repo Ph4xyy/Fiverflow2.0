@@ -441,7 +441,7 @@ const LandingPage: React.FC = () => {
             </div>
 
             <div>
-              <h4 className="text-lg font-semibold mb-4">Suppport</h4>
+              <h4 className="text-lg font-semibold mb-4">Support</h4>
               <ul className="space-y-3">
                 <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Help Center</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Documentation</a></li>
@@ -456,7 +456,7 @@ const LandingPage: React.FC = () => {
               © 2024 FiverFlow. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">Privacyy Policy</a>
+              <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">Privacy Policy</a>
               <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">Terms of Service</a>
               <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">Cookie Policy</a>
             </div>
