@@ -1,0 +1,389 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* CSS Custom Properties for Dark Mode */
+  :root {
+    /* Light mode colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-tertiary: #94a3b8;
+    --border-primary: #e2e8f0;
+    --border-secondary: #cbd5e1;
+    --accent-blue: #3b82f6;
+    --accent-green: #10b981;
+    --accent-purple: #8b5cf6;
+    --accent-orange: #f59e0b;
+    --accent-red: #ef4444;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  }
+
+  .dark {
+    /* Dark mode colors */
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    --border-primary: #334155;
+    --border-secondary: #475569;
+    --accent-blue: #4a9eff;
+    --accent-green: #39d353;
+    --accent-purple: #bf5af2;
+    --accent-orange: #ff9f0a;
+    --accent-red: #ff6b6b;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+  }
+
+  /* Smooth transitions for all elements */
+  * {
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  html {
+    transition: color-scheme 0.3s ease;
+  }
+  
+  .dark {
+    color-scheme: dark;
+  }
+
+  /* Base body styling */
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+  }
+}
+
+@layer components {
+  /* Enhanced form inputs for dark mode */
+  .form-input {
+    @apply bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-600 
+           text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400
+           focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
+           focus:border-transparent transition-all duration-200;
+  }
+
+  .form-input:focus {
+    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+  }
+
+  /* Enhanced buttons with vibrant colors */
+  .btn-primary {
+    @apply bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600
+           text-white font-medium px-4 py-2 rounded-lg
+           hover:from-blue-700 hover:to-blue-800 dark:hover:from-blue-400 dark:hover:to-blue-500
+           focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2
+           dark:focus:ring-offset-slate-800 transition-all duration-200
+           shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
+  }
+
+  .btn-secondary {
+    @apply bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600
+           text-gray-700 dark:text-slate-200 font-medium px-4 py-2 rounded-lg
+           hover:bg-gray-50 dark:hover:bg-slate-600
+           focus:ring-2 focus:ring-gray-500 dark:focus:ring-slate-400 focus:ring-offset-2
+           dark:focus:ring-offset-slate-800 transition-all duration-200;
+  }
+
+  /* Enhanced cards with better dark mode styling */
+  .card {
+    @apply bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700
+           rounded-lg shadow-sm dark:shadow-lg transition-all duration-200
+           hover:shadow-md dark:hover:shadow-xl;
+  }
+
+  .card-header {
+    @apply border-b border-gray-200 dark:border-slate-700 p-4 sm:p-6;
+  }
+
+  /* Enhanced navigation styling */
+  .nav-item {
+    @apply text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white
+           hover:bg-gray-100 dark:hover:bg-slate-700 px-3 py-2 rounded-lg
+           transition-all duration-200;
+  }
+
+  .nav-item-active {
+    @apply bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 
+           border-r-2 border-blue-700 dark:border-blue-400;
+  }
+
+  /* Enhanced table styling */
+  .table-header {
+    @apply bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700;
+  }
+
+  .table-row {
+    @apply bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700
+           border-b border-gray-200 dark:border-slate-700 transition-colors duration-200;
+  }
+
+  /* Enhanced modal styling */
+  .modal-overlay {
+    @apply bg-black bg-opacity-50 dark:bg-opacity-70;
+  }
+
+  .modal-content {
+    @apply bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700
+           shadow-xl dark:shadow-2xl;
+  }
+
+  /* Status badges with vibrant colors */
+  .status-completed {
+    @apply bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300
+           border border-green-200 dark:border-green-700;
+  }
+
+  .status-in-progress {
+    @apply bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300
+           border border-blue-200 dark:border-blue-700;
+  }
+
+  .status-pending {
+    @apply bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300
+           border border-yellow-200 dark:border-yellow-700;
+  }
+
+  .status-error {
+    @apply bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300
+           border border-red-200 dark:border-red-700;
+  }
+
+  /* Enhanced gradient backgrounds */
+  .gradient-primary {
+    @apply bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800
+           dark:from-blue-500 dark:via-purple-500 dark:to-blue-700;
+  }
+
+  .gradient-secondary {
+    @apply bg-gradient-to-r from-purple-600 via-pink-600 to-purple-800
+           dark:from-purple-500 dark:via-pink-500 dark:to-purple-700;
+  }
+
+  /* Enhanced text colors */
+  .text-primary {
+    @apply text-gray-900 dark:text-slate-100;
+  }
+
+  .text-secondary {
+    @apply text-gray-600 dark:text-slate-400;
+  }
+
+  .text-tertiary {
+    @apply text-gray-500 dark:text-slate-500;
+  }
+
+  /* Enhanced border colors */
+  .border-primary {
+    @apply border-gray-200 dark:border-slate-700;
+  }
+
+  .border-secondary {
+    @apply border-gray-300 dark:border-slate-600;
+  }
+}
+
+/* FullCalendar Dark Mode Overrides */
+.dark .fc {
+  color: #f8fafc;
+}
+
+.dark .fc-toolbar-title {
+  color: #f8fafc;
+}
+
+.dark .fc-button {
+  background-color: #4a9eff;
+  border-color: #4a9eff;
+  color: white;
+}
+
+.dark .fc-button:hover {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.dark .fc-button-active {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.dark .fc-day-today {
+  background-color: rgba(74, 158, 255, 0.1);
+}
+
+.dark .fc-day-past {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.dark .fc-daygrid-day {
+  border-color: #334155;
+}
+
+.dark .fc-scrollgrid {
+  border-color: #334155;
+}
+
+.dark .fc-col-header-cell {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.dark .fc-daygrid-day-frame {
+  background-color: #0f172a;
+}
+
+.dark .fc-popover {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+.dark .fc-more-link {
+  color: #4a9eff;
+}
+
+/* Toast Notifications Dark Mode */
+.dark .Toaster__toast {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+}
+
+.dark .Toaster__toast--success {
+  background-color: #064e3b !important;
+  border-color: #059669 !important;
+}
+
+.dark .Toaster__toast--error {
+  background-color: #7f1d1d !important;
+  border-color: #dc2626 !important;
+}
+
+/* Scrollbar Dark Mode */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Selection colors for dark mode */
+.dark ::selection {
+  background-color: rgba(74, 158, 255, 0.3);
+  color: #f8fafc;
+}
+
+/* Focus ring enhancements */
+.dark *:focus {
+  outline: none;
+}
+
+.dark *:focus-visible {
+  outline: 2px solid #4a9eff;
+  outline-offset: 2px;
+}
+
+/* Enhanced shadows for dark mode */
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+}
+
+.dark .shadow {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+}
+
+.dark .shadow-md {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+}
+
+.dark .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+}
+
+.dark .shadow-xl {
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.6), 0 8px 10px -6px rgb(0 0 0 / 0.6);
+}
+
+.dark .shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.7);
+}
+
+/* Glow effects for interactive elements */
+.dark .glow-blue {
+  box-shadow: 0 0 20px rgba(74, 158, 255, 0.3);
+}
+
+.dark .glow-green {
+  box-shadow: 0 0 20px rgba(57, 211, 83, 0.3);
+}
+
+.dark .glow-purple {
+  box-shadow: 0 0 20px rgba(191, 90, 242, 0.3);
+}
+
+/* Enhanced hover effects */
+.dark .hover-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(74, 158, 255, 0.2);
+}
+
+/* Animated gradient backgrounds */
+.dark .animated-gradient {
+  background: linear-gradient(-45deg, #4a9eff, #bf5af2, #39d353, #ff9f0a);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Enhanced glass morphism effect */
+.dark .glass-effect {
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Neon accent borders */
+.dark .neon-border-blue {
+  border: 1px solid #4a9eff;
+  box-shadow: 0 0 10px rgba(74, 158, 255, 0.3);
+}
+
+.dark .neon-border-green {
+  border: 1px solid #39d353;
+  box-shadow: 0 0 10px rgba(57, 211, 83, 0.3);
+}
+
+.dark .neon-border-purple {
+  border: 1px solid #bf5af2;
+  box-shadow: 0 0 10px rgba(191, 90, 242, 0.3);
+}
