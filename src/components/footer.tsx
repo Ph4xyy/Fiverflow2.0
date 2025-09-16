@@ -26,8 +26,8 @@ export default function Footer() {
 
             {/* Social icons */}
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <span className="sr-only">Twitter</span>
+              <a href="https://dsc.gg/fiverflow#" className="text-gray-400 hover:text-white transition-colors">
+                <span className="sr-only">Discord</span>
                 <Globe size={20} />
               </a>
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
@@ -56,7 +56,7 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-4">Support</h4>
             <ul className="space-y-3">
               <li><Link to="/support" className="text-gray-400 hover:text-white transition-colors">FAQ</Link></li>
-              <li><Link to="dsc.gg/fiverflow" className="text-gray-400 hover:text-white transition-colors">Discord</Link></li>
+            <a href="https://dsc.gg/fiverflow" className="text-gray-400 hover:text-white text-sm transition-colors">Discord</a>
             </ul>
           </div>
         </div>
@@ -67,9 +67,9 @@ export default function Footer() {
             © 2025 FiverFlow. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">Privacy Policy</a>
-            <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">Terms of Service</a>
-            <a href="#" className="text-gray-400 hover:text-white text-sm transition-colors">Cookie Policy</a>
+            <li><Link to="/PrivacyPolicy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link></li>
+            <li><Link to="/TermsOfService" className="text-gray-400 hover:text-white text-sm transition-colors">Terms of Service</Link></li>
+            <li><Link to="/CoockiePolicy" className="text-gray-400 hover:text-white text-sm transition-colors">Cookie Policy</Link></li>
           </div>
         </div>
       </div>
