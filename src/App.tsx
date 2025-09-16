@@ -1,10 +1,10 @@
-// src/App.tsx (ajout de la route /support)
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { UserDataProvider } from './contexts/UserDataContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
+import { AnimatePresence, motion } from "framer-motion";
 
 // Core pages
 import LandingPage from './pages/LandingPage';
@@ -27,7 +27,7 @@ import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import CookiePolicy from "./components/CookiePolicy";
-import TermsOfService from "./components/TermsOfService"; // <- il manquait probablement ça
+import TermsOfService from "./components/TermsOfService";
 
 // Lazy invoices
 const InvoicesLayout = lazy(() => import('./pages/InvoicesLayout'));
@@ -35,51 +35,76 @@ const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
 const InvoiceTemplatesPage = lazy(() => import('./pages/InvoiceTemplatesPage'));
 const InvoiceTemplateEditorPage = lazy(() => import('./pages/InvoiceTemplateEditorPage'));
 
+// Wrapper pour animer les routes
+const AnimatedRoutes = () => {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageWrapper><LandingPage /></PageWrapper>} />
+        <Route path="/pricing" element={<PageWrapper><PricingPage /></PageWrapper>} />
+        <Route path="/support" element={<PageWrapper><SupportPage /></PageWrapper>} />
+        <Route path="/login" element={<PageWrapper><LoginPage /></PageWrapper>} />
+        <Route path="/register" element={<PageWrapper><RegisterPage /></PageWrapper>} />
+
+        <Route path="/onboarding" element={<ProtectedRoute><PageWrapper><OnboardingPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><PageWrapper><DashboardPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/clients" element={<ProtectedRoute><PageWrapper><ClientsPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/orders" element={<ProtectedRoute><PageWrapper><OrdersPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/calendar" element={<ProtectedRoute><PageWrapper><CalendarPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/tasks" element={<ProtectedRoute><PageWrapper><TasksPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/templates" element={<ProtectedRoute><PageWrapper><TemplatesPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/stats" element={<ProtectedRoute><PageWrapper><StatsPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><PageWrapper><ProfilePage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/network" element={<ProtectedRoute><PageWrapper><NetworkPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/upgrade" element={<ProtectedRoute><PageWrapper><UpgradePage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/admin/dashboard" element={<AdminRoute><PageWrapper><AdminDashboard /></PageWrapper></AdminRoute>} />
+        <Route path="/success" element={<ProtectedRoute><PageWrapper><SuccessPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/terms-of-service" element={<ProtectedRoute><PageWrapper><TermsOfService /></PageWrapper></ProtectedRoute>} />
+        <Route path="/privacy-policy" element={<ProtectedRoute><PageWrapper><PrivacyPolicy /></PageWrapper></ProtectedRoute>} />
+        <Route path="/cookie-policy" element={<ProtectedRoute><PageWrapper><CookiePolicy /></PageWrapper></ProtectedRoute>} />
+
+        <Route
+          path="/invoices"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><InvoicesLayout /></PageWrapper>
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<InvoicesPage />} />
+          <Route path="sent" element={<InvoicesPage />} />
+          <Route path="create" element={<InvoicesPage />} />
+          <Route path="templates" element={<InvoiceTemplatesPage />} />
+          <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
+        </Route>
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
+// Wrapper motion pour chaque page
+const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
 function App() {
   return (
     <AppErrorBoundary>
       <UserDataProvider>
         <Router>
           <Suspense fallback={<div style={{ padding: 16 }}>Loading…</div>}>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/support" element={<SupportPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-
-              <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-              <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
-              <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
-              <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-              <Route path="/tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
-              <Route path="/templates" element={<ProtectedRoute><TemplatesPage /></ProtectedRoute>} />
-              <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-              <Route path="/network" element={<ProtectedRoute><NetworkPage /></ProtectedRoute>} />
-              <Route path="/upgrade" element={<ProtectedRoute><UpgradePage /></ProtectedRoute>} />
-              <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-              <Route path="/success" element={<ProtectedRoute><SuccessPage /></ProtectedRoute>} />
-              <Route path="/terms-of-service" element={<ProtectedRoute><TermsOfService /></ProtectedRoute>} />
-              <Route path="/privacy-policy" element={<ProtectedRoute><PrivacyPolicy /></ProtectedRoute>} />
-              <Route path="/cookie-policy" element={<ProtectedRoute><CookiePolicy /></ProtectedRoute>} />
-
-              <Route
-                path="/invoices"
-                element={
-                  <ProtectedRoute>
-                    <InvoicesLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<InvoicesPage />} />
-                <Route path="sent" element={<InvoicesPage />} />
-                <Route path="create" element={<InvoicesPage />} />
-                <Route path="templates" element={<InvoiceTemplatesPage />} />
-                <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
-              </Route>
-            </Routes>
+            <AnimatedRoutes />
           </Suspense>
         </Router>
       </UserDataProvider>

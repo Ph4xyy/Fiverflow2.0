@@ -7,8 +7,7 @@ const CookiePolicy = () => {
   const { user } = useAuth();
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header same as PrivacyPolicy, only nav label changed */}
-      <header className="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-200 z-50">
+              <header className="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-200 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center space-x-2">
