@@ -1,4 +1,5 @@
 // src/App.tsx
+import "./i18n"; 
 import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { UserDataProvider } from './contexts/UserDataContext';
@@ -6,7 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import { AnimatePresence, motion } from 'framer-motion';
-import "./i18n"; // <-- IMPORTANT : doit être importé une seule fois au lancement
+// <-- IMPORTANT : doit être importé une seule fois au lancement
 
 // Core pages
 import LandingPage from './pages/LandingPage';
