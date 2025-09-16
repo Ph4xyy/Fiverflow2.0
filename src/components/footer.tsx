@@ -41,14 +41,13 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Product links */}
+          {/* Liens rapides */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Product</h4>
+            <h4 className="text-lg font-semibold mb-4">Pages</h4>
             <ul className="space-y-3">
               <li><Link to="/#features" className="text-gray-400 hover:text-white transition-colors">Features</Link></li>
               <li><Link to="/pricing" className="text-gray-400 hover:text-white transition-colors">Pricing</Link></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Integrations</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">API</a></li>
+             <li><Link to="/dashboard" className="text-gray-400 hover:text-white transition-colors">Dashboard</Link></li>
             </ul>
           </div>
 
@@ -56,10 +55,8 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Support</h4>
             <ul className="space-y-3">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Help Center</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Documentation</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Status</a></li>
+              <li><Link to="/support" className="text-gray-400 hover:text-white transition-colors">FAQ</Link></li>
+              <li><Link to="dsc.gg/fiverflow" className="text-gray-400 hover:text-white transition-colors">Discord</Link></li>
             </ul>
           </div>
         </div>
