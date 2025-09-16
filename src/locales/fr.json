@@ -1,42 +1,7 @@
 {
-  "navbar": {
-    "features": "Fonctionnalités",
-    "pricing": "Tarifs",
-    "support": "Support",
-    "signIn": "Connexion",
-    "getStarted": "Commencer",
-    "dashboard": "Tableau de bord"
-  },
-  "hero": {
-    "trusted": "Fiable pour plus de 10 000 freelances dans le monde",
-    "title1": "Créé Par",
-    "title2": "Un Freelance",
-    "title3": "Pour les Freelances",
-    "description": "FiverFlow vous aide à organiser vos clients, suivre vos commandes et développer votre activité de freelance sur toutes les plateformes.",
-    "ctaPrimary": "Essai Gratuit",
-    "ctaSecondary": "Voir la démo",
-    "trialNote": "Essai gratuit de 7 jours • Annulation à tout moment"
-  },
-  "stats": {
-    "freelancers": "Freelances actifs",
-    "projects": "Projets gérés",
-    "uptime": "Disponibilité",
-    "support": "Support"
-  },
-  "trustedBy": "Fiable pour les freelances sur",
-  "featuresSection": {
-    "title": "Tout ce dont vous avez besoin pour réussir",
-    "subtitle": "Des outils puissants conçus spécialement pour les freelances afin de gérer leur activité et la développer."
-  },
-  "testimonials": {
-    "title": "Apprécié par les freelances du monde entier",
-    "subtitle": "Découvrez ce que notre communauté de freelances à succès pense de FiverFlow."
-  },
-  "cta": {
-    "title": "Prêt à transformer votre activité de freelance ?",
-    "subtitle": "Rejoignez des milliers de freelances qui ont déjà adopté FiverFlow.",
-    "start": "Commencer l’essai gratuit",
-    "dashboard": "Aller au tableau de bord",
-    "note": "Essai gratuit de 7 jours"
-  }
+  "welcome": "Bienvenue sur EvoFlow",
+  "login": "Connexion",
+  "register": "Inscription",
+  "dashboard": "Tableau de bord",
+  "clients": "Clients"
 }
