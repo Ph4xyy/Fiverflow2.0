@@ -10,54 +10,31 @@ import { Crown } from "lucide-react";
 const SupportPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-200 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Crown className="text-white" size={20} />
-              </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                FiverFlow
-              </h1>
-            </Link>
-            
+      {/* Header simple pour cohérence avec la landing inline */}
+          <header className="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-200 z-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-16">
+                <Link to="/" className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                    <Crown className="text-white" size={20} />
+                  </div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    FiverFlow
+          </Link>
             <nav className="hidden md:flex items-center space-x-8">
               <Link to="/#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</Link>
-              <span className="text-blue-600 font-medium">Pricing</span>
-              <Link to="/support" className="text-gray-600 hover:text-gray-900 transition-colors">Support</Link>
+              <Link to="/pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</Link>
+              <span className="text-blue-600 font-medium">Support</span>
             </nav>
-            
-            <div className="flex items-center space-x-4">
-              {user ? (
-                <Link
-                  to="/dashboard"
-                  className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-                >
-                  Dashboard
-                  <ArrowRight size={16} className="ml-2" />
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  >
-                    Get Started
-                  </Link>
-                </>
-              )}
-            </div>
+          <div className="flex items-center gap-3">
+            <Link to="/login" className="text-gray-600 hover:text-gray-900">Sign In</Link>
+            <Button asChild>
+              <Link to="/register">Get Started</Link>
+            </Button>
           </div>
         </div>
       </header>
+
       {/* Hero */}
       <section className="py-16 sm:py-24 bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
@@ -98,7 +75,7 @@ const SupportPage: React.FC = () => {
                 <Mail className="w-6 h-6 text-green-600 mb-3" />
                 <div className="font-semibold text-gray-900">Contact</div>
                 <div className="text-sm text-gray-500">support@fiverflow.app</div>
-                <ArrowRight className="w-4 h-4 text-gray-400 mt-3 group-hover:translate-x-1 transition" />
+                <ArrowRight className="w-4 h-4 text-gray-400 mt-3 group-hover:translate-x-1 transition" /> 
               </a>
             </div>
           </div>
