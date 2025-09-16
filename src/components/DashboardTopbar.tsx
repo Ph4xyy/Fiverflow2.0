@@ -39,14 +39,16 @@ const DashboardTopBar: React.FC = () => {
   return (
     <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm border-b border-gray-200 dark:border-slate-700 fixed w-full top-0 z-50">
       <div className="flex items-center justify-between px-4 py-3">
-        {/* Left side: Logo + Langue + Currency */}
-        <div className="flex items-center space-x-4">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <img src={LogoImage} alt="Logo" className="h-8 w-auto" />
-            {/* Ou du texte: <span className="text-xl font-bold">FiverFlow</span> */}
-          </div>
+        {/* Left side: Logo + texte */}
+        <div className="flex items-center space-x-3">
+          <img src={LogoImage} alt="Logo" className="h-8 w-auto" />
+          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-accent-blue dark:to-accent-purple bg-clip-text text-transparent">
+            FiverFlow
+          </span>
+        </div>
 
+        {/* Right side: Langue, Currency, DarkMode, Notifications, SignOut */}
+        <div className="flex items-center space-x-3">
           {/* Language dropdown */}
           <div className="relative">
             <button
@@ -57,7 +59,7 @@ const DashboardTopBar: React.FC = () => {
               <span className="text-sm">{selectedLang.label}</span>
             </button>
             {langDropdownOpen && (
-              <div className="absolute left-0 mt-1 w-36 bg-white dark:bg-slate-800 rounded-lg shadow-lg z-50">
+              <div className="absolute right-0 mt-1 w-36 bg-white dark:bg-slate-800 rounded-lg shadow-lg z-50">
                 {languages.map(lang => (
                   <button
                     key={lang.code}
@@ -82,7 +84,7 @@ const DashboardTopBar: React.FC = () => {
               <span className="text-sm">{selectedCurrency.label}</span>
             </button>
             {currencyDropdownOpen && (
-              <div className="absolute left-0 mt-1 w-36 bg-white dark:bg-slate-800 rounded-lg shadow-lg z-50">
+              <div className="absolute right-0 mt-1 w-36 bg-white dark:bg-slate-800 rounded-lg shadow-lg z-50">
                 {currencies.map(curr => (
                   <button
                     key={curr.code}
@@ -96,10 +98,8 @@ const DashboardTopBar: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
 
-        {/* Right side: DarkMode, Notifications, SignOut */}
-        <div className="flex items-center space-x-3">
+          {/* Dark Mode */}
           <button
             onClick={toggleDarkMode}
             className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition"
@@ -108,10 +108,12 @@ const DashboardTopBar: React.FC = () => {
             {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
           </button>
 
+          {/* Notifications */}
           <button className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition">
             <Bell size={16} />
           </button>
 
+          {/* SignOut */}
           <button
             onClick={signOut}
             className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition"
