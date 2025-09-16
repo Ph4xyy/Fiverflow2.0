@@ -25,6 +25,9 @@ import CalendarPage from './pages/CalendarPage';
 import TasksPage from './pages/TasksPage';
 import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import CookiePolicy from "./components/CookiePolicy";
+import TermsOfService from "./components/TermsOfService"; // <- il manquait probablement ça
 
 // Lazy invoices
 const InvoicesLayout = lazy(() => import('./pages/InvoicesLayout'));
@@ -58,6 +61,9 @@ function App() {
               <Route path="/upgrade" element={<ProtectedRoute><UpgradePage /></ProtectedRoute>} />
               <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/success" element={<ProtectedRoute><SuccessPage /></ProtectedRoute>} />
+              <Route path="/terms-of-service" element={<ProtectedRoute><TermsOfService /></ProtectedRoute>} />
+              <Route path="/privacy-policy" element={<ProtectedRoute><PrivacyPolicy /></ProtectedRoute>} />
+              <Route path="/cookie-policy" element={<ProtectedRoute><CookiePolicy /></ProtectedRoute>} />
 
               <Route
                 path="/invoices"
