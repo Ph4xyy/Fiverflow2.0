@@ -35,7 +35,38 @@ const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
 const InvoiceTemplatesPage = lazy(() => import('./pages/InvoiceTemplatesPage'));
 const InvoiceTemplateEditorPage = lazy(() => import('./pages/InvoiceTemplateEditorPage'));
 
-// Wrapper pour animer les routes
+// PageWrapper pour animations et scroll en haut
+const PageWrapper: React.FC<{ children: React.ReactNode, isDashboard?: boolean }> = ({ children, isDashboard = false }) => {
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  const variants = isDashboard
+    ? {
+        initial: { opacity: 0, x: 100 },
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 0, x: -100 },
+      }
+    : {
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -10 },
+      };
+
+  return (
+    <motion.div
+      variants={variants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={{ duration: isDashboard ? 0.5 : 0.3 }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+// Routes animées avec AnimatePresence
 const AnimatedRoutes = () => {
   const location = useLocation();
 
@@ -49,7 +80,7 @@ const AnimatedRoutes = () => {
         <Route path="/register" element={<PageWrapper><RegisterPage /></PageWrapper>} />
 
         <Route path="/onboarding" element={<ProtectedRoute><PageWrapper><OnboardingPage /></PageWrapper></ProtectedRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute><PageWrapper><DashboardPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><PageWrapper isDashboard><DashboardPage /></PageWrapper></ProtectedRoute>} />
         <Route path="/clients" element={<ProtectedRoute><PageWrapper><ClientsPage /></PageWrapper></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><PageWrapper><OrdersPage /></PageWrapper></ProtectedRoute>} />
         <Route path="/calendar" element={<ProtectedRoute><PageWrapper><CalendarPage /></PageWrapper></ProtectedRoute>} />
@@ -59,7 +90,7 @@ const AnimatedRoutes = () => {
         <Route path="/profile" element={<ProtectedRoute><PageWrapper><ProfilePage /></PageWrapper></ProtectedRoute>} />
         <Route path="/network" element={<ProtectedRoute><PageWrapper><NetworkPage /></PageWrapper></ProtectedRoute>} />
         <Route path="/upgrade" element={<ProtectedRoute><PageWrapper><UpgradePage /></PageWrapper></ProtectedRoute>} />
-        <Route path="/admin/dashboard" element={<AdminRoute><PageWrapper><AdminDashboard /></PageWrapper></AdminRoute>} />
+        <Route path="/admin/dashboard" element={<AdminRoute><PageWrapper isDashboard><AdminDashboard /></PageWrapper></AdminRoute>} />
         <Route path="/success" element={<ProtectedRoute><PageWrapper><SuccessPage /></PageWrapper></ProtectedRoute>} />
         <Route path="/terms-of-service" element={<ProtectedRoute><PageWrapper><TermsOfService /></PageWrapper></ProtectedRoute>} />
         <Route path="/privacy-policy" element={<ProtectedRoute><PageWrapper><PrivacyPolicy /></PageWrapper></ProtectedRoute>} />
@@ -81,20 +112,6 @@ const AnimatedRoutes = () => {
         </Route>
       </Routes>
     </AnimatePresence>
-  );
-};
-
-// Wrapper motion pour chaque page
-const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
-      {children}
-    </motion.div>
   );
 };
 
