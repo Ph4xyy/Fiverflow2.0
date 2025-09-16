@@ -1,14 +1,13 @@
 // src/App.tsx
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from "framer-motion";
 import { UserDataProvider } from './contexts/UserDataContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
-import { AnimatePresence, motion, Easing } from "framer-motion";
-import Lenis from "@studio-freight/lenis";
 
-// Core pages
+// Pages
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -37,45 +36,68 @@ const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
 const InvoiceTemplatesPage = lazy(() => import('./pages/InvoiceTemplatesPage'));
 const InvoiceTemplateEditorPage = lazy(() => import('./pages/InvoiceTemplateEditorPage'));
 
-// === Wrapper motion pour chaque page ===
-const PageWrapper: React.FC<{ children: React.ReactNode; isDashboard?: boolean }> = ({ children, isDashboard = false }) => {
-  const location = useLocation();
+// === Wrappers pour animations === //
 
-  // Scroll automatique en haut lors du changement de page
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [location.pathname]);
+// Pages normales (animation quasi nulle)
+const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 1 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 1 }}
+  >
+    {children}
+  </motion.div>
+);
 
-  // easing cubic-bezier pour Framer Motion
-  const ease: Easing = [0.43, 0.13, 0.23, 0.96];
+// Dashboard (animation "portal" uniquement si playAnimation = true)
+const DashboardWrapper: React.FC<{ children: React.ReactNode; playAnimation: boolean }> = ({ children, playAnimation }) => (
+  <motion.div
+    initial={playAnimation ? { opacity: 0, y: 50 } : { opacity: 1, y: 0 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -50 }}
+    transition={{ duration: playAnimation ? 0.8 : 0 }}
+  >
+    {children}
+  </motion.div>
+);
 
-  return (
-    <motion.div
-      initial={isDashboard ? { opacity: 0, y: 100 } : { opacity: 1, y: 0 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={isDashboard ? { opacity: 0, y: -100 } : { opacity: 1, y: 0 }}
-      transition={{ duration: isDashboard ? 0.6 : 0.2, ease }}
-    >
-      {children}
-    </motion.div>
-  );
-};
-
-// === Wrapper pour animer les routes ===
+// Gestion des routes animées
 const AnimatedRoutes = () => {
   const location = useLocation();
+  const [prevPath, setPrevPath] = useState<string>('');
+  const [playDashboardAnimation, setPlayDashboardAnimation] = useState(false);
+
+  useEffect(() => {
+    // Animation dashboard seulement quand on arrive depuis une autre page
+    if (location.pathname === '/dashboard' && prevPath !== '/dashboard') {
+      setPlayDashboardAnimation(true);
+    } else {
+      setPlayDashboardAnimation(false);
+    }
+    setPrevPath(location.pathname);
+    // Scroll top automatique à chaque changement de page
+    window.scrollTo({ top: 0 });
+  }, [location.pathname]);
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+        {/* Pages publiques */}
         <Route path="/" element={<PageWrapper><LandingPage /></PageWrapper>} />
         <Route path="/pricing" element={<PageWrapper><PricingPage /></PageWrapper>} />
         <Route path="/support" element={<PageWrapper><SupportPage /></PageWrapper>} />
         <Route path="/login" element={<PageWrapper><LoginPage /></PageWrapper>} />
         <Route path="/register" element={<PageWrapper><RegisterPage /></PageWrapper>} />
 
+        {/* Pages protégées */}
         <Route path="/onboarding" element={<ProtectedRoute><PageWrapper><OnboardingPage /></PageWrapper></ProtectedRoute>} />
-        <Route path="/dashboard" element={<ProtectedRoute><PageWrapper isDashboard><DashboardPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <DashboardWrapper playAnimation={playDashboardAnimation}>
+              <DashboardPage />
+            </DashboardWrapper>
+          </ProtectedRoute>
+        } />
         <Route path="/clients" element={<ProtectedRoute><PageWrapper><ClientsPage /></PageWrapper></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><PageWrapper><OrdersPage /></PageWrapper></ProtectedRoute>} />
         <Route path="/calendar" element={<ProtectedRoute><PageWrapper><CalendarPage /></PageWrapper></ProtectedRoute>} />
@@ -85,20 +107,14 @@ const AnimatedRoutes = () => {
         <Route path="/profile" element={<ProtectedRoute><PageWrapper><ProfilePage /></PageWrapper></ProtectedRoute>} />
         <Route path="/network" element={<ProtectedRoute><PageWrapper><NetworkPage /></PageWrapper></ProtectedRoute>} />
         <Route path="/upgrade" element={<ProtectedRoute><PageWrapper><UpgradePage /></PageWrapper></ProtectedRoute>} />
-        <Route path="/admin/dashboard" element={<AdminRoute><PageWrapper isDashboard><AdminDashboard /></PageWrapper></AdminRoute>} />
+        <Route path="/admin/dashboard" element={<AdminRoute><PageWrapper><AdminDashboard /></PageWrapper></AdminRoute>} />
         <Route path="/success" element={<ProtectedRoute><PageWrapper><SuccessPage /></PageWrapper></ProtectedRoute>} />
         <Route path="/terms-of-service" element={<ProtectedRoute><PageWrapper><TermsOfService /></PageWrapper></ProtectedRoute>} />
         <Route path="/privacy-policy" element={<ProtectedRoute><PageWrapper><PrivacyPolicy /></PageWrapper></ProtectedRoute>} />
         <Route path="/cookie-policy" element={<ProtectedRoute><PageWrapper><CookiePolicy /></PageWrapper></ProtectedRoute>} />
 
-        <Route
-          path="/invoices"
-          element={
-            <ProtectedRoute>
-              <PageWrapper><InvoicesLayout /></PageWrapper>
-            </ProtectedRoute>
-          }
-        >
+        {/* Invoices */}
+        <Route path="/invoices" element={<ProtectedRoute><PageWrapper><InvoicesLayout /></PageWrapper></ProtectedRoute>} >
           <Route index element={<InvoicesPage />} />
           <Route path="sent" element={<InvoicesPage />} />
           <Route path="create" element={<InvoicesPage />} />
@@ -110,26 +126,8 @@ const AnimatedRoutes = () => {
   );
 };
 
-// === Application principale ===
+// === App principal === //
 function App() {
-  // Lenis smooth scroll
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t: number) => t,
-      wheelMultiplier: 1,
-      touchMultiplier: 1,
-      infinite: false,
-    });
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-  }, []);
-
   return (
     <AppErrorBoundary>
       <UserDataProvider>
