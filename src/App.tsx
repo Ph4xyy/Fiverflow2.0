@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import { AnimatePresence, motion } from 'framer-motion';
+import "./i18n"; // <-- IMPORTANT : doit être importé une seule fois au lancement
 
 // Core pages
 import LandingPage from './pages/LandingPage';
