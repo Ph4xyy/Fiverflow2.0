@@ -3,13 +3,17 @@ import { Moon, Sun, LogOut, Bell } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 
-// Import des icon drapeau //
+// Import des icônes drapeaux
 import FlagEN from '../assets/IconUS.svg';
 import FlagFR from '../assets/IconFR.svg';
 
-import CurrencyUSD from '../assets//IconUS.svg';
+// Import des icônes currency
+import CurrencyUSD from '../assets/IconUS.svg';
 import CurrencyEUR from '../assets/IconEU.svg';
 import CurrencyCAD from '../assets/IconCA.svg';
+
+// Import logo
+import LogoImage from '../assets/LogoTransparent.png'; // <-- place ton logo ici
 
 const languages = [
   { code: 'en', label: 'English', icon: FlagEN },
@@ -35,8 +39,14 @@ const DashboardTopBar: React.FC = () => {
   return (
     <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm border-b border-gray-200 dark:border-slate-700 fixed w-full top-0 z-50">
       <div className="flex items-center justify-between px-4 py-3">
-        {/* Left side: Langue + Currency */}
-        <div className="flex items-center space-x-3">
+        {/* Left side: Logo + Langue + Currency */}
+        <div className="flex items-center space-x-4">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <img src={LogoImage} alt="Logo" className="h-8 w-auto" />
+            {/* Ou du texte: <span className="text-xl font-bold">FiverFlow</span> */}
+          </div>
+
           {/* Language dropdown */}
           <div className="relative">
             <button
