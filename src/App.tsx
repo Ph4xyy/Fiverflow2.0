@@ -1,10 +1,12 @@
+// src/App.tsx
 import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { UserDataProvider } from './contexts/UserDataContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, Easing } from "framer-motion";
+import Lenis from "@studio-freight/lenis";
 
 // Core pages
 import LandingPage from './pages/LandingPage';
@@ -35,95 +37,99 @@ const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
 const InvoiceTemplatesPage = lazy(() => import('./pages/InvoiceTemplatesPage'));
 const InvoiceTemplateEditorPage = lazy(() => import('./pages/InvoiceTemplateEditorPage'));
 
-// Smooth scroll to top à chaque changement de route
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
+// === Wrapper motion pour chaque page ===
+const PageWrapper: React.FC<{ children: React.ReactNode; isDashboard?: boolean }> = ({ children, isDashboard = false }) => {
+  const location = useLocation();
+
+  // Scroll automatique en haut lors du changement de page
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [pathname]);
-  return null;
-};
+  }, [location.pathname]);
 
-// Wrapper motion pour chaque page
-const PageWrapper: React.FC<{ children: React.ReactNode; isDashboard?: boolean }> = ({ children, isDashboard = false }) => {
-  const variants = isDashboard
-    ? {
-        initial: { opacity: 0, x: 300, scale: 0.95 },
-        animate: { opacity: 1, x: 0, scale: 1 },
-        exit: { opacity: 0, x: -300, scale: 0.95 },
-      }
-    : {
-        initial: { opacity: 0.95 },
-        animate: { opacity: 1 },
-        exit: { opacity: 0.95 },
-      };
+  // easing cubic-bezier pour Framer Motion
+  const ease: Easing = [0.43, 0.13, 0.23, 0.96];
 
   return (
     <motion.div
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      variants={variants}
-      transition={{ duration: isDashboard ? 0.7 : 0.2, ease: "easeInOut" }}
+      initial={isDashboard ? { opacity: 0, y: 100 } : { opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={isDashboard ? { opacity: 0, y: -100 } : { opacity: 1, y: 0 }}
+      transition={{ duration: isDashboard ? 0.6 : 0.2, ease }}
     >
       {children}
     </motion.div>
   );
 };
 
-// Wrapper pour animer les routes
+// === Wrapper pour animer les routes ===
 const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
-    <>
-      <ScrollToTop />
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<PageWrapper><LandingPage /></PageWrapper>} />
-          <Route path="/pricing" element={<PageWrapper><PricingPage /></PageWrapper>} />
-          <Route path="/support" element={<PageWrapper><SupportPage /></PageWrapper>} />
-          <Route path="/login" element={<PageWrapper><LoginPage /></PageWrapper>} />
-          <Route path="/register" element={<PageWrapper><RegisterPage /></PageWrapper>} />
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageWrapper><LandingPage /></PageWrapper>} />
+        <Route path="/pricing" element={<PageWrapper><PricingPage /></PageWrapper>} />
+        <Route path="/support" element={<PageWrapper><SupportPage /></PageWrapper>} />
+        <Route path="/login" element={<PageWrapper><LoginPage /></PageWrapper>} />
+        <Route path="/register" element={<PageWrapper><RegisterPage /></PageWrapper>} />
 
-          <Route path="/onboarding" element={<ProtectedRoute><PageWrapper><OnboardingPage /></PageWrapper></ProtectedRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><PageWrapper isDashboard><DashboardPage /></PageWrapper></ProtectedRoute>} />
-          <Route path="/clients" element={<ProtectedRoute><PageWrapper><ClientsPage /></PageWrapper></ProtectedRoute>} />
-          <Route path="/orders" element={<ProtectedRoute><PageWrapper><OrdersPage /></PageWrapper></ProtectedRoute>} />
-          <Route path="/calendar" element={<ProtectedRoute><PageWrapper><CalendarPage /></PageWrapper></ProtectedRoute>} />
-          <Route path="/tasks" element={<ProtectedRoute><PageWrapper><TasksPage /></PageWrapper></ProtectedRoute>} />
-          <Route path="/templates" element={<ProtectedRoute><PageWrapper><TemplatesPage /></PageWrapper></ProtectedRoute>} />
-          <Route path="/stats" element={<ProtectedRoute><PageWrapper><StatsPage /></PageWrapper></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><PageWrapper><ProfilePage /></PageWrapper></ProtectedRoute>} />
-          <Route path="/network" element={<ProtectedRoute><PageWrapper><NetworkPage /></PageWrapper></ProtectedRoute>} />
-          <Route path="/upgrade" element={<ProtectedRoute><PageWrapper><UpgradePage /></PageWrapper></ProtectedRoute>} />
-          <Route path="/admin/dashboard" element={<AdminRoute><PageWrapper isDashboard><AdminDashboard /></PageWrapper></AdminRoute>} />
-          <Route path="/success" element={<ProtectedRoute><PageWrapper><SuccessPage /></PageWrapper></ProtectedRoute>} />
-          <Route path="/terms-of-service" element={<ProtectedRoute><PageWrapper><TermsOfService /></PageWrapper></ProtectedRoute>} />
-          <Route path="/privacy-policy" element={<ProtectedRoute><PageWrapper><PrivacyPolicy /></PageWrapper></ProtectedRoute>} />
-          <Route path="/cookie-policy" element={<ProtectedRoute><PageWrapper><CookiePolicy /></PageWrapper></ProtectedRoute>} />
+        <Route path="/onboarding" element={<ProtectedRoute><PageWrapper><OnboardingPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><PageWrapper isDashboard><DashboardPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/clients" element={<ProtectedRoute><PageWrapper><ClientsPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/orders" element={<ProtectedRoute><PageWrapper><OrdersPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/calendar" element={<ProtectedRoute><PageWrapper><CalendarPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/tasks" element={<ProtectedRoute><PageWrapper><TasksPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/templates" element={<ProtectedRoute><PageWrapper><TemplatesPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/stats" element={<ProtectedRoute><PageWrapper><StatsPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><PageWrapper><ProfilePage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/network" element={<ProtectedRoute><PageWrapper><NetworkPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/upgrade" element={<ProtectedRoute><PageWrapper><UpgradePage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/admin/dashboard" element={<AdminRoute><PageWrapper isDashboard><AdminDashboard /></PageWrapper></AdminRoute>} />
+        <Route path="/success" element={<ProtectedRoute><PageWrapper><SuccessPage /></PageWrapper></ProtectedRoute>} />
+        <Route path="/terms-of-service" element={<ProtectedRoute><PageWrapper><TermsOfService /></PageWrapper></ProtectedRoute>} />
+        <Route path="/privacy-policy" element={<ProtectedRoute><PageWrapper><PrivacyPolicy /></PageWrapper></ProtectedRoute>} />
+        <Route path="/cookie-policy" element={<ProtectedRoute><PageWrapper><CookiePolicy /></PageWrapper></ProtectedRoute>} />
 
-          <Route
-            path="/invoices"
-            element={
-              <ProtectedRoute>
-                <PageWrapper><InvoicesLayout /></PageWrapper>
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<InvoicesPage />} />
-            <Route path="sent" element={<InvoicesPage />} />
-            <Route path="create" element={<InvoicesPage />} />
-            <Route path="templates" element={<InvoiceTemplatesPage />} />
-            <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
-          </Route>
-        </Routes>
-      </AnimatePresence>
-    </>
+        <Route
+          path="/invoices"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><InvoicesLayout /></PageWrapper>
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<InvoicesPage />} />
+          <Route path="sent" element={<InvoicesPage />} />
+          <Route path="create" element={<InvoicesPage />} />
+          <Route path="templates" element={<InvoiceTemplatesPage />} />
+          <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
+        </Route>
+      </Routes>
+    </AnimatePresence>
   );
 };
 
+// === Application principale ===
 function App() {
+  // Lenis smooth scroll
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t: number) => t,
+      wheelMultiplier: 1,
+      touchMultiplier: 1,
+      infinite: false,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+  }, []);
+
   return (
     <AppErrorBoundary>
       <UserDataProvider>
