@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
+import DashboardTopbar from './DashboardTopbar';
 import NotificationsDropdown from './NotificationsDropdown';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { 
@@ -178,44 +179,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className={`min-h-screen ${pageBgClass} transition-colors duration-300`}>
-      <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm border-b border-gray-200 dark:border-slate-700 fixed w-full top-0 z-50">
-        <div className="flex items-center justify-between px-3 sm:px-4 py-3">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden p-1 sm:p-2 rounded-md text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200"
-            >
-              {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-            <Link to="/dashboard" className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-accent-blue dark:to-accent-purple bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700 transition-all duration-200">
-              FiverFlow
-            </Link>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <button 
-              onClick={toggleDarkMode}
-              className="p-1 sm:p-2 rounded-md text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110"
-              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
+      <DashboardTopbar />
 
-            {!SAFE_MODE_DISABLE_NOTIFICATIONS && (
-              <LocalErrorBoundary>
-                <NotificationsDropdown />
-              </LocalErrorBoundary>
-            )}
-
-            <button 
-              onClick={handleSignOut}
-              className="p-1 sm:p-2 rounded-md text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110"
-            >
-              <LogOut size={16} />
-            </button>
-          </div>
-        </div>
-      </header>
 
       <div className="flex pt-16">
         <aside className={`
