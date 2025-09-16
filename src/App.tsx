@@ -41,17 +41,17 @@ const PageWrapper: React.FC<{ children: React.ReactNode, isDashboard?: boolean }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  const variants = isDashboard
-    ? {
-        initial: { opacity: 0, x: 100 },
-        animate: { opacity: 1, x: 0 },
-        exit: { opacity: 0, x: -100 },
-      }
-    : {
-        initial: { opacity: 0, y: 10 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: -10 },
-      };
+const variants = isDashboard
+  ? {
+      initial: { opacity: 0, x: 300, scale: 0.95 },
+      animate: { opacity: 1, x: 0, scale: 1 },
+      exit: { opacity: 0, x: -300, scale: 0.95 },
+    }
+  : {
+      initial: { opacity: 0, y: 10 },
+      animate: { opacity: 1, y: 0 },
+      exit: { opacity: 0, y: -10 },
+    };
 
   return (
     <motion.div
@@ -59,7 +59,7 @@ const PageWrapper: React.FC<{ children: React.ReactNode, isDashboard?: boolean }
       initial="initial"
       animate="animate"
       exit="exit"
-      transition={{ duration: isDashboard ? 0.5 : 0.3 }}
+      transition={{ duration: isDashboard ? 0.7 : 0.3, ease: "easeInOut" }}
     >
       {children}
     </motion.div>
