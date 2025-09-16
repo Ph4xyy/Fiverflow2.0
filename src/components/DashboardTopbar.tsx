@@ -1,85 +1,111 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Sun, Moon, LogOut, Bell } from 'lucide-react';
+import { Moon, Sun, LogOut, Bell } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 
-const Header: React.FC = () => {
-  const { isDarkMode, toggleDarkMode } = useTheme();
-  const [isLangOpen, setIsLangOpen] = useState(false);
-  const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
+// Import des icon drapeau //
+import FlagEN from '../assets/IconUS.svg';
+import FlagFR from '../assets/IconFR.svg';
+
+import CurrencyUSD from '../assets//IconUS.svg';
+import CurrencyEUR from '../assets/IconEU.svg';
+import CurrencyCAD from '../assets/IconCA.svg';
+
+const languages = [
+  { code: 'en', label: 'English', icon: FlagEN },
+  { code: 'fr', label: 'Français', icon: FlagFR },
+];
+
+const currencies = [
+  { code: 'USD', label: 'USD', icon: CurrencyUSD },
+  { code: 'EUR', label: 'EUR', icon: CurrencyEUR },
+  { code: 'CAD', label: 'CAD', icon: CurrencyCAD },
+];
+
+const DashboardTopBar: React.FC = () => {
+  const { toggleDarkMode, isDarkMode } = useTheme();
+  const { signOut } = useAuth();
+
+  const [selectedLang, setSelectedLang] = useState(languages[0]);
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+
+  const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]);
+  const [currencyDropdownOpen, setCurrencyDropdownOpen] = useState(false);
 
   return (
     <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm border-b border-gray-200 dark:border-slate-700 fixed w-full top-0 z-50">
       <div className="flex items-center justify-between px-4 py-3">
-        {/* Logo */}
-        <Link to="/dashboard" className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          FiverFlow
-        </Link>
+        {/* Left side: Langue + Currency */}
+        <div className="flex items-center space-x-3">
+          {/* Language dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setLangDropdownOpen(!langDropdownOpen)}
+              className="flex items-center space-x-1 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition"
+            >
+              <img src={selectedLang.icon} alt={selectedLang.label} className="w-5 h-5" />
+              <span className="text-sm">{selectedLang.label}</span>
+            </button>
+            {langDropdownOpen && (
+              <div className="absolute left-0 mt-1 w-36 bg-white dark:bg-slate-800 rounded-lg shadow-lg z-50">
+                {languages.map(lang => (
+                  <button
+                    key={lang.code}
+                    onClick={() => { setSelectedLang(lang); setLangDropdownOpen(false); }}
+                    className="flex items-center gap-2 px-3 py-2 w-full hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md"
+                  >
+                    <img src={lang.icon} alt={lang.label} className="w-5 h-5" />
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
-        {/* Right section */}
-        <div className="flex items-center space-x-4">
-          {/* Dark mode toggle */}
+          {/* Currency dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)}
+              className="flex items-center space-x-1 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition"
+            >
+              <img src={selectedCurrency.icon} alt={selectedCurrency.label} className="w-5 h-5" />
+              <span className="text-sm">{selectedCurrency.label}</span>
+            </button>
+            {currencyDropdownOpen && (
+              <div className="absolute left-0 mt-1 w-36 bg-white dark:bg-slate-800 rounded-lg shadow-lg z-50">
+                {currencies.map(curr => (
+                  <button
+                    key={curr.code}
+                    onClick={() => { setSelectedCurrency(curr); setCurrencyDropdownOpen(false); }}
+                    className="flex items-center gap-2 px-3 py-2 w-full hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md"
+                  >
+                    <img src={curr.icon} alt={curr.label} className="w-5 h-5" />
+                    {curr.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right side: DarkMode, Notifications, SignOut */}
+        <div className="flex items-center space-x-3">
           <button
             onClick={toggleDarkMode}
-            className="p-2 rounded-md text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110"
+            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition"
+            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
           </button>
 
-          {/* Notifications */}
-          <div className="relative">
-            <button
-              className="p-2 rounded-md text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110"
-            >
-              <Bell size={16} />
-            </button>
-            {/* Dropdown si tu veux plus tard */}
-          </div>
+          <button className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+            <Bell size={16} />
+          </button>
 
-          {/* Language Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setIsLangOpen(!isLangOpen)}
-              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200"
-            >
-              {/* Exemple SVG drapeau */}
-              <svg width="20" height="20" viewBox="0 0 640 480">
-                <rect width="640" height="480" fill="#00247d"/>
-                <rect width="640" height="160" y="160" fill="#fff"/>
-                <rect width="640" height="80" y="200" fill="#cf142b"/>
-              </svg>
-            </button>
-            {isLangOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700">
-                <button className="flex items-center px-4 py-2 w-full hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition">
-                  <span className="mr-2">🇺🇸</span> English
-                </button>
-                <button className="flex items-center px-4 py-2 w-full hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition">
-                  <span className="mr-2">🇫🇷</span> Français
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Currency Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setIsCurrencyOpen(!isCurrencyOpen)}
-              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200"
-            >
-              💲 USD
-            </button>
-            {isCurrencyOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700">
-                <button className="w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition">USD</button>
-                <button className="w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition">CAD</button>
-                <button className="w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition">EUR</button>
-              </div>
-            )}
-          </div>
-
-          {/* Sign out */}
-          <button className="p-2 rounded-md text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110">
+          <button
+            onClick={signOut}
+            className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition"
+          >
             <LogOut size={16} />
           </button>
         </div>
@@ -88,4 +114,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header;
+export default DashboardTopBar;
