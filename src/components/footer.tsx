@@ -64,7 +64,7 @@ export default function Footer() {
         {/* Bottom section */}
         <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            © 2025 FiverFlow. All rights reserved.
+            © 20255 FiverFlow. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <li><Link to="/PrivacyPolicy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link></li>
