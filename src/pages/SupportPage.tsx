@@ -16,8 +16,8 @@ const SupportPage: React.FC = () => {
           </Link>
             <nav className="hidden md:flex items-center space-x-8">
               <Link to="/#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</Link>
-              <span className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</span>
-              <Link to="/#testimonials" className="text-blue-600 font-medium">Support</Link>
+              <Link to="/princing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</Link>
+              <span className="text-blue-600 font-medium">Support</span>
             </nav>
           <div className="flex items-center gap-3">
             <Link to="/login" className="text-gray-600 hover:text-gray-900">Sign In</Link>

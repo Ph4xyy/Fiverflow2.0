@@ -128,7 +128,6 @@ const LandingPage: React.FC = () => {
               {/* 🔧 Utilise Link vers /#features pour que l’item reste visible partout et scrolle correctement */}
               <Link to="/#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</Link>
               <Link to="/pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</Link>
-              {/* 🔁 Reviews -> Support (seule modif) */}
               <Link to="/support" className="text-gray-600 hover:text-gray-900 transition-colors">Support</Link>
             </nav>
             
