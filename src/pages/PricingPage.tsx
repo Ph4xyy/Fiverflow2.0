@@ -201,7 +201,7 @@ const PricingPage: React.FC = () => {
             <nav className="hidden md:flex items-center space-x-8">
               <Link to="/#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</Link>
               <span className="text-blue-600 font-medium">Pricing</span>
-              <Link to="/#testimonials" className="text-gray-600 hover:text-gray-900 transition-colors">Support</Link>
+              <Link to="/support" className="text-gray-600 hover:text-gray-900 transition-colors">Support</Link>
             </nav>
             
             <div className="flex items-center space-x-4">
