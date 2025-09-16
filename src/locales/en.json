@@ -1,7 +1,71 @@
 {
-  "welcome": "Welcome to FiverFlow",
-  "login": "Login",
-  "register": "Register",
-  "dashboard": "Dashboard",
-  "clients": "Clients"
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "support": "Support",
+      "dashboard": "Dashboard"
+    },
+    "hero": {
+      "trusted": "Trusted by freelancers worldwide",
+      "title": "Manage your business with",
+      "highlight": "FiverFlow",
+      "subtitle": "The all-in-one platform to manage your freelance business and scale your operations across all platforms."
+    },
+    "stats": {
+      "freelancers": "Freelancers",
+      "projects": "Projects completed",
+      "uptime": "Uptime",
+      "support": "Dedicated Support"
+    },
+    "featuresTitle": "Powerful Features",
+    "featuresSubtitle": "Everything you need to run your freelance business smoothly.",
+    "features": {
+      "clientManagement": {
+        "title": "Client Management",
+        "description": "Easily manage all your clients and their projects in one place."
+      },
+      "orderTracking": {
+        "title": "Order Tracking",
+        "description": "Track your ongoing and past orders with ease."
+      },
+      "messageTemplates": {
+        "title": "Message Templates",
+        "description": "Save time with reusable templates for client communication."
+      },
+      "analytics": {
+        "title": "Analytics",
+        "description": "Gain insights into your business with powerful analytics tools."
+      },
+      "automation": {
+        "title": "Automation",
+        "description": "Automate repetitive tasks to save time and focus on growth."
+      },
+      "security": {
+        "title": "Security",
+        "description": "Your data is safe with enterprise-grade security."
+      }
+    },
+    "footer": {
+      "links": {
+        "pages": "Pages",
+        "features": "Features",
+        "pricing": "Pricing",
+        "dashboard": "Dashboard",
+        "support": "Support",
+        "faq": "FAQ"
+      },
+      "socials": {
+        "discord": "Discord",
+        "linkedin": "LinkedIn",
+        "github": "GitHub"
+      },
+      "legal": {
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "cookies": "Cookie Policy"
+      },
+      "rights": "© 2025 FiverFlow. All rights reserved."
+    }
+  }
 }

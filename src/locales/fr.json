@@ -1,7 +1,71 @@
 {
-  "welcome": "Bienvenue sur EvoFlow",
-  "login": "Connexion",
-  "register": "Inscription",
-  "dashboard": "Tableau de bord",
-  "clients": "Clients"
+  "landing": {
+    "nav": {
+      "features": "Fonctionnalités",
+      "pricing": "Tarifs",
+      "support": "Support",
+      "dashboard": "Tableau de bord"
+    },
+    "hero": {
+      "trusted": "Fiable pour les freelances du monde entier",
+      "title": "Gérez votre activité avec",
+      "highlight": "FiverFlow",
+      "subtitle": "La plateforme tout-en-un pour gérer votre activité freelance et la développer sur tous les canaux."
+    },
+    "stats": {
+      "freelancers": "Freelances",
+      "projects": "Projets complétés",
+      "uptime": "Disponibilité",
+      "support": "Support dédié"
+    },
+    "featuresTitle": "Des fonctionnalités puissantes",
+    "featuresSubtitle": "Tout ce dont vous avez besoin pour gérer votre activité freelance efficacement.",
+    "features": {
+      "clientManagement": {
+        "title": "Gestion des clients",
+        "description": "Gérez facilement tous vos clients et leurs projets en un seul endroit."
+      },
+      "orderTracking": {
+        "title": "Suivi des commandes",
+        "description": "Suivez vos commandes en cours et passées sans effort."
+      },
+      "messageTemplates": {
+        "title": "Modèles de messages",
+        "description": "Gagnez du temps grâce à des modèles réutilisables pour vos communications."
+      },
+      "analytics": {
+        "title": "Analytique",
+        "description": "Obtenez des informations précieuses grâce à des outils d'analyse performants."
+      },
+      "automation": {
+        "title": "Automatisation",
+        "description": "Automatisez les tâches répétitives pour gagner du temps et vous concentrer sur la croissance."
+      },
+      "security": {
+        "title": "Sécurité",
+        "description": "Vos données sont protégées avec une sécurité de niveau entreprise."
+      }
+    },
+    "footer": {
+      "links": {
+        "pages": "Pages",
+        "features": "Fonctionnalités",
+        "pricing": "Tarifs",
+        "dashboard": "Tableau de bord",
+        "support": "Support",
+        "faq": "FAQ"
+      },
+      "socials": {
+        "discord": "Discord",
+        "linkedin": "LinkedIn",
+        "github": "GitHub"
+      },
+      "legal": {
+        "privacy": "Politique de confidentialité",
+        "terms": "Conditions d’utilisation",
+        "cookies": "Politique des cookies"
+      },
+      "rights": "© 2025 FiverFlow. Tous droits réservés."
+    }
+  }
 }
