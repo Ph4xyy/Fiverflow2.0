@@ -1,13 +1,13 @@
 // src/App.tsx
-import React, { Suspense, lazy, useState, useEffect } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from "framer-motion";
 import { UserDataProvider } from './contexts/UserDataContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
+import { AnimatePresence, motion } from 'framer-motion';
 
-// Pages
+// Core pages
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -36,47 +36,48 @@ const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
 const InvoiceTemplatesPage = lazy(() => import('./pages/InvoiceTemplatesPage'));
 const InvoiceTemplateEditorPage = lazy(() => import('./pages/InvoiceTemplateEditorPage'));
 
-// === Wrappers pour animations === //
+// Wrapper motion pour les pages normales
+const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      {children}
+    </motion.div>
+  );
+};
 
-// Pages normales (animation quasi nulle)
-const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <motion.div
-    initial={{ opacity: 1 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 1 }}
-  >
-    {children}
-  </motion.div>
-);
+// Wrapper motion spécial dashboard
+const DashboardWrapper: React.FC<{ children: React.ReactNode; playAnimation: boolean }> = ({ children, playAnimation }) => {
+  return (
+    <motion.div
+      initial={playAnimation ? { opacity: 0, y: 50 } : { opacity: 1, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: playAnimation ? 0.8 : 0 }}
+    >
+      {children}
+    </motion.div>
+  );
+};
 
-// Dashboard (animation "portal" uniquement si playAnimation = true)
-const DashboardWrapper: React.FC<{ children: React.ReactNode; playAnimation: boolean }> = ({ children, playAnimation }) => (
-  <motion.div
-    initial={playAnimation ? { opacity: 0, y: 50 } : { opacity: 1, y: 0 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -50 }}
-    transition={{ duration: playAnimation ? 0.8 : 0 }}
-  >
-    {children}
-  </motion.div>
-);
-
-// Gestion des routes animées
+// Animated Routes avec gestion du dashboard portal
 const AnimatedRoutes = () => {
   const location = useLocation();
   const [prevPath, setPrevPath] = useState<string>('');
-  const [playDashboardAnimation, setPlayDashboardAnimation] = useState(false);
+  const [isDashboardPortal, setIsDashboardPortal] = useState(false);
 
   useEffect(() => {
-    // Animation dashboard seulement quand on arrive depuis une autre page
-    if (location.pathname === '/dashboard' && prevPath !== '/dashboard') {
-      setPlayDashboardAnimation(true);
-    } else {
-      setPlayDashboardAnimation(false);
-    }
+    const enteringDashboard = location.pathname === '/dashboard' && !prevPath.startsWith('/dashboard');
+    setIsDashboardPortal(enteringDashboard);
+
     setPrevPath(location.pathname);
-    // Scroll top automatique à chaque changement de page
-    window.scrollTo({ top: 0 });
+
+    // Scroll top automatique
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [location.pathname]);
 
   return (
@@ -89,15 +90,16 @@ const AnimatedRoutes = () => {
         <Route path="/login" element={<PageWrapper><LoginPage /></PageWrapper>} />
         <Route path="/register" element={<PageWrapper><RegisterPage /></PageWrapper>} />
 
-        {/* Pages protégées */}
-        <Route path="/onboarding" element={<ProtectedRoute><PageWrapper><OnboardingPage /></PageWrapper></ProtectedRoute>} />
+        {/* Dashboard */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
-            <DashboardWrapper playAnimation={playDashboardAnimation}>
+            <DashboardWrapper playAnimation={isDashboardPortal}>
               <DashboardPage />
             </DashboardWrapper>
           </ProtectedRoute>
         } />
+
+        {/* Autres pages internes du dashboard (pas d'animation) */}
         <Route path="/clients" element={<ProtectedRoute><PageWrapper><ClientsPage /></PageWrapper></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><PageWrapper><OrdersPage /></PageWrapper></ProtectedRoute>} />
         <Route path="/calendar" element={<ProtectedRoute><PageWrapper><CalendarPage /></PageWrapper></ProtectedRoute>} />
@@ -109,24 +111,28 @@ const AnimatedRoutes = () => {
         <Route path="/upgrade" element={<ProtectedRoute><PageWrapper><UpgradePage /></PageWrapper></ProtectedRoute>} />
         <Route path="/admin/dashboard" element={<AdminRoute><PageWrapper><AdminDashboard /></PageWrapper></AdminRoute>} />
         <Route path="/success" element={<ProtectedRoute><PageWrapper><SuccessPage /></PageWrapper></ProtectedRoute>} />
+
+        {/* Pages légales */}
         <Route path="/terms-of-service" element={<ProtectedRoute><PageWrapper><TermsOfService /></PageWrapper></ProtectedRoute>} />
         <Route path="/privacy-policy" element={<ProtectedRoute><PageWrapper><PrivacyPolicy /></PageWrapper></ProtectedRoute>} />
         <Route path="/cookie-policy" element={<ProtectedRoute><PageWrapper><CookiePolicy /></PageWrapper></ProtectedRoute>} />
 
         {/* Invoices */}
-        <Route path="/invoices" element={<ProtectedRoute><PageWrapper><InvoicesLayout /></PageWrapper></ProtectedRoute>} >
+        <Route path="/invoices" element={<ProtectedRoute><PageWrapper><InvoicesLayout /></PageWrapper></ProtectedRoute>}>
           <Route index element={<InvoicesPage />} />
           <Route path="sent" element={<InvoicesPage />} />
           <Route path="create" element={<InvoicesPage />} />
           <Route path="templates" element={<InvoiceTemplatesPage />} />
           <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
         </Route>
+
+        {/* Onboarding */}
+        <Route path="/onboarding" element={<ProtectedRoute><PageWrapper><OnboardingPage /></PageWrapper></ProtectedRoute>} />
       </Routes>
     </AnimatePresence>
   );
 };
 
-// === App principal === //
 function App() {
   return (
     <AppErrorBoundary>
