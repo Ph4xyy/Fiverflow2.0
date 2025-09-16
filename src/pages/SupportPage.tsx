@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { HelpCircle, BookOpen, Newspaper, Mail, ArrowRight } from "lucide-react";
 import { FAQ } from "@/components/support/FAQ";
 import { Button } from "@/components/ui/Button";
+import Footer from "../components/footer";
 import { 
   Crown, 
 } from 'lucide-react';
@@ -140,19 +141,8 @@ const SupportPage: React.FC = () => {
           />
         </div>
       </section>
-
-      {/* Footer simple */}
-      <footer className="bg-gray-900 text-white py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-gray-400 text-sm">© 2024 FiverFlow. All rights reserved.</p>
-          <div className="flex items-center gap-6 text-sm">
-            <Link to="/support" className="text-gray-400 hover:text-white">Support</Link>
-            <a href="#" className="text-gray-400 hover:text-white">Blog</a>
-            <a href="#" className="text-gray-400 hover:text-white">Docs</a>
-            <a href="#" className="text-gray-400 hover:text-white">Status</a>
-          </div>
-        </div>
-      </footer>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
