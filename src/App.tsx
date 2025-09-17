@@ -1,13 +1,11 @@
 // src/App.tsx
 import "./i18n"; 
-import React, { Suspense, lazy, useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UserDataProvider } from './contexts/UserDataContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
-import { AnimatePresence, motion } from 'framer-motion';
-// <-- IMPORTANT : doit être importé une seule fois au lancement
 
 // Core pages
 import LandingPage from './pages/LandingPage';
@@ -38,110 +36,57 @@ const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
 const InvoiceTemplatesPage = lazy(() => import('./pages/InvoiceTemplatesPage'));
 const InvoiceTemplateEditorPage = lazy(() => import('./pages/InvoiceTemplateEditorPage'));
 
-// Wrapper motion pour les pages normales
-const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-    >
-      {children}
-    </motion.div>
-  );
-};
-
-// Wrapper motion spécial dashboard
-const DashboardWrapper: React.FC<{ children: React.ReactNode; playAnimation: boolean }> = ({ children, playAnimation }) => {
-  return (
-    <motion.div
-      initial={playAnimation ? { opacity: 0, y: 50 } : { opacity: 1, y: 0 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: playAnimation ? 0.8 : 0 }}
-    >
-      {children}
-    </motion.div>
-  );
-};
-
-// Animated Routes avec gestion du dashboard portal
-const AnimatedRoutes = () => {
-  const location = useLocation();
-  const [prevPath, setPrevPath] = useState<string>('');
-  const [isDashboardPortal, setIsDashboardPortal] = useState(false);
-
-  useEffect(() => {
-    const enteringDashboard = location.pathname === '/dashboard' && !prevPath.startsWith('/dashboard');
-    setIsDashboardPortal(enteringDashboard);
-
-    setPrevPath(location.pathname);
-
-    // Scroll top automatique
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [location.pathname]);
-
-  return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        {/* Pages publiques */}
-        <Route path="/" element={<PageWrapper><LandingPage /></PageWrapper>} />
-        <Route path="/pricing" element={<PageWrapper><PricingPage /></PageWrapper>} />
-        <Route path="/support" element={<PageWrapper><SupportPage /></PageWrapper>} />
-        <Route path="/login" element={<PageWrapper><LoginPage /></PageWrapper>} />
-        <Route path="/register" element={<PageWrapper><RegisterPage /></PageWrapper>} />
-
-        {/* Dashboard */}
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <DashboardWrapper playAnimation={isDashboardPortal}>
-              <DashboardPage />
-            </DashboardWrapper>
-          </ProtectedRoute>
-        } />
-
-        {/* Autres pages internes du dashboard (pas d'animation) */}
-        <Route path="/clients" element={<ProtectedRoute><PageWrapper><ClientsPage /></PageWrapper></ProtectedRoute>} />
-        <Route path="/orders" element={<ProtectedRoute><PageWrapper><OrdersPage /></PageWrapper></ProtectedRoute>} />
-        <Route path="/calendar" element={<ProtectedRoute><PageWrapper><CalendarPage /></PageWrapper></ProtectedRoute>} />
-        <Route path="/tasks" element={<ProtectedRoute><PageWrapper><TasksPage /></PageWrapper></ProtectedRoute>} />
-        <Route path="/templates" element={<ProtectedRoute><PageWrapper><TemplatesPage /></PageWrapper></ProtectedRoute>} />
-        <Route path="/stats" element={<ProtectedRoute><PageWrapper><StatsPage /></PageWrapper></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><PageWrapper><ProfilePage /></PageWrapper></ProtectedRoute>} />
-        <Route path="/network" element={<ProtectedRoute><PageWrapper><NetworkPage /></PageWrapper></ProtectedRoute>} />
-        <Route path="/upgrade" element={<ProtectedRoute><PageWrapper><UpgradePage /></PageWrapper></ProtectedRoute>} />
-        <Route path="/admin/dashboard" element={<AdminRoute><PageWrapper><AdminDashboard /></PageWrapper></AdminRoute>} />
-        <Route path="/success" element={<ProtectedRoute><PageWrapper><SuccessPage /></PageWrapper></ProtectedRoute>} />
-
-        {/* Pages légales */}
-        <Route path="/terms-of-service" element={<ProtectedRoute><PageWrapper><TermsOfService /></PageWrapper></ProtectedRoute>} />
-        <Route path="/privacy-policy" element={<ProtectedRoute><PageWrapper><PrivacyPolicy /></PageWrapper></ProtectedRoute>} />
-        <Route path="/cookie-policy" element={<ProtectedRoute><PageWrapper><CookiePolicy /></PageWrapper></ProtectedRoute>} />
-
-        {/* Invoices */}
-        <Route path="/invoices" element={<ProtectedRoute><PageWrapper><InvoicesLayout /></PageWrapper></ProtectedRoute>}>
-          <Route index element={<InvoicesPage />} />
-          <Route path="sent" element={<InvoicesPage />} />
-          <Route path="create" element={<InvoicesPage />} />
-          <Route path="templates" element={<InvoiceTemplatesPage />} />
-          <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
-        </Route>
-
-        {/* Onboarding */}
-        <Route path="/onboarding" element={<ProtectedRoute><PageWrapper><OnboardingPage /></PageWrapper></ProtectedRoute>} />
-      </Routes>
-    </AnimatePresence>
-  );
-};
-
 function App() {
   return (
     <AppErrorBoundary>
       <UserDataProvider>
         <Router>
           <Suspense fallback={<div style={{ padding: 16 }}>Loading…</div>}>
-            <AnimatedRoutes />
+            <Routes>
+              {/* Pages publiques */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/support" element={<SupportPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+
+              {/* Dashboard */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              } />
+
+              {/* Autres pages internes du dashboard */}
+              <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
+              <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+              <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+              <Route path="/tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
+              <Route path="/templates" element={<ProtectedRoute><TemplatesPage /></ProtectedRoute>} />
+              <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/network" element={<ProtectedRoute><NetworkPage /></ProtectedRoute>} />
+              <Route path="/upgrade" element={<ProtectedRoute><UpgradePage /></ProtectedRoute>} />
+              <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+              <Route path="/success" element={<ProtectedRoute><SuccessPage /></ProtectedRoute>} />
+
+              {/* Pages légales */}
+              <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/cookie-policy" element={<CookiePolicy />} />
+
+              {/* Invoices */}
+              <Route path="/invoices" element={<ProtectedRoute><InvoicesLayout /></ProtectedRoute>}>
+                <Route index element={<InvoicesPage />} />
+                <Route path="sent" element={<InvoicesPage />} />
+                <Route path="create" element={<InvoicesPage />} />
+                <Route path="templates" element={<InvoiceTemplatesPage />} />
+                <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
+              </Route>
+
+              {/* Onboarding */}
+              <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
+            </Routes>
           </Suspense>
         </Router>
       </UserDataProvider>

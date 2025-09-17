@@ -1,42 +1,7 @@
 {
-  "navbar": {
-    "features": "Features",
-    "pricing": "Pricing",
-    "support": "Support",
-    "signIn": "Sign In",
-    "getStarted": "Get Started",
-    "dashboard": "Dashboard"
-  },
-  "hero": {
-    "trusted": "Trusted by 10,000+ freelancers worldwide",
-    "title1": "Made By",
-    "title2": "A Freelancer",
-    "title3": "For Freelancers",
-    "description": "FiverFlow helps you organize clients, track orders, and grow your freelance business across all platforms.",
-    "ctaPrimary": "Start Free Trial",
-    "ctaSecondary": "Watch Demo",
-    "trialNote": "Free 7-day trial • Cancel anytime"
-  },
-  "stats": {
-    "freelancers": "Active Freelancers",
-    "projects": "Projects Managed",
-    "uptime": "Uptime",
-    "support": "Support"
-  },
-  "trustedBy": "Trusted by freelancers on",
-  "featuresSection": {
-    "title": "Everything you need to succeed",
-    "subtitle": "Powerful tools designed specifically for freelancers to manage their business and scale their operations."
-  },
-  "testimonials": {
-    "title": "Loved by freelancers worldwide",
-    "subtitle": "See what our community of successful freelancers has to say about FiverFlow."
-  },
-  "cta": {
-    "title": "Ready to transform your freelance business?",
-    "subtitle": "Join thousands of successful freelancers who've already made the switch to FiverFlow.",
-    "start": "Start Free Trial",
-    "dashboard": "Go to Dashboard",
-    "note": "7-day free trial"
-  }
+  "welcome": "Welcome to FiverFlow",
+  "login": "Login",
+  "register": "Register",
+  "dashboard": "Dashboard",
+  "clients": "Clients"
 }
