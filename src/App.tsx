@@ -1,4 +1,5 @@
-// src/App.tsx (ajout de la route /support)
+// src/App.tsx
+import "./i18n"; 
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UserDataProvider } from './contexts/UserDataContext';
@@ -25,6 +26,9 @@ import CalendarPage from './pages/CalendarPage';
 import TasksPage from './pages/TasksPage';
 import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import CookiePolicy from "./components/CookiePolicy";
+import TermsOfService from "./components/TermsOfService";
 
 // Lazy invoices
 const InvoicesLayout = lazy(() => import('./pages/InvoicesLayout'));
@@ -39,14 +43,21 @@ function App() {
         <Router>
           <Suspense fallback={<div style={{ padding: 16 }}>Loading…</div>}>
             <Routes>
+              {/* Pages publiques */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/support" element={<SupportPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
 
-              <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+              {/* Dashboard */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              } />
+
+              {/* Autres pages internes du dashboard */}
               <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
               <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
               <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
@@ -59,20 +70,22 @@ function App() {
               <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/success" element={<ProtectedRoute><SuccessPage /></ProtectedRoute>} />
 
-              <Route
-                path="/invoices"
-                element={
-                  <ProtectedRoute>
-                    <InvoicesLayout />
-                  </ProtectedRoute>
-                }
-              >
+              {/* Pages légales */}
+              <Route path="/terms-of-service" element={<TermsOfService />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/cookie-policy" element={<CookiePolicy />} />
+
+              {/* Invoices */}
+              <Route path="/invoices" element={<ProtectedRoute><InvoicesLayout /></ProtectedRoute>}>
                 <Route index element={<InvoicesPage />} />
                 <Route path="sent" element={<InvoicesPage />} />
                 <Route path="create" element={<InvoicesPage />} />
                 <Route path="templates" element={<InvoiceTemplatesPage />} />
                 <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
               </Route>
+
+              {/* Onboarding */}
+              <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
             </Routes>
           </Suspense>
         </Router>

@@ -1,28 +1,65 @@
 // src/pages/SupportPage.tsx
 import React from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from '../contexts/AuthContext';
 import { HelpCircle, BookOpen, Newspaper, Mail, ArrowRight } from "lucide-react";
 import { FAQ } from "@/components/support/FAQ";
 import { Button } from "@/components/ui/Button";
+import Footer from "../components/footer";
+import { 
+  Crown, 
+} from 'lucide-react';
+
 
 const SupportPage: React.FC = () => {
+    const { user } = useAuth();
   return (
     <div className="min-h-screen bg-white">
-      {/* Header simple pour cohérence avec la landing inline */}
-      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-200">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            FiverFlow
-          </Link>
-          <nav className="hidden md:flex items-center gap-8">
-            <Link to="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
-            <Link to="/support" className="text-gray-900 font-semibold">Support</Link>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Link to="/login" className="text-gray-600 hover:text-gray-900">Sign In</Link>
-            <Button asChild>
-              <Link to="/register">Get Started</Link>
-            </Button>
+      {/* Header */}
+      <header className="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-200 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <Crown className="text-white" size={20} />
+              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                FiverFlow
+              </h1>
+            </Link>
+            
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link to="/#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</Link>
+              <Link to="/pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</Link>
+              <span className="text-blue-600 font-medium">Support</span>
+            </nav>
+            
+            <div className="flex items-center space-x-4">
+              {user ? (
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  Dashboard
+                  <ArrowRight size={16} className="ml-2" />
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -104,19 +141,8 @@ const SupportPage: React.FC = () => {
           />
         </div>
       </section>
-
-      {/* Footer simple */}
-      <footer className="bg-gray-900 text-white py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-gray-400 text-sm">© 2024 FiverFlow. All rights reserved.</p>
-          <div className="flex items-center gap-6 text-sm">
-            <Link to="/support" className="text-gray-400 hover:text-white">Support</Link>
-            <a href="#" className="text-gray-400 hover:text-white">Blog</a>
-            <a href="#" className="text-gray-400 hover:text-white">Docs</a>
-            <a href="#" className="text-gray-400 hover:text-white">Status</a>
-          </div>
-        </div>
-      </footer>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

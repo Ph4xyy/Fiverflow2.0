@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
-import type { User, AuthError, Session } from '@supabase/supabase-js';
+import type { User, AuthError, Session, PostgrestError } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 interface AuthContextType {
@@ -8,7 +8,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, userData: any) => Promise<{ user: User | null; error: AuthError | null }>;
   signIn: (email: string, password: string) => Promise<{ user: User | null; error: AuthError | null }>;
   signOut: () => Promise<void>;
-  updateProfile: (updates: any) => Promise<{ error: AuthError | null }>;
+  updateProfile: (updates: any) => Promise<{ error: PostgrestError | null }>; // 🔥 fix ici
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -155,9 +155,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUserSafe(null);
   };
 
-  const updateProfile = async (updates: any) => {
+  const updateProfile = async (updates: any): Promise<{ error: PostgrestError | null }> => {
     if (!isSupabaseConfigured || !supabase || !user) {
-      return { error: null as unknown as AuthError };
+      return { error: null };
     }
     const { error } = await supabase.from('users').update(updates).eq('id', user.id);
     if (!error && typeof updates?.role !== 'undefined') {
