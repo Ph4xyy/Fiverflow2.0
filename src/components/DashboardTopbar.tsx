@@ -8,7 +8,7 @@ import FlagEN from '../assets/IconUS.svg';
 import FlagFR from '../assets/IconFR.svg';
 
 // Import logo
-import LogoImage from '../assets/LogoTransparent.png'; // <-- place ton logo ici
+import LogoImage from '../assets/LogoTransparent.png'; // <-- placce ton logo ici
 
 // Langues disponibles
 const languages = [
