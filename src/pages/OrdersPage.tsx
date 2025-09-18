@@ -42,8 +42,8 @@ const OrdersPage: React.FC = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   // Filters
-  const [status, setStatus] = useState<string>('');        // '', 'Pending' | 'In Progress' | 'Completed'
-  const [platform, setPlatform] = useState<string>('');    // '', 'Fiverr', 'Upwork', ...
+  const [status, setStatus] = useState<string>('');
+  const [platform, setPlatform] = useState<string>('');
   const [platformOptions, setPlatformOptions] = useState<string[]>([]);
 
   // Pagination
@@ -119,7 +119,6 @@ const OrdersPage: React.FC = () => {
         }
       }));
 
-      // client-side filtering + search + pagination
       let filtered = demo;
       if (debouncedSearch) {
         const term = debouncedSearch.toLowerCase();
@@ -143,24 +142,20 @@ const OrdersPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // base query (join client for name/platform)
       let query = supabase
         .from('orders')
         .select(`id,title,amount,status,deadline,created_at, clients!inner(name,platform,user_id)`, { count: 'exact' })
         .eq('clients.user_id', user.id)
         .order('created_at', { ascending: false });
 
-      // filters
       if (status) query = query.eq('status', status);
       if (platform) query = query.eq('clients.platform', platform);
 
-      // search
       if (debouncedSearch) {
         const term = `%${debouncedSearch}%`;
         query = query.or(`title.ilike.${term},clients.name.ilike.${term}`);
       }
 
-      // pagination
       const start = (page - 1) * PAGE_SIZE;
       const end = start + PAGE_SIZE - 1;
       query = query.range(start, end);
@@ -189,7 +184,6 @@ const OrdersPage: React.FC = () => {
     }
   };
 
-  // initial + deps
   useEffect(() => {
     fetchOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -263,7 +257,6 @@ const OrdersPage: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">
-            {/* Icône Orders : carré arrondi, même tone (amber -> orange) */}
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 grid place-items-center text-white shadow-glow-sm">
               <ShoppingCart size={18} />
             </div>
@@ -308,39 +301,51 @@ const OrdersPage: React.FC = () => {
           </div>
         </div>
 
-        {/* KPIs */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className={`${cardClass} p-4`}>
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-slate-400">Total Revenue</div>
-              <div className="w-9 h-9 rounded-xl grid place-items-center text-white bg-gradient-to-br from-emerald-500 to-teal-600">
+        {/* KPIs — Nouveau conteneur unique, épuré & pro */}
+        <div className={`${cardClass} p-4 sm:p-5`}>
+          <div className="grid grid-cols-1 md:grid-cols-3">
+            {/* Bloc 1 */}
+            <div className="flex items-center gap-4 p-3 md:p-4">
+              <div className="w-10 h-10 rounded-xl grid place-items-center text-white bg-gradient-to-br from-emerald-500 to-teal-600">
                 <DollarSign className="w-4 h-4" />
               </div>
+              <div className="min-w-0">
+                <div className="text-[11px] uppercase tracking-wider text-slate-400">Total Revenue</div>
+                <div className="text-xl sm:text-2xl font-semibold text-white truncate">
+                  ${kpis.totalRevenue.toLocaleString()}
+                </div>
+              </div>
             </div>
-            <div className="mt-2 text-2xl font-semibold text-white">
-              ${kpis.totalRevenue.toLocaleString()}
-            </div>
-          </div>
-          <div className={`${cardClass} p-4`}>
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-slate-400">Pending Revenue</div>
-              <div className="w-9 h-9 rounded-xl grid place-items-center text-white bg-gradient-to-br from-amber-500 to-orange-600">
+
+            {/* séparateur vertical seulement sur md+ */}
+            <div className="hidden md:block border-l border-[#1C2230]" />
+
+            {/* Bloc 2 */}
+            <div className="flex items-center gap-4 p-3 md:p-4">
+              <div className="w-10 h-10 rounded-xl grid place-items-center text-white bg-gradient-to-br from-amber-500 to-orange-600">
                 <Layers className="w-4 h-4" />
               </div>
-            </div>
-            <div className="mt-2 text-2xl font-semibold text-white">
-              ${kpis.pendingRevenue.toLocaleString()}
-            </div>
-          </div>
-          <div className={`${cardClass} p-4`}>
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-slate-400">In Progress</div>
-              <div className="w-9 h-9 rounded-xl grid place-items-center text-white bg-gradient-to-br from-indigo-500 to-blue-600">
-                <Calendar className="w-4 h-4" />
+              <div className="min-w-0">
+                <div className="text-[11px] uppercase tracking-wider text-slate-400">Pending Revenue</div>
+                <div className="text-xl sm:text-2xl font-semibold text-white truncate">
+                  ${kpis.pendingRevenue.toLocaleString()}
+                </div>
               </div>
             </div>
-            <div className="mt-2 text-2xl font-semibold text-white">
-              {kpis.inProgress}
+
+            <div className="hidden md:block border-l border-[#1C2230]" />
+
+            {/* Bloc 3 */}
+            <div className="flex items-center gap-4 p-3 md:p-4">
+              <div className="w-10 h-10 rounded-xl grid place-items-center text-white bg-gradient-to-br from-indigo-500 to-blue-600">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[11px] uppercase tracking-wider text-slate-400">In Progress</div>
+                <div className="text-xl sm:text-2xl font-semibold text-white truncate">
+                  {kpis.inProgress}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -529,7 +534,6 @@ const OrdersPage: React.FC = () => {
           onClose={() => setIsDetailModalOpen(false)}
           onEdit={(order: any) => {
             setIsDetailModalOpen(false);
-            // Sécurité : si la modale envoie un ordre sans clients, fallback
             const orow: OrderRow = order?.clients
               ? order
               : {
