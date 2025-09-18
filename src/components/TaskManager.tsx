@@ -17,7 +17,7 @@ import {
   Calendar,
   User,
   BarChart3
-  CheckSquare,
+  CheckSquare
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
