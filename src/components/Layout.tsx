@@ -31,9 +31,12 @@ interface LayoutProps {
 }
 
 /* ---------- Shared UI classes (use across all pages) ---------- */
-export const pageBgClass = 'bg-gray-50 dark:bg-slate-950';
-export const cardClass   = 'bg-white dark:bg-slate-800 rounded-lg shadow';
-export const subtleBg    = 'bg-gray-100 dark:bg-slate-700';
+/** Fond global sombre + gradient subtil pour le mode dark */
+export const pageBgClass = 'bg-gray-50 dark:bg-slate-950 bg-dark-gradient dark:bg-dark-gradient';
+/** Cartes modernisées (coins + ombres + bordure douce) */
+export const cardClass   = 'rounded-2xl border border-gray-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 shadow dark:shadow-dark-lg';
+/** Pills et badges discrets en foncé */
+export const subtleBg    = 'bg-gray-100 dark:bg-slate-800/70';
 
 /* ---------- Helper: détecte admin depuis toutes les sources dispo ---------- */
 const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
@@ -159,7 +162,6 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       restricted: !checkAccess('referrals') && !restrictions?.isAdmin,
       requiredPlan: 'Pro' as const
     },
-    // ✅ corrige le lien Admin pour matcher la route déclarée
     ...(isAdmin ? [{
       path: '/admin/dashboard',
       label: 'Admin',
@@ -178,24 +180,27 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className={`min-h-screen ${pageBgClass} transition-colors duration-300`}>
-      <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm border-b border-gray-200 dark:border-slate-700 fixed w-full top-0 z-50">
+      {/* Topbar : verre dépoli + gradient fin + ombre sombre */}
+      <header className="bg-white/80 dark:bg-slate-900/70 backdrop-blur-md shadow-sm dark:shadow-dark-lg border-b border-gray-200/70 dark:border-slate-800 fixed w-full top-0 z-50">
         <div className="flex items-center justify-between px-3 sm:px-4 py-3">
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden p-1 sm:p-2 rounded-md text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200"
+              className="lg:hidden p-2 rounded-xl text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/70 dark:hover:bg-slate-800/70 transition-all duration-200"
             >
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <Link to="/dashboard" className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-accent-blue dark:to-accent-purple bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700 transition-all duration-200">
-              FiverFlow
+            <Link to="/dashboard" className="text-2xl font-extrabold leading-none">
+              <span className="bg-gradient-to-r from-accent-blue via-accent-purple to-accent-green bg-clip-text text-transparent">
+                FiverFlow
+              </span>
             </Link>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button 
               onClick={toggleDarkMode}
-              className="p-1 sm:p-2 rounded-md text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110"
+              className="p-2 rounded-xl text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/70 dark:hover:bg-slate-800/70 transition-all duration-200 hover:scale-105"
               title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
@@ -203,13 +208,15 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
             {!SAFE_MODE_DISABLE_NOTIFICATIONS && (
               <LocalErrorBoundary>
-                <NotificationsDropdown />
+                <div className="rounded-xl hover:bg-gray-100/60 dark:hover:bg-slate-800/60 transition-all">
+                  <NotificationsDropdown />
+                </div>
               </LocalErrorBoundary>
             )}
 
             <button 
               onClick={handleSignOut}
-              className="p-1 sm:p-2 rounded-md text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-110"
+              className="p-2 rounded-xl text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/70 dark:hover:bg-slate-800/70 transition-all duration-200 hover:scale-105"
             >
               <LogOut size={16} />
             </button>
@@ -218,12 +225,18 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       </header>
 
       <div className="flex pt-16">
-        <aside className={`
-          fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-lg dark:shadow-dark-lg transform transition-transform duration-300 ease-in-out border-r border-gray-200 dark:border-slate-700
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          pt-16 lg:pt-0
-        `}>
-          <nav className="h-full px-3 sm:px-4 py-4 sm:py-6 space-y-1 sm:space-y-2 overflow-y-auto">
+        {/* Sidebar : verre dépoli + relief + états animés */}
+        <aside
+          className={`
+            fixed lg:static inset-y-0 left-0 z-40 w-72
+            bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl
+            shadow-lg dark:shadow-dark-lg border-r border-gray-200/70 dark:border-slate-800
+            transform transition-transform duration-300 ease-in-out
+            ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            pt-16 lg:pt-0
+          `}
+        >
+          <nav className="h-full px-3 sm:px-4 py-5 space-y-1 sm:space-y-2 overflow-y-auto">
             <LocalErrorBoundary>
               {navigationItems.map((item) => {
                 const Icon = item.icon;
@@ -246,14 +259,14 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
                       setIsSidebarOpen(false);
                     }}
                     className={`
-                      flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-sm font-medium transition-colors relative
+                      group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all
                       ${isUpgrade
-                        ? 'bg-gradient-to-r from-accent-orange to-accent-yellow dark:from-accent-orange dark:to-accent-yellow text-white shadow-lg hover:shadow-glow-orange transform hover:-translate-y-0.5 transition-all duration-200'
+                        ? 'text-white bg-gradient-to-r from-accent-orange to-accent-yellow shadow-glow-orange hover:shadow-lg hover:-translate-y-0.5'
                         : isRestricted
                           ? 'text-gray-400 dark:text-slate-500 cursor-pointer'
                           : isActive
-                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-accent-blue border-r-2 border-blue-700 dark:border-accent-blue shadow-sm dark:shadow-glow-sm'
-                          : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transform hover:translate-x-1 transition-all duration-200'
+                          ? 'text-accent-blue dark:text-accent-blue bg-blue-50/60 dark:bg-blue-900/25 ring-1 ring-inset ring-blue-200/60 dark:ring-blue-700/40 shadow-sm'
+                          : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100/70 dark:hover:bg-slate-800/70 hover:text-gray-900 dark:hover:text-white hover:translate-x-1'
                       }
                     `}
                   >
@@ -265,21 +278,26 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
                     </div>
                     <span>{item.label}</span>
                     {isRestricted && 'requiredPlan' in item && (
-                      <span className="ml-auto text-xs bg-gray-200 dark:bg-slate-600 text-gray-600 dark:text-slate-300 px-2 py-1 rounded-full">
+                      <span className="ml-auto text-xs px-2 py-1 rounded-full bg-gray-200/70 dark:bg-slate-700/70 text-gray-700 dark:text-slate-200">
                         {(item as any).requiredPlan}
                       </span>
                     )}
                     {isUpgrade && (
                       <div className="ml-auto">
-                        <div className="w-2 h-2 bg-white rounded-full animate-pulse-slow"></div>
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse-slow" />
                       </div>
+                    )}
+
+                    {/* Glow décoratif sur l’item actif */}
+                    {isActive && (
+                      <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-blue-500/10 shadow-glow-sm" />
                     )}
                   </Link>
                 );
               })}
             </LocalErrorBoundary>
             
-            <div className="pt-4 mt-4 border-t border-gray-200 dark:border-slate-700">
+            <div className="pt-4 mt-4 border-t border-gray-200/70 dark:border-slate-800">
               <div className="px-3 sm:px-4 mb-2">
                 <span className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider">
                   Account
@@ -290,15 +308,18 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
                   to="/profile"
                   onClick={() => setIsSidebarOpen(false)}
                   className={`
-                    flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-sm font-medium transition-colors
+                    group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all
                     ${location.pathname === '/profile'
-                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-accent-blue border-r-2 border-blue-700 dark:border-accent-blue shadow-sm dark:shadow-glow-sm'
-                      : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white transform hover:translate-x-1 transition-all duration-200'
+                      ? 'text-accent-blue dark:text-accent-blue bg-blue-50/60 dark:bg-blue-900/25 ring-1 ring-inset ring-blue-200/60 dark:ring-blue-700/40 shadow-sm'
+                      : 'text-gray-700 dark:text-slate-300 hover:bg-gray-100/70 dark:hover:bg-slate-800/70 hover:text-gray-900 dark:hover:text-white hover:translate-x-1'
                     }
                   `}
                 >
                   <User size={18} />
                   <span>My Profile</span>
+                  {location.pathname === '/profile' && (
+                    <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-blue-500/10 shadow-glow-sm" />
+                  )}
                 </Link>
               </LocalErrorBoundary>
             </div>
@@ -307,7 +328,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-[1px] z-30 lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
@@ -333,7 +354,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             className="
               relative w-full max-w-lg
               rounded-3xl overflow-hidden
-              shadow-2xl
+              shadow-2xl dark:shadow-dark-xl
               border border-white/10
               bg-gradient-to-b from-white/90 to-white/70
               dark:from-slate-900/90 dark:to-slate-900/70
@@ -436,14 +457,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               <div className="mt-6 flex flex-col sm:flex-row sm:justify-end gap-2.5">
                 <button
                   onClick={() => setUpgradeOpen(false)}
-                  className="
-                    px-4 py-2 rounded-lg
-                    border border-gray-300 dark:border-slate-700
-                    bg-white/70 dark:bg-slate-900/50
-                    text-gray-800 dark:text-gray-200
-                    hover:bg-gray-50 dark:hover:bg-slate-800
-                    transition
-                  "
+                  className="btn-secondary"
                 >
                   Not now
                 </button>
@@ -452,14 +466,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
                     setUpgradeOpen(false);
                     navigate('/upgrade');
                   }}
-                  className="
-                    px-4 py-2 rounded-lg
-                    text-white
-                    bg-gradient-to-r from-indigo-600 to-fuchsia-600
-                    hover:from-indigo-700 hover:to-fuchsia-700
-                    shadow-lg shadow-indigo-900/20
-                    transition
-                  "
+                  className="btn-primary"
                 >
                   See plans
                 </button>

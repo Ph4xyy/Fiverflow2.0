@@ -108,7 +108,7 @@ const CalendarPage: React.FC = () => {
       <Layout>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="ml-4 text-gray-600">Loading...</p>
+          <p className="ml-4 text-gray-600 dark:text-slate-400">Loading...</p>
         </div>
       </Layout>
     );
@@ -123,7 +123,7 @@ const CalendarPage: React.FC = () => {
       <Layout>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="ml-4 text-gray-600">Loading calendar...</p>
+          <p className="ml-4 text-gray-600 dark:text-slate-400">Loading calendar...</p>
         </div>
       </Layout>
     );
@@ -132,21 +132,22 @@ const CalendarPage: React.FC = () => {
   return (
     <Layout>
       <div className="space-y-6 p-4">
-        <div className="flex justify-between items-center">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-glow-purple">
               <CalendarIcon className="text-white" size={20} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100">Calendar</h1>
-              <p className="text-base text-gray-600 dark:text-slate-400">View and manage your order deadlines</p>
+              <h1 className="text-3xl font-extrabold text-gray-900 dark:text-slate-100">Calendar</h1>
+              <p className="text-sm text-gray-600 dark:text-slate-400">View and manage your order deadlines</p>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center flex-wrap gap-2">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-slate-700 bg-white/90 dark:bg-slate-900/70 text-gray-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -156,14 +157,14 @@ const CalendarPage: React.FC = () => {
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="inline-flex items-center px-3 py-2 rounded-xl btn-primary disabled:opacity-60"
             >
               <RefreshCw size={16} className={`mr-2 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </button>
             <button
               disabled
-              className="inline-flex items-center px-3 py-2 bg-gray-300 text-gray-500 text-sm rounded-lg cursor-not-allowed"
+              className="inline-flex items-center px-3 py-2 rounded-xl bg-gray-300 text-gray-600 dark:bg-slate-800 dark:text-slate-400 cursor-not-allowed"
             >
               <ExternalLink size={16} className="mr-2" />
               Sync with Google
@@ -172,16 +173,17 @@ const CalendarPage: React.FC = () => {
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
-            <AlertCircle className="text-red-500 mr-3" size={20} />
+          <div className="rounded-2xl p-4 flex items-start gap-3 border border-red-200 dark:border-red-700 bg-red-50/70 dark:bg-red-900/20">
+            <AlertCircle className="text-red-600 dark:text-red-400 mt-0.5" size={20} />
             <div>
-              <p className="text-red-800 font-medium">Unable to load calendar data</p>
-              <p className="text-red-600 text-sm mt-1">{error}</p>
+              <p className="text-red-800 dark:text-red-300 font-semibold">Unable to load calendar data</p>
+              <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error}</p>
             </div>
           </div>
         )}
 
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+        {/* Calendar container */}
+        <div className="rounded-2xl border border-gray-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 shadow dark:shadow-dark-lg p-4 sm:p-6">
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
