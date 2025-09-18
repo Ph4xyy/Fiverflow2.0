@@ -104,7 +104,6 @@ const OrdersPage: React.FC = () => {
       return;
     }
 
-    // Demo / local mode
     if (!isSupabaseConfigured || !supabase) {
       const demo: OrderRow[] = Array.from({ length: 42 }).map((_, i) => ({
         id: String(i + 1),
@@ -186,8 +185,7 @@ const OrdersPage: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, debouncedSearch, status, platform, page]);
+  }, [user, debouncedSearch, status, platform, page]); // eslint-disable-line
 
   const handleAddOrder = async () => {
     const canAdd = await checkOrderLimit();
@@ -212,7 +210,6 @@ const OrdersPage: React.FC = () => {
     fetchOrders();
   };
 
-  // --- UI helpers ---
   const getStatusBadge = (s: string) => {
     switch (s) {
       case 'Completed':
@@ -235,7 +232,6 @@ const OrdersPage: React.FC = () => {
         }[p] || 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300'
       : 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-300';
 
-  // KPIs
   const kpis = useMemo(() => {
     const totalRevenue = orders.reduce((s, o) => s + (o.amount || 0), 0);
     const pendingRevenue = orders
@@ -267,7 +263,6 @@ const OrdersPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            {/* Search */}
             <div className="relative w-full sm:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
@@ -301,48 +296,43 @@ const OrdersPage: React.FC = () => {
           </div>
         </div>
 
-        {/* KPIs — Nouveau conteneur unique, épuré & pro */}
-        <div className={`${cardClass} p-4 sm:p-5`}>
-          <div className="grid grid-cols-1 md:grid-cols-3">
-            {/* Bloc 1 */}
-            <div className="flex items-center gap-4 p-3 md:p-4">
-              <div className="w-10 h-10 rounded-xl grid place-items-center text-white bg-gradient-to-br from-emerald-500 to-teal-600">
-                <DollarSign className="w-4 h-4" />
+        {/* KPIs — conteneur unique, proportions stables */}
+        <div className={`${cardClass} p-0`}>
+          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#1C2230]">
+            {/* Total Revenue */}
+            <div className="p-4 sm:p-5 flex items-center gap-4 min-h-[84px]">
+              <div className="w-11 h-11 rounded-xl grid place-items-center text-white bg-gradient-to-br from-emerald-500 to-teal-600">
+                <DollarSign className="w-5 h-5" />
               </div>
               <div className="min-w-0">
                 <div className="text-[11px] uppercase tracking-wider text-slate-400">Total Revenue</div>
-                <div className="text-xl sm:text-2xl font-semibold text-white truncate">
+                <div className="text-2xl font-semibold text-white truncate">
                   ${kpis.totalRevenue.toLocaleString()}
                 </div>
               </div>
             </div>
 
-            {/* séparateur vertical seulement sur md+ */}
-            <div className="hidden md:block border-l border-[#1C2230]" />
-
-            {/* Bloc 2 */}
-            <div className="flex items-center gap-4 p-3 md:p-4">
-              <div className="w-10 h-10 rounded-xl grid place-items-center text-white bg-gradient-to-br from-amber-500 to-orange-600">
-                <Layers className="w-4 h-4" />
+            {/* Pending Revenue */}
+            <div className="p-4 sm:p-5 flex items-center gap-4 min-h-[84px]">
+              <div className="w-11 h-11 rounded-xl grid place-items-center text-white bg-gradient-to-br from-amber-500 to-orange-600">
+                <Layers className="w-5 h-5" />
               </div>
               <div className="min-w-0">
                 <div className="text-[11px] uppercase tracking-wider text-slate-400">Pending Revenue</div>
-                <div className="text-xl sm:text-2xl font-semibold text-white truncate">
+                <div className="text-2xl font-semibold text-white truncate">
                   ${kpis.pendingRevenue.toLocaleString()}
                 </div>
               </div>
             </div>
 
-            <div className="hidden md:block border-l border-[#1C2230]" />
-
-            {/* Bloc 3 */}
-            <div className="flex items-center gap-4 p-3 md:p-4">
-              <div className="w-10 h-10 rounded-xl grid place-items-center text-white bg-gradient-to-br from-indigo-500 to-blue-600">
-                <Calendar className="w-4 h-4" />
+            {/* In Progress */}
+            <div className="p-4 sm:p-5 flex items-center gap-4 min-h-[84px]">
+              <div className="w-11 h-11 rounded-xl grid place-items-center text-white bg-gradient-to-br from-indigo-500 to-blue-600">
+                <Calendar className="w-5 h-5" />
               </div>
               <div className="min-w-0">
                 <div className="text-[11px] uppercase tracking-wider text-slate-400">In Progress</div>
-                <div className="text-xl sm:text-2xl font-semibold text-white truncate">
+                <div className="text-2xl font-semibold text-white truncate">
                   {kpis.inProgress}
                 </div>
               </div>
