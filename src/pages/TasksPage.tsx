@@ -1,6 +1,6 @@
 // src/pages/TasksPage.tsx
 import React from 'react';
-import Layout from '../components/Layout';
+import Layout, { cardClass } from '../components/Layout';
 import PlanRestrictedPage from '../components/PlanRestrictedPage';
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import TaskManager from '../components/TaskManager';
@@ -9,13 +9,13 @@ import { CheckSquare } from 'lucide-react';
 const TasksPage: React.FC = () => {
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
 
-  // Chargement (visuel sombre cohérent)
+  // Loading
   if (restrictionsLoading) {
     return (
       <Layout>
         <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
             <p className="ml-4 text-slate-400">Loading...</p>
           </div>
         </div>
@@ -23,11 +23,11 @@ const TasksPage: React.FC = () => {
     );
   }
 
-  // Accès restreint
+  // Restricted
   if (!checkAccess('tasks')) {
     return (
-      <PlanRestrictedPage 
-        feature="tasks" 
+      <PlanRestrictedPage
+        feature="tasks"
         currentPlan={restrictions?.plan || 'free'}
         isTrialActive={restrictions?.isTrialActive}
         trialDaysRemaining={restrictions?.trialDaysRemaining}
@@ -38,7 +38,7 @@ const TasksPage: React.FC = () => {
   return (
     <Layout>
       <div className="space-y-6 p-4 sm:p-0">
-        {/* Header (même style que nav : carré arrondi + dégradé cohérent) */}
+        {/* Header (aligné avec le nouveau thème) */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 grid place-items-center text-white shadow-glow-sm">
             <CheckSquare size={18} />
@@ -51,8 +51,12 @@ const TasksPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Task Manager (aucune logique modifiée) */}
-        <TaskManager />
+        {/* Task Manager sous carte sombre (presque noir) */}
+        <div className={`${cardClass} p-0 bg-[#0B0E14] border-[#1C2230]`}>
+          <div className="p-4 sm:p-5">
+            <TaskManager />
+          </div>
+        </div>
       </div>
     </Layout>
   );
