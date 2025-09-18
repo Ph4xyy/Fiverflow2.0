@@ -150,17 +150,17 @@ const OrdersPage: React.FC = () => {
         .eq('clients.user_id', user.id)
         .order('created_at', { ascending: false });
 
-      // filters (server-side when possible)
+      // filters
       if (status) query = query.eq('status', status);
       if (platform) query = query.eq('clients.platform', platform);
 
-      // search (server-side ilike on title + client name)
+      // search
       if (debouncedSearch) {
         const term = `%${debouncedSearch}%`;
         query = query.or(`title.ilike.${term},clients.name.ilike.${term}`);
       }
 
-      // pagination (PostgREST range)
+      // pagination
       const start = (page - 1) * PAGE_SIZE;
       const end = start + PAGE_SIZE - 1;
       query = query.range(start, end);
@@ -219,8 +219,8 @@ const OrdersPage: React.FC = () => {
   };
 
   // --- UI helpers ---
-  const getStatusBadge = (status: string) => {
-    switch (status) {
+  const getStatusBadge = (s: string) => {
+    switch (s) {
       case 'Completed':
         return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
       case 'In Progress':
@@ -262,24 +262,27 @@ const OrdersPage: React.FC = () => {
       <div className="space-y-6 p-4 sm:p-0">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Orders</h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Suivez, filtrez et gérez toutes vos commandes client.
-            </p>
+          <div className="flex items-center gap-3">
+            {/* Icône Orders : carré arrondi, même tone (amber -> orange) */}
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 grid place-items-center text-white shadow-glow-sm">
+              <ShoppingCart size={18} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-extrabold text-white">Orders</h1>
+              <p className="text-sm text-slate-400">Suivez, filtrez et gérez toutes vos commandes client.</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
             {/* Search */}
             <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Rechercher (titre, client, plateforme)…"
-                className="w-full pl-9 pr-9 py-2 rounded-lg border border-gray-300 dark:border-slate-700
-                           bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100
-                           placeholder-gray-400 dark:placeholder-slate-400
+                className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-[#1C2230]
+                           bg-[#11151D]/95 text-slate-100 placeholder-slate-400
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 type="text"
               />
@@ -287,17 +290,17 @@ const OrdersPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSearch('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-800"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-[#141922]"
                   aria-label="Effacer la recherche"
                 >
-                  <X className="h-4 w-4 text-gray-400" />
+                  <X className="h-4 w-4 text-slate-400" />
                 </button>
               )}
             </div>
 
             <button
               onClick={handleAddOrder}
-              className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+              className="inline-flex items-center px-4 py-2.5 rounded-xl btn-primary"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create Order
@@ -309,28 +312,34 @@ const OrdersPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className={`${cardClass} p-4`}>
             <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-600 dark:text-gray-400">Total Revenue</div>
-              <DollarSign className="w-4 h-4 text-emerald-500" />
+              <div className="text-sm text-slate-400">Total Revenue</div>
+              <div className="w-9 h-9 rounded-xl grid place-items-center text-white bg-gradient-to-br from-emerald-500 to-teal-600">
+                <DollarSign className="w-4 h-4" />
+              </div>
             </div>
-            <div className="mt-2 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            <div className="mt-2 text-2xl font-semibold text-white">
               ${kpis.totalRevenue.toLocaleString()}
             </div>
           </div>
           <div className={`${cardClass} p-4`}>
             <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-600 dark:text-gray-400">Pending Revenue</div>
-              <Layers className="w-4 h-4 text-yellow-500" />
+              <div className="text-sm text-slate-400">Pending Revenue</div>
+              <div className="w-9 h-9 rounded-xl grid place-items-center text-white bg-gradient-to-br from-amber-500 to-orange-600">
+                <Layers className="w-4 h-4" />
+              </div>
             </div>
-            <div className="mt-2 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            <div className="mt-2 text-2xl font-semibold text-white">
               ${kpis.pendingRevenue.toLocaleString()}
             </div>
           </div>
           <div className={`${cardClass} p-4`}>
             <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-600 dark:text-gray-400">In Progress</div>
-              <Calendar className="w-4 h-4 text-blue-500" />
+              <div className="text-sm text-slate-400">In Progress</div>
+              <div className="w-9 h-9 rounded-xl grid place-items-center text-white bg-gradient-to-br from-indigo-500 to-blue-600">
+                <Calendar className="w-4 h-4" />
+              </div>
             </div>
-            <div className="mt-2 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            <div className="mt-2 text-2xl font-semibold text-white">
               {kpis.inProgress}
             </div>
           </div>
@@ -338,7 +347,7 @@ const OrdersPage: React.FC = () => {
 
         {/* Filters */}
         <div className={`${cardClass} p-3 sm:p-4`}>
-          <div className="flex items-center gap-2 mb-3 text-gray-700 dark:text-gray-200">
+          <div className="flex items-center gap-2 mb-3 text-slate-200">
             <Filter className="h-4 w-4" />
             <span className="text-sm font-medium">Filtres</span>
           </div>
@@ -346,7 +355,7 @@ const OrdersPage: React.FC = () => {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2.5 rounded-xl border border-[#1C2230] bg-[#11151D]/95 text-slate-100 focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Statut (tous)</option>
               <option value="Pending">Pending</option>
@@ -357,7 +366,7 @@ const OrdersPage: React.FC = () => {
             <select
               value={platform}
               onChange={(e) => setPlatform(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2.5 rounded-xl border border-[#1C2230] bg-[#11151D]/95 text-slate-100 focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Plateforme (toutes)</option>
               {platformOptions.map((p) => (
@@ -367,7 +376,7 @@ const OrdersPage: React.FC = () => {
 
             <button
               onClick={clearAll}
-              className="px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-200"
+              className="px-3 py-2.5 rounded-xl border border-[#1C2230] hover:bg-[#141922] text-slate-200"
             >
               Réinitialiser
             </button>
@@ -379,90 +388,92 @@ const OrdersPage: React.FC = () => {
           {loading ? (
             <div className="p-10 flex items-center justify-center">
               <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600" />
-              <span className="ml-3 text-gray-600 dark:text-gray-400">Chargement…</span>
+              <span className="ml-3 text-slate-400">Chargement…</span>
             </div>
           ) : error ? (
             <div className="p-6 text-center">
-              <p className="text-red-600 dark:text-red-400 font-medium">Impossible de charger les commandes</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{error}</p>
+              <p className="text-red-400 font-semibold">Impossible de charger les commandes</p>
+              <p className="text-sm text-slate-400 mt-1">{error}</p>
               <button
                 onClick={fetchOrders}
-                className="mt-4 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                className="mt-4 px-4 py-2 rounded-xl btn-primary"
               >
                 Réessayer
               </button>
             </div>
           ) : orders.length === 0 ? (
             <div className="text-center py-12">
-              <ShoppingCart className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-slate-100">No orders</h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Get started by creating your first order.</p>
+              <div className="w-12 h-12 rounded-xl grid place-items-center mx-auto bg-[#151A22] ring-1 ring-inset ring-[#1C2230] mb-3">
+                <ShoppingCart className="h-6 w-6 text-slate-300" />
+              </div>
+              <h3 className="text-sm font-semibold text-white">No orders</h3>
+              <p className="mt-1 text-sm text-slate-400">Get started by creating your first order.</p>
             </div>
           ) : (
             <>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
-                  <thead className="bg-gray-50 dark:bg-slate-800/60">
+                <table className="min-w-full divide-y divide-[#1C2230]">
+                  <thead className="bg-[#0F141C]">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">
                         Order
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">
                         Client
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">
                         Platform
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">
                         Amount
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">
                         Deadline
                       </th>
                       <th className="px-6 py-3" />
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
+                  <tbody className="bg-[#0B0E14] divide-y divide-[#1C2230]">
                     {orders.map((o) => (
                       <tr
                         key={o.id}
-                        className="hover:bg-gray-50 dark:hover:bg-slate-800/40 cursor-pointer"
+                        className="hover:bg-[#11161F] cursor-pointer"
                         onClick={() => openDetail(o)}
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 dark:text-white">{o.title}</div>
+                          <div className="text-sm font-medium text-white">{o.title}</div>
                           {o.created_at && (
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                            <div className="text-xs text-slate-400">
                               Créé le {new Date(o.created_at).toLocaleDateString()}
                             </div>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-200">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">
                           {o.clients.name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${platformChip(o.clients.platform)}`}>
+                          <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${platformChip(o.clients.platform)}`}>
                             {o.clients.platform || '—'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                           {typeof o.amount === 'number' ? `$${o.amount.toLocaleString()}` : '—'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusBadge(o.status)}`}>
+                          <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${getStatusBadge(o.status)}`}>
                             {o.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-200">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">
                           {o.deadline ? new Date(o.deadline).toLocaleDateString() : '—'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <button
                             onClick={(e) => { e.stopPropagation(); editOrder(o); }}
-                            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
+                            className="text-blue-400 hover:text-blue-300 text-sm font-medium"
                           >
                             Modifier
                           </button>
@@ -474,8 +485,8 @@ const OrdersPage: React.FC = () => {
               </div>
 
               {/* Pagination */}
-              <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-slate-700">
-                <p className="text-sm text-gray-700 dark:text-gray-300">
+              <div className="flex items-center justify-between px-4 py-3 border-t border-[#1C2230]">
+                <p className="text-sm text-slate-300">
                   {total > 0
                     ? `Affichage ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)} sur ${total}`
                     : 'Aucun résultat'}
@@ -484,17 +495,17 @@ const OrdersPage: React.FC = () => {
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page <= 1}
-                    className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-50"
+                    className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-[#1C2230] text-slate-200 hover:bg-[#141922] disabled:opacity-50"
                   >
                     <ChevronLeft className="h-4 w-4" /> Précédent
                   </button>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                  <span className="text-sm text-slate-300">
                     Page {page} / {totalPages}
                   </span>
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page >= totalPages}
-                    className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-50"
+                    className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-[#1C2230] text-slate-200 hover:bg-[#141922] disabled:opacity-50"
                   >
                     Suivant <ChevronRight className="h-4 w-4" />
                   </button>
