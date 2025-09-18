@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePlanRestrictions } from '@/hooks/usePlanRestrictions';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
-import FullCalendar, { EventContentArg } from '@fullcalendar/react';
+import FullCalendar, { EventContentArg, DatesSetArg } from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -17,8 +17,7 @@ import {
   ExternalLink,
   AlertCircle,
   ChevronLeft,
-  ChevronRight,
-  Filter
+  ChevronRight
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -29,41 +28,46 @@ type OrderRow = {
   status: 'Pending' | 'In Progress' | 'Completed' | string;
   deadline: string | null;
   created_at: string | null;
-  clients: {
-    name: string;
-    platform: string | null;
-    user_id?: string;
-  };
+  clients: { name: string; platform: string | null; user_id?: string };
+};
+
+const statusStyle = (status: string) => {
+  switch (status) {
+    case 'Completed':
+      return { bar: '#16a34a', chipBg: 'rgba(22,163,74,0.12)', text: '#d1fae5' };
+    case 'In Progress':
+      return { bar: '#2563eb', chipBg: 'rgba(37,99,235,0.12)', text: '#dbeafe' };
+    case 'Pending':
+      return { bar: '#f59e0b', chipBg: 'rgba(245,158,11,0.14)', text: '#ffedd5' };
+    default:
+      return { bar: '#64748b', chipBg: 'rgba(100,116,139,0.14)', text: '#e2e8f0' };
+  }
 };
 
 const CalendarPage: React.FC = () => {
   const { user } = useAuth();
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
 
-  // UI state
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [view, setView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay'>('dayGridMonth');
+  // View + UI
+  const [currentView, setCurrentView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay'>('dayGridMonth');
+  const [title, setTitle] = useState<string>('');
+  const calendarRef = useRef<FullCalendar | null>(null);
 
-  // Data state
+  // Filters / data
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const hasFetchedRef = useRef(false);
-  const calendarRef = useRef<FullCalendar | null>(null);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError(null);
 
-    if (!isSupabaseConfigured || !supabase) {
+    if (!isSupabaseConfigured || !supabase || !user) {
       setOrders([]);
-      setLoading(false);
-      return;
-    }
-
-    if (!user) {
       setLoading(false);
       return;
     }
@@ -71,9 +75,7 @@ const CalendarPage: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select(
-          `id, title, amount, status, deadline, created_at, clients!inner(name, platform, user_id)`
-        )
+        .select(`id, title, amount, status, deadline, created_at, clients!inner(name, platform, user_id)`)
         .eq('clients.user_id', user.id)
         .order('deadline', { ascending: true });
 
@@ -94,21 +96,7 @@ const CalendarPage: React.FC = () => {
     }
   }, [fetchOrders]);
 
-  // Color system (Motion/ClickUp-ish chips)
-  const statusColor = useCallback((status: string) => {
-    switch (status) {
-      case 'Completed':
-        return { bg: '#16a34a', border: '#15803d' }; // green
-      case 'In Progress':
-        return { bg: '#2563eb', border: '#1d4ed8' }; // blue
-      case 'Pending':
-        return { bg: '#f59e0b', border: '#d97706' }; // amber
-      default:
-        return { bg: '#64748b', border: '#475569' }; // slate
-    }
-  }, []);
-
-  // Build events from orders + filter
+  // Build events
   useEffect(() => {
     const filtered = statusFilter === 'all'
       ? orders
@@ -117,21 +105,21 @@ const CalendarPage: React.FC = () => {
     const mapped = filtered
       .filter(o => !!o.deadline)
       .map(o => {
-        const c = statusColor(o.status);
+        const s = statusStyle(o.status);
         return {
           id: o.id,
           title: o.title,
-          start: o.deadline, // using start for better compatibility across views
+          start: o.deadline,
           allDay: true,
-          backgroundColor: c.bg,
-          borderColor: c.border,
-          textColor: '#ffffff',
-          extendedProps: { order: o }
+          backgroundColor: 'transparent', // we style via custom content
+          borderColor: 'transparent',
+          textColor: s.text,
+          extendedProps: { order: o, style: s }
         };
       });
 
     setEvents(mapped);
-  }, [orders, statusFilter, statusColor]);
+  }, [orders, statusFilter]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -140,44 +128,54 @@ const CalendarPage: React.FC = () => {
     toast.success('Calendar refreshed!');
   };
 
-  const gotoPrev = () => {
+  const goto = (dir: 'prev' | 'next' | 'today') => {
     const api = calendarRef.current?.getApi();
-    api?.prev();
+    if (!api) return;
+    if (dir === 'today') api.today();
+    if (dir === 'prev') api.prev();
+    if (dir === 'next') api.next();
+    setTitle(api.view?.title || '');
   };
 
-  const gotoNext = () => {
+  const switchView = (view: typeof currentView) => {
+    setCurrentView(view);
     const api = calendarRef.current?.getApi();
-    api?.next();
+    api?.changeView(view);
+    setTitle(api?.view?.title || '');
   };
 
-  const gotoToday = () => {
-    const api = calendarRef.current?.getApi();
-    api?.today();
+  const onDatesSet = (arg: DatesSetArg) => {
+    setTitle(arg.view.title);
   };
 
-  const changeView = (v: typeof view) => {
-    setView(v);
-    const api = calendarRef.current?.getApi();
-    api?.changeView(v);
-  };
-
-  const renderEventContent = (arg: EventContentArg) => {
+  // Minimal event chip with left color bar
+  const renderEvent = (arg: EventContentArg) => {
+    const style = (arg.event.extendedProps as any)?.style as ReturnType<typeof statusStyle>;
     const order: OrderRow | undefined = (arg.event.extendedProps as any)?.order;
-    // Chip style event (rounded, compact)
+
     return (
-      <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[12px] leading-tight">
+      <div
+        className="rounded-lg px-2 py-1 text-[12px] leading-[1.1] flex items-center gap-2"
+        style={{ background: style.chipBg, borderLeft: `3px solid ${style.bar}` }}
+      >
         <span className="truncate font-medium">{arg.event.title}</span>
         {order?.clients?.platform && (
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/15">
-            <span className="w-1.5 h-1.5 rounded-full bg-white/70" />
-            {order.clients.platform}
-          </span>
+          <span className="text-[11px] opacity-80">{order.clients.platform}</span>
         )}
       </div>
     );
   };
 
-  /* ---------- Loading & access gates ---------- */
+  // Upcoming (right column)
+  const upcoming = useMemo(() => {
+    const now = new Date();
+    return orders
+      .filter(o => o.deadline && new Date(o.deadline) >= new Date(now.toDateString()))
+      .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
+      .slice(0, 8);
+  }, [orders]);
+
+  /* ---------- Gates ---------- */
   if (restrictionsLoading) {
     return (
       <Layout>
@@ -216,59 +214,101 @@ const CalendarPage: React.FC = () => {
     <Layout>
       <div className="space-y-6 p-4 sm:p-0">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 grid place-items-center shadow-glow-purple">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-sky-600 grid place-items-center">
               <CalendarIcon className="text-white" size={18} />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Calendar</h1>
-              <p className="text-sm sm:text-base text-slate-400">
-                View and manage your order deadlines
-              </p>
+              <p className="text-sm sm:text-base text-slate-400">Deadlines & schedule overview</p>
             </div>
           </div>
 
-          {/* Right controls */}
-          <div className="flex items-center flex-wrap gap-2">
-            {/* Status filter */}
-            <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0B0E14] border border-[#1C2230]">
-              <Filter size={16} className="text-slate-400" />
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-transparent focus:outline-none text-slate-100 text-sm"
+          {/* Controls */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="inline-flex rounded-lg overflow-hidden ring-1 ring-inset ring-[#1C2230]">
+              <button
+                onClick={() => goto('prev')}
+                className="px-3 py-2 bg-[#0E121A] hover:bg-[#121722] text-slate-100"
+                title="Previous"
               >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-              </select>
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                onClick={() => goto('today')}
+                className="px-3 py-2 bg-[#0E121A] hover:bg-[#121722] text-slate-100"
+              >
+                Today
+              </button>
+              <button
+                onClick={() => goto('next')}
+                className="px-3 py-2 bg-[#0E121A] hover:bg-[#121722] text-slate-100"
+                title="Next"
+              >
+                <ChevronRight size={16} />
+              </button>
             </div>
 
-            {/* Refresh */}
+            <div className="inline-flex rounded-lg overflow-hidden ring-1 ring-inset ring-[#1C2230]">
+              <button
+                onClick={() => switchView('dayGridMonth')}
+                className={`px-3 py-2 text-sm ${
+                  currentView === 'dayGridMonth' ? 'bg-blue-600 text-white' : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'
+                }`}
+              >
+                Month
+              </button>
+              <button
+                onClick={() => switchView('timeGridWeek')}
+                className={`px-3 py-2 text-sm ${
+                  currentView === 'timeGridWeek' ? 'bg-blue-600 text-white' : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'
+                }`}
+              >
+                Week
+              </button>
+              <button
+                onClick={() => switchView('timeGridDay')}
+                className={`px-3 py-2 text-sm ${
+                  currentView === 'timeGridDay' ? 'bg-blue-600 text-white' : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'
+                }`}
+              >
+                Day
+              </button>
+            </div>
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 text-sm rounded-lg bg-[#0E121A] text-slate-100 ring-1 ring-inset ring-[#1C2230] focus:outline-none"
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="inline-flex items-center px-3 py-2 rounded-xl text-white bg-gradient-to-br from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 transition disabled:opacity-60"
+              className="inline-flex items-center px-3 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition disabled:opacity-60"
             >
               <RefreshCw size={16} className={`mr-2 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </button>
 
-            {/* Google sync (disabled placeholder) */}
             <button
               disabled
-              className="inline-flex items-center px-3 py-2 rounded-xl bg-[#141922] text-slate-400 cursor-not-allowed ring-1 ring-inset ring-[#1C2230]"
+              className="inline-flex items-center px-3 py-2 rounded-lg bg-[#0E121A] text-slate-500 cursor-not-allowed ring-1 ring-inset ring-[#1C2230]"
             >
               <ExternalLink size={16} className="mr-2" />
-              Sync with Google
+              Sync
             </button>
           </div>
         </div>
 
         {error && (
-          <div className="rounded-2xl p-4 flex items-start gap-3 border border-red-700/40 bg-red-900/20">
+          <div className="rounded-xl p-4 flex items-start gap-3 border border-red-700/40 bg-red-900/20">
             <AlertCircle className="text-red-400 mt-0.5" size={20} />
             <div>
               <p className="text-red-300 font-semibold">Unable to load calendar data</p>
@@ -277,112 +317,18 @@ const CalendarPage: React.FC = () => {
           </div>
         )}
 
-        {/* Layout: mini calendar + main calendar */}
+        {/* Content */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Sidebar */}
-          <aside className="lg:col-span-3">
-            {/* Mini calendar */}
+          {/* Main Calendar */}
+          <section className="lg:col-span-8 xl:col-span-9">
             <div className="rounded-2xl border border-[#1C2230] bg-[#0B0E14] p-3">
-              <FullCalendar
-                plugins={[dayGridPlugin]}
-                initialView="dayGridMonth"
-                headerToolbar={false}
-                fixedWeekCount={false}
-                height="auto"
-                dayHeaderClassNames="text-slate-300"
-                dayCellClassNames="border-[#1C2230]"
-              />
-            </div>
-
-            {/* Legend */}
-            <div className="mt-4 rounded-2xl border border-[#1C2230] bg-[#0B0E14] p-4">
-              <p className="text-xs uppercase tracking-wider text-slate-400 mb-3">Legend</p>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#16a34a' }} />
-                  <span className="text-slate-200">Completed</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#2563eb' }} />
-                  <span className="text-slate-200">In Progress</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#f59e0b' }} />
-                  <span className="text-slate-200">Pending</span>
-                </div>
+              <div className="px-1 pb-3">
+                <div className="text-lg font-semibold text-white">{title}</div>
               </div>
-            </div>
-          </aside>
-
-          {/* Main calendar */}
-          <section className="lg:col-span-9">
-            {/* Custom toolbar */}
-            <div className="rounded-2xl border border-[#1C2230] bg-[#0B0E14] px-3 py-2 flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={gotoPrev}
-                  className="p-2 rounded-lg bg-[#10151D] ring-1 ring-inset ring-[#1C2230] hover:bg-[#121924] transition"
-                  title="Previous"
-                >
-                  <ChevronLeft size={18} className="text-slate-200" />
-                </button>
-                <button
-                  onClick={gotoToday}
-                  className="px-3 py-2 rounded-lg bg-[#10151D] ring-1 ring-inset ring-[#1C2230] text-slate-200 hover:bg-[#121924] transition"
-                >
-                  Today
-                </button>
-                <button
-                  onClick={gotoNext}
-                  className="p-2 rounded-lg bg-[#10151D] ring-1 ring-inset ring-[#1C2230] hover:bg-[#121924] transition"
-                  title="Next"
-                >
-                  <ChevronRight size={18} className="text-slate-200" />
-                </button>
-              </div>
-
-              {/* Dynamic title from FullCalendar */}
-              <div className="text-sm sm:text-base font-semibold text-white">
-                {/* We'll read title directly from FullCalendar DOM via CSS; or rely on FC title inside main calendar */}
-                {/* Keeping this spacer for balance; FC will still render its title in the grid header */}
-                {/* If you want a controlled title, we can read calendarRef.getApi().view.title and store in state */}
-              </div>
-
-              {/* View switch */}
-              <div className="inline-flex rounded-lg bg-[#10151D] ring-1 ring-inset ring-[#1C2230] overflow-hidden">
-                <button
-                  onClick={() => changeView('dayGridMonth')}
-                  className={`px-3 py-2 text-sm ${
-                    view === 'dayGridMonth' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-[#131A22]'
-                  }`}
-                >
-                  Month
-                </button>
-                <button
-                  onClick={() => changeView('timeGridWeek')}
-                  className={`px-3 py-2 text-sm ${
-                    view === 'timeGridWeek' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-[#131A22]'
-                  }`}
-                >
-                  Week
-                </button>
-                <button
-                  onClick={() => changeView('timeGridDay')}
-                  className={`px-3 py-2 text-sm ${
-                    view === 'timeGridDay' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-[#131A22]'
-                  }`}
-                >
-                  Day
-                </button>
-              </div>
-            </div>
-
-            {/* Calendar */}
-            <div className="rounded-2xl border border-[#1C2230] bg-[#0B0E14] p-2 sm:p-3">
               <FullCalendar
                 ref={calendarRef as any}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                initialView={view}
+                initialView={currentView}
                 headerToolbar={false}
                 height="auto"
                 expandRows
@@ -391,14 +337,53 @@ const CalendarPage: React.FC = () => {
                 moreLinkClick="popover"
                 eventTimeFormat={{ hour: 'numeric', minute: '2-digit', meridiem: 'short' }}
                 events={events}
-                eventContent={renderEventContent}
-                // dark styling via classNames
+                eventContent={renderEvent}
+                datesSet={onDatesSet}
+                // subtle dark grid
                 dayHeaderClassNames="bg-[#0F141C] text-slate-300 border-[#1C2230]"
                 dayCellClassNames="border-[#1C2230] hover:bg-[#0F141C]"
-                weekNumberCalculation="ISO"
               />
             </div>
           </section>
+
+          {/* Upcoming list */}
+          <aside className="lg:col-span-4 xl:col-span-3">
+            <div className="rounded-2xl border border-[#1C2230] bg-[#0B0E14] p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-semibold text-white">Upcoming</h3>
+                <span className="text-xs text-slate-400">{upcoming.length} items</span>
+              </div>
+
+              {upcoming.length === 0 ? (
+                <p className="text-sm text-slate-400">No upcoming deadlines.</p>
+              ) : (
+                <div className="space-y-2">
+                  {upcoming.map((o) => {
+                    const s = statusStyle(o.status);
+                    const d = new Date(o.deadline!);
+                    const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    return (
+                      <div
+                        key={o.id}
+                        className="rounded-xl p-3 bg-[#0E121A] ring-1 ring-inset ring-[#1C2230] hover:bg-[#121722] transition"
+                        style={{ borderLeft: `3px solid ${s.bar}` }}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-white truncate">{o.title}</div>
+                            <div className="text-xs text-slate-400 truncate">
+                              {o.clients?.name} {o.clients?.platform ? `• ${o.clients.platform}` : ''}
+                            </div>
+                          </div>
+                          <span className="text-xs text-slate-300">{date}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </aside>
         </div>
       </div>
     </Layout>
