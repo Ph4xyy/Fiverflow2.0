@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Moon, Sun, LogOut, Bell } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from "../contexts/AuthContext";
 
 // Import des icônes drapeaux
 import FlagEN from '../assets/IconUS.svg';
