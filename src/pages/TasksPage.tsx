@@ -9,7 +9,6 @@ import { CheckSquare } from 'lucide-react';
 const TasksPage: React.FC = () => {
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
 
-  // Loading
   if (restrictionsLoading) {
     return (
       <Layout>
@@ -23,7 +22,6 @@ const TasksPage: React.FC = () => {
     );
   }
 
-  // Restricted
   if (!checkAccess('tasks')) {
     return (
       <PlanRestrictedPage
@@ -38,7 +36,7 @@ const TasksPage: React.FC = () => {
   return (
     <Layout>
       <div className="space-y-6 p-4 sm:p-0">
-        {/* Header (aligné avec le nouveau thème) */}
+        {/* Header */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 grid place-items-center text-white shadow-glow-sm">
             <CheckSquare size={18} />
@@ -51,9 +49,9 @@ const TasksPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Task Manager sous carte sombre (presque noir) */}
+        {/* Carte sombre + scope pour forcer le nouveau thème à l’intérieur */}
         <div className={`${cardClass} p-0 bg-[#0B0E14] border-[#1C2230]`}>
-          <div className="p-4 sm:p-5">
+          <div className="task-scope p-4 sm:p-5">
             <TaskManager />
           </div>
         </div>
