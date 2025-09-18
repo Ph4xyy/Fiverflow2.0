@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Layout, { cardClass, subtleBg } from '@/components/Layout';
-import { useAuth } from './src/contexts/AuthContext';
-import { useClients } from '@/hooks/useClients';
-import { useStripeSubscription } from '@/hooks/useStripeSubscription';
-import { usePlanRestrictions } from '@/hooks/usePlanRestrictions';
-import { usePlanLimits } from '@/hooks/usePlanLimits';
-import ClientForm from '@/components/ClientForm';
-import OrderForm from '@/components/OrderForm';
-import TaskForm from '@/components/TaskForm';
-import { supabase } from '@/lib/supabase';
+import Layout, { cardClass, subtleBg } from '../components/Layout';
+import { useAuth } from '../contexts/AuthContext';
+import { useClients } from '../hooks/useClients';
+import { useStripeSubscription } from '../hooks/useStripeSubscription';
+import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
+import { usePlanLimits } from '../hooks/usePlanLimits';
+import ClientForm from '../components/ClientForm';
+import OrderForm from '../components/OrderForm';
+import TaskForm from '../components/TaskForm';
+import { supabase } from '../lib/supabase';
 import {
   Users,
   ShoppingCart,
