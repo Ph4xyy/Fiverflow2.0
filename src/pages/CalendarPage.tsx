@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import Layout from '../components/Layout';
+import Layout, { cardClass } from '@/components/Layout';
 import PlanRestrictedPage from '../components/PlanRestrictedPage';
-import { useAuth } from '../contexts/AuthContext';
-import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePlanRestrictions } from '@/hooks/usePlanRestrictions';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { Calendar as CalendarIcon, RefreshCw, ExternalLink, Clock, AlertCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, RefreshCw, ExternalLink, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const CalendarPage: React.FC = () => {
@@ -108,7 +108,7 @@ const CalendarPage: React.FC = () => {
       <Layout>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="ml-4 text-gray-600 dark:text-slate-400">Loading...</p>
+          <p className="ml-4 text-slate-400">Loading...</p>
         </div>
       </Layout>
     );
@@ -123,7 +123,7 @@ const CalendarPage: React.FC = () => {
       <Layout>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="ml-4 text-gray-600 dark:text-slate-400">Loading calendar...</p>
+          <p className="ml-4 text-slate-400">Loading calendar...</p>
         </div>
       </Layout>
     );
@@ -139,15 +139,15 @@ const CalendarPage: React.FC = () => {
               <CalendarIcon className="text-white" size={20} />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold text-gray-900 dark:text-slate-100">Calendar</h1>
-              <p className="text-sm text-gray-600 dark:text-slate-400">View and manage your order deadlines</p>
+              <h1 className="text-3xl font-extrabold text-white">Calendar</h1>
+              <p className="text-sm text-slate-400">View and manage your order deadlines</p>
             </div>
           </div>
           <div className="flex items-center flex-wrap gap-2">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 text-sm rounded-xl border border-gray-300 dark:border-slate-700 bg-white/90 dark:bg-slate-900/70 text-gray-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+              className="px-3 py-2 text-sm rounded-xl border border-[#1C2230] bg-[#11151D]/95 text-slate-100 focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -164,7 +164,7 @@ const CalendarPage: React.FC = () => {
             </button>
             <button
               disabled
-              className="inline-flex items-center px-3 py-2 rounded-xl bg-gray-300 text-gray-600 dark:bg-slate-800 dark:text-slate-400 cursor-not-allowed"
+              className="inline-flex items-center px-3 py-2 rounded-xl bg-[#141922] text-slate-400 cursor-not-allowed ring-1 ring-inset ring-[#1C2230]"
             >
               <ExternalLink size={16} className="mr-2" />
               Sync with Google
@@ -173,17 +173,17 @@ const CalendarPage: React.FC = () => {
         </div>
 
         {error && (
-          <div className="rounded-2xl p-4 flex items-start gap-3 border border-red-200 dark:border-red-700 bg-red-50/70 dark:bg-red-900/20">
-            <AlertCircle className="text-red-600 dark:text-red-400 mt-0.5" size={20} />
+          <div className="rounded-2xl p-4 flex items-start gap-3 border border-red-700/40 bg-red-900/20">
+            <AlertCircle className="text-red-400 mt-0.5" size={20} />
             <div>
-              <p className="text-red-800 dark:text-red-300 font-semibold">Unable to load calendar data</p>
-              <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error}</p>
+              <p className="text-red-300 font-semibold">Unable to load calendar data</p>
+              <p className="text-red-400 text-sm mt-1">{error}</p>
             </div>
           </div>
         )}
 
-        {/* Calendar container */}
-        <div className="rounded-2xl border border-gray-200 dark:border-slate-700 bg-white/90 dark:bg-slate-900/80 shadow dark:shadow-dark-lg p-4 sm:p-6">
+        {/* Calendar container très sombre */}
+        <div className={`${cardClass} p-4 sm:p-6`}>
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
