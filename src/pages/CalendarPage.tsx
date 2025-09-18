@@ -21,6 +21,9 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+/** 👇 Import du thème sombre FullCalendar */
+import '@/styles/calendar-dark.css';
+
 type OrderRow = {
   id: string;
   title: string;
@@ -98,20 +101,21 @@ const CalendarPage: React.FC = () => {
 
   // Build events
   useEffect(() => {
-    const filtered = statusFilter === 'all'
-      ? orders
-      : orders.filter(o => o.status.toLowerCase().replace(' ', '_') === statusFilter);
+    const filtered =
+      statusFilter === 'all'
+        ? orders
+        : orders.filter((o) => o.status.toLowerCase().replace(' ', '_') === statusFilter);
 
     const mapped = filtered
-      .filter(o => !!o.deadline)
-      .map(o => {
+      .filter((o) => !!o.deadline)
+      .map((o) => {
         const s = statusStyle(o.status);
         return {
           id: o.id,
           title: o.title,
           start: o.deadline,
           allDay: true,
-          backgroundColor: 'transparent', // we style via custom content
+          backgroundColor: 'transparent', // styled via custom content
           borderColor: 'transparent',
           textColor: s.text,
           extendedProps: { order: o, style: s }
@@ -159,9 +163,7 @@ const CalendarPage: React.FC = () => {
         style={{ background: style.chipBg, borderLeft: `3px solid ${style.bar}` }}
       >
         <span className="truncate font-medium">{arg.event.title}</span>
-        {order?.clients?.platform && (
-          <span className="text-[11px] opacity-80">{order.clients.platform}</span>
-        )}
+        {order?.clients?.platform && <span className="text-[11px] opacity-80">{order.clients.platform}</span>}
       </div>
     );
   };
@@ -170,7 +172,7 @@ const CalendarPage: React.FC = () => {
   const upcoming = useMemo(() => {
     const now = new Date();
     return orders
-      .filter(o => o.deadline && new Date(o.deadline) >= new Date(now.toDateString()))
+      .filter((o) => o.deadline && new Date(o.deadline) >= new Date(now.toDateString()))
       .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
       .slice(0, 8);
   }, [orders]);
@@ -254,7 +256,9 @@ const CalendarPage: React.FC = () => {
               <button
                 onClick={() => switchView('dayGridMonth')}
                 className={`px-3 py-2 text-sm ${
-                  currentView === 'dayGridMonth' ? 'bg-blue-600 text-white' : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'
+                  currentView === 'dayGridMonth'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'
                 }`}
               >
                 Month
@@ -262,7 +266,9 @@ const CalendarPage: React.FC = () => {
               <button
                 onClick={() => switchView('timeGridWeek')}
                 className={`px-3 py-2 text-sm ${
-                  currentView === 'timeGridWeek' ? 'bg-blue-600 text-white' : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'
+                  currentView === 'timeGridWeek'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'
                 }`}
               >
                 Week
@@ -339,7 +345,7 @@ const CalendarPage: React.FC = () => {
                 events={events}
                 eventContent={renderEvent}
                 datesSet={onDatesSet}
-                // subtle dark grid
+                /** 👇 ces classes sont conservées; le reste du thème est géré via calendar-dark.css */
                 dayHeaderClassNames="bg-[#0F141C] text-slate-300 border-[#1C2230]"
                 dayCellClassNames="border-[#1C2230] hover:bg-[#0F141C]"
               />

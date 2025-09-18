@@ -1,0 +1,158 @@
+/* src/styles/calendar-dark.css */
+
+/* Racine */
+.dark .fc {
+    background-color: #0b1220; /* proche bg-slate-950 */
+    color: #e5e7eb;            /* text-slate-200 */
+  }
+  
+  /* Toolbar (mois, semaine, jour, boutons) */
+  .dark .fc .fc-toolbar-title {
+    color: #e5e7eb;
+  }
+  .dark .fc .fc-toolbar.fc-header-toolbar,
+  .dark .fc .fc-toolbar.fc-footer-toolbar {
+    border-color: #1f2937; /* slate-800 */
+  }
+  
+  /* Boutons */
+  .dark .fc .fc-button {
+    background-color: #111827 !important; /* slate-900 */
+    border: 1px solid #1f2937 !important;  /* slate-800 */
+    color: #e5e7eb !important;
+    text-transform: none;
+  }
+  .dark .fc .fc-button:hover {
+    background-color: #0b1220 !important; /* slate-950 */
+  }
+  .dark .fc .fc-button:disabled {
+    opacity: 0.5;
+  }
+  .dark .fc .fc-button-primary:not(:disabled).fc-button-active,
+  .dark .fc .fc-button-primary:not(:disabled):active {
+    background-color: #1f2937 !important; /* slate-800 */
+    border-color: #374151 !important;     /* slate-700 */
+  }
+  
+  /* Grille et bordures */
+  .dark .fc .fc-scrollgrid,
+  .dark .fc .fc-scrollgrid table,
+  .dark .fc .fc-daygrid,
+  .dark .fc .fc-timegrid {
+    border-color: #1f2937; /* slate-800 */
+  }
+  .dark .fc .fc-daygrid-day,
+  .dark .fc .fc-timegrid-slot,
+  .dark .fc .fc-col-header-cell {
+    border-color: #1f2937; /* slate-800 */
+  }
+  
+  /* En-têtes de jours */
+  .dark .fc .fc-col-header-cell-cushion {
+    color: #cbd5e1; /* slate-300 */
+  }
+  
+  /* Today highlight */
+  .dark .fc .fc-day-today {
+    background: rgba(56, 189, 248, 0.08); /* sky-400/8 */
+  }
+  .dark .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+    color: #7dd3fc; /* sky-300 */
+  }
+  
+  /* Sélection au survol */
+  .dark .fc .fc-daygrid-day:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+  
+  /* Numéros de jour */
+  .dark .fc .fc-daygrid-day-number {
+    color: #cbd5e1; /* slate-300 */
+  }
+  
+  /* Événements (dayGrid) */
+  .dark .fc .fc-daygrid-event {
+    background-color: #0ea5e9; /* sky-500 */
+    border: 1px solid #0284c7; /* sky-600 */
+    color: #0b1220;            /* texte sombre lisible */
+  }
+  .dark .fc .fc-daygrid-event:hover {
+    filter: brightness(0.95);
+  }
+  
+  /* Événements (timeGrid) */
+  .dark .fc .fc-timegrid-event {
+    background-color: #22c55e; /* green-500 */
+    border: 1px solid #16a34a; /* green-600 */
+    color: #0b1220;
+  }
+  
+  /* Now indicator (ligne rouge) */
+  .dark .fc .fc-timegrid-now-indicator-line {
+    border-color: #ef4444; /* red-500 */
+  }
+  
+  /* Slots/Heures (timeGrid) */
+  .dark .fc .fc-timegrid-slot {
+    background-color: transparent;
+  }
+  .dark .fc .fc-timegrid-slot-label-cushion {
+    color: #94a3b8; /* slate-400 */
+  }
+  
+  /* Popovers (événements +) */
+  .dark .fc .fc-popover {
+    background-color: #0b1220;
+    border: 1px solid #1f2937;
+    color: #e5e7eb;
+  }
+  .dark .fc .fc-popover-header {
+    background-color: #0b1220;
+    border-bottom: 1px solid #1f2937;
+    color: #cbd5e1;
+  }
+  
+  /* List view */
+  .dark .fc .fc-list,
+  .dark .fc .fc-list-day-cushion,
+  .dark .fc .fc-list-table {
+    background-color: #0b1220;
+    color: #e5e7eb;
+  }
+  .dark .fc .fc-list-day {
+    background-color: #111827;
+    color: #cbd5e1;
+  }
+  .dark .fc .fc-list-event:hover td {
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+  .dark .fc .fc-list-event-time,
+  .dark .fc .fc-list-event-title {
+    color: #e5e7eb;
+  }
+  .dark .fc .fc-list-day-text,
+  .dark .fc .fc-list-day-side-text {
+    color: #94a3b8; /* slate-400 */
+  }
+  
+  /* Scrollbars (optionnel) */
+  .dark .fc ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .dark .fc ::-webkit-scrollbar-track {
+    background: #0b1220;
+  }
+  .dark .fc ::-webkit-scrollbar-thumb {
+    background: #1f2937;
+    border-radius: 9999px;
+  }
+  .dark .fc ::-webkit-scrollbar-thumb:hover {
+    background: #374151;
+  }
+  
+  /* Drag & resize handles (si interactionPlugin) */
+  .dark .fc .fc-event .fc-event-resizer {
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+  
