@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import NotificationsDropdown from './NotificationsDropdown';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
@@ -18,8 +17,6 @@ import {
   User,
   LogOut,
   Share2,
-  Moon,
-  Sun,
   Lock,
   Receipt,
   CheckCircle2,
@@ -30,12 +27,12 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-/* ---------- Thème visuel partagé (SOMBRES ++) ---------- */
+/* ---------- Thème visuel partagé (Dark-only) ---------- */
 export const pageBgClass = 'bg-[#0B0E14] text-slate-100';
 export const cardClass   = 'rounded-2xl border border-[#1C2230] bg-[#11151D]/95 shadow-lg';
 export const subtleBg    = 'bg-[#141922]';
 
-/* ---------- Helper: détecte admin depuis toutes les sources dispo ---------- */
+/* ---------- Helper: détecte admin ---------- */
 const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
   const roleFromMeta =
     user?.app_metadata?.role ||
@@ -85,7 +82,6 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
-  const { isDarkMode, toggleDarkMode } = useTheme();
   const { restrictions, checkAccess } = usePlanRestrictions();
 
   const SAFE_MODE_DISABLE_NOTIFICATIONS = false;
@@ -151,7 +147,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   ];
 
   // Section 2: AI (vide pour l’instant)
-  const aiItems: any[] = []; // intentionally empty
+  const aiItems: any[] = [];
 
   // Section 3: Workspace
   const workspaceItems = [
@@ -235,7 +231,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             ${isRestricted
               ? 'bg-[#151A22] ring-1 ring-inset ring-[#202839]'
               : isActive
-                ? \`bg-gradient-to-br \${item.tone} shadow-glow-sm\`
+                ? ${`'bg-gradient-to-br ' + item.tone + ' shadow-glow-sm'`}
                 : 'bg-[#151A22] group-hover:bg-[#17202C] ring-1 ring-inset ring-[#202839] group-hover:ring-[#2A3347]'
             }
           `}
@@ -266,7 +262,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className={`min-h-screen ${pageBgClass} transition-colors duration-300`}>
-      {/* Topbar */}
+      {/* Topbar (dark-only) */}
       <header className="bg-[#0D1117]/80 backdrop-blur-xl border-b border-[#1C2230] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] fixed w-full top-0 z-50">
         <div className="flex items-center justify-between px-3 sm:px-4 py-3">
           <div className="flex items-center space-x-4">
@@ -284,14 +280,6 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           </div>
           
           <div className="flex items-center gap-2 sm:gap-3">
-            <button 
-              onClick={toggleDarkMode}
-              className="size-10 rounded-xl grid place-items-center text-slate-300 hover:text-white bg-[#121722] hover:bg-[#141A26] ring-1 ring-inset ring-[#202839] hover:ring-[#2A3347] transition-all duration-200 hover:scale-[1.03]"
-              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-
             {!SAFE_MODE_DISABLE_NOTIFICATIONS && (
               <LocalErrorBoundary>
                 <div className="size-10 rounded-xl grid place-items-center text-slate-300 hover:text-white bg-[#121722] hover:bg-[#141A26] ring-1 ring-inset ring-[#202839] hover:ring-[#2A3347] transition-all duration-200">
@@ -339,19 +327,11 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               <div className="px-3 sm:px-4 pt-4">
                 <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">AI</span>
               </div>
-              {aiItems.length === 0 ? (
-                <div className="mx-3 sm:mx-4 mt-2">
-                  <div className="text-xs text-slate-400 px-3 py-2 rounded-xl bg-[#0E121A] ring-1 ring-inset ring-[#1C2230]">
-                    No channels yet
-                  </div>
+              <div className="mx-3 sm:mx-4 mt-2">
+                <div className="text-xs text-slate-400 px-3 py-2 rounded-xl bg-[#0E121A] ring-1 ring-inset ring-[#1C2230]">
+                  No channels yet
                 </div>
-              ) : (
-                <div className="space-y-1">
-                  {aiItems.map((item) => (
-                    <LinkRow key={item.path} item={item} />
-                  ))}
-                </div>
-              )}
+              </div>
 
               {/* -------- Section: Workspace -------- */}
               <div className="px-3 sm:px-4 pt-4">
@@ -422,9 +402,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               relative w-full max-w-lg
               rounded-3xl overflow-hidden
               shadow-2xl
-              border border-white/10
-              bg-gradient-to-b from-white/90 to-white/70
-              dark:from-[#0D1117]/95 dark:to-[#0D1117]/80
+              border border-[#1C2230]
+              bg-[#0D1117]/90
               backdrop-blur-xl
             "
           >
