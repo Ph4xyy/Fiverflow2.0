@@ -200,6 +200,24 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
         : (location.pathname === item.path ||
           (item.path?.startsWith?.('/admin') && location.pathname.startsWith('/admin')));
 
+    // ✅ Build-safe classes (pas de backticks imbriqués)
+    const rowClass =
+      isUpgrade
+        ? 'text-white bg-gradient-to-r from-accent-orange to-accent-yellow shadow-glow-orange hover:shadow-lg hover:-translate-y-0.5'
+        : isRestricted
+        ? 'text-slate-500/70 cursor-pointer'
+        : isActive
+        ? 'text-white bg-[#121722] ring-1 ring-inset ring-[#2A3347] shadow-glow-sm'
+        : 'text-slate-300 hover:text-white hover:bg-[#11161F] ring-1 ring-inset ring-transparent hover:ring-[#21293C]';
+
+    const iconClassBase = 'size-9 rounded-xl grid place-items-center text-white/90';
+    const iconClass =
+      isRestricted
+        ? `${iconClassBase} bg-[#151A22] ring-1 ring-inset ring-[#202839]`
+        : isActive
+        ? `${iconClassBase} bg-gradient-to-br ${item.tone} shadow-glow-sm`
+        : `${iconClassBase} bg-[#151A22] group-hover:bg-[#17202C] ring-1 ring-inset ring-[#202839] group-hover:ring-[#2A3347]`;
+
     return (
       <Link
         key={item.path}
@@ -213,29 +231,9 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           }
           setIsSidebarOpen(false);
         }}
-        className={`
-          group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all
-          ${isUpgrade
-            ? 'text-white bg-gradient-to-r from-accent-orange to-accent-yellow shadow-glow-orange hover:shadow-lg hover:-translate-y-0.5'
-            : isRestricted
-              ? 'text-slate-500/70 cursor-pointer'
-              : isActive
-              ? 'text-white bg-[#121722] ring-1 ring-inset ring-[#2A3347] shadow-glow-sm'
-              : 'text-slate-300 hover:text-white hover:bg-[#11161F] ring-1 ring-inset ring-transparent hover:ring-[#21293C]'
-          }
-        `}
+        className={`group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${rowClass}`}
       >
-        <div
-          className={`
-            size-9 rounded-xl grid place-items-center text-white/90
-            ${isRestricted
-              ? 'bg-[#151A22] ring-1 ring-inset ring-[#202839]'
-              : isActive
-                ? ${`'bg-gradient-to-br ' + item.tone + ' shadow-glow-sm'`}
-                : 'bg-[#151A22] group-hover:bg-[#17202C] ring-1 ring-inset ring-[#202839] group-hover:ring-[#2A3347]'
-            }
-          `}
-        >
+        <div className={iconClass}>
           <Icon size={16} />
         </div>
 
