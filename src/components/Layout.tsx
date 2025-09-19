@@ -31,11 +31,8 @@ interface LayoutProps {
 }
 
 /* ---------- Thème visuel partagé (SOMBRES ++) ---------- */
-/** Fond global quasi noir (moins bleu que slate-950) */
 export const pageBgClass = 'bg-[#0B0E14] text-slate-100';
-/** Cartes : très sombre, bordures subtiles */
 export const cardClass   = 'rounded-2xl border border-[#1C2230] bg-[#11151D]/95 shadow-lg';
-/** Pills & badges */
 export const subtleBg    = 'bg-[#141922]';
 
 /* ---------- Helper: détecte admin depuis toutes les sources dispo ---------- */
@@ -123,26 +120,10 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
   const isAdmin = useIsAdminFromEverywhere(user, userRole);
 
-  const navigationItems = [
+  /* ---------- NAV STRUCTURE EN 3 SECTIONS + MICRO SECTION BAS ---------- */
+  // Section 1: Overview (principales)
+  const overviewItems = [
     { path: '/dashboard', label: 'Dashboard', icon: Home, tone: 'from-accent-blue to-accent-purple' },
-    { path: '/clients', label: 'Clients', icon: Users, tone: 'from-emerald-500 to-teal-600' },
-    { path: '/orders', label: 'Orders', icon: ShoppingCart, tone: 'from-amber-500 to-orange-600' },
-    { 
-      path: '/invoices',
-      label: 'Invoices',
-      icon: Receipt,
-      restricted: !(restrictions?.isAdmin || checkAccess('invoices')),
-      requiredPlan: 'Excellence' as const,
-      tone: 'from-fuchsia-500 to-pink-600'
-    },
-    { 
-      path: '/tasks', 
-      label: 'Tasks', 
-      icon: CheckSquare,
-      restricted: !checkAccess('tasks') && !restrictions?.isAdmin,
-      requiredPlan: 'Pro' as const,
-      tone: 'from-indigo-500 to-blue-600'
-    },
     { 
       path: '/calendar', 
       label: 'Calendar', 
@@ -167,26 +148,125 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       requiredPlan: 'Pro' as const,
       tone: 'from-rose-500 to-red-600'
     },
+  ];
+
+  // Section 2: AI (vide pour l’instant)
+  const aiItems: any[] = []; // intentionally empty
+
+  // Section 3: Workspace
+  const workspaceItems = [
+    { path: '/clients', label: 'Clients', icon: Users, tone: 'from-emerald-500 to-teal-600' },
+    { path: '/orders',  label: 'Orders',  icon: ShoppingCart, tone: 'from-amber-500 to-orange-600' },
+    { 
+      path: '/invoices',
+      label: 'Invoices',
+      icon: Receipt,
+      restricted: !(restrictions?.isAdmin || checkAccess('invoices')),
+      requiredPlan: 'Excellence' as const,
+      tone: 'from-fuchsia-500 to-pink-600'
+    },
+    { 
+      path: '/tasks', 
+      label: 'Tasks', 
+      icon: CheckSquare,
+      restricted: !checkAccess('tasks') && !restrictions?.isAdmin,
+      requiredPlan: 'Pro' as const,
+      tone: 'from-indigo-500 to-blue-600'
+    },
+  ];
+
+  // Micro section (tout en bas)
+  const bottomItems = [
+    { path: '/profile', label: 'Account', icon: User, tone: 'from-accent-blue to-accent-purple' },
     ...(isAdmin ? [{
       path: '/admin/dashboard',
       label: 'Admin',
       icon: Shield,
       tone: 'from-lime-500 to-green-600'
     }] as const : []),
-    { path: '/upgrade', label: 'Upgrade', icon: Crown, tone: 'from-accent-orange to-accent-yellow' },
-  ];
-
-  const accountItems = [
-    { path: '/profile', label: 'My Profile', icon: User, tone: 'from-accent-blue to-accent-purple' },
+    { path: '/upgrade', label: 'Upgrade', icon: Crown, tone: 'from-accent-orange to-accent-yellow', special: 'upgrade' as const },
   ];
 
   const handleSignOut = async () => {
     await signOut();
   };
 
+  const LinkRow: React.FC<{
+    item: any;
+    activeMatcher?: (p: string) => boolean;
+  }> = ({ item, activeMatcher }) => {
+    const Icon = item.icon;
+    const isRestricted = 'restricted' in item && (item as any).restricted;
+    const isUpgrade = item.special === 'upgrade';
+    const isActive =
+      activeMatcher
+        ? activeMatcher(item.path)
+        : (location.pathname === item.path ||
+          (item.path?.startsWith?.('/admin') && location.pathname.startsWith('/admin')));
+
+    return (
+      <Link
+        key={item.path}
+        to={item.path}
+        onClick={(e) => {
+          if (isRestricted) {
+            e.preventDefault();
+            setRequiredPlan((item as any).requiredPlan || 'Pro');
+            setUpgradeOpen(true);
+            return;
+          }
+          setIsSidebarOpen(false);
+        }}
+        className={`
+          group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all
+          ${isUpgrade
+            ? 'text-white bg-gradient-to-r from-accent-orange to-accent-yellow shadow-glow-orange hover:shadow-lg hover:-translate-y-0.5'
+            : isRestricted
+              ? 'text-slate-500/70 cursor-pointer'
+              : isActive
+              ? 'text-white bg-[#121722] ring-1 ring-inset ring-[#2A3347] shadow-glow-sm'
+              : 'text-slate-300 hover:text-white hover:bg-[#11161F] ring-1 ring-inset ring-transparent hover:ring-[#21293C]'
+          }
+        `}
+      >
+        <div
+          className={`
+            size-9 rounded-xl grid place-items-center text-white/90
+            ${isRestricted
+              ? 'bg-[#151A22] ring-1 ring-inset ring-[#202839]'
+              : isActive
+                ? \`bg-gradient-to-br \${item.tone} shadow-glow-sm\`
+                : 'bg-[#151A22] group-hover:bg-[#17202C] ring-1 ring-inset ring-[#202839] group-hover:ring-[#2A3347]'
+            }
+          `}
+        >
+          <Icon size={16} />
+        </div>
+
+        <span className="truncate">{item.label}</span>
+
+        {isRestricted && 'requiredPlan' in item && (
+          <span className="ml-auto text-[10px] px-2 py-1 rounded-full bg-[#121722] text-slate-300 ring-1 ring-inset ring-[#202839]">
+            {(item as any).requiredPlan}
+          </span>
+        )}
+
+        {isUpgrade && (
+          <div className="ml-auto">
+            <div className="w-2 h-2 bg-white rounded-full animate-pulse-slow" />
+          </div>
+        )}
+
+        {isActive && (
+          <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-accent-blue/10 shadow-[0_0_20px_rgba(74,158,255,0.12)]" />
+        )}
+      </Link>
+    );
+  };
+
   return (
     <div className={`min-h-screen ${pageBgClass} transition-colors duration-300`}>
-      {/* Topbar : encore plus sombre + verre dépoli */}
+      {/* Topbar */}
       <header className="bg-[#0D1117]/80 backdrop-blur-xl border-b border-[#1C2230] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] fixed w-full top-0 z-50">
         <div className="flex items-center justify-between px-3 sm:px-4 py-3">
           <div className="flex items-center space-x-4">
@@ -204,7 +284,6 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           </div>
           
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Boutons topbar dans des carrés arrondis */}
             <button 
               onClick={toggleDarkMode}
               className="size-10 rounded-xl grid place-items-center text-slate-300 hover:text-white bg-[#121722] hover:bg-[#141A26] ring-1 ring-inset ring-[#202839] hover:ring-[#2A3347] transition-all duration-200 hover:scale-[1.03]"
@@ -232,7 +311,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       </header>
 
       <div className="flex pt-16">
-        {/* Sidebar : noir profond + icônes encapsulées */}
+        {/* Sidebar */}
         <aside
           className={`
             fixed lg:static inset-y-0 left-0 z-40 w-72
@@ -244,114 +323,71 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             pt-16 lg:pt-0
           `}
         >
-          <nav className="h-full px-3 sm:px-4 py-5 space-y-1 sm:space-y-2 overflow-y-auto">
+          <nav className="h-full px-3 sm:px-4 py-5 space-y-2 overflow-y-auto flex flex-col">
             <LocalErrorBoundary>
-              {navigationItems.map((item) => {
-                const Icon = item.icon;
-                const isUpgrade = item.path === '/upgrade';
-                const isRestricted = 'restricted' in item && (item as any).restricted;
-                const isActive =
-                  location.pathname === item.path ||
-                  (item.path.startsWith('/admin') && location.pathname.startsWith('/admin'));
+              {/* -------- Section: Overview -------- */}
+              <div className="px-3 sm:px-4">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Overview</span>
+              </div>
+              <div className="space-y-1">
+                {overviewItems.map((item) => (
+                  <LinkRow key={item.path} item={item} />
+                ))}
+              </div>
 
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={(e) => {
-                      if (isRestricted) {
-                        e.preventDefault();
-                        setRequiredPlan((item as any).requiredPlan || 'Pro');
-                        setUpgradeOpen(true);
-                        return;
-                      }
-                      setIsSidebarOpen(false);
-                    }}
-                    className={`
-                      group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all
-                      ${isUpgrade
-                        ? 'text-white bg-gradient-to-r from-accent-orange to-accent-yellow shadow-glow-orange hover:shadow-lg hover:-translate-y-0.5'
-                        : isRestricted
-                          ? 'text-slate-500/70 cursor-pointer'
-                          : isActive
-                          ? 'text-white bg-[#121722] ring-1 ring-inset ring-[#2A3347] shadow-glow-sm'
-                          : 'text-slate-300 hover:text-white hover:bg-[#11161F] ring-1 ring-inset ring-transparent hover:ring-[#21293C]'
-                      }
-                    `}
-                  >
-                    {/* Carré arrondi contenant l’icône */}
-                    <div
-                      className={`
-                        size-9 rounded-xl grid place-items-center text-white/90
-                        ${isRestricted
-                          ? 'bg-[#151A22] ring-1 ring-inset ring-[#202839]'
-                          : isActive
-                            ? `bg-gradient-to-br ${item.tone} shadow-glow-sm`
-                            : 'bg-[#151A22] group-hover:bg-[#17202C] ring-1 ring-inset ring-[#202839] group-hover:ring-[#2A3347]'
-                        }
-                      `}
-                    >
-                      <Icon size={16} />
-                    </div>
+              {/* -------- Section: AI -------- */}
+              <div className="px-3 sm:px-4 pt-4">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">AI</span>
+              </div>
+              {aiItems.length === 0 ? (
+                <div className="mx-3 sm:mx-4 mt-2">
+                  <div className="text-xs text-slate-400 px-3 py-2 rounded-xl bg-[#0E121A] ring-1 ring-inset ring-[#1C2230]">
+                    No channels yet
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {aiItems.map((item) => (
+                    <LinkRow key={item.path} item={item} />
+                  ))}
+                </div>
+              )}
 
-                    <span className="truncate">{item.label}</span>
-
-                    {isRestricted && 'requiredPlan' in item && (
-                      <span className="ml-auto text-[10px] px-2 py-1 rounded-full bg-[#121722] text-slate-300 ring-1 ring-inset ring-[#202839]">
-                        {(item as any).requiredPlan}
-                      </span>
-                    )}
-
-                    {isUpgrade && (
-                      <div className="ml-auto">
-                        <div className="w-2 h-2 bg-white rounded-full animate-pulse-slow" />
-                      </div>
-                    )}
-
-                    {/* Soulignement/Glow décoratif sur actif */}
-                    {isActive && (
-                      <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-accent-blue/10 shadow-[0_0_20px_rgba(74,158,255,0.12)]" />
-                    )}
-                  </Link>
-                );
-              })}
+              {/* -------- Section: Workspace -------- */}
+              <div className="px-3 sm:px-4 pt-4">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Workspace</span>
+              </div>
+              <div className="space-y-1">
+                {workspaceItems.map((item) => (
+                  <LinkRow key={item.path} item={item} />
+                ))}
+              </div>
             </LocalErrorBoundary>
-            
-            <div className="pt-4 mt-4 border-t border-[#1C2230]">
+
+            {/* push le bas */}
+            <div className="flex-1" />
+
+            {/* -------- Micro section: Account / Admin / Upgrade -------- */}
+            <div className="pt-4 mt-2 border-t border-[#1C2230]">
               <div className="px-3 sm:px-4 mb-2">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Account
-                </span>
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">More</span>
               </div>
               <LocalErrorBoundary>
-                <Link
-                  to="/profile"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`
-                    group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all
-                    ${location.pathname === '/profile'
-                      ? 'text-white bg-[#121722] ring-1 ring-inset ring-[#2A3347] shadow-glow-sm'
-                      : 'text-slate-300 hover:text-white hover:bg-[#11161F] ring-1 ring-inset ring-transparent hover:ring-[#21293C]'
-                    }
-                  `}
-                >
-                  <div
-                    className={`
-                      size-9 rounded-xl grid place-items-center text-white/90
-                      ${location.pathname === '/profile'
-                        ? 'bg-gradient-to-br from-accent-blue to-accent-purple shadow-glow-sm'
-                        : 'bg-[#151A22] group-hover:bg-[#17202C] ring-1 ring-inset ring-[#202839] group-hover:ring-[#2A3347]'
+                <div className="space-y-1">
+                  {bottomItems.map((item) => (
+                    <LinkRow
+                      key={item.path}
+                      item={item}
+                      activeMatcher={(p) =>
+                        p === '/profile'
+                          ? location.pathname === '/profile'
+                          : p.startsWith('/admin')
+                          ? location.pathname.startsWith('/admin')
+                          : location.pathname === p
                       }
-                    `}
-                  >
-                    <User size={16} />
-                  </div>
-                  <span>My Profile</span>
-
-                  {location.pathname === '/profile' && (
-                    <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-accent-blue/10 shadow-[0_0_20px_rgba(74,158,255,0.12)]" />
-                  )}
-                </Link>
+                    />
+                  ))}
+                </div>
               </LocalErrorBoundary>
             </div>
           </nav>
