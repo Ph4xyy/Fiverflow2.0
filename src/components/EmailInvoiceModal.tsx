@@ -4,18 +4,15 @@ import { X, Send } from "lucide-react";
 import toast from "react-hot-toast";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { generateInvoicePdfBase64 } from "@/utils/invoicePdf";
+import { renderInvoiceWithTemplateToPdf } from "@/utils/invoiceTemplate";
 
 interface EmailInvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
-  invoice: any; // contient clients, number, etc. + items
+  invoice: any; // contient clients, number, items, template?
 }
 
-const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({
-  isOpen,
-  onClose,
-  invoice,
-}) => {
+const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, invoice }) => {
   const [to, setTo] = useState<string>("");
   const [subject, setSubject] = useState<string>("");
   const [message, setMessage] = useState<string>("");
@@ -24,9 +21,11 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({
   useMemo(() => {
     if (!isOpen || !invoice) return;
 
-    // Pré-remplissage automatique
+    // Pré-remplissages
     const defaultEmail =
-      invoice?.clients?.email_primary || invoice?.clients?.email || "";
+      invoice?.clients?.email_primary ||
+      invoice?.clients?.email ||
+      ""; // selon ton schéma clients
 
     setTo(defaultEmail || "");
     setSubject(`Facture ${invoice?.number || ""}`);
@@ -50,40 +49,45 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({
       setSending(true);
       const toastId = toast.loading("Génération du PDF…");
 
-      // 1) Génération du PDF
-      const pdfBase64 = await generateInvoicePdfBase64(invoice);
+      let pdfBase64: string;
       const filename = `${invoice?.number || "invoice"}.pdf`;
+
+      // Générer le PDF selon le template
+      if (invoice?.template?.schema) {
+        const doc = await renderInvoiceWithTemplateToPdf(invoice.template.schema, invoice);
+        const dataUri = doc.output("datauristring");
+        pdfBase64 = dataUri.split(",")[1];
+      } else {
+        pdfBase64 = await generateInvoicePdfBase64(invoice);
+      }
 
       toast.loading("Envoi de l'email…", { id: toastId });
 
       if (!isSupabaseConfigured || !supabase) {
-        // Mode démo
+        // DEMO: simuler
         await new Promise((r) => setTimeout(r, 800));
         toast.success("Email envoyé (demo)", { id: toastId });
         onClose();
         return;
       }
 
-      // 2) Appel de la Edge Function (le senderEmail est géré côté backend via la session)
-      const { data, error } = await supabase.functions.invoke(
-        "send-invoice-email",
-        {
-          body: {
-            to,
-            subject,
-            html: message.replace(/\n/g, "<br/>"),
-            pdfBase64,
-            filename,
-          },
-        }
-      );
+      // Appeler la Edge Function
+      const { data, error } = await supabase.functions.invoke("send-invoice-email", {
+        body: {
+          to,
+          subject,
+          html: message.replace(/\n/g, "<br/>"),
+          pdfBase64,
+          filename,
+        },
+      });
 
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
 
       toast.success("Email envoyé", { id: toastId });
       onClose();
-    } catch (e) {
+    } catch (e: any) {
       console.error("[EmailInvoiceModal] send error:", e);
       toast.error("Échec de l'envoi");
     } finally {
@@ -96,20 +100,14 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({
     "border-gray-300 text-gray-900 placeholder-gray-400 " +
     "dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-400";
 
-  const labelBase =
-    "block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300";
+  const labelBase = "block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300";
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl w-full max-w-lg">
         <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-slate-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Envoyer la facture par email
-          </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-          >
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Envoyer la facture par email</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
             <X size={22} />
           </button>
         </div>
@@ -127,11 +125,7 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({
           </div>
           <div>
             <label className={labelBase}>Sujet *</label>
-            <input
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              className={inputBase}
-            />
+            <input value={subject} onChange={(e) => setSubject(e.target.value)} className={inputBase} />
           </div>
           <div>
             <label className={labelBase}>Message</label>
