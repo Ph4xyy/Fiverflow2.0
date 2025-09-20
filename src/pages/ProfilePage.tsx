@@ -2,20 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
 import { useStripeSubscription } from '../hooks/useStripeSubscription';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { 
-  User, 
-  Bell, 
-  Shield, 
-  CreditCard, 
+import {
+  User,
+  Bell,
+  Shield,
+  CreditCard,
   Palette,
   Eye,
   EyeOff,
   Lock,
-  Moon,
-  Sun,
   Save
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -34,7 +31,6 @@ interface UserProfile {
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
-  const { isDarkMode, setDarkMode } = useTheme();
   const { subscription: stripeSubscription } = useStripeSubscription();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -95,6 +91,7 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     fetchProfile();
     fetchPreferences();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchProfile = async () => {
@@ -158,7 +155,7 @@ const ProfilePage: React.FC = () => {
           language: 'English'
         });
       }
-    } catch (error) {
+    } catch {
       const fallback = {
         id: user?.id || 'unknown',
         email: user?.email || '',
@@ -306,7 +303,7 @@ const ProfilePage: React.FC = () => {
     return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
-  // ---------- UI class helpers (dark‑ready)
+  // ---------- UI class helpers (dark-ready)
   const card = 'bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700';
   const soft = 'bg-gray-50 dark:bg-slate-800';
   const h1 = 'text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white';
@@ -586,7 +583,7 @@ const ProfilePage: React.FC = () => {
                         {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                       </button>
                     </div>
-                    <button 
+                    <button
                       onClick={handleChangePassword}
                       disabled={saving}
                       className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
@@ -619,14 +616,14 @@ const ProfilePage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                        {stripeSubscription?.product_name 
-                          ? `${stripeSubscription.product_name} - ${stripeSubscription.product_description}` 
+                        {stripeSubscription?.product_name
+                          ? `${stripeSubscription.product_name} - ${stripeSubscription.product_description}`
                           : 'Free Plan - Limited features'}
                       </p>
                       {stripeSubscription?.subscription_status && (
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 ${
-                          stripeSubscription.subscription_status === 'active' 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' 
+                          stripeSubscription.subscription_status === 'active'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                             : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
                         }`}>
                           {stripeSubscription.subscription_status}
@@ -677,35 +674,7 @@ const ProfilePage: React.FC = () => {
             <div>
               <h3 className={h3}>App Preferences</h3>
               <div className="space-y-4">
-                <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
-                  <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-2">Theme</h4>
-                  <div className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-700">
-                    <div className="flex items-center space-x-3">
-                      {isDarkMode ? <Moon className="text-blue-600" size={20} /> : <Sun className="text-yellow-500" size={20} />}
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {isDarkMode ? 'Dark Mode' : 'Light Mode'}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {isDarkMode ? 'Dark theme is enabled' : 'Light theme is enabled'}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setDarkMode(!isDarkMode)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        isDarkMode ? 'bg-blue-600' : 'bg-gray-200 dark:bg-slate-700'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          isDarkMode ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
-                </div>
-
+                {/* Theme toggle removed — dark mode is enforced globally */}
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
                   <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-2">Default Currency</h4>
                   <select className={selectBase}>
@@ -762,7 +731,7 @@ const ProfilePage: React.FC = () => {
         <div className={card}>
           {/* Header with background */}
           <div className="bg-gradient-to-r from-blue-500 to-purple-600 h-24 sm:h-32"></div>
-          
+
           {/* Profile Content */}
           <div className="relative px-4 sm:px-6 pb-6">
             {/* Avatar */}
@@ -775,7 +744,7 @@ const ProfilePage: React.FC = () => {
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="text-center sm:text-left mb-4 sm:mb-2">
                   <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                     {profile.name || 'User'}
@@ -786,8 +755,8 @@ const ProfilePage: React.FC = () => {
                   )}
                   <div className="flex items-center justify-center sm:justify-start space-x-2 mt-2">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                      profile.is_pro 
-                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' 
+                      profile.is_pro
+                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
                         : 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-300'
                     }`}>
                       {profile.is_pro ? 'Pro' : 'Free'}
@@ -807,7 +776,7 @@ const ProfilePage: React.FC = () => {
         {/* Account Information */}
         <div className={`${card} p-4 sm:p-6`}>
           <h3 className={h2}>Account Information</h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             <div>
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Member since</p>
@@ -815,14 +784,14 @@ const ProfilePage: React.FC = () => {
                 {formatDate(profile.created_at)}
               </p>
             </div>
-            
+
             <div>
               <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">User ID</p>
               <p className={monoMuted}>
                 {profile.id}
               </p>
             </div>
-            
+
             {profile.referrer_id && (
               <div>
                 <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Referred by</p>
@@ -864,9 +833,9 @@ const ProfilePage: React.FC = () => {
             {/* Content */}
             <div className="flex-1 p-4 sm:p-6 min-w-0">
               {renderTabContent()}
-              
+
               <div className={`mt-6 sm:mt-8 pt-4 sm:pt-6 ${divider}`}>
-                <button 
+                <button
                   onClick={handleSaveProfile}
                   disabled={saving}
                   className="inline-flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white text-sm sm:text-base rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"

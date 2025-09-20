@@ -1,12 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FiverFlow</title>
+    <script>
+      try {
+        // Force définitivement le thème sombre avant le rendu
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark'); // Neutralise tout ancien choix
+      } catch {}
+    </script>
   </head>
-  <body>
+  <body class="dark bg-gray-900 text-white">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
