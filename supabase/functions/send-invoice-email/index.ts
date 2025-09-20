@@ -1,58 +1,63 @@
-// supabase/functions/send-invoice-email/index.ts
-// Deno Edge Function — utilise Resend pour envoyer un email avec PDF en PJ
-
-// Import npm depuis Deno (Edge functions supportent npm:)
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { Resend } from "npm:resend@3.2.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-type Payload = {
-  to: string;
-  subject: string;
-  html: string;        // corps HTML (simple)
-  pdfBase64: string;   // contenu PDF en base64 (sans prefix data:)
-  filename?: string;   // ex: "FACTURE-1234.pdf"
-  from?: string;       // optionnel, ex: "Facturation <no-reply@tondomaine.com>"
-};
+// ⚡ Clés (ajoute SUPABASE_URL + SUPABASE_ANON_KEY dans les variables d’environnement Supabase)
+const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  global: { headers: { Authorization: `Bearer ${supabaseKey}` } },
+});
 
-Deno.serve(async (req) => {
+const resend = new Resend(Deno.env.get("RESEND_API_KEY") || "");
+
+serve(async (req: Request) => {
   try {
-    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    if (!RESEND_API_KEY) {
-      return new Response(JSON.stringify({ error: "Missing RESEND_API_KEY" }), { status: 500 });
+    // Vérif session utilisateur
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
     }
 
-    const body = (await req.json()) as Payload;
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
-    if (!body.to || !body.subject || !body.html || !body.pdfBase64) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400 });
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
     }
 
-    const resend = new Resend(RESEND_API_KEY);
+    // Récupération des infos envoyées
+    const { to, subject, html, pdfBase64, filename } = await req.json();
 
-    // Décoder la PJ base64 (Resend accepte Uint8Array/Buffer)
-    const binary = Uint8Array.from(atob(body.pdfBase64), (c) => c.charCodeAt(0));
+    if (!to || !subject || !pdfBase64) {
+      return new Response(JSON.stringify({ error: "Missing fields" }), { status: 400 });
+    }
 
-    const from = body.from || "FiverFlow <no-reply@fiverflow.app>";
-    const filename = body.filename || "invoice.pdf";
+    // On force l’expéditeur à être l’utilisateur connecté
+    const senderEmail = user.email;
 
-    const { error } = await resend.emails.send({
-      from,
-      to: [body.to],
-      subject: body.subject,
-      html: body.html,
+    const res = await resend.emails.send({
+      from: "factures@fiverflow.com", // domaine validé
+      reply_to: senderEmail,          // ✅ sécurisé : email de l’utilisateur
+      to,
+      subject,
+      html,
       attachments: [
         {
-          filename,
-          content: binary, // Uint8Array ok sur Resend
+          filename: filename || "invoice.pdf",
+          content: pdfBase64,
+          encoding: "base64",
         },
       ],
     });
 
-    if (error) {
-      return new Response(JSON.stringify({ error: String(error) }), { status: 500 });
+    if (res.error) {
+      return new Response(JSON.stringify({ error: res.error.message }), { status: 500 });
     }
 
-    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+    return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e) }), { status: 500 });
+    console.error("[send-invoice-email] error:", e);
+    return new Response(JSON.stringify({ error: "Unexpected error" }), { status: 500 });
   }
 });
