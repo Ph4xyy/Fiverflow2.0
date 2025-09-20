@@ -331,7 +331,7 @@ const ProfilePage: React.FC = () => {
               <h3 className={h3}>Profile Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <label className={labelBase}>Full Name</label>
+                  <label className={labelBase}>Username</label>
                   <input
                     type="text"
                     value={profileData.name}
