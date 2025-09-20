@@ -327,7 +327,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               </div>
               <div className="mx-3 sm:mx-4 mt-2">
                 <div className="text-xs text-slate-400 px-3 py-2 rounded-xl bg-[#0E121A] ring-1 ring-inset ring-[#1C2230]">
-                  No channels yet
+                  Coming soon!
                 </div>
               </div>
 
