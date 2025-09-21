@@ -1,11 +1,12 @@
 // src/App.tsx
 import "./i18n"; 
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { UserDataProvider } from './contexts/UserDataContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
+import { usePlanRestrictions } from './hooks/usePlanRestrictions';
 
 // Core pages
 import LandingPage from './pages/LandingPage';
@@ -29,12 +30,31 @@ import SupportPage from './pages/SupportPage';
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import CookiePolicy from "./components/CookiePolicy";
 import TermsOfService from "./components/TermsOfService";
+import TodoListPage from './pages/TodoListPage'; // 👈 nouvelle page
 
 // Lazy invoices
 const InvoicesLayout = lazy(() => import('./pages/InvoicesLayout'));
 const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
 const InvoiceTemplatesPage = lazy(() => import('./pages/InvoiceTemplatesPage'));
 const InvoiceTemplateEditorPage = lazy(() => import('./pages/InvoiceTemplateEditorPage'));
+
+/** 
+ * PlanGate : garde d'accès par feature (ici on s'en sert pour 'todo')
+ * - Autorisé : Pro & Plus/Excellence (+ trial)
+ * - Non autorisé : Free -> redirige vers /upgrade
+ */
+const PlanGate: React.FC<{ feature: 'calendar' | 'referrals' | 'stats' | 'tasks' | 'invoices' | 'todo'; children: React.ReactNode }> = ({ feature, children }) => {
+  const { checkAccess, loading } = usePlanRestrictions();
+  const location = useLocation();
+
+  if (loading) {
+    return <div style={{ padding: 16 }}>Loading…</div>;
+  }
+  if (!checkAccess(feature)) {
+    return <Navigate to="/upgrade" replace state={{ from: location }} />;
+  }
+  return <>{children}</>;
+};
 
 function App() {
   return (
@@ -69,6 +89,18 @@ function App() {
               <Route path="/upgrade" element={<ProtectedRoute><UpgradePage /></ProtectedRoute>} />
               <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/success" element={<ProtectedRoute><SuccessPage /></ProtectedRoute>} />
+
+              {/* Nouvelle route : To-Do (Pro & Plus/Excellence seulement) */}
+              <Route
+                path="/workspace/todo"
+                element={
+                  <ProtectedRoute>
+                    <PlanGate feature="todo">
+                      <TodoListPage />
+                    </PlanGate>
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Pages légales */}
               <Route path="/terms-of-service" element={<TermsOfService />} />

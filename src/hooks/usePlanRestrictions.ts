@@ -26,7 +26,7 @@ interface PlanRestrictions {
   isAdmin: boolean;
 }
 
-type FeatureKey = 'calendar' | 'referrals' | 'stats' | 'tasks' | 'invoices';
+type FeatureKey = 'calendar' | 'referrals' | 'stats' | 'tasks' | 'invoices' | 'todo';
 
 interface UsePlanRestrictionsReturn {
   restrictions: PlanRestrictions | null;
@@ -146,7 +146,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
         case 'price_1RoXOgENcVsHr4WIitiOEaaz':
           plan = 'pro';
           break;
-        // EXCELLENCE
+        // EXCELLENCE (a.k.a. Plus)
         case 'price_1RoRMdENcVsHr4WIVRYCy8JL':
         case 'price_1RoXNwENcVsHr4WI3SP8AYYu':
           plan = 'excellence';
@@ -166,7 +166,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
 
     const calculated: PlanRestrictions = {
       plan,
-      // Calendar & Tasks: available for PRO/EXCELLENCE and also during trial
+      // Calendar & Tasks (& Todo): available for PRO/EXCELLENCE and also during trial
       canAccessCalendar: plan !== 'free' || isTrialActive,
       canAccessTasks: plan !== 'free' || isTrialActive,
 
@@ -203,6 +203,8 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
         return restrictions.canAccessTasks;
       case 'invoices':
         return restrictions.canAccessInvoices;
+      case 'todo': // 👈 même règle que tasks
+        return restrictions.canAccessTasks;
       default:
         return false;
     }

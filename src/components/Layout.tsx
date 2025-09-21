@@ -21,6 +21,7 @@ import {
   Receipt,
   CheckCircle2,
   Shield,
+  ListChecks,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -169,6 +170,15 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       requiredPlan: 'Pro' as const,
       tone: 'from-indigo-500 to-blue-600'
     },
+    // 👇 To-Do List (Pro & Plus/Excellence, pas Free)
+    { 
+      path: '/workspace/todo',
+      label: 'To-Do List',
+      icon: ListChecks,
+      restricted: !checkAccess('todo') && !restrictions?.isAdmin,
+      requiredPlan: 'Pro' as const, // badge "Pro" si restreint
+      tone: 'from-violet-500 to-fuchsia-600'
+    },
   ];
 
   // Micro section (tout en bas)
@@ -200,7 +210,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
         : (location.pathname === item.path ||
           (item.path?.startsWith?.('/admin') && location.pathname.startsWith('/admin')));
 
-    // ✅ Build-safe classes (pas de backticks imbriqués)
+    // ✅ Build-safe classes
     const rowClass =
       isUpgrade
         ? 'text-white bg-gradient-to-r from-accent-orange to-accent-yellow shadow-glow-orange hover:shadow-lg hover:-translate-y-0.5'
@@ -278,13 +288,11 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           </div>
           
           <div className="flex items-center gap-2 sm:gap-3">
-            {!SAFE_MODE_DISABLE_NOTIFICATIONS && (
-              <LocalErrorBoundary>
-                <div className="size-10 rounded-xl grid place-items-center text-slate-300 hover:text-white bg-[#121722] hover:bg-[#141A26] ring-1 ring-inset ring-[#202839] hover:ring-[#2A3347] transition-all duration-200">
-                  <NotificationsDropdown />
-                </div>
-              </LocalErrorBoundary>
-            )}
+            <LocalErrorBoundary>
+              <div className="size-10 rounded-xl grid place-items-center text-slate-300 hover:text-white bg-[#121722] hover:bg-[#141A26] ring-1 ring-inset ring-[#202839] hover:ring-[#2A3347] transition-all duration-200">
+                <NotificationsDropdown />
+              </div>
+            </LocalErrorBoundary>
 
             <button 
               onClick={handleSignOut}
