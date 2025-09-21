@@ -286,10 +286,10 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               {isSidebarOpen ? <X size={40} /> : <Menu size={20} />}
             </button>
             <Link to="/dashboard" className="text-2xl font-extrabold leading-none">
-        {/* Left side: Logo + texte */}
+        {/* Le logo est a gauche et le texte a drete */}
         <div className="flex items-center space-x-3">
-          <img src={LogoImage} alt="Logo" className="h-8 w-auto" />
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-accent-blue dark:to-accent-purple bg-clip-text text-transparent">
+          <img src={LogoImage} alt="Logo" className="h-8 w-auto" /> {/* Logo */}
+          <span className="text-2x1 font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-accent-blue dark:to-accent-purple bg-clip-text text-transparent">
             FiverFlow
               </span>
             </div>
