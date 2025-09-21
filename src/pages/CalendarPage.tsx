@@ -25,9 +25,8 @@ import toast from 'react-hot-toast';
 
 // Styles FullCalendar consolidés
 import '@/styles/fullcalendar.css';
-
-// Override dark mode
 import '@/styles/calendar-dark.css';
+
 
 /* ---------------- Types ---------------- */
 type UUID = string;

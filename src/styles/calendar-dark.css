@@ -1,50 +1,63 @@
-/* === FullCalendar: enlever tout fond/bordure bleus des events, sans toucher au TSX === */
+/* src/styles/calendar-dark.css */
 
-/* DayGrid + TimeGrid: wrapper & contenu */
-.fc .fc-event,
-.fc .fc-daygrid-event,
-.fc .fc-daygrid-block-event,
-.fc .fc-h-event,
-.fc .fc-timegrid-event,
-.fc .fc-timegrid-event-harness,
-.fc .fc-event .fc-event-main,
-.fc .fc-timegrid-event .fc-event-main {
-  background: transparent !important;
-  border: 0 !important;
-  color: #e5e7eb !important; /* texte neutre (tailwind slate-200) */
-}
+/* --- Dark mode overrides for FullCalendar --- */
 
-/* Certains thèmes ajoutent un fond sur le harness */
-.fc .fc-daygrid-event-harness,
-.fc .fc-timegrid-event-harness-inset {
-  background: transparent !important;
-  border: 0 !important;
-}
-
-/* Liens internes générés par FC (évite le bleu global de a { color: ... }) */
-.fc a,
-.fc .fc-daygrid-event a,
-.fc .fc-h-event a,
-.fc .fc-timegrid-event a,
-.fc .fc-daygrid-more-link {
-  color: inherit !important;
-  text-decoration: none !important;
-}
-
-/* Puces “+X more” pour rester dans le thème */
-.fc .fc-daygrid-more-link {
-  background: #111827 !important;
-  color: #cbd5e1 !important;
-  border: 1px solid #1C2230 !important;
-  border-radius: 10px;
-  padding: 2px 8px;
-}
-
-/* Cellule hover / today (cosmétique, optionnel) */
-.fc .fc-daygrid-day-frame:hover { background: #111827 !important; }
-.fc .fc-daygrid-day.fc-day-today { background: rgba(42,51,71,0.35) !important; }
-
-/* Bordures (cosmétique) */
-.fc-theme-standard .fc-scrollgrid,
+/* Enlève tout fond bleu par défaut */
 .fc-theme-standard td,
-.fc-theme-standard th { border-color: #1C2230 !important; }
+.fc-theme-standard th {
+  background-color: #0E121A !important;
+  border-color: #1C2230 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Headers (jours, semaines) */
+.fc .fc-col-header-cell {
+  background-color: #0F141C !important;
+  color: #cbd5e1 !important;
+  border-color: #1C2230 !important;
+}
+
+/* Jours */
+.fc-daygrid-day {
+  background-color: #0E121A !important;
+  border-color: #1C2230 !important;
+  color: #f1f5f9 !important;
+}
+
+.fc-daygrid-day:hover {
+  background-color: #121722 !important;
+}
+
+/* Jour actuel */
+.fc-day-today {
+  background-color: rgba(59, 130, 246, 0.15) !important; /* bleu clair transparent */
+  border: 1px solid #2563eb !important;
+}
+
+/* Events */
+.fc-event {
+  background: transparent !important;
+  border: none !important;
+  color: #f8fafc !important;
+}
+
+/* Bouton "more" */
+.fc .fc-more-link {
+  color: #38bdf8 !important;
+}
+
+/* Scrollbars dans timeGrid */
+.fc-scroller {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 #0F141C;
+}
+
+.fc-scroller::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb {
+  background-color: #334155;
+  border-radius: 8px;
+}
