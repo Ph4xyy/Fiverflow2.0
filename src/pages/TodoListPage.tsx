@@ -66,6 +66,37 @@ type ColumnKey =
   | 'comments'
   | 'tags';
 
+/* ===========================
+   UI Tokens / Classes
+   =========================== */
+const PAGE_BG = 'bg-[#0B0E14]'; // gris foncé du dashboard
+const HEADER_CARD =
+  'rounded-3xl border border-[#1C2230] bg-[#0F141C]/90 backdrop-blur-xl shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)]';
+
+const BTN_PRIMARY =
+  'inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-white bg-gradient-to-r from-indigo-500 to-fuchsia-600 hover:opacity-95 transition';
+const BTN_SOFT =
+  'inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-slate-200 bg-[#111722] hover:bg-[#141B27] ring-1 ring-inset ring-[#20293C] transition';
+const CHIP_SOFT = 'inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-white/5 text-slate-300';
+
+const TABLE_HEAD =
+  'bg-white/5 text-left text-[11px] uppercase tracking-[0.08em] text-slate-300';
+
+const CELL_BASE =
+  'px-4 py-3 text-[15px] text-slate-200 border-b border-white/5 align-top';
+
+/* Select moderne (wrappé) */
+const SELECT_WRAPPER =
+  'relative inline-flex items-center w-full';
+const SELECT_BASE =
+  'appearance-none w-full px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 ' +
+  'border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[15px]';
+const SELECT_CHEVRON =
+  'pointer-events-none absolute right-3 text-slate-400';
+
+/* ===========================
+   Helpers
+   =========================== */
 const DEFAULT_COLUMNS: ColumnKey[] = [
   'task', 'status', 'priority', 'client', 'order', 'due', 'comments', 'tags'
 ];
@@ -75,24 +106,20 @@ const COLOR_SWATCHES = [
   '#14B8A6', '#22C55E', '#A855F7', '#F97316', '#06B6D4', '#EAB308',
 ];
 
-const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string }[] = [
-  { value: 'todo',         label: 'To do',        color: 'bg-zinc-700' },
-  { value: 'in_progress',  label: 'In progress',  color: 'bg-blue-600' },
-  { value: 'blocked',      label: 'Blocked',      color: 'bg-rose-600' },
-  { value: 'done',         label: 'Done',         color: 'bg-emerald-600' },
+const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
+  { value: 'todo',         label: 'To do' },
+  { value: 'in_progress',  label: 'In progress' },
+  { value: 'blocked',      label: 'Blocked' },
+  { value: 'done',         label: 'Done' },
 ];
 
-const PRIORITY_OPTIONS: { value: TaskPriority; label: string; dot: string }[] = [
-  { value: 'urgent', label: 'P1 Urgent', dot: 'bg-rose-500' },
-  { value: 'high',   label: 'P2 High',   dot: 'bg-amber-500' },
-  { value: 'medium', label: 'P3 Medium', dot: 'bg-blue-500' },
-  { value: 'low',    label: 'P4 Low',    dot: 'bg-zinc-500' },
+const PRIORITY_OPTIONS: { value: TaskPriority; label: string }[] = [
+  { value: 'urgent', label: 'P1 Urgent' },
+  { value: 'high',   label: 'P2 High'   },
+  { value: 'medium', label: 'P3 Medium' },
+  { value: 'low',    label: 'P4 Low'    },
 ];
 
-const CELL_BASE =
-  'px-3 py-2 text-sm text-slate-200 border-b border-white/5 align-top';
-
-/* Utils */
 const byPositionThenCreated = (a: TaskRow, b: TaskRow) => {
   const pa = a.position ?? 0;
   const pb = b.position ?? 0;
@@ -134,10 +161,11 @@ const flattenTree = (nodes: TaskRow[], collapsedIds: Set<string>): TaskRow[] => 
 };
 
 const pill = (text: string, extra = '') =>
-  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full ${extra}`}>
-    {text}
-  </span>;
+  <span className={`${CHIP_SOFT} ${extra}`}>{text}</span>;
 
+/* ===========================
+   Page
+   =========================== */
 const TodoListPage: React.FC = () => {
   const { user } = useAuth();
 
@@ -158,7 +186,7 @@ const TodoListPage: React.FC = () => {
     return filterStatus === 'all' ? flat : flat.filter(r => r.status === filterStatus);
   }, [tree, collapsed, filterStatus]);
 
-  /* ----------- LOAD (avec fallback intelligent) ----------- */
+  /* ----------- LOAD (fallback intelligent) ----------- */
   const loadAll = useCallback(async () => {
     if (!user) return;
     if (!isSupabaseConfigured || !supabase) {
@@ -174,13 +202,20 @@ const TodoListPage: React.FC = () => {
         .eq('user_id', user.id)
         .order('name', { ascending: true });
 
-      const oPromise = supabase
+      // Orders → tente user_id, fallback sans si absent
+      let oRes = await supabase
         .from('orders')
         .select('id,title')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
+      if (oRes.error && String(oRes.error.code) === '42703') {
+        oRes = await supabase
+          .from('orders')
+          .select('id,title')
+          .order('id', { ascending: true });
+      }
 
-      // 1) Essai "étendu"
+      // Tasks → essai étendu, fallback base si colonnes manquent
       let tRes = await supabase
         .from('tasks')
         .select(`
@@ -191,7 +226,6 @@ const TodoListPage: React.FC = () => {
         .eq('user_id', user.id)
         .order('position', { ascending: true });
 
-      // 2) Fallback si colonnes manquantes (code 42703) → on passe en "base"
       if (tRes.error && String(tRes.error.code) === '42703') {
         colorPersistSupportedRef.current = false;
         tRes = await supabase
@@ -204,20 +238,11 @@ const TodoListPage: React.FC = () => {
           .order('id', { ascending: true });
       }
 
-      const [cRes, oRes] = await Promise.all([cPromise, oPromise]);
+      const cRes = await cPromise;
 
-      if (cRes.error) {
-        console.error('[loadAll:clients]', cRes.error);
-        throw cRes.error;
-      }
-      if (oRes.error) {
-        console.error('[loadAll:orders]', oRes.error);
-        throw oRes.error;
-      }
-      if (tRes.error) {
-        console.error('[loadAll:tasks]', tRes.error);
-        throw tRes.error;
-      }
+      if (cRes.error) throw cRes.error;
+      if (oRes.error) throw oRes.error;
+      if (tRes.error) throw tRes.error;
 
       setClients(cRes.data || []);
       setOrders(oRes.data || []);
@@ -231,9 +256,7 @@ const TodoListPage: React.FC = () => {
       }));
       setRows(normalized);
     } catch (e: any) {
-      const msg = e?.message || 'Erreur inconnue';
-      const code = e?.code ? ` [${e.code}]` : '';
-      toast.error(`Erreur lors du chargement des données: ${msg}${code}`);
+      toast.error(`Erreur lors du chargement des données: ${e?.message || 'inconnue'}${e?.code ? ` [${e.code}]` : ''}`);
     } finally {
       setLoading(false);
     }
@@ -397,7 +420,7 @@ const TodoListPage: React.FC = () => {
     updateTask(task.id, { color });
   };
 
-  /* ----------- Cells ----------- */
+  /* ----------- Cells (modernisées) ----------- */
   const TitleCell: React.FC<{ t: TaskRow }> = ({ t }) => {
     const [editing, setEditing] = useState(false);
     const [val, setVal] = useState(t.title);
@@ -413,68 +436,90 @@ const TodoListPage: React.FC = () => {
     };
 
     return (
-      <div className="flex items-start gap-2">
-        <div className="flex items-center" style={{ paddingLeft: `${(t._depth || 0) * 16}px` }}>
+      <div className="flex items-start gap-3">
+        <div className="flex items-center" style={{ paddingLeft: `${(t._depth || 0) * 18}px` }}>
           {t._children && t._children.length > 0 ? (
             <button
               onClick={() => toggleCollapse(t.id)}
-              className="p-1 rounded hover:bg-white/10"
+              className="p-1.5 rounded-xl hover:bg-white/10"
               title={collapsed.has(t.id) ? 'Expand' : 'Collapse'}
             >
-              {collapsed.has(t.id) ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+              {collapsed.has(t.id) ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
             </button>
           ) : (
-            <span className="w-6" />
+            <span className="w-7" />
           )}
         </div>
 
-        <div className="mt-1">
-          <div className="w-2 h-4 rounded-sm" style={{ background: t.color || '#3f3f46' }} />
+        <div className="mt-1.5">
+          <div className="w-2.5 h-5 rounded-sm" style={{ background: t.color || '#3f3f46' }} />
         </div>
 
         <div className="flex-1">
           {editing ? (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <input
                 autoFocus
                 value={val}
                 onChange={(e) => setVal(e.target.value)}
                 onKeyDown={(e) => (e.key === 'Enter' ? onSave() : e.key === 'Escape' ? (setEditing(false), setVal(t.title)) : null)}
-                className="bg-black/40 border border-white/10 rounded px-2 py-1 w-full outline-none focus:ring-2 focus:ring-white/10"
+                className="bg-[#0F141C] border border-[#1C2230] rounded-2xl px-3.5 py-2.5 w-full outline-none focus:ring-2 focus:ring-[#2A3347] text-[15px]"
               />
-              <button onClick={onSave} className="p-1 rounded bg-white/10 hover:bg-white/20">
-                <Check size={14} />
+              <button onClick={onSave} className="p-2 rounded-xl bg-white/10 hover:bg-white/20">
+                <Check size={16} />
               </button>
-              <button onClick={() => { setEditing(false); setVal(t.title); }} className="p-1 rounded hover:bg-white/10">
-                <X size={14} />
+              <button onClick={() => { setEditing(false); setVal(t.title); }} className="p-2 rounded-xl hover:bg-white/10">
+                <X size={16} />
               </button>
             </div>
           ) : (
             <button
               onClick={() => setEditing(true)}
-              className="group text-left w-full inline-flex items-start gap-2 hover:bg-white/5 rounded px-1 py-0.5"
+              className="group text-left w-full inline-flex items-start gap-2 hover:bg-white/5 rounded-xl px-1.5 py-1"
               title="Edit title"
             >
-              <span className="text-slate-100">{t.title || 'Untitled'}</span>
-              <Pencil size={14} className="opacity-0 group-hover:opacity-60 transition" />
+              <span className="text-[15px] text-slate-100">{t.title || 'Untitled'}</span>
+              <Pencil size={16} className="opacity-0 group-hover:opacity-60 transition" />
             </button>
           )}
 
-          <div className="mt-1 flex items-center gap-2 text-xs text-slate-400">
+          <div className="mt-1.5 flex items-center gap-2 text-[12px] text-slate-400">
             <button
               onClick={() => insertTask(t)}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-white/10"
+              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-xl hover:bg-white/10"
               title="Add subtask"
             >
-              <Plus size={12} /> Subtask
+              <Plus size={13} /> Subtask
             </button>
             <button
               onClick={() => removeTask(t)}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-white/10 text-rose-300"
+              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-xl hover:bg-white/10 text-rose-300"
               title="Delete task"
             >
-              <Trash2 size={12} /> Delete
+              <Trash2 size={13} /> Delete
             </button>
+          </div>
+
+          {/* Choix rapide des couleurs */}
+          <div className="mt-2.5 flex items-center gap-2">
+            <span className="text-xs text-slate-400">Color:</span>
+            <div className="flex flex-wrap gap-1.5">
+              {COLOR_SWATCHES.slice(0, 8).map(c => (
+                <button
+                  key={c}
+                  onClick={() => setTaskColor(t, c)}
+                  className="w-4.5 h-4.5 rounded ring-1 ring-white/20"
+                  style={{ background: c }}
+                  title={c}
+                />
+              ))}
+              <button
+                onClick={() => setTaskColor(t, null)}
+                className="px-1.5 text-[11px] rounded bg-white/5 hover:bg-white/10"
+              >
+                Clear
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -482,61 +527,79 @@ const TodoListPage: React.FC = () => {
   };
 
   const StatusCell: React.FC<{ t: TaskRow }> = ({ t }) => (
-    <select
-      value={t.status}
-      onChange={(e) => updateTask(t.id, { status: e.target.value as TaskStatus })}
-      className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10"
-    >
-      {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-    </select>
+    <div className={SELECT_WRAPPER}>
+      <select
+        value={t.status}
+        onChange={(e) => updateTask(t.id, { status: e.target.value as TaskStatus })}
+        className={SELECT_BASE}
+      >
+        {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+      </select>
+      <ChevronDown size={16} className={SELECT_CHEVRON} />
+    </div>
   );
 
   const PriorityCell: React.FC<{ t: TaskRow }> = ({ t }) => (
-    <select
-      value={t.priority}
-      onChange={(e) => updateTask(t.id, { priority: e.target.value as TaskPriority })}
-      className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10"
-    >
-      {PRIORITY_OPTIONS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-    </select>
+    <div className={SELECT_WRAPPER}>
+      <select
+        value={t.priority}
+        onChange={(e) => updateTask(t.id, { priority: e.target.value as TaskPriority })}
+        className={SELECT_BASE}
+      >
+        {PRIORITY_OPTIONS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+      </select>
+      <ChevronDown size={16} className={SELECT_CHEVRON} />
+    </div>
   );
 
   const ClientCell: React.FC<{ t: TaskRow }> = ({ t }) => (
     <div className="flex items-center gap-2">
-      <Building2 size={14} className="opacity-60" />
-      <select
-        value={t.client_id || ''}
-        onChange={(e) => updateTask(t.id, { client_id: e.target.value || null })}
-        className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10 w-full"
-      >
-        <option value="">—</option>
-        {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-      </select>
+      <div className="shrink-0 p-2 rounded-xl bg-[#111722] ring-1 ring-inset ring-[#20293C]">
+        <Building2 size={16} className="text-slate-300" />
+      </div>
+      <div className={SELECT_WRAPPER}>
+        <select
+          value={t.client_id || ''}
+          onChange={(e) => updateTask(t.id, { client_id: e.target.value || null })}
+          className={SELECT_BASE}
+        >
+          <option value="">—</option>
+          {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+        <ChevronDown size={16} className={SELECT_CHEVRON} />
+      </div>
     </div>
   );
 
   const OrderCell: React.FC<{ t: TaskRow }> = ({ t }) => (
     <div className="flex items-center gap-2">
-      <Package2 size={14} className="opacity-60" />
-      <select
-        value={t.order_id || ''}
-        onChange={(e) => updateTask(t.id, { order_id: e.target.value || null })}
-        className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10 w-full"
-      >
-        <option value="">—</option>
-        {orders.map(o => <option key={o.id} value={o.id}>{o.title}</option>)}
-      </select>
+      <div className="shrink-0 p-2 rounded-xl bg-[#111722] ring-1 ring-inset ring-[#20293C]">
+        <Package2 size={16} className="text-slate-300" />
+      </div>
+      <div className={SELECT_WRAPPER}>
+        <select
+          value={t.order_id || ''}
+          onChange={(e) => updateTask(t.id, { order_id: e.target.value || null })}
+          className={SELECT_BASE}
+        >
+          <option value="">—</option>
+          {orders.map(o => <option key={o.id} value={o.id}>{o.title}</option>)}
+        </select>
+        <ChevronDown size={16} className={SELECT_CHEVRON} />
+      </div>
     </div>
   );
 
   const DueCell: React.FC<{ t: TaskRow }> = ({ t }) => (
     <div className="flex items-center gap-2">
-      <CalendarIcon size={14} className="opacity-60" />
+      <div className="shrink-0 p-2 rounded-xl bg-[#111722] ring-1 ring-inset ring-[#20293C]">
+        <CalendarIcon size={16} className="text-slate-300" />
+      </div>
       <input
         type="date"
         value={t.due_date || ''}
         onChange={(e) => updateTask(t.id, { due_date: e.target.value || null })}
-        className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10"
+        className="px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[15px]"
       />
     </div>
   );
@@ -559,23 +622,23 @@ const TodoListPage: React.FC = () => {
     };
     return (
       <div>
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           {(labels || []).map((l, i) => (
-            <span key={i} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-white/10">
+            <span key={i} className="inline-flex items-center gap-1.5 text-[12px] px-2.5 py-1 rounded-full bg-[#111722] ring-1 ring-inset ring-[#20293C] text-slate-200">
               <Tag size={12} /> {l}
               <button onClick={() => onRemove(l)} className="opacity-60 hover:opacity-100"><X size={12} /></button>
             </span>
           ))}
         </div>
-        <div className="mt-1 flex items-center gap-1">
+        <div className="mt-2 flex items-center gap-1.5">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' ? onAdd() : null}
             placeholder="Add tag..."
-            className="bg-black/40 border border-white/10 rounded px-2 py-1 text-xs outline-none focus:ring-2 focus:ring-white/10"
+            className="flex-1 px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[13px]"
           />
-          <button onClick={onAdd} className="px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-xs">
+          <button onClick={onAdd} className={BTN_SOFT + ' text-[13px] py-2 px-3'}>
             Add
           </button>
         </div>
@@ -587,31 +650,32 @@ const TodoListPage: React.FC = () => {
     const [open, setOpen] = useState(false);
     const [txt, setTxt] = useState('');
     return (
-      <div className="space-y-1">
+      <div className="space-y-2">
         <button
           onClick={() => setOpen(v => !v)}
-          className="inline-flex items-center gap-1 px-2 py-1 rounded bg-white/5 hover:bg-white/10"
+          className={`${BTN_SOFT} px-3 py-2 rounded-2xl text-[13px]`}
           title="Comments"
         >
-          <MessageSquare size={14} />
+          <MessageSquare size={16} />
           <span>{t.comments_count ?? 0}</span>
         </button>
         {open && (
-          <div className="p-2 bg-black/40 border border-white/10 rounded">
+          <div className="p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230]">
             <textarea
-              rows={2}
+              rows={3}
               value={txt}
               onChange={(e) => setTxt(e.target.value)}
-              className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10"
+              className="w-full bg-[#0F141C] border border-[#1C2230] rounded-2xl px-3.5 py-2.5 text-[15px] outline-none focus:ring-2 focus:ring-[#2A3347]"
               placeholder="Add a comment..."
             />
-            <div className="mt-2 flex justify-end gap-2">
-              <button onClick={() => setOpen(false)} className="px-2 py-1 rounded hover:bg-white/10 text-slate-300">Close</button>
+            <div className="mt-3 flex justify-end gap-2">
+              <button onClick={() => setOpen(false)} className={`${BTN_SOFT} px-3 py-2 text-[13px]`}>Close</button>
               <button
                 onClick={async () => { if (txt.trim()) { await addComment(t, txt); setTxt(''); } }}
-                className="px-2 py-1 rounded bg-white/10 hover:bg-white/20"
+                className={`${BTN_PRIMARY} px-3 py-2 text-[13px]`}
               >
-                <Save size={14} />
+                <Save size={16} />
+                Save
               </button>
             </div>
           </div>
@@ -639,7 +703,7 @@ const TodoListPage: React.FC = () => {
     }
   }, [user]);
 
-  /* ----------- Toolbar ----------- */
+  /* ----------- Toolbar (modernisée) ----------- */
   const Toolbar: React.FC = () => {
     const [showCols, setShowCols] = useState(false);
     const [showColors, setShowColors] = useState(false);
@@ -649,81 +713,86 @@ const TodoListPage: React.FC = () => {
     };
 
     return (
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => insertTask()}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20"
-          >
-            <Plus size={16} /> New task
-          </button>
-
-          <div className="relative">
+      <div className={`${HEADER_CARD} px-4 sm:px-6 py-4`}>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowCols(v => !v)}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10"
-              title="Columns"
+              onClick={() => insertTask()}
+              className={BTN_PRIMARY}
             >
-              <SlidersHorizontal size={16} /> Columns
+              <Plus size={18} /> New task
             </button>
-            {showCols && (
-              <div className="absolute z-10 mt-2 w-56 p-3 rounded-xl bg-black border border-white/10 shadow-xl">
-                {DEFAULT_COLUMNS.map(c => (
-                  <label key={c} className="flex items-center gap-2 py-1 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={visibleCols.includes(c)}
-                      onChange={() => toggleCol(c)}
-                    />
-                    <span className="capitalize">{c}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
 
-          <button className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10" title="Filter (status)">
-            <Filter size={16} />
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
-              className="bg-transparent outline-none"
-            >
-              <option value="all">All status</option>
-              {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-            </select>
-          </button>
-
-          <div className="relative">
-            <button
-              onClick={() => setShowColors(v => !v)}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10"
-              title="Color palette (task color)"
-            >
-              <Palette size={16} /> Colors
-            </button>
-            {showColors && (
-              <div className="absolute z-10 mt-2 p-3 rounded-xl bg-black border border-white/10 shadow-xl">
-                <div className="grid grid-cols-6 gap-2">
-                  {COLOR_SWATCHES.map((c) => (
-                    <div key={c} className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded" style={{ background: c }} />
-                      <span className="text-xs text-slate-400">{c}</span>
-                    </div>
+            <div className="relative">
+              <button
+                onClick={() => setShowCols(v => !v)}
+                className={BTN_SOFT}
+                title="Columns"
+              >
+                <SlidersHorizontal size={18} /> Columns
+              </button>
+              {showCols && (
+                <div className="absolute z-10 mt-2 w-64 p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230] shadow-xl">
+                  {DEFAULT_COLUMNS.map(c => (
+                    <label key={c} className="flex items-center justify-between gap-2 py-1.5 text-[14px]">
+                      <span className="capitalize text-slate-200">{c}</span>
+                      <input
+                        type="checkbox"
+                        className="accent-indigo-500"
+                        checked={visibleCols.includes(c)}
+                        onChange={() => toggleCol(c)}
+                      />
+                    </label>
                   ))}
                 </div>
-                <div className="mt-2 text-xs text-slate-400">Sélecteur global (info) — appliquez la couleur par tâche via la colonne Task.</div>
-              </div>
-            )}
-          </div>
-        </div>
+              )}
+            </div>
 
-        <div className="flex items-center gap-2">
-          {pill(`Total: ${rows.length}`, 'bg-white/5')}
-          {pill(`Visible: ${visibleRows.length}`, 'bg-white/5')}
-          <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-white/5">
-            <Clock size={12} /> Autosave
-          </span>
+            <div className={`${BTN_SOFT} gap-3`}>
+              <Filter size={18} />
+              <div className={SELECT_WRAPPER + ' w-48'}>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value as any)}
+                  className="bg-transparent text-[14px] outline-none"
+                >
+                  <option value="all">All status</option>
+                  {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="relative">
+              <button
+                onClick={() => setShowColors(v => !v)}
+                className={BTN_SOFT}
+                title="Color palette"
+              >
+                <Palette size={18} /> Colors
+              </button>
+              {showColors && (
+                <div className="absolute z-10 mt-2 p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230] shadow-xl">
+                  <div className="grid grid-cols-6 gap-2">
+                    {COLOR_SWATCHES.map((c) => (
+                      <div key={c} className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded ring-1 ring-white/10" style={{ background: c }} />
+                        <span className="text-xs text-slate-400">{c}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-2 text-xs text-slate-400">Applique la couleur par tâche depuis la colonne Task.</div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {pill(`Total: ${rows.length}`)}
+            {pill(`Visible: ${visibleRows.length}`)}
+            <span className={`${CHIP_SOFT} gap-1.5`}>
+              <Clock size={12} /> Autosave
+            </span>
+          </div>
         </div>
       </div>
     );
@@ -732,16 +801,21 @@ const TodoListPage: React.FC = () => {
   /* ----------- Render ----------- */
   return (
     <Layout>
-      <div className="min-h-[calc(100vh-64px)] w-full bg-black">
+      <div className={`min-h-[calc(100vh-64px)] w-full ${PAGE_BG}`}>
+        {/* Header */}
         <div className="px-4 sm:px-6 pt-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-white/10">
-                <ListChecks size={20} />
-              </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-semibold text-slate-100">To-Do List</h1>
-                <p className="text-sm text-slate-400">Planifie, organise et exécute — subtasks illimitées & colonnes personnalisables.</p>
+          <div className={`${HEADER_CARD} px-5 sm:px-7 py-5`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-600 to-fuchsia-600 text-white shadow-md">
+                  <ListChecks size={22} />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 leading-tight">To-Do List</h1>
+                  <p className="text-[13px] text-slate-400 mt-1">
+                    Planifie, organise et exécute — subtasks illimitées & colonnes personnalisables.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -751,77 +825,39 @@ const TodoListPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="px-4 sm:px-6 mt-4 pb-10">
+        {/* Table */}
+        <div className="px-4 sm:px-6 mt-5 pb-12">
           <div className={`${cardClass} overflow-hidden`}>
             <div className="overflow-x-auto">
               <table className="min-w-full border-collapse">
                 <thead>
-                  <tr className="bg-white/5 text-left text-xs uppercase tracking-wider text-slate-300">
-                    {visibleCols.includes('task') && <th className="px-3 py-2 w-[38%]">Task</th>}
-                    {visibleCols.includes('status') && <th className="px-3 py-2 w-[10%]">Status</th>}
-                    {visibleCols.includes('priority') && <th className="px-3 py-2 w-[10%]">Priority</th>}
-                    {visibleCols.includes('client') && <th className="px-3 py-2 w-[12%]">Client</th>}
-                    {visibleCols.includes('order') && <th className="px-3 py-2 w-[12%]">Order</th>}
-                    {visibleCols.includes('due') && <th className="px-3 py-2 w-[10%]">Due</th>}
-                    {visibleCols.includes('comments') && <th className="px-3 py-2 w-[8%]">Comments</th>}
-                    {visibleCols.includes('tags') && <th className="px-3 py-2 w-[20%]">Tags</th>}
+                  <tr className={TABLE_HEAD}>
+                    {visibleCols.includes('task') && <th className="px-4 py-3 w-[38%]">Task</th>}
+                    {visibleCols.includes('status') && <th className="px-4 py-3 w-[12%]">Status</th>}
+                    {visibleCols.includes('priority') && <th className="px-4 py-3 w-[12%]">Priority</th>}
+                    {visibleCols.includes('client') && <th className="px-4 py-3 w-[14%]">Client</th>}
+                    {visibleCols.includes('order') && <th className="px-4 py-3 w-[14%]">Order</th>}
+                    {visibleCols.includes('due') && <th className="px-4 py-3 w-[12%]">Due</th>}
+                    {visibleCols.includes('comments') && <th className="px-4 py-3 w-[8%]">Comments</th>}
+                    {visibleCols.includes('tags') && <th className="px-4 py-3 w-[20%]">Tags</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={8} className="px-3 py-6 text-center text-slate-400">Loading…</td></tr>
+                    <tr><td colSpan={8} className="px-4 py-10 text-center text-slate-400 text-[15px]">Loading…</td></tr>
                   ) : visibleRows.length === 0 ? (
-                    <tr><td colSpan={8} className="px-3 py-6 text-center text-slate-400">
-                      Aucune tâche. <button onClick={() => insertTask()} className="underline">Créer une première tâche</button>.
+                    <tr><td colSpan={8} className="px-4 py-10 text-center text-slate-300 text-[15px]">
+                      Aucune tâche.{' '}
+                      <button onClick={() => insertTask()} className="underline decoration-slate-400 hover:decoration-slate-200">
+                        Créer une première tâche
+                      </button>.
                     </td></tr>
                   ) : (
                     visibleRows.map((t) => (
-                      <tr key={t.id} className="hover:bg-white/2">
+                      <tr key={t.id} className="hover:bg-white/3">
                         {visibleCols.includes('task') && (
                           <td className={`${CELL_BASE}`}>
-                            <div className="flex items-start gap-2">
-                              <div className="flex items-center" style={{ paddingLeft: `${(t._depth || 0) * 16}px` }}>
-                                {t._children && t._children.length > 0 ? (
-                                  <button
-                                    onClick={() => toggleCollapse(t.id)}
-                                    className="p-1 rounded hover:bg-white/10"
-                                    title={collapsed.has(t.id) ? 'Expand' : 'Collapse'}
-                                  >
-                                    {collapsed.has(t.id) ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
-                                  </button>
-                                ) : (
-                                  <span className="w-6" />
-                                )}
-                              </div>
-
-                              <div className="mt-1">
-                                <div className="w-2 h-4 rounded-sm" style={{ background: t.color || '#3f3f46' }} />
-                              </div>
-
-                              <div className="flex-1">
-                                <TitleCell t={t} />
-                                <div className="mt-2 flex items-center gap-2">
-                                  <span className="text-xs text-slate-400">Color:</span>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {COLOR_SWATCHES.slice(0, 8).map(c => (
-                                      <button
-                                        key={c}
-                                        onClick={() => setTaskColor(t, c)}
-                                        className="w-4 h-4 rounded ring-1 ring-white/20"
-                                        style={{ background: c }}
-                                        title={c}
-                                      />
-                                    ))}
-                                    <button
-                                      onClick={() => setTaskColor(t, null)}
-                                      className="px-1 text-xs rounded bg-white/5 hover:bg-white/10"
-                                    >
-                                      Clear
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                            <TitleCell t={t} />
                           </td>
                         )}
                         {visibleCols.includes('status') && <td className={`${CELL_BASE}`}><StatusCell t={t} /></td>}
@@ -839,7 +875,8 @@ const TodoListPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-3 text-xs text-slate-400 flex flex-wrap items-center gap-3">
+          {/* Légende */}
+          <div className="mt-4 text-[12px] text-slate-400 flex flex-wrap items-center gap-3">
             <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded bg-rose-500 inline-block" /> P1</span>
             <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-500 inline-block" /> P2</span>
             <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-500 inline-block" /> P3</span>
