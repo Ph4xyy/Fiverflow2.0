@@ -23,7 +23,13 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-/** Thème blackout FullCalendar (CSS ci-dessus) */
+// Styles FullCalendar
+import '@fullcalendar/common/main.css';
+import '@fullcalendar/daygrid/main.css';
+import '@fullcalendar/timegrid/main.css';
+import '@fullcalendar/list/main.css';
+
+// Override dark mode
 import '@/styles/calendar-dark.css';
 
 /* ---------------- Types ---------------- */
@@ -134,14 +140,12 @@ const CalendarPage: React.FC = () => {
     setOrders((data || []) as OrderRow[]);
   }, [user]);
 
-  /* ---------------- Fetch Tasks (due_date) ---------------- */
+  /* ---------------- Fetch Tasks ---------------- */
   const fetchTasks = useCallback(async () => {
     if (!isSupabaseConfigured || !supabase || !user) {
       setTasks([]);
       return;
     }
-
-    // On évite le LEFT JOIN si la FK n’existe pas encore : on ne prend que les colonnes sûres.
     const { data, error } = await supabase
       .from('tasks')
       .select(`id, title, status, priority, due_date, color, client_id`)
@@ -173,7 +177,7 @@ const CalendarPage: React.FC = () => {
     }
   }, [fetchAll]);
 
-  /* ---------------- Build events (Orders + Tasks) ---------------- */
+  /* ---------------- Events ---------------- */
   const filteredOrders = useMemo(() => {
     if (!showOrders) return [];
     const base = statusFilter === 'all'
@@ -183,11 +187,7 @@ const CalendarPage: React.FC = () => {
     const q = query.trim().toLowerCase();
     if (!q) return base;
     return base.filter(o => {
-      const hay = [
-        o.title,
-        o.clients?.name || '',
-        o.clients?.platform || '',
-      ].join(' ').toLowerCase();
+      const hay = [o.title, o.clients?.name || '', o.clients?.platform || ''].join(' ').toLowerCase();
       return hay.includes(q);
     });
   }, [orders, statusFilter, showOrders, query]);
@@ -239,35 +239,8 @@ const CalendarPage: React.FC = () => {
     setEvents([...orderEvents, ...taskEvents]);
   }, [filteredOrders, filteredTasks]);
 
-  /* ---------------- Optional: backfill tasks into calendar_events ---------------- */
-  const backfillCalendarEvents = useCallback(async () => {
-    if (!user || !isSupabaseConfigured || !supabase) return;
-    const withDue = tasks.filter(t => t.due_date);
-    if (withDue.length === 0) return;
-
-    try {
-      const rows = withDue.map(t => ({
-        user_id: user.id,
-        title: t.title || 'Task',
-        start: t.due_date!,
-        end: t.due_date!,
-        all_day: true,
-        related_task_id: t.id,
-      }));
-      const { error } = await supabase.from('calendar_events').upsert(rows, { onConflict: 'related_task_id' });
-      if (error) console.warn('[calendar backfill]', error.message);
-    } catch (e) {
-      console.warn('[calendar backfill]', e);
-    }
-  }, [tasks, user]);
-
-  useEffect(() => {
-    if (tasks.length > 0) backfillCalendarEvents();
-  }, [tasks, backfillCalendarEvents]);
-
-  /* ---------------- Drag & Drop (update DB) ---------------- */
+  /* ---------------- Drag & Drop ---------------- */
   const onEventDrop = useCallback(async (info: any) => {
-    // info.event.id = "task_UUID" ou "order_UUID"
     const newDate = toDateOnly(info.event.start);
     if (!newDate) return info.revert();
 
@@ -279,32 +252,14 @@ const CalendarPage: React.FC = () => {
       if (!isSupabaseConfigured || !supabase) throw new Error('DB non configurée');
 
       if (isTask) {
-        // Optimistic local update
         setTasks(prev => prev.map(t => t.id === rawId ? { ...t, due_date: newDate } : t));
-
         const { error } = await supabase.from('tasks').update({ due_date: newDate }).eq('id', rawId);
         if (error) throw error;
-
-        // Sync calendar_events (non bloquant)
-        try {
-          await supabase.from('calendar_events').upsert({
-            user_id: user?.id,
-            title: info.event.title?.replace(/^✓\s*/, '') || 'Task',
-            start: newDate,
-            end: newDate,
-            all_day: true,
-            related_task_id: rawId,
-          }, { onConflict: 'related_task_id' });
-        } catch (e) {
-          console.warn('[eventDrop calendar upsert]', e);
-        }
       } else {
-        // ORDER
         setOrders(prev => prev.map(o => o.id === rawId ? { ...o, deadline: newDate } : o));
         const { error } = await supabase.from('orders').update({ deadline: newDate }).eq('id', rawId);
         if (error) throw error;
       }
-
       toast.success('Date mise à jour');
     } catch (e: any) {
       console.error('[onEventDrop]', e);
@@ -351,7 +306,7 @@ const CalendarPage: React.FC = () => {
     const subtitle =
       kind === 'order'
         ? (order?.clients?.platform || order?.clients?.name || null)
-        : null; // on évite join côté tasks
+        : null;
 
     return (
       <div
@@ -365,8 +320,8 @@ const CalendarPage: React.FC = () => {
     );
   };
 
-  /* ---------------- Upcoming (mix Orders + Tasks) ---------------- */
-  const upcoming = useMemo< MixedItem[] >(() => {
+  /* ---------------- Upcoming ---------------- */
+  const upcoming = useMemo<MixedItem[]>(() => {
     const now = new Date();
     const oItems: MixedItem[] = orders
       .filter((o) => o.deadline && new Date(o.deadline) >= new Date(now.toDateString()))
@@ -480,14 +435,16 @@ const CalendarPage: React.FC = () => {
               <button
                 onClick={() => switchView('timeGridDay')}
                 className={`px-3 py-2 text-sm ${
-                  currentView === 'timeGridDay' ? 'bg-blue-600 text-white' : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'
+                  currentView === 'timeGridDay'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'
                 }`}
               >
                 Day
               </button>
             </div>
 
-            {/* Orders status filter (conserve) */}
+            {/* Orders status filter */}
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -582,7 +539,9 @@ const CalendarPage: React.FC = () => {
                 eventDurationEditable={false}
                 droppable={false}
                 eventDrop={onEventDrop}
-                /* Thème blackout via classes + calendar-dark.css */
+                /* Désactivation du thème bleu par défaut */
+                themeSystem={''}
+                /* Dark mode classes */
                 dayHeaderClassNames="bg-[#0F141C] text-slate-300 border-[#1C2230]"
                 dayCellClassNames="border-[#1C2230] hover:bg-[#0F141C]"
               />
