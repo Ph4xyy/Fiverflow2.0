@@ -23,6 +23,7 @@ import {
   Building2,
   Package2,
   Pencil,
+  Search as SearchIcon,
 } from 'lucide-react';
 
 type UUID = string;
@@ -163,6 +164,21 @@ const flattenTree = (nodes: TaskRow[], collapsedIds: Set<string>): TaskRow[] => 
 const pill = (text: string, extra = '') =>
   <span className={`${CHIP_SOFT} ${extra}`}>{text}</span>;
 
+/* Popover util (click-outside close) */
+const usePopover = () => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (!ref.current) return;
+      if (!ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    if (open) document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [open]);
+  return { open, setOpen, ref };
+};
+
 /* ===========================
    Page
    =========================== */
@@ -176,15 +192,27 @@ const TodoListPage: React.FC = () => {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [visibleCols, setVisibleCols] = useState<ColumnKey[]>(DEFAULT_COLUMNS);
   const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all'>('all');
+  const [query, setQuery] = useState<string>('');
 
   // devient false si la DB n’a pas les colonnes avancées (color/labels/position/collapsed/comments_count)
   const colorPersistSupportedRef = useRef<boolean>(true);
 
   const tree = useMemo(() => buildTree(rows), [rows]);
+
   const visibleRows = useMemo(() => {
     const flat = flattenTree(tree, collapsed);
-    return filterStatus === 'all' ? flat : flat.filter(r => r.status === filterStatus);
-  }, [tree, collapsed, filterStatus]);
+    const byStatus = filterStatus === 'all' ? flat : flat.filter(r => r.status === filterStatus);
+    const q = query.trim().toLowerCase();
+    if (!q) return byStatus;
+    return byStatus.filter(r => {
+      const hay = [
+        r.title,
+        r.description || '',
+        ...(r.labels || []),
+      ].join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+  }, [tree, collapsed, filterStatus, query]);
 
   /* ----------- LOAD (fallback intelligent) ----------- */
   const loadAll = useCallback(async () => {
@@ -255,6 +283,9 @@ const TodoListPage: React.FC = () => {
         collapsed: r.collapsed ?? false,
       }));
       setRows(normalized);
+
+      // Backfill calendrier (si due_date existe mais pas d’event lié)
+      await ensureCalendarSync(normalized);
     } catch (e: any) {
       toast.error(`Erreur lors du chargement des données: ${e?.message || 'inconnue'}${e?.code ? ` [${e.code}]` : ''}`);
     } finally {
@@ -280,6 +311,26 @@ const TodoListPage: React.FC = () => {
       }, { onConflict: 'related_task_id' });
     } catch (e) {
       console.warn('[calendar upsert]', e);
+    }
+  }, [user]);
+
+  const ensureCalendarSync = useCallback(async (tasks: TaskRow[]) => {
+    if (!user || !isSupabaseConfigured || !supabase) return;
+    const withDue = tasks.filter(t => t.due_date);
+    if (withDue.length === 0) return;
+    try {
+      const rows = withDue.map(t => ({
+        user_id: user.id,
+        title: t.title || 'Task',
+        start: t.due_date!,
+        end: t.due_date!,
+        all_day: true,
+        related_task_id: t.id,
+      }));
+      const { error } = await supabase.from('calendar_events').upsert(rows, { onConflict: 'related_task_id' });
+      if (error) console.warn('[ensureCalendarSync]', error);
+    } catch (e) {
+      console.warn('[ensureCalendarSync]', e);
     }
   }, [user]);
 
@@ -325,11 +376,11 @@ const TodoListPage: React.FC = () => {
         const merged = { ...(task || {}), ...patch } as TaskRow;
         if (merged.due_date) await upsertCalendar(merged);
       }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     } catch (e: any) {
       console.error('[updateTask]', e);
       toast.error(`Sauvegarde impossible: ${e?.message || 'erreur inconnue'}`);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, rows, upsertCalendar]);
 
   const insertTask = useCallback(async (parent?: TaskRow) => {
@@ -373,7 +424,7 @@ const TodoListPage: React.FC = () => {
       const { data, error } = await supabase
         .from('tasks')
         .insert(payload)
-        .select('id')
+        .select('id, title, due_date')
         .single();
 
       if (error) {
@@ -383,6 +434,8 @@ const TodoListPage: React.FC = () => {
 
       if (data?.id) {
         setRows(prev => prev.map(r => r.id === optimistic.id ? { ...r, id: data.id } : r));
+        // sync calendrier si due_date déjà définie (peu probable à la création)
+        if (data?.due_date) await upsertCalendar({ ...optimistic, id: data.id, due_date: data.due_date });
       }
       toast.success('Tâche créée');
     } catch (e: any) {
@@ -390,7 +443,7 @@ const TodoListPage: React.FC = () => {
       toast.error(`Création impossible: ${e?.message || 'erreur inconnue'}`);
       setRows(prev => prev.filter(r => r.id !== optimistic.id));
     }
-  }, [user, rows]);
+  }, [user, rows, upsertCalendar]);
 
   const removeTask = useCallback(async (task: TaskRow) => {
     setRows(prev => prev.filter(r => r.id !== task.id && r.parent_id !== task.id));
@@ -452,7 +505,7 @@ const TodoListPage: React.FC = () => {
         </div>
 
         <div className="mt-1.5">
-          <div className="w-2.5 h-5 rounded-sm" style={{ background: t.color || '#3f3f46' }} />
+          <div className="w-2 h-5 rounded-sm" style={{ background: t.color || '#3f3f46' }} />
         </div>
 
         <div className="flex-1">
@@ -483,23 +536,6 @@ const TodoListPage: React.FC = () => {
             </button>
           )}
 
-          <div className="mt-1.5 flex items-center gap-2 text-[12px] text-slate-400">
-            <button
-              onClick={() => insertTask(t)}
-              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-xl hover:bg-white/10"
-              title="Add subtask"
-            >
-              <Plus size={13} /> Subtask
-            </button>
-            <button
-              onClick={() => removeTask(t)}
-              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-xl hover:bg-white/10 text-rose-300"
-              title="Delete task"
-            >
-              <Trash2 size={13} /> Delete
-            </button>
-          </div>
-
           {/* Choix rapide des couleurs */}
           <div className="mt-2.5 flex items-center gap-2">
             <span className="text-xs text-slate-400">Color:</span>
@@ -508,7 +544,7 @@ const TodoListPage: React.FC = () => {
                 <button
                   key={c}
                   onClick={() => setTaskColor(t, c)}
-                  className="w-4.5 h-4.5 rounded ring-1 ring-white/20"
+                  className="w-4 h-4 rounded ring-1 ring-white/20"
                   style={{ background: c }}
                   title={c}
                 />
@@ -554,7 +590,7 @@ const TodoListPage: React.FC = () => {
 
   const ClientCell: React.FC<{ t: TaskRow }> = ({ t }) => (
     <div className="flex items-center gap-2">
-      <div className="shrink-0 p-2 rounded-xl bg-[#111722] ring-1 ring-inset ring-[#20293C]">
+      <div className="shrink-0 p-2 rounded-2xl bg-[#111722] ring-1 ring-inset ring-[#20293C]">
         <Building2 size={16} className="text-slate-300" />
       </div>
       <div className={SELECT_WRAPPER}>
@@ -573,7 +609,7 @@ const TodoListPage: React.FC = () => {
 
   const OrderCell: React.FC<{ t: TaskRow }> = ({ t }) => (
     <div className="flex items-center gap-2">
-      <div className="shrink-0 p-2 rounded-xl bg-[#111722] ring-1 ring-inset ring-[#20293C]">
+      <div className="shrink-0 p-2 rounded-2xl bg-[#111722] ring-1 ring-inset ring-[#20293C]">
         <Package2 size={16} className="text-slate-300" />
       </div>
       <div className={SELECT_WRAPPER}>
@@ -592,7 +628,7 @@ const TodoListPage: React.FC = () => {
 
   const DueCell: React.FC<{ t: TaskRow }> = ({ t }) => (
     <div className="flex items-center gap-2">
-      <div className="shrink-0 p-2 rounded-xl bg-[#111722] ring-1 ring-inset ring-[#20293C]">
+      <div className="shrink-0 p-2 rounded-2xl bg-[#111722] ring-1 ring-inset ring-[#20293C]">
         <CalendarIcon size={16} className="text-slate-300" />
       </div>
       <input
@@ -703,18 +739,24 @@ const TodoListPage: React.FC = () => {
     }
   }, [user]);
 
-  /* ----------- Toolbar (modernisée) ----------- */
+  /* ----------- Toolbar (modernisée + recherche + popovers stables) ----------- */
   const Toolbar: React.FC = () => {
-    const [showCols, setShowCols] = useState(false);
-    const [showColors, setShowColors] = useState(false);
+    const colsPop = usePopover();
+    const statusPop = usePopover();
+    const colorsPop = usePopover();
 
     const toggleCol = (c: ColumnKey) => {
       setVisibleCols(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c]);
     };
 
+    const statusLabel = useMemo(() => {
+      if (filterStatus === 'all') return 'All status';
+      return STATUS_OPTIONS.find(s => s.value === filterStatus)?.label || 'Status';
+    }, [filterStatus]);
+
     return (
       <div className={`${HEADER_CARD} px-4 sm:px-6 py-4`}>
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <button
               onClick={() => insertTask()}
@@ -723,16 +765,17 @@ const TodoListPage: React.FC = () => {
               <Plus size={18} /> New task
             </button>
 
-            <div className="relative">
+            {/* Columns */}
+            <div className="relative" ref={colsPop.ref}>
               <button
-                onClick={() => setShowCols(v => !v)}
+                onClick={() => colsPop.setOpen(v => !v)}
                 className={BTN_SOFT}
                 title="Columns"
               >
                 <SlidersHorizontal size={18} /> Columns
               </button>
-              {showCols && (
-                <div className="absolute z-10 mt-2 w-64 p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230] shadow-xl">
+              {colsPop.open && (
+                <div className="absolute z-20 mt-2 w-64 p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230] shadow-xl">
                   {DEFAULT_COLUMNS.map(c => (
                     <label key={c} className="flex items-center justify-between gap-2 py-1.5 text-[14px]">
                       <span className="capitalize text-slate-200">{c}</span>
@@ -748,30 +791,53 @@ const TodoListPage: React.FC = () => {
               )}
             </div>
 
-            <div className={`${BTN_SOFT} gap-3`}>
-              <Filter size={18} />
-              <div className={SELECT_WRAPPER + ' w-48'}>
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value as any)}
-                  className="bg-transparent text-[14px] outline-none"
-                >
-                  <option value="all">All status</option>
-                  {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                </select>
-              </div>
+            {/* Status filter (custom dropdown propre) */}
+            <div className="relative" ref={statusPop.ref}>
+              <button
+                onClick={() => statusPop.setOpen(v => !v)}
+                className={BTN_SOFT + ' min-w-[160px] justify-between'}
+                title="Filter by status"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Filter size={18} />
+                  {statusLabel}
+                </span>
+                <ChevronDown size={16} />
+              </button>
+
+              {statusPop.open && (
+                <div className="absolute z-20 mt-2 w-56 p-2 rounded-2xl bg-[#0F141C] border border-[#1C2230] shadow-xl">
+                  <button
+                    onClick={() => { setFilterStatus('all'); statusPop.setOpen(false); }}
+                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 text-slate-200 text-[14px]"
+                  >
+                    All status
+                  </button>
+                  <div className="my-1 h-px bg-white/5" />
+                  {STATUS_OPTIONS.map(s => (
+                    <button
+                      key={s.value}
+                      onClick={() => { setFilterStatus(s.value); statusPop.setOpen(false); }}
+                      className={`w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 text-[14px] ${filterStatus === s.value ? 'bg-white/5' : ''}`}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <div className="relative">
+            {/* Colors popover (look & close fix) */}
+            <div className="relative" ref={colorsPop.ref}>
               <button
-                onClick={() => setShowColors(v => !v)}
+                onClick={() => colorsPop.setOpen(v => !v)}
                 className={BTN_SOFT}
                 title="Color palette"
               >
                 <Palette size={18} /> Colors
               </button>
-              {showColors && (
-                <div className="absolute z-10 mt-2 p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230] shadow-xl">
+              {colorsPop.open && (
+                <div className="absolute z-20 mt-2 p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230] shadow-xl min-w-[260px]">
                   <div className="grid grid-cols-6 gap-2">
                     {COLOR_SWATCHES.map((c) => (
                       <div key={c} className="flex items-center gap-2">
@@ -780,18 +846,33 @@ const TodoListPage: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                  <div className="mt-2 text-xs text-slate-400">Applique la couleur par tâche depuis la colonne Task.</div>
+                  <div className="mt-2 text-xs text-slate-400">
+                    Apply per task from the <span className="text-slate-300">Task</span> column.
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {pill(`Total: ${rows.length}`)}
-            {pill(`Visible: ${visibleRows.length}`)}
-            <span className={`${CHIP_SOFT} gap-1.5`}>
-              <Clock size={12} /> Autosave
-            </span>
+          {/* Search */}
+          <div className="flex items-center gap-2 min-w-[260px] w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-[320px]">
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search tasks, tags, descriptions…"
+                className="w-full pl-10 pr-3 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[15px]"
+              />
+              <SearchIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            </div>
+
+            <div className="hidden sm:flex items-center gap-2">
+              {pill(`Total: ${rows.length}`)}
+              {pill(`Visible: ${visibleRows.length}`)}
+              <span className={`${CHIP_SOFT} gap-1.5`}>
+                <Clock size={12} /> Autosave
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -875,13 +956,7 @@ const TodoListPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Légende */}
-          <div className="mt-4 text-[12px] text-slate-400 flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded bg-rose-500 inline-block" /> P1</span>
-            <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-500 inline-block" /> P2</span>
-            <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-500 inline-block" /> P3</span>
-            <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded bg-zinc-500 inline-block" /> P4</span>
-          </div>
+          {/* (Légende P1/P2/P3/P4 retirée comme demandé) */}
         </div>
       </div>
     </Layout>
