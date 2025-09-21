@@ -10,11 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fullcalendar/core": "^6.1.7",
-    "@fullcalendar/daygrid": "^6.1.7",
-    "@fullcalendar/interaction": "^6.1.7",
-    "@fullcalendar/react": "^6.1.7",
-    "@fullcalendar/timegrid": "^6.1.7",
+    "@fullcalendar/core": "^6.1.17",
+    "@fullcalendar/daygrid": "^6.1.17",
+    "@fullcalendar/interaction": "^6.1.17",
+    "@fullcalendar/list": "^6.1.17",
+    "@fullcalendar/react": "^6.1.17",
+    "@fullcalendar/timegrid": "^6.1.17",
     "@studio-freight/lenis": "^1.0.42",
     "@supabase/supabase-js": "^2.52.0",
     "clsx": "^2.1.1",
