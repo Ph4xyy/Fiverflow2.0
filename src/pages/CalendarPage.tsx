@@ -23,11 +23,10 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Styles FullCalendar
-import '@fullcalendar/common/main.css';
-import '@fullcalendar/daygrid/main.css';
-import '@fullcalendar/timegrid/main.css';
-import '@fullcalendar/list/main.css';
+// Styles FullCalendar (corrigé)
+import '@fullcalendar/daygrid/index.css';
+import '@fullcalendar/timegrid/index.css';
+import '@fullcalendar/list/index.css';
 
 // Override dark mode
 import '@/styles/calendar-dark.css';
