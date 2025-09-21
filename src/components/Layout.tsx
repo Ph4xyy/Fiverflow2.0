@@ -283,13 +283,16 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="lg:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#141922] transition-all duration-200"
             >
-              {isSidebarOpen ? <X size={40 /> : <Menu size={20} />}
+              {isSidebarOpen ? <X size={40} /> : <Menu size={20} />}
             </button>
             <Link to="/dashboard" className="text-2xl font-extrabold leading-none">
-            <img src={LogoImage} alt="Logo" className="h-8 w-auto" />
-              <span className="bg-gradient-to-r from-accent-blue via-accent-purple to-accent-green bg-clip-text text-transparent">
-                FiverFlow
+        {/* Left side: Logo + texte */}
+        <div className="flex items-center space-x-3">
+          <img src={LogoImage} alt="Logo" className="h-8 w-auto" />
+          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-accent-blue dark:to-accent-purple bg-clip-text text-transparent">
+            FiverFlow
               </span>
+            </div>
             </Link>
           </div>
           
