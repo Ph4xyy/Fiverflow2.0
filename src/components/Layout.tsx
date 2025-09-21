@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+
+// Import logo
+import LogoImage from '../assets/LogoTransparent.png';
+
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import NotificationsDropdown from './NotificationsDropdown';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+
 import { 
   Menu, 
   X, 
@@ -281,8 +286,9 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <Link to="/dashboard" className="text-2xl font-extrabold leading-none">
+            <img src={LogoImage} alt="Logo" className="h-8 w-auto" />
               <span className="bg-gradient-to-r from-accent-blue via-accent-purple to-accent-green bg-clip-text text-transparent">
-                FiverFloww
+                FiverFlow
               </span>
             </Link>
           </div>
