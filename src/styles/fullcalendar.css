@@ -1,6 +1,6 @@
 /* src/styles/fullcalendar.css */
 
-/* Styles FullCalendar v6.x */
-@import '../../node_modules/@fullcalendar/daygrid/dist/daygrid.css';
-@import '../../node_modules/@fullcalendar/timegrid/dist/timegrid.css';
-@import '../../node_modules/@fullcalendar/list/dist/list.css';
+/* FullCalendar v6.x styles (global) */
+@import '@fullcalendar/daygrid/index.global.css';
+@import '@fullcalendar/timegrid/index.global.css';
+@import '@fullcalendar/list/index.global.css';
