@@ -1,10 +1,10 @@
 /* src/styles/calendar-dark.css
-   Thème blackout FullCalendar – remplace tout résidu bleu par des tons du dashboard.
-   Compatible FC v6 (variables + classes).
+   ✅ Thème blackout FullCalendar, overrides forts (avec !important) pour éradiquer tout bleu interne.
+   S’assure que le wrapper .fc-daygrid-event/.fc-h-event est transparent,
+   que les liens ne redeviennent pas bleus et que “+X more”/popovers suivent le thème.
 */
 
 :root {
-  /* Couleurs globales */
   --ff-bg: #0B0E14;
   --ff-panel: #0F141C;
   --ff-panel-2: #0E121A;
@@ -18,26 +18,15 @@
   --ff-highlight: rgba(42, 51, 71, 0.5);
 }
 
-/* Variables FullCalendar */
 .fc {
   --fc-page-bg-color: var(--ff-bg);
   --fc-neutral-bg-color: var(--ff-panel);
   --fc-neutral-text-color: var(--ff-text-3);
   --fc-border-color: var(--ff-border);
-
-  /* Boutons — on n’utilise pas ceux de FC, mais au cas où */
-  --fc-button-text-color: var(--ff-text);
-  --fc-button-bg-color: var(--ff-panel-2);
-  --fc-button-border-color: var(--ff-border);
-  --fc-button-hover-bg-color: var(--ff-hover);
-  --fc-button-hover-border-color: var(--ff-border-2);
-  --fc-button-active-bg-color: #1a2440;
-  --fc-button-active-border-color: var(--ff-border-2);
-
   --fc-today-bg-color: var(--ff-today);
   --fc-highlight-color: var(--ff-highlight);
 
-  /* Couleurs d’événements par défaut (on rend tout transparent car on fait un rendu custom) */
+  /* Neutralise styles d’event par défaut */
   --fc-event-bg-color: transparent;
   --fc-event-border-color: transparent;
   --fc-event-text-color: var(--ff-text);
@@ -46,101 +35,59 @@
 /* Grille / bordures */
 .fc-theme-standard .fc-scrollgrid,
 .fc-theme-standard td,
-.fc-theme-standard th {
-  border-color: var(--ff-border);
-}
+.fc-theme-standard th { border-color: var(--ff-border) !important; }
 
-/* En-têtes de jours (lun, mar, ...) */
-.fc .fc-col-header-cell-cushion {
-  color: var(--ff-text-3);
-}
+/* En-têtes de jours */
+.fc .fc-col-header-cell-cushion { color: var(--ff-text-3) !important; }
 
-/* Numéros de jours */
-.fc .fc-daygrid-day-number {
-  color: var(--ff-text-2);
-}
+/* Numéros de jour */
+.fc .fc-daygrid-day-number { color: var(--ff-text-2) !important; }
 
-/* Cellule aujourd’hui */
-.fc .fc-daygrid-day.fc-day-today {
-  background: var(--ff-today);
-}
+/* Aujourd’hui */
+.fc .fc-daygrid-day.fc-day-today { background: var(--ff-today) !important; }
 
 /* Hover cellule */
-.fc .fc-daygrid-day-frame:hover {
-  background: var(--ff-hover);
-}
+.fc .fc-daygrid-day-frame:hover { background: var(--ff-hover) !important; }
 
-/* Liens FC (évite le bleu par défaut) */
-.fc a {
-  color: inherit;
-  text-decoration: none;
-}
-.fc a:hover {
-  color: var(--ff-text);
-  text-decoration: none;
-}
+/* Liens (évite le bleu global de Tailwind ou reset) */
+.fc a { color: inherit !important; text-decoration: none !important; }
 
-/* Plus (“+3 more”) */
+/* PLUS (“+3 more”) */
 .fc .fc-daygrid-more-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #111722;
-  color: var(--ff-text-2);
-  border: 1px solid var(--ff-border);
-  padding: 2px 8px;
-  border-radius: 10px;
-  line-height: 1.2;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #111722 !important; color: var(--ff-text-2) !important;
+  border: 1px solid var(--ff-border) !important;
+  padding: 2px 8px; border-radius: 10px; line-height: 1.2;
 }
 .fc .fc-daygrid-more-link:hover {
-  background: var(--ff-hover);
-  color: var(--ff-text);
-  border-color: var(--ff-border-2);
+  background: var(--ff-hover) !important; color: var(--ff-text) !important;
+  border-color: var(--ff-border-2) !important;
 }
 
 /* Popover “more” */
-.fc .fc-popover {
-  background: var(--ff-bg);
-  border: 1px solid var(--ff-border);
-  box-shadow: 0 10px 30px -15px rgba(0,0,0,0.6);
-}
-.fc .fc-popover-header {
-  background: var(--ff-panel);
-  color: var(--ff-text);
-  border-bottom: 1px solid var(--ff-border);
-}
-.fc .fc-popover-body {
-  background: var(--ff-bg);
-  color: var(--ff-text-2);
-}
+.fc .fc-popover { background: var(--ff-bg) !important; border: 1px solid var(--ff-border) !important;
+  box-shadow: 0 10px 30px -15px rgba(0,0,0,0.6) !important; }
+.fc .fc-popover-header { background: var(--ff-panel) !important; color: var(--ff-text) !important;
+  border-bottom: 1px solid var(--ff-border) !important; }
+.fc .fc-popover-body { background: var(--ff-bg) !important; color: var(--ff-text-2) !important; }
 
 /* Sélection / drag placeholder */
-.fc .fc-highlight {
-  background: var(--ff-highlight);
-}
+.fc .fc-highlight { background: var(--ff-highlight) !important; }
 
-/* Rendu des évènements (on neutralise le fond FC, le contenu est custom rendu dans React) */
+/* ✅ Neutralise totalement le fond/bordure par défaut des events (le bleu) */
 .fc .fc-event,
-.fc .fc-daygrid-event {
+.fc .fc-daygrid-event,
+.fc .fc-h-event,
+.fc .fc-daygrid-block-event {
   background: transparent !important;
   border: none !important;
   color: var(--ff-text) !important;
 }
 
-/* Popover event spacing */
-.fc .fc-more-popover .fc-popover-body .fc-daygrid-event {
-  margin: 4px 0;
-}
+/* Titre d’event dans wrappers du popover */
+.fc .fc-event-title, .fc .fc-event-time { color: var(--ff-text) !important; }
 
-/* Scrollbars (subtiles) */
-.fc ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.fc ::-webkit-scrollbar-thumb {
-  background: #1a2331;
-  border-radius: 8px;
-}
-.fc ::-webkit-scrollbar-thumb:hover {
-  background: #223049;
-}
+/* Scrollbars */
+.fc ::-webkit-scrollbar { width: 8px; height: 8px; }
+.fc ::-webkit-scrollbar-thumb { background: #1a2331; border-radius: 8px; }
+.fc ::-webkit-scrollbar-thumb:hover { background: #223049; }
