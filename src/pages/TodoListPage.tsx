@@ -25,9 +25,6 @@ import {
   Pencil,
 } from 'lucide-react';
 
-/** ===========================
- *  Types
- *  =========================== */
 type UUID = string;
 
 type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done';
@@ -45,14 +42,12 @@ interface TaskRow {
   order_id?: UUID | null;
   parent_id?: UUID | null;
   list_id?: UUID | null;
-  comments_count?: number;
-  // Champs optionnels (peuvent ne pas exister en DB — gérés avec fallback UI)
-  color?: string | null;
-  labels?: string[] | null;
-  position?: number | null;
-  collapsed?: boolean | null;
+  comments_count?: number | null;
+  color?: string | null;      // optionnel en DB
+  labels?: string[] | null;   // optionnel en DB
+  position?: number | null;   // optionnel en DB
+  collapsed?: boolean | null; // optionnel en DB
 
-  // Locaux/UI
   _depth?: number;
   _children?: TaskRow[];
   _loading?: boolean;
@@ -71,26 +66,13 @@ type ColumnKey =
   | 'comments'
   | 'tags';
 
-/** ===========================
- *  Constantes / Palettes
- *  =========================== */
 const DEFAULT_COLUMNS: ColumnKey[] = [
   'task', 'status', 'priority', 'client', 'order', 'due', 'comments', 'tags'
 ];
 
 const COLOR_SWATCHES = [
-  '#EF4444', // red-500
-  '#F59E0B', // amber-500
-  '#10B981', // emerald-500
-  '#3B82F6', // blue-500
-  '#8B5CF6', // violet-500
-  '#EC4899', // pink-500
-  '#14B8A6', // teal-500
-  '#22C55E', // green-500
-  '#A855F7', // purple-500
-  '#F97316', // orange-500
-  '#06B6D4', // cyan-500
-  '#EAB308', // yellow-500
+  '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899',
+  '#14B8A6', '#22C55E', '#A855F7', '#F97316', '#06B6D4', '#EAB308',
 ];
 
 const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string }[] = [
@@ -110,14 +92,11 @@ const PRIORITY_OPTIONS: { value: TaskPriority; label: string; dot: string }[] = 
 const CELL_BASE =
   'px-3 py-2 text-sm text-slate-200 border-b border-white/5 align-top';
 
-/** ===========================
- *  Utils
- *  =========================== */
+/* Utils */
 const byPositionThenCreated = (a: TaskRow, b: TaskRow) => {
   const pa = a.position ?? 0;
   const pb = b.position ?? 0;
   if (pa !== pb) return pa - pb;
-  // fallback: stable by id
   return a.id.localeCompare(b.id);
 };
 
@@ -159,9 +138,6 @@ const pill = (text: string, extra = '') =>
     {text}
   </span>;
 
-/** ===========================
- *  Page
- *  =========================== */
 const TodoListPage: React.FC = () => {
   const { user } = useAuth();
 
@@ -169,22 +145,20 @@ const TodoListPage: React.FC = () => {
   const [clients, setClients] = useState<ClientLite[]>([]);
   const [orders, setOrders] = useState<OrderLite[]>([]);
   const [rows, setRows] = useState<TaskRow[]>([]);
-  const [tree, setTree] = useState<TaskRow[]>([]);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [visibleCols, setVisibleCols] = useState<ColumnKey[]>(DEFAULT_COLUMNS);
   const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all'>('all');
 
-  const colorPersistSupportedRef = useRef<boolean>(true); // devient false si la colonne "color" n'existe pas en DB
+  // devient false si la DB n’a pas les colonnes avancées (color/labels/position/collapsed/comments_count)
+  const colorPersistSupportedRef = useRef<boolean>(true);
 
+  const tree = useMemo(() => buildTree(rows), [rows]);
   const visibleRows = useMemo(() => {
-    const t = buildTree(rows);
-    setTree(t);
-    const flat = flattenTree(t, collapsed);
+    const flat = flattenTree(tree, collapsed);
     return filterStatus === 'all' ? flat : flat.filter(r => r.status === filterStatus);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows, collapsed, filterStatus]);
+  }, [tree, collapsed, filterStatus]);
 
-  /** ------------- Load data ------------- */
+  /* ----------- LOAD (avec fallback intelligent) ----------- */
   const loadAll = useCallback(async () => {
     if (!user) return;
     if (!isSupabaseConfigured || !supabase) {
@@ -194,35 +168,72 @@ const TodoListPage: React.FC = () => {
     }
     setLoading(true);
     try {
-      const [cRes, oRes, tRes] = await Promise.all([
-        supabase.from('clients')
-          .select('id,name')
-          .eq('user_id', user.id)
-          .order('name', { ascending: true }),
-        supabase.from('orders')
-          .select('id,title')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false }),
-        supabase.from('tasks')
+      const cPromise = supabase
+        .from('clients')
+        .select('id,name')
+        .eq('user_id', user.id)
+        .order('name', { ascending: true });
+
+      const oPromise = supabase
+        .from('orders')
+        .select('id,title')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      // 1) Essai "étendu"
+      let tRes = await supabase
+        .from('tasks')
+        .select(`
+          id, user_id, title, description, status, priority, due_date,
+          client_id, order_id, parent_id, list_id, comments_count,
+          color, labels, "position", collapsed
+        `)
+        .eq('user_id', user.id)
+        .order('position', { ascending: true });
+
+      // 2) Fallback si colonnes manquantes (code 42703) → on passe en "base"
+      if (tRes.error && String(tRes.error.code) === '42703') {
+        colorPersistSupportedRef.current = false;
+        tRes = await supabase
+          .from('tasks')
           .select(`
             id, user_id, title, description, status, priority, due_date,
-            client_id, order_id, parent_id, list_id, comments_count,
-            color, labels, position, collapsed
-          `) // si certaines colonnes n'existent pas, Supabase renverra null pour ces champs si la policy le permet ; sinon on gèrera via try/catch à la sauvegarde
+            client_id, order_id, parent_id, list_id
+          `)
           .eq('user_id', user.id)
-          .order('position', { ascending: true })
-      ]);
+          .order('id', { ascending: true });
+      }
 
-      if (cRes.error) throw cRes.error;
-      if (oRes.error) throw oRes.error;
-      if (tRes.error) throw tRes.error;
+      const [cRes, oRes] = await Promise.all([cPromise, oPromise]);
+
+      if (cRes.error) {
+        console.error('[loadAll:clients]', cRes.error);
+        throw cRes.error;
+      }
+      if (oRes.error) {
+        console.error('[loadAll:orders]', oRes.error);
+        throw oRes.error;
+      }
+      if (tRes.error) {
+        console.error('[loadAll:tasks]', tRes.error);
+        throw tRes.error;
+      }
 
       setClients(cRes.data || []);
       setOrders(oRes.data || []);
-      setRows((tRes.data as TaskRow[] | null) || []);
+
+      const raw = (tRes.data || []) as TaskRow[];
+      const normalized = raw.map(r => ({
+        ...r,
+        comments_count: r.comments_count ?? 0,
+        labels: r.labels ?? [],
+        collapsed: r.collapsed ?? false,
+      }));
+      setRows(normalized);
     } catch (e: any) {
-      console.error(e);
-      toast.error('Erreur lors du chargement des données');
+      const msg = e?.message || 'Erreur inconnue';
+      const code = e?.code ? ` [${e.code}]` : '';
+      toast.error(`Erreur lors du chargement des données: ${msg}${code}`);
     } finally {
       setLoading(false);
     }
@@ -232,7 +243,7 @@ const TodoListPage: React.FC = () => {
     loadAll();
   }, [loadAll]);
 
-  /** ------------- Helpers Supabase ------------- */
+  /* ----------- CALENDAR UPSERT ----------- */
   const upsertCalendar = useCallback(async (task: TaskRow) => {
     if (!user || !task.due_date) return;
     try {
@@ -245,36 +256,35 @@ const TodoListPage: React.FC = () => {
         related_task_id: task.id,
       }, { onConflict: 'related_task_id' });
     } catch (e) {
-      // non bloquant
       console.warn('[calendar upsert]', e);
     }
   }, [user]);
 
+  /* ----------- UPDATE / INSERT / DELETE ----------- */
   const updateTask = useCallback(async (id: UUID, patch: Partial<TaskRow>) => {
     if (!user) return;
     setRows(prev => prev.map(r => r.id === id ? { ...r, ...patch } : r));
     if (!isSupabaseConfigured || !supabase) return;
 
     const payload: Record<string, any> = { ...patch };
-    // Si la DB n’a pas la colonne "color"/"labels"/"position"/"collapsed", supprime-les du payload et désactive la persistance
     if (!colorPersistSupportedRef.current) {
       delete payload.color;
       delete payload.labels;
       delete payload.position;
       delete payload.collapsed;
+      delete payload.comments_count;
     }
 
     try {
       const { error } = await supabase.from('tasks').update(payload).eq('id', id);
       if (error) {
         const msg = String(error?.message || '');
-        // Heuristique: si "column \"color\" does not exist" etc → on coupe la persistance couleur/labels/position
         if (/column .* does not exist/i.test(msg)) {
           colorPersistSupportedRef.current = false;
           toast((t) => (
             <div className="text-sm">
-              <div className="font-semibold">Option couleur avancée non activée</div>
-              <div className="opacity-80">Exécute le patch SQL proposé pour ajouter <code>color</code>, <code>labels</code>, <code>position</code>, <code>collapsed</code>.</div>
+              <div className="font-semibold">Options avancées non activées</div>
+              <div className="opacity-80">Exécute le patch SQL (color, labels, position, collapsed, comments_count) pour la persistance complète.</div>
               <button
                 onClick={() => toast.dismiss(t.id)}
                 className="mt-2 px-3 py-1 rounded bg-white/10 hover:bg-white/20"
@@ -287,21 +297,21 @@ const TodoListPage: React.FC = () => {
           throw error;
         }
       }
-      // calendrier
       if (typeof patch.due_date !== 'undefined') {
         const task = rows.find(r => r.id === id);
         const merged = { ...(task || {}), ...patch } as TaskRow;
         if (merged.due_date) await upsertCalendar(merged);
       }
-    } catch (e) {
-      console.error(e);
-      toast.error('Sauvegarde impossible (réseau ou droits)');
+    } catch (e: any) {
+      console.error('[updateTask]', e);
+      toast.error(`Sauvegarde impossible: ${e?.message || 'erreur inconnue'}`);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, rows, upsertCalendar]);
 
   const insertTask = useCallback(async (parent?: TaskRow) => {
     if (!user) return;
+
     const optimistic: TaskRow = {
       id: `tmp_${Math.random().toString(36).slice(2)}`,
       title: 'New task',
@@ -330,82 +340,64 @@ const TodoListPage: React.FC = () => {
         parent_id: optimistic.parent_id,
         position: optimistic.position,
       };
-      // persistance color si dispo
       if (colorPersistSupportedRef.current) {
         payload.color = optimistic.color;
         payload.labels = optimistic.labels;
         payload.collapsed = optimistic.collapsed;
+        payload.comments_count = optimistic.comments_count ?? 0;
       }
+
       const { data, error } = await supabase
         .from('tasks')
         .insert(payload)
         .select('id')
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[insertTask] error:', error);
+        throw error;
+      }
+
       if (data?.id) {
         setRows(prev => prev.map(r => r.id === optimistic.id ? { ...r, id: data.id } : r));
       }
       toast.success('Tâche créée');
-    } catch (e) {
-      console.error(e);
-      toast.error('Création impossible');
-      // rollback
+    } catch (e: any) {
+      console.error('[insertTask] catch:', e);
+      toast.error(`Création impossible: ${e?.message || 'erreur inconnue'}`);
       setRows(prev => prev.filter(r => r.id !== optimistic.id));
     }
   }, [user, rows]);
 
   const removeTask = useCallback(async (task: TaskRow) => {
-    setRows(prev => prev.filter(r => r.id !== task.id && r.parent_id !== task.id)); // naïf: enlève aussi enfants directs (cascade côté DB gère tout)
+    setRows(prev => prev.filter(r => r.id !== task.id && r.parent_id !== task.id));
     if (!isSupabaseConfigured || !supabase) return;
     try {
       const { error } = await supabase.from('tasks').delete().eq('id', task.id);
       if (error) throw error;
       toast('Tâche supprimée', { icon: '🗑️' });
-    } catch (e) {
-      console.error(e);
-      toast.error('Suppression impossible');
+    } catch (e: any) {
+      console.error('[removeTask]', e);
+      toast.error(`Suppression impossible: ${e?.message || 'erreur inconnue'}`);
     }
   }, []);
 
-  const addComment = useCallback(async (task: TaskRow, content: string) => {
-    if (!user || !content.trim()) return;
-    if (!isSupabaseConfigured || !supabase) return;
-    try {
-      const { error } = await supabase.from('task_comments').insert({
-        task_id: task.id,
-        user_id: user.id,
-        content: content.trim()
-      });
-      if (error) throw error;
-      setRows(prev => prev.map(r => r.id === task.id
-        ? { ...r, comments_count: (r.comments_count || 0) + 1 }
-        : r));
-    } catch (e) {
-      console.error(e);
-      toast.error('Commentaire non sauvegardé');
-    }
-  }, [user]);
-
-  /** ------------- UI utils ------------- */
+  /* ----------- UI helpers ----------- */
   const toggleCollapse = (id: string) => {
     const next = new Set(collapsed);
     next.has(id) ? next.delete(id) : next.add(id);
     setCollapsed(next);
-    // Persistance optionnelle si supporté (champ collapsed)
     if (colorPersistSupportedRef.current) {
       updateTask(id, { collapsed: next.has(id) });
     }
   };
 
   const setTaskColor = (task: TaskRow, color: string | null) => {
-    // visu immédiate
     setRows(prev => prev.map(r => r.id === task.id ? { ...r, color } : r));
-    // persistance
     updateTask(task.id, { color });
   };
 
-  /** ------------- Cellules ------------- */
+  /* ----------- Cells ----------- */
   const TitleCell: React.FC<{ t: TaskRow }> = ({ t }) => {
     const [editing, setEditing] = useState(false);
     const [val, setVal] = useState(t.title);
@@ -422,7 +414,6 @@ const TodoListPage: React.FC = () => {
 
     return (
       <div className="flex items-start gap-2">
-        {/* indent + caret */}
         <div className="flex items-center" style={{ paddingLeft: `${(t._depth || 0) * 16}px` }}>
           {t._children && t._children.length > 0 ? (
             <button
@@ -437,12 +428,10 @@ const TodoListPage: React.FC = () => {
           )}
         </div>
 
-        {/* couleur (bande/puce) */}
         <div className="mt-1">
           <div className="w-2 h-4 rounded-sm" style={{ background: t.color || '#3f3f46' }} />
         </div>
 
-        {/* titre editable */}
         <div className="flex-1">
           {editing ? (
             <div className="flex items-center gap-1">
@@ -492,118 +481,65 @@ const TodoListPage: React.FC = () => {
     );
   };
 
-  const StatusCell: React.FC<{ t: TaskRow }> = ({ t }) => {
-    return (
-      <div className="relative">
-        <select
-          value={t.status}
-          onChange={(e) => updateTask(t.id, { status: e.target.value as TaskStatus })}
-          className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10"
-        >
-          {STATUS_OPTIONS.map(s => (
-            <option key={s.value} value={s.value}>{s.label}</option>
-          ))}
-        </select>
-      </div>
-    );
-  };
+  const StatusCell: React.FC<{ t: TaskRow }> = ({ t }) => (
+    <select
+      value={t.status}
+      onChange={(e) => updateTask(t.id, { status: e.target.value as TaskStatus })}
+      className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10"
+    >
+      {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+    </select>
+  );
 
-  const PriorityCell: React.FC<{ t: TaskRow }> = ({ t }) => {
-    return (
+  const PriorityCell: React.FC<{ t: TaskRow }> = ({ t }) => (
+    <select
+      value={t.priority}
+      onChange={(e) => updateTask(t.id, { priority: e.target.value as TaskPriority })}
+      className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10"
+    >
+      {PRIORITY_OPTIONS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+    </select>
+  );
+
+  const ClientCell: React.FC<{ t: TaskRow }> = ({ t }) => (
+    <div className="flex items-center gap-2">
+      <Building2 size={14} className="opacity-60" />
       <select
-        value={t.priority}
-        onChange={(e) => updateTask(t.id, { priority: e.target.value as TaskPriority })}
-        className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10"
+        value={t.client_id || ''}
+        onChange={(e) => updateTask(t.id, { client_id: e.target.value || null })}
+        className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10 w-full"
       >
-        {PRIORITY_OPTIONS.map(p => (
-          <option key={p.value} value={p.value}>{p.label}</option>
-        ))}
+        <option value="">—</option>
+        {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
       </select>
-    );
-  };
+    </div>
+  );
 
-  const ClientCell: React.FC<{ t: TaskRow }> = ({ t }) => {
-    return (
-      <div className="flex items-center gap-2">
-        <Building2 size={14} className="opacity-60" />
-        <select
-          value={t.client_id || ''}
-          onChange={(e) => updateTask(t.id, { client_id: e.target.value || null })}
-          className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10 w-full"
-        >
-          <option value="">—</option>
-          {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
-      </div>
-    );
-  };
+  const OrderCell: React.FC<{ t: TaskRow }> = ({ t }) => (
+    <div className="flex items-center gap-2">
+      <Package2 size={14} className="opacity-60" />
+      <select
+        value={t.order_id || ''}
+        onChange={(e) => updateTask(t.id, { order_id: e.target.value || null })}
+        className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10 w-full"
+      >
+        <option value="">—</option>
+        {orders.map(o => <option key={o.id} value={o.id}>{o.title}</option>)}
+      </select>
+    </div>
+  );
 
-  const OrderCell: React.FC<{ t: TaskRow }> = ({ t }) => {
-    return (
-      <div className="flex items-center gap-2">
-        <Package2 size={14} className="opacity-60" />
-        <select
-          value={t.order_id || ''}
-          onChange={(e) => updateTask(t.id, { order_id: e.target.value || null })}
-          className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10 w-full"
-        >
-          <option value="">—</option>
-          {orders.map(o => <option key={o.id} value={o.id}>{o.title}</option>)}
-        </select>
-      </div>
-    );
-  };
-
-  const DueCell: React.FC<{ t: TaskRow }> = ({ t }) => {
-    return (
-      <div className="flex items-center gap-2">
-        <CalendarIcon size={14} className="opacity-60" />
-        <input
-          type="date"
-          value={t.due_date || ''}
-          onChange={(e) => updateTask(t.id, { due_date: e.target.value || null })}
-          className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10"
-        />
-      </div>
-    );
-  };
-
-  const CommentsCell: React.FC<{ t: TaskRow }> = ({ t }) => {
-    const [open, setOpen] = useState(false);
-    const [txt, setTxt] = useState('');
-    return (
-      <div className="space-y-1">
-        <button
-          onClick={() => setOpen(v => !v)}
-          className="inline-flex items-center gap-1 px-2 py-1 rounded bg-white/5 hover:bg-white/10"
-          title="Comments"
-        >
-          <MessageSquare size={14} />
-          <span>{t.comments_count || 0}</span>
-        </button>
-        {open && (
-          <div className="p-2 bg-black/40 border border-white/10 rounded">
-            <textarea
-              rows={2}
-              value={txt}
-              onChange={(e) => setTxt(e.target.value)}
-              className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10"
-              placeholder="Add a comment..."
-            />
-            <div className="mt-2 flex justify-end gap-2">
-              <button onClick={() => setOpen(false)} className="px-2 py-1 rounded hover:bg-white/10 text-slate-300">Close</button>
-              <button
-                onClick={async () => { await addComment(t, txt); setTxt(''); }}
-                className="px-2 py-1 rounded bg-white/10 hover:bg-white/20"
-              >
-                <Save size={14} />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
+  const DueCell: React.FC<{ t: TaskRow }> = ({ t }) => (
+    <div className="flex items-center gap-2">
+      <CalendarIcon size={14} className="opacity-60" />
+      <input
+        type="date"
+        value={t.due_date || ''}
+        onChange={(e) => updateTask(t.id, { due_date: e.target.value || null })}
+        className="bg-black/40 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10"
+      />
+    </div>
+  );
 
   const TagsCell: React.FC<{ t: TaskRow }> = ({ t }) => {
     const [input, setInput] = useState('');
@@ -647,7 +583,63 @@ const TodoListPage: React.FC = () => {
     );
   };
 
-  /** ------------- Header / Toolbar ------------- */
+  const CommentsCell: React.FC<{ t: TaskRow }> = ({ t }) => {
+    const [open, setOpen] = useState(false);
+    const [txt, setTxt] = useState('');
+    return (
+      <div className="space-y-1">
+        <button
+          onClick={() => setOpen(v => !v)}
+          className="inline-flex items-center gap-1 px-2 py-1 rounded bg-white/5 hover:bg-white/10"
+          title="Comments"
+        >
+          <MessageSquare size={14} />
+          <span>{t.comments_count ?? 0}</span>
+        </button>
+        {open && (
+          <div className="p-2 bg-black/40 border border-white/10 rounded">
+            <textarea
+              rows={2}
+              value={txt}
+              onChange={(e) => setTxt(e.target.value)}
+              className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-white/10"
+              placeholder="Add a comment..."
+            />
+            <div className="mt-2 flex justify-end gap-2">
+              <button onClick={() => setOpen(false)} className="px-2 py-1 rounded hover:bg-white/10 text-slate-300">Close</button>
+              <button
+                onClick={async () => { if (txt.trim()) { await addComment(t, txt); setTxt(''); } }}
+                className="px-2 py-1 rounded bg-white/10 hover:bg-white/20"
+              >
+                <Save size={14} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const addComment = useCallback(async (task: TaskRow, content: string) => {
+    if (!user || !content.trim()) return;
+    if (!isSupabaseConfigured || !supabase) return;
+    try {
+      const { error } = await supabase.from('task_comments').insert({
+        task_id: task.id,
+        user_id: user.id,
+        content: content.trim()
+      });
+      if (error) throw error;
+      setRows(prev => prev.map(r => r.id === task.id
+        ? { ...r, comments_count: (r.comments_count || 0) + 1 }
+        : r));
+    } catch (e: any) {
+      console.error('[addComment]', e);
+      toast.error(`Commentaire non sauvegardé: ${e?.message || 'erreur inconnue'}`);
+    }
+  }, [user]);
+
+  /* ----------- Toolbar ----------- */
   const Toolbar: React.FC = () => {
     const [showCols, setShowCols] = useState(false);
     const [showColors, setShowColors] = useState(false);
@@ -720,7 +712,7 @@ const TodoListPage: React.FC = () => {
                     </div>
                   ))}
                 </div>
-                <div className="mt-2 text-xs text-slate-400">Sélecteur global (info) — appliquez la couleur par tâche via l’icône pipette dans la colonne Task.</div>
+                <div className="mt-2 text-xs text-slate-400">Sélecteur global (info) — appliquez la couleur par tâche via la colonne Task.</div>
               </div>
             )}
           </div>
@@ -737,12 +729,10 @@ const TodoListPage: React.FC = () => {
     );
   };
 
-  /** ------------- Rendu ------------- */
+  /* ----------- Render ----------- */
   return (
     <Layout>
-      {/* fond noir total (page) */}
       <div className="min-h-[calc(100vh-64px)] w-full bg-black">
-        {/* header */}
         <div className="px-4 sm:px-6 pt-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -761,37 +751,20 @@ const TodoListPage: React.FC = () => {
           </div>
         </div>
 
-        {/* table */}
         <div className="px-4 sm:px-6 mt-4 pb-10">
           <div className={`${cardClass} overflow-hidden`}>
             <div className="overflow-x-auto">
               <table className="min-w-full border-collapse">
                 <thead>
                   <tr className="bg-white/5 text-left text-xs uppercase tracking-wider text-slate-300">
-                    {visibleCols.includes('task') && (
-                      <th className="px-3 py-2 w-[38%]">Task</th>
-                    )}
-                    {visibleCols.includes('status') && (
-                      <th className="px-3 py-2 w-[10%]">Status</th>
-                    )}
-                    {visibleCols.includes('priority') && (
-                      <th className="px-3 py-2 w-[10%]">Priority</th>
-                    )}
-                    {visibleCols.includes('client') && (
-                      <th className="px-3 py-2 w-[12%]">Client</th>
-                    )}
-                    {visibleCols.includes('order') && (
-                      <th className="px-3 py-2 w-[12%]">Order</th>
-                    )}
-                    {visibleCols.includes('due') && (
-                      <th className="px-3 py-2 w-[10%]">Due</th>
-                    )}
-                    {visibleCols.includes('comments') && (
-                      <th className="px-3 py-2 w-[8%]">Comments</th>
-                    )}
-                    {visibleCols.includes('tags') && (
-                      <th className="px-3 py-2 w-[20%]">Tags</th>
-                    )}
+                    {visibleCols.includes('task') && <th className="px-3 py-2 w-[38%]">Task</th>}
+                    {visibleCols.includes('status') && <th className="px-3 py-2 w-[10%]">Status</th>}
+                    {visibleCols.includes('priority') && <th className="px-3 py-2 w-[10%]">Priority</th>}
+                    {visibleCols.includes('client') && <th className="px-3 py-2 w-[12%]">Client</th>}
+                    {visibleCols.includes('order') && <th className="px-3 py-2 w-[12%]">Order</th>}
+                    {visibleCols.includes('due') && <th className="px-3 py-2 w-[10%]">Due</th>}
+                    {visibleCols.includes('comments') && <th className="px-3 py-2 w-[8%]">Comments</th>}
+                    {visibleCols.includes('tags') && <th className="px-3 py-2 w-[20%]">Tags</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -806,51 +779,58 @@ const TodoListPage: React.FC = () => {
                       <tr key={t.id} className="hover:bg-white/2">
                         {visibleCols.includes('task') && (
                           <td className={`${CELL_BASE}`}>
-                            <TitleCell t={t} />
-                            {/* Actions rapides couleurs pour la tâche */}
-                            <div className="mt-2 flex items-center gap-2">
-                              <span className="text-xs text-slate-400">Color:</span>
-                              <div className="flex flex-wrap gap-1.5">
-                                {COLOR_SWATCHES.slice(0, 8).map(c => (
+                            <div className="flex items-start gap-2">
+                              <div className="flex items-center" style={{ paddingLeft: `${(t._depth || 0) * 16}px` }}>
+                                {t._children && t._children.length > 0 ? (
                                   <button
-                                    key={c}
-                                    onClick={() => setTaskColor(t, c)}
-                                    className="w-4 h-4 rounded ring-1 ring-white/20"
-                                    style={{ background: c }}
-                                    title={c}
-                                  />
-                                ))}
-                                <button
-                                  onClick={() => setTaskColor(t, null)}
-                                  className="px-1 text-xs rounded bg-white/5 hover:bg-white/10"
-                                >
-                                  Clear
-                                </button>
+                                    onClick={() => toggleCollapse(t.id)}
+                                    className="p-1 rounded hover:bg-white/10"
+                                    title={collapsed.has(t.id) ? 'Expand' : 'Collapse'}
+                                  >
+                                    {collapsed.has(t.id) ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+                                  </button>
+                                ) : (
+                                  <span className="w-6" />
+                                )}
+                              </div>
+
+                              <div className="mt-1">
+                                <div className="w-2 h-4 rounded-sm" style={{ background: t.color || '#3f3f46' }} />
+                              </div>
+
+                              <div className="flex-1">
+                                <TitleCell t={t} />
+                                <div className="mt-2 flex items-center gap-2">
+                                  <span className="text-xs text-slate-400">Color:</span>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {COLOR_SWATCHES.slice(0, 8).map(c => (
+                                      <button
+                                        key={c}
+                                        onClick={() => setTaskColor(t, c)}
+                                        className="w-4 h-4 rounded ring-1 ring-white/20"
+                                        style={{ background: c }}
+                                        title={c}
+                                      />
+                                    ))}
+                                    <button
+                                      onClick={() => setTaskColor(t, null)}
+                                      className="px-1 text-xs rounded bg-white/5 hover:bg-white/10"
+                                    >
+                                      Clear
+                                    </button>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </td>
                         )}
-                        {visibleCols.includes('status') && (
-                          <td className={`${CELL_BASE}`}><StatusCell t={t} /></td>
-                        )}
-                        {visibleCols.includes('priority') && (
-                          <td className={`${CELL_BASE}`}><PriorityCell t={t} /></td>
-                        )}
-                        {visibleCols.includes('client') && (
-                          <td className={`${CELL_BASE}`}><ClientCell t={t} /></td>
-                        )}
-                        {visibleCols.includes('order') && (
-                          <td className={`${CELL_BASE}`}><OrderCell t={t} /></td>
-                        )}
-                        {visibleCols.includes('due') && (
-                          <td className={`${CELL_BASE}`}><DueCell t={t} /></td>
-                        )}
-                        {visibleCols.includes('comments') && (
-                          <td className={`${CELL_BASE}`}><CommentsCell t={t} /></td>
-                        )}
-                        {visibleCols.includes('tags') && (
-                          <td className={`${CELL_BASE}`}><TagsCell t={t} /></td>
-                        )}
+                        {visibleCols.includes('status') && <td className={`${CELL_BASE}`}><StatusCell t={t} /></td>}
+                        {visibleCols.includes('priority') && <td className={`${CELL_BASE}`}><PriorityCell t={t} /></td>}
+                        {visibleCols.includes('client') && <td className={`${CELL_BASE}`}><ClientCell t={t} /></td>}
+                        {visibleCols.includes('order') && <td className={`${CELL_BASE}`}><OrderCell t={t} /></td>}
+                        {visibleCols.includes('due') && <td className={`${CELL_BASE}`}><DueCell t={t} /></td>}
+                        {visibleCols.includes('comments') && <td className={`${CELL_BASE}`}><CommentsCell t={t} /></td>}
+                        {visibleCols.includes('tags') && <td className={`${CELL_BASE}`}><TagsCell t={t} /></td>}
                       </tr>
                     ))
                   )}
@@ -859,7 +839,6 @@ const TodoListPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Légende */}
           <div className="mt-3 text-xs text-slate-400 flex flex-wrap items-center gap-3">
             <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded bg-rose-500 inline-block" /> P1</span>
             <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded bg-amber-500 inline-block" /> P2</span>
