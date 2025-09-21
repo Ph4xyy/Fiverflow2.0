@@ -526,7 +526,8 @@ const AdminDashboard: React.FC = () => {
         </div>
 
 
-        {/* Create Subscription */}
+        {/* DEBUT - SYSTEME D'AJOUT D'ABONNEMENTS */}
+
 <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
   <div className="flex items-center justify-between mb-4">
     <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
@@ -627,6 +628,9 @@ const AdminDashboard: React.FC = () => {
     </button>
   </form>
 </div>
+
+
+        {/* FIN - SYSTEME D'AJOUT D'ABONNEMENTS */}
 
 
         <div className="text-xs text-gray-500 dark:text-gray-400">
