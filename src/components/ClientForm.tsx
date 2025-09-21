@@ -190,12 +190,13 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
     { value: 'platform', label: 'Plateforme' }
   ];
 
+  // === Thème unique sombre (par défaut) ===
   const baseField =
-    'w-full px-4 py-2.5 rounded-xl border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ' +
-    'bg-gray-50 text-gray-900 border-gray-300 placeholder-gray-400 ' +
-    'dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:placeholder-gray-500 transition-colors';
+    'w-full px-4 py-2.5 rounded-xl border transition-colors ' +
+    'bg-zinc-900 text-zinc-100 placeholder-zinc-500 border-zinc-800 ' +
+    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
 
-  const labelCls = 'block text-sm font-semibold mb-2 text-gray-800 dark:text-gray-200';
+  const labelCls = 'block text-sm font-semibold mb-2 text-zinc-200';
 
   const handleServicesChange = (service: string) => {
     const currentServices = formData.services_needed;
@@ -339,11 +340,11 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
       case 1:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-900 dark:text-gray-100">
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-zinc-100">
               <User className="mr-2" size={20} />
               Informations de base
             </h3>
-            {/* --- Tous tes champs Step 1 (Nom, entreprise, type, plateforme) --- */}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Nom complet *</label>
@@ -356,6 +357,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   required
                 />
               </div>
+
               <div>
                 <label className={labelCls}>Nom de l'entreprise</label>
                 <input
@@ -366,6 +368,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   placeholder="Nom de l'entreprise"
                 />
               </div>
+
               <div>
                 <label className={labelCls}>Type de client *</label>
                 <select
@@ -378,6 +381,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className={labelCls}>Plateforme *</label>
                 <select
@@ -398,11 +402,11 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
       case 2:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-900 dark:text-gray-100">
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-zinc-100">
               <Mail className="mr-2" size={20} />
               Contact & Localisation
             </h3>
-            {/* --- Tous tes champs Step 2 (emails, téléphones, langue, pays, ville) --- */}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Email principal</label>
@@ -414,6 +418,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   placeholder="email@example.com"
                 />
               </div>
+
               <div>
                 <label className={labelCls}>Email secondaire</label>
                 <input
@@ -424,6 +429,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   placeholder="email2@example.com"
                 />
               </div>
+
               <div>
                 <label className={labelCls}>Téléphone principal</label>
                 <input
@@ -434,6 +440,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   placeholder="+33 1 23 45 67 89"
                 />
               </div>
+
               <div>
                 <label className={labelCls}>WhatsApp</label>
                 <input
@@ -444,6 +451,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   placeholder="+33 1 23 45 67 89"
                 />
               </div>
+
               <div>
                 <label className={labelCls}>Fuseau horaire</label>
                 <select
@@ -457,6 +465,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className={labelCls}>Langue préférée</label>
                 <select
@@ -469,6 +478,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className={labelCls}>Pays</label>
                 <select
@@ -482,6 +492,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className={labelCls}>Ville</label>
                 <input
@@ -498,11 +509,11 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
       case 3:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-900 dark:text-gray-100">
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-zinc-100">
               <Briefcase className="mr-2" size={20} />
               Activité & Projets
             </h3>
-            {/* --- Tous tes champs Step 3 (secteur, budget, fréquence, source, services) --- */}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Secteur d'activité</label>
@@ -517,6 +528,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className={labelCls}>Budget moyen par projet</label>
                 <select
@@ -530,6 +542,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className={labelCls}>Fréquence de collaboration</label>
                 <select
@@ -543,6 +556,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className={labelCls}>Source d'acquisition</label>
                 <select
@@ -557,16 +571,17 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                 </select>
               </div>
             </div>
+
             <div>
               <label className={labelCls}>Services demandés</label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded-xl p-3 border-gray-300 dark:border-gray-700">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded-xl p-3 border-zinc-800">
                 {servicesOptions.map((service) => (
-                  <label key={service} className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                  <label key={service} className="flex items-center text-sm text-zinc-300">
                     <input
                       type="checkbox"
                       checked={formData.services_needed.includes(service)}
                       onChange={() => handleServicesChange(service)}
-                      className="mr-2 rounded"
+                      className="mr-2 rounded accent-blue-600"
                     />
                     {service}
                   </label>
@@ -578,11 +593,11 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
       case 4:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-900 dark:text-gray-100">
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-zinc-100">
               <MessageSquare className="mr-2" size={20} />
               Gestion & Communication
             </h3>
-            {/* --- Tous tes champs Step 4 (statut, priorité, paiements, méthode contact, notes, tags) --- */}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>Statut client</label>
@@ -596,6 +611,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className={labelCls}>Priorité</label>
                 <select
@@ -608,6 +624,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className={labelCls}>Conditions de paiement</label>
                 <select
@@ -621,6 +638,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className={labelCls}>Méthode de contact préférée</label>
                 <select
@@ -633,6 +651,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   ))}
                 </select>
               </div>
+
               <div>
                 <label className={labelCls}>Prochaine action</label>
                 <input
@@ -643,6 +662,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   placeholder="Appeler pour discuter du projet"
                 />
               </div>
+
               <div>
                 <label className={labelCls}>Date de la prochaine action</label>
                 <input
@@ -653,6 +673,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                 />
               </div>
             </div>
+
             <div>
               <label className={labelCls}>Notes de disponibilité</label>
               <textarea
@@ -663,6 +684,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                 placeholder="Disponible en semaine de 9h à 17h"
               />
             </div>
+
             <div>
               <label className={labelCls}>Notes importantes</label>
               <textarea
@@ -673,6 +695,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                 placeholder="Informations importantes à retenir..."
               />
             </div>
+
             <div>
               <label className={labelCls}>Tags personnalisés</label>
               <input
@@ -686,13 +709,13 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   {formData.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300"
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-950 text-blue-300"
                     >
                       {tag}
                       <button
                         type="button"
                         onClick={() => removeTag(tag)}
-                        className="ml-1 text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
+                        className="ml-1 text-blue-300 hover:text-blue-200"
                       >
                         ×
                       </button>
@@ -709,12 +732,12 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-800">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-zinc-900 text-zinc-100 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-zinc-800">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+            <h2 className="text-xl font-bold">
               {client ? 'Modifier le client' : 'Nouveau client'}
             </h2>
             <div className="flex items-center mt-3 space-x-2">
@@ -722,7 +745,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                 <div
                   key={step}
                   className={`h-2 w-10 rounded-full transition-all ${
-                    step <= currentStep ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'
+                    step <= currentStep ? 'bg-blue-600' : 'bg-zinc-700'
                   }`}
                 />
               ))}
@@ -730,7 +753,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
+            className="rounded-full p-2 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors"
           >
             <X size={24} />
           </button>
@@ -741,28 +764,28 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
           {renderStep()}
 
           {/* Footer */}
-          <div className="flex justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
+          <div className="flex justify-between mt-8 pt-6 border-t border-zinc-800">
             <button
               type="button"
               onClick={prevStep}
               disabled={currentStep === 1}
               className="px-4 py-2 border rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed
-                         border-gray-300 text-gray-700 hover:bg-gray-50
-                         dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                         border-zinc-700 text-zinc-200 hover:bg-zinc-800"
             >
               Précédent
             </button>
+
             <div className="flex space-x-3">
               <button
                 type="button"
                 onClick={onClose}
                 className="px-4 py-2 border rounded-lg transition-colors
-                           border-gray-300 text-gray-700 hover:bg-gray-50
-                           dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                           border-zinc-700 text-zinc-200 hover:bg-zinc-800"
                 disabled={loading}
               >
                 Annuler
               </button>
+
               {currentStep < 4 ? (
                 <button
                   type="button"
