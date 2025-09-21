@@ -23,10 +23,13 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Styles FullCalendar consolidés
-import '@/styles/fullcalendar.css';
-import '@/styles/calendar-dark.css';
+// Styles FullCalendar (imports directs v6)
+import '@fullcalendar/daygrid/index.global.css';
+import '@fullcalendar/timegrid/index.global.css';
+import '@fullcalendar/list/index.global.css';
 
+// Override dark mode
+import '@/styles/calendar-dark.css';
 
 /* ---------------- Types ---------------- */
 type UUID = string;
@@ -106,7 +109,7 @@ const CalendarPage: React.FC = () => {
   const calendarRef = useRef<FullCalendar | null>(null);
 
   // Filters / toggles / search
-  const [statusFilter, setStatusFilter] = useState<string>('all'); // pour Orders uniquement
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showOrders, setShowOrders] = useState<boolean>(true);
   const [showTasks, setShowTasks] = useState<boolean>(true);
   const [query, setQuery] = useState<string>('');
