@@ -23,10 +23,10 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Styles FullCalendar (imports directs v6)
-import '@fullcalendar/daygrid/index.global.css';
-import '@fullcalendar/timegrid/index.global.css';
-import '@fullcalendar/list/index.global.css';
+// Styles FullCalendar (bypass exports avec chemin absolu node_modules)
+import '../../node_modules/@fullcalendar/daygrid/index.global.css';
+import '../../node_modules/@fullcalendar/timegrid/index.global.css';
+import '../../node_modules/@fullcalendar/list/index.global.css';
 
 // Override dark mode
 import '@/styles/calendar-dark.css';
@@ -109,7 +109,7 @@ const CalendarPage: React.FC = () => {
   const calendarRef = useRef<FullCalendar | null>(null);
 
   // Filters / toggles / search
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all'); // pour Orders uniquement
   const [showOrders, setShowOrders] = useState<boolean>(true);
   const [showTasks, setShowTasks] = useState<boolean>(true);
   const [query, setQuery] = useState<string>('');
@@ -139,12 +139,13 @@ const CalendarPage: React.FC = () => {
     setOrders((data || []) as OrderRow[]);
   }, [user]);
 
-  /* ---------------- Fetch Tasks ---------------- */
+  /* ---------------- Fetch Tasks (due_date) ---------------- */
   const fetchTasks = useCallback(async () => {
     if (!isSupabaseConfigured || !supabase || !user) {
       setTasks([]);
       return;
     }
+
     const { data, error } = await supabase
       .from('tasks')
       .select(`id, title, status, priority, due_date, color, client_id`)
@@ -176,7 +177,7 @@ const CalendarPage: React.FC = () => {
     }
   }, [fetchAll]);
 
-  /* ---------------- Events ---------------- */
+  /* ---------------- Build events (Orders + Tasks) ---------------- */
   const filteredOrders = useMemo(() => {
     if (!showOrders) return [];
     const base = statusFilter === 'all'
@@ -186,7 +187,11 @@ const CalendarPage: React.FC = () => {
     const q = query.trim().toLowerCase();
     if (!q) return base;
     return base.filter(o => {
-      const hay = [o.title, o.clients?.name || '', o.clients?.platform || ''].join(' ').toLowerCase();
+      const hay = [
+        o.title,
+        o.clients?.name || '',
+        o.clients?.platform || '',
+      ].join(' ').toLowerCase();
       return hay.includes(q);
     });
   }, [orders, statusFilter, showOrders, query]);
@@ -238,7 +243,33 @@ const CalendarPage: React.FC = () => {
     setEvents([...orderEvents, ...taskEvents]);
   }, [filteredOrders, filteredTasks]);
 
-  /* ---------------- Drag & Drop ---------------- */
+  /* ---------------- backfill calendar_events ---------------- */
+  const backfillCalendarEvents = useCallback(async () => {
+    if (!user || !isSupabaseConfigured || !supabase) return;
+    const withDue = tasks.filter(t => t.due_date);
+    if (withDue.length === 0) return;
+
+    try {
+      const rows = withDue.map(t => ({
+        user_id: user.id,
+        title: t.title || 'Task',
+        start: t.due_date!,
+        end: t.due_date!,
+        all_day: true,
+        related_task_id: t.id,
+      }));
+      const { error } = await supabase.from('calendar_events').upsert(rows, { onConflict: 'related_task_id' });
+      if (error) console.warn('[calendar backfill]', error.message);
+    } catch (e) {
+      console.warn('[calendar backfill]', e);
+    }
+  }, [tasks, user]);
+
+  useEffect(() => {
+    if (tasks.length > 0) backfillCalendarEvents();
+  }, [tasks, backfillCalendarEvents]);
+
+  /* ---------------- Drag & Drop (update DB) ---------------- */
   const onEventDrop = useCallback(async (info: any) => {
     const newDate = toDateOnly(info.event.start);
     if (!newDate) return info.revert();
@@ -252,13 +283,28 @@ const CalendarPage: React.FC = () => {
 
       if (isTask) {
         setTasks(prev => prev.map(t => t.id === rawId ? { ...t, due_date: newDate } : t));
+
         const { error } = await supabase.from('tasks').update({ due_date: newDate }).eq('id', rawId);
         if (error) throw error;
+
+        try {
+          await supabase.from('calendar_events').upsert({
+            user_id: user?.id,
+            title: info.event.title?.replace(/^✓\s*/, '') || 'Task',
+            start: newDate,
+            end: newDate,
+            all_day: true,
+            related_task_id: rawId,
+          }, { onConflict: 'related_task_id' });
+        } catch (e) {
+          console.warn('[eventDrop calendar upsert]', e);
+        }
       } else {
         setOrders(prev => prev.map(o => o.id === rawId ? { ...o, deadline: newDate } : o));
         const { error } = await supabase.from('orders').update({ deadline: newDate }).eq('id', rawId);
         if (error) throw error;
       }
+
       toast.success('Date mise à jour');
     } catch (e: any) {
       console.error('[onEventDrop]', e);
@@ -319,7 +365,7 @@ const CalendarPage: React.FC = () => {
     );
   };
 
-  /* ---------------- Upcoming ---------------- */
+  /* ---------------- Upcoming (mix Orders + Tasks) ---------------- */
   const upcoming = useMemo<MixedItem[]>(() => {
     const now = new Date();
     const oItems: MixedItem[] = orders
