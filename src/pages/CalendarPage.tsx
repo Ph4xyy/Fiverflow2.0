@@ -1,6 +1,6 @@
 // src/pages/CalendarPage.tsx
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import Layout from '@/components/Layout';
+import Layout, { pageBgClass, cardClass } from '@/components/Layout';
 import PlanRestrictedPage from '../components/PlanRestrictedPage';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePlanRestrictions } from '@/hooks/usePlanRestrictions';
@@ -17,12 +17,20 @@ import {
   ExternalLink,
   AlertCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ListChecks,
+  Search as SearchIcon,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-/** 👇 Import du thème sombre FullCalendar */
+/** 👇 Thème sombre FullCalendar (conservé) */
 import '@/styles/calendar-dark.css';
+
+/* ---------------- Types ---------------- */
+type UUID = string;
+
+type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done';
+type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 type OrderRow = {
   id: string;
@@ -31,9 +39,24 @@ type OrderRow = {
   status: 'Pending' | 'In Progress' | 'Completed' | string;
   deadline: string | null;
   created_at: string | null;
-  clients: { name: string; platform: string | null; user_id?: string };
+  clients: { name: string; platform: string | null; user_id?: string } | null;
 };
 
+type TaskRow = {
+  id: UUID;
+  title: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  due_date: string | null;
+  color?: string | null;
+  clients?: { name?: string | null } | null; // left-join éventuel
+};
+
+type MixedItem =
+  | { kind: 'order'; date: string; title: string; colorBar: string; subtitle?: string | null }
+  | { kind: 'task'; date: string; title: string; colorBar: string; subtitle?: string | null };
+
+/* ---------------- Styles helpers ---------------- */
 const statusStyle = (status: string) => {
   switch (status) {
     case 'Completed':
@@ -47,6 +70,24 @@ const statusStyle = (status: string) => {
   }
 };
 
+const taskStyleFromPriority = (p: TaskPriority, fallbackHex?: string | null) => {
+  if (fallbackHex) {
+    // Couleur personnalisée (task.color) -> on fabrique une puce translucide
+    return { bar: fallbackHex, chipBg: 'rgba(255,255,255,0.06)', text: '#e5e7eb' };
+  }
+  switch (p) {
+    case 'urgent':
+      return { bar: '#ef4444', chipBg: 'rgba(239,68,68,0.12)', text: '#fee2e2' };
+    case 'high':
+      return { bar: '#f97316', chipBg: 'rgba(249,115,22,0.12)', text: '#ffedd5' };
+    case 'medium':
+      return { bar: '#3b82f6', chipBg: 'rgba(59,130,246,0.12)', text: '#dbeafe' };
+    default:
+      return { bar: '#94a3b8', chipBg: 'rgba(148,163,184,0.12)', text: '#e2e8f0' };
+  }
+};
+
+/* ---------------- Page ---------------- */
 const CalendarPage: React.FC = () => {
   const { user } = useAuth();
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
@@ -56,79 +97,192 @@ const CalendarPage: React.FC = () => {
   const [title, setTitle] = useState<string>('');
   const calendarRef = useRef<FullCalendar | null>(null);
 
-  // Filters / data
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  // Filters / toggles / search
+  const [statusFilter, setStatusFilter] = useState<string>('all'); // pour Orders uniquement
+  const [showOrders, setShowOrders] = useState<boolean>(true);
+  const [showTasks, setShowTasks] = useState<boolean>(true);
+  const [query, setQuery] = useState<string>('');
+
+  // Data states
   const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [tasks, setTasks] = useState<TaskRow[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const hasFetchedRef = useRef(false);
 
+  /* ---------------- Fetch Orders ---------------- */
   const fetchOrders = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
     if (!isSupabaseConfigured || !supabase || !user) {
       setOrders([]);
-      setLoading(false);
       return;
     }
+    const { data, error } = await supabase
+      .from('orders')
+      .select(`id, title, amount, status, deadline, created_at, clients!inner(name, platform, user_id)`)
+      .eq('clients.user_id', user.id)
+      .order('deadline', { ascending: true });
 
+    if (error) throw error;
+    setOrders((data || []) as OrderRow[]);
+  }, [user]);
+
+  /* ---------------- Fetch Tasks (due_date) ---------------- */
+  const fetchTasks = useCallback(async () => {
+    if (!isSupabaseConfigured || !supabase || !user) {
+      setTasks([]);
+      return;
+    }
+    // LEFT JOIN clients (si FK), sinon cette partie sera simplement null
+    const { data, error } = await supabase
+      .from('tasks')
+      .select(`
+        id, title, status, priority, due_date, color,
+        clients(name)
+      `)
+      .eq('user_id', user.id)
+      .not('due_date', 'is', null) // uniquement celles qui ont une échéance
+      .order('due_date', { ascending: true });
+
+    if (error) throw error;
+    const rows = (data || []) as any[];
+    setTasks(rows.map(r => ({
+      id: r.id,
+      title: r.title,
+      status: r.status,
+      priority: r.priority,
+      due_date: r.due_date,
+      color: r.color ?? null,
+      clients: r.clients ?? null,
+    })) as TaskRow[]);
+  }, [user]);
+
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`id, title, amount, status, deadline, created_at, clients!inner(name, platform, user_id)`)
-        .eq('clients.user_id', user.id)
-        .order('deadline', { ascending: true });
-
-      if (error) throw error;
-      setOrders((data || []) as OrderRow[]);
+      await Promise.all([fetchOrders(), fetchTasks()]);
     } catch (err: any) {
-      setError(err.message || 'Failed to load orders');
+      setError(err?.message || 'Failed to load calendar data');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user]);
+  }, [fetchOrders, fetchTasks]);
 
   useEffect(() => {
     if (!hasFetchedRef.current) {
       hasFetchedRef.current = true;
-      fetchOrders();
+      fetchAll();
     }
-  }, [fetchOrders]);
+  }, [fetchAll]);
 
-  // Build events
+  /* ---------------- Build events (Orders + Tasks) ---------------- */
+  const filteredOrders = useMemo(() => {
+    if (!showOrders) return [];
+    const base = statusFilter === 'all'
+      ? orders
+      : orders.filter((o) => o.status.toLowerCase().replace(' ', '_') === statusFilter);
+
+    const q = query.trim().toLowerCase();
+    if (!q) return base;
+    return base.filter(o => {
+      const hay = [
+        o.title,
+        o.clients?.name || '',
+        o.clients?.platform || '',
+      ].join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+  }, [orders, statusFilter, showOrders, query]);
+
+  const filteredTasks = useMemo(() => {
+    if (!showTasks) return [];
+    const q = query.trim().toLowerCase();
+    const base = tasks;
+    if (!q) return base;
+    return base.filter(t => {
+      const hay = [
+        t.title,
+        t.clients?.name || '',
+      ].join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+  }, [tasks, showTasks, query]);
+
   useEffect(() => {
-    const filtered =
-      statusFilter === 'all'
-        ? orders
-        : orders.filter((o) => o.status.toLowerCase().replace(' ', '_') === statusFilter);
-
-    const mapped = filtered
+    const orderEvents = filteredOrders
       .filter((o) => !!o.deadline)
       .map((o) => {
         const s = statusStyle(o.status);
         return {
-          id: o.id,
+          id: `order_${o.id}`,
           title: o.title,
           start: o.deadline,
           allDay: true,
-          backgroundColor: 'transparent', // styled via custom content
+          backgroundColor: 'transparent',
           borderColor: 'transparent',
           textColor: s.text,
-          extendedProps: { order: o, style: s }
+          extendedProps: { kind: 'order', order: o, style: s }
         };
       });
 
-    setEvents(mapped);
-  }, [orders, statusFilter]);
+    const taskEvents = filteredTasks
+      .filter((t) => !!t.due_date)
+      .map((t) => {
+        const s = taskStyleFromPriority(t.priority, t.color ?? undefined);
+        const prefix = t.status === 'done' ? '✓ ' : '';
+        return {
+          id: `task_${t.id}`,
+          title: `${prefix}${t.title}`,
+          start: t.due_date!,
+          allDay: true,
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+          textColor: s.text,
+          extendedProps: { kind: 'task', task: t, style: s }
+        };
+      });
 
+    setEvents([...orderEvents, ...taskEvents]);
+  }, [filteredOrders, filteredTasks]);
+
+  /* ---------------- Optional: backfill tasks into calendar_events ---------------- */
+  const backfillCalendarEvents = useCallback(async () => {
+    if (!user || !isSupabaseConfigured || !supabase) return;
+    const withDue = tasks.filter(t => t.due_date);
+    if (withDue.length === 0) return;
+
+    try {
+      const rows = withDue.map(t => ({
+        user_id: user.id,
+        title: t.title || 'Task',
+        start: t.due_date!,
+        end: t.due_date!,
+        all_day: true,
+        related_task_id: t.id,
+      }));
+      const { error } = await supabase.from('calendar_events').upsert(rows, { onConflict: 'related_task_id' });
+      if (error) {
+        // Table/colonnes absentes -> on ignore sans bloquer l’UI
+        console.warn('[calendar backfill]', error.message);
+      }
+    } catch (e) {
+      console.warn('[calendar backfill]', e);
+    }
+  }, [tasks, user]);
+
+  useEffect(() => {
+    // Essaie de backfiller quand des tasks avec due_date existent
+    if (tasks.length > 0) backfillCalendarEvents();
+  }, [tasks, backfillCalendarEvents]);
+
+  /* ---------------- Controls ---------------- */
   const handleRefresh = async () => {
     setRefreshing(true);
     hasFetchedRef.current = false;
-    await fetchOrders();
+    await fetchAll();
     toast.success('Calendar refreshed!');
   };
 
@@ -152,32 +306,47 @@ const CalendarPage: React.FC = () => {
     setTitle(arg.view.title);
   };
 
-  // Minimal event chip with left color bar
+  /* ---------------- Event renderer ---------------- */
   const renderEvent = (arg: EventContentArg) => {
-    const style = (arg.event.extendedProps as any)?.style as ReturnType<typeof statusStyle>;
+    const style = (arg.event.extendedProps as any)?.style as { bar: string; chipBg: string; text: string };
+    const kind: 'order' | 'task' | undefined = (arg.event.extendedProps as any)?.kind;
     const order: OrderRow | undefined = (arg.event.extendedProps as any)?.order;
+    const task: TaskRow | undefined = (arg.event.extendedProps as any)?.task;
+
+    const subtitle =
+      kind === 'order'
+        ? (order?.clients?.platform || order?.clients?.name || null)
+        : (task?.clients?.name || null);
 
     return (
       <div
         className="rounded-lg px-2 py-1 text-[12px] leading-[1.1] flex items-center gap-2"
         style={{ background: style.chipBg, borderLeft: `3px solid ${style.bar}` }}
       >
+        {kind === 'task' && <ListChecks size={12} className="opacity-80" />}
         <span className="truncate font-medium">{arg.event.title}</span>
-        {order?.clients?.platform && <span className="text-[11px] opacity-80">{order.clients.platform}</span>}
+        {subtitle && <span className="text-[11px] opacity-80 truncate">{subtitle}</span>}
       </div>
     );
   };
 
-  // Upcoming (right column)
-  const upcoming = useMemo(() => {
+  /* ---------------- Upcoming (mix Orders + Tasks) ---------------- */
+  const upcoming = useMemo< MixedItem[] >(() => {
     const now = new Date();
-    return orders
+    const oItems: MixedItem[] = orders
       .filter((o) => o.deadline && new Date(o.deadline) >= new Date(now.toDateString()))
-      .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
-      .slice(0, 8);
-  }, [orders]);
+      .map((o) => ({ kind: 'order', date: o.deadline!, title: o.title, colorBar: statusStyle(o.status).bar, subtitle: o.clients?.platform || o.clients?.name || null }));
 
-  /* ---------- Gates ---------- */
+    const tItems: MixedItem[] = tasks
+      .filter((t) => t.due_date && new Date(t.due_date) >= new Date(now.toDateString()))
+      .map((t) => ({ kind: 'task', date: t.due_date!, title: t.title, colorBar: taskStyleFromPriority(t.priority, t.color ?? undefined).bar, subtitle: t.clients?.name || null }));
+
+    return [...oItems, ...tItems]
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 8);
+  }, [orders, tasks]);
+
+  /* ---------------- Gates ---------------- */
   if (restrictionsLoading) {
     return (
       <Layout>
@@ -211,10 +380,10 @@ const CalendarPage: React.FC = () => {
     );
   }
 
-  /* ---------- Page ---------- */
+  /* ---------------- Page ---------------- */
   return (
     <Layout>
-      <div className="space-y-6 p-4 sm:p-0">
+      <div className={`space-y-6 p-4 sm:p-0 ${pageBgClass}`}>
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -283,16 +452,42 @@ const CalendarPage: React.FC = () => {
               </button>
             </div>
 
+            {/* Orders status filter (conserve) */}
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="px-3 py-2 text-sm rounded-lg bg-[#0E121A] text-slate-100 ring-1 ring-inset ring-[#1C2230] focus:outline-none"
+              title="Filter orders by status"
             >
-              <option value="all">All Status</option>
+              <option value="all">All Orders</option>
               <option value="pending">Pending</option>
               <option value="in_progress">In Progress</option>
               <option value="completed">Completed</option>
             </select>
+
+            {/* Toggles */}
+            <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-[#0E121A] text-slate-100 ring-1 ring-inset ring-[#1C2230]">
+              <label className="flex items-center gap-1">
+                <input type="checkbox" className="accent-sky-500" checked={showOrders} onChange={(e) => setShowOrders(e.target.checked)} />
+                <span className="text-sm">Orders</span>
+              </label>
+              <span className="text-slate-600">|</span>
+              <label className="flex items-center gap-1">
+                <input type="checkbox" className="accent-fuchsia-500" checked={showTasks} onChange={(e) => setShowTasks(e.target.checked)} />
+                <span className="text-sm">Tasks</span>
+              </label>
+            </div>
+
+            {/* Search */}
+            <div className="relative">
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search title, client, platform…"
+                className="pl-9 pr-3 py-2 text-sm rounded-lg bg-[#0E121A] text-slate-100 ring-1 ring-inset ring-[#1C2230] focus:outline-none w-56"
+              />
+              <SearchIcon size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            </div>
 
             <button
               onClick={handleRefresh}
@@ -306,6 +501,7 @@ const CalendarPage: React.FC = () => {
             <button
               disabled
               className="inline-flex items-center px-3 py-2 rounded-lg bg-[#0E121A] text-slate-500 cursor-not-allowed ring-1 ring-inset ring-[#1C2230]"
+              title="External sync (coming soon)"
             >
               <ExternalLink size={16} className="mr-2" />
               Sync
@@ -327,7 +523,7 @@ const CalendarPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Main Calendar */}
           <section className="lg:col-span-8 xl:col-span-9">
-            <div className="rounded-2xl border border-[#1C2230] bg-[#0B0E14] p-3">
+            <div className={`${cardClass} p-3`}>
               <div className="px-1 pb-3">
                 <div className="text-lg font-semibold text-white">{title}</div>
               </div>
@@ -345,7 +541,7 @@ const CalendarPage: React.FC = () => {
                 events={events}
                 eventContent={renderEvent}
                 datesSet={onDatesSet}
-                /** 👇 ces classes sont conservées; le reste du thème est géré via calendar-dark.css */
+                /** Thème blackout via classes + calendar-dark.css */
                 dayHeaderClassNames="bg-[#0F141C] text-slate-300 border-[#1C2230]"
                 dayCellClassNames="border-[#1C2230] hover:bg-[#0F141C]"
               />
@@ -354,32 +550,32 @@ const CalendarPage: React.FC = () => {
 
           {/* Upcoming list */}
           <aside className="lg:col-span-4 xl:col-span-3">
-            <div className="rounded-2xl border border-[#1C2230] bg-[#0B0E14] p-4">
+            <div className={`${cardClass} p-4`}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-base font-semibold text-white">Upcoming</h3>
                 <span className="text-xs text-slate-400">{upcoming.length} items</span>
               </div>
 
               {upcoming.length === 0 ? (
-                <p className="text-sm text-slate-400">No upcoming deadlines.</p>
+                <p className="text-sm text-slate-400">No upcoming items.</p>
               ) : (
                 <div className="space-y-2">
-                  {upcoming.map((o) => {
-                    const s = statusStyle(o.status);
-                    const d = new Date(o.deadline!);
+                  {upcoming.map((it, idx) => {
+                    const d = new Date(it.date);
                     const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
                     return (
                       <div
-                        key={o.id}
+                        key={idx}
                         className="rounded-xl p-3 bg-[#0E121A] ring-1 ring-inset ring-[#1C2230] hover:bg-[#121722] transition"
-                        style={{ borderLeft: `3px solid ${s.bar}` }}
+                        style={{ borderLeft: `3px solid ${it.colorBar}` }}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <div className="text-sm font-medium text-white truncate">{o.title}</div>
-                            <div className="text-xs text-slate-400 truncate">
-                              {o.clients?.name} {o.clients?.platform ? `• ${o.clients.platform}` : ''}
+                            <div className="text-sm font-medium text-white truncate">
+                              {it.kind === 'task' ? <span className="inline-flex items-center gap-1 mr-1"><ListChecks size={14} /> Task:</span> : null}
+                              {it.title}
                             </div>
+                            {it.subtitle && <div className="text-xs text-slate-400 truncate">{it.subtitle}</div>}
                           </div>
                           <span className="text-xs text-slate-300">{date}</span>
                         </div>
