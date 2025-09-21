@@ -23,10 +23,8 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Styles FullCalendar (v6.x)
-import '@fullcalendar/daygrid/dist/daygrid.css';
-import '@fullcalendar/timegrid/dist/timegrid.css';
-import '@fullcalendar/list/dist/list.css';
+// Styles FullCalendar consolidés
+import '@/styles/fullcalendar.css';
 
 // Override dark mode
 import '@/styles/calendar-dark.css';
@@ -532,15 +530,12 @@ const CalendarPage: React.FC = () => {
                 events={events}
                 eventContent={renderEvent}
                 datesSet={onDatesSet}
-                /* Drag & drop */
                 editable
                 eventStartEditable
                 eventDurationEditable={false}
                 droppable={false}
                 eventDrop={onEventDrop}
-                /* Désactivation du thème bleu par défaut */
                 themeSystem={''}
-                /* Dark mode classes */
                 dayHeaderClassNames="bg-[#0F141C] text-slate-300 border-[#1C2230]"
                 dayCellClassNames="border-[#1C2230] hover:bg-[#0F141C]"
               />
