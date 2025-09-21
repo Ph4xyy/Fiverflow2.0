@@ -554,7 +554,7 @@ const AdminDashboard: React.FC = () => {
       try {
         const { error } = await supabase.from("subscriptions").insert([
           {
-            user_id: userId,
+            id: userId,
             plan,
             start_date: startDate,
             end_date: endDate,
@@ -628,8 +628,6 @@ const AdminDashboard: React.FC = () => {
     </button>
   </form>
 </div>
-
-
         {/* FIN - SYSTEME D'AJOUT D'ABONNEMENTS */}
 
 
