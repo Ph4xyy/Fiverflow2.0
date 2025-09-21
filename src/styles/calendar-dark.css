@@ -33,7 +33,7 @@
 
 /* Puces “+X more” pour rester dans le thème */
 .fc .fc-daygrid-more-link {
-  background: #111722 !important;
+  background: #111827 !important;
   color: #cbd5e1 !important;
   border: 1px solid #1C2230 !important;
   border-radius: 10px;
@@ -41,7 +41,7 @@
 }
 
 /* Cellule hover / today (cosmétique, optionnel) */
-.fc .fc-daygrid-day-frame:hover { background: #121722 !important; }
+.fc .fc-daygrid-day-frame:hover { background: #111827 !important; }
 .fc .fc-daygrid-day.fc-day-today { background: rgba(42,51,71,0.35) !important; }
 
 /* Bordures (cosmétique) */
