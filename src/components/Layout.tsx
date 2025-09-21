@@ -282,7 +282,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             </button>
             <Link to="/dashboard" className="text-2xl font-extrabold leading-none">
               <span className="bg-gradient-to-r from-accent-blue via-accent-purple to-accent-green bg-clip-text text-transparent">
-                FiverFlow
+                FiverFloww
               </span>
             </Link>
           </div>
