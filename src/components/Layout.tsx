@@ -283,7 +283,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="lg:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#141922] transition-all duration-200"
             >
-              {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+              {isSidebarOpen ? <X size={40 /> : <Menu size={20} />}
             </button>
             <Link to="/dashboard" className="text-2xl font-extrabold leading-none">
             <img src={LogoImage} alt="Logo" className="h-8 w-auto" />
