@@ -24,7 +24,6 @@ import toast from 'react-hot-toast';
 
 /** FullCalendar CSS (v6.1.7 compatible) */
 // CSS FullCalendar
-import '@fullcalendar/core/vdom'; // <-- important pour React 18
 import '@fullcalendar/common/main.css';
 import '@fullcalendar/daygrid/main.css';
 import '@fullcalendar/timegrid/main.css';
