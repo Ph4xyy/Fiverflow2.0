@@ -25,7 +25,8 @@ import toast from 'react-hot-toast';
 /** FullCalendar CSS (v6.1.7 compatible) */
 import '@fullcalendar/daygrid/index.css';
 import '@fullcalendar/timegrid/index.css';
-import '@/styles/calendar-dark.css';
+import '@/styles/calendar-dark.css'; // ton override dark mode
+
 
 /* ---------------- Types ---------------- */
 type UUID = string;
