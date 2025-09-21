@@ -525,6 +525,110 @@ const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
+
+        {/* Create Subscription */}
+<div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+  <div className="flex items-center justify-between mb-4">
+    <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+      Créer un abonnement
+    </h2>
+    <Crown className="text-yellow-500" size={20} />
+  </div>
+
+  <form
+    onSubmit={async (e) => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      const formData = new FormData(form);
+      const userId = formData.get("userId") as string;
+      const plan = formData.get("plan") as PlanKey;
+      const startDate = formData.get("startDate") as string;
+      const endDate = formData.get("endDate") as string;
+
+      if (!userId || !plan || !startDate || !endDate) {
+        toast.error("Tous les champs sont obligatoires");
+        return;
+      }
+
+      try {
+        const { error } = await supabase.from("subscriptions").insert([
+          {
+            user_id: userId,
+            plan,
+            start_date: startDate,
+            end_date: endDate,
+          },
+        ]);
+        if (error) throw error;
+        toast.success("Abonnement créé !");
+        form.reset();
+      } catch (err: any) {
+        console.error(err);
+        toast.error("Erreur lors de la création");
+      }
+    }}
+    className="space-y-4"
+  >
+    <div>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        ID utilisateur
+      </label>
+      <input
+        type="text"
+        name="userId"
+        placeholder="uuid utilisateur"
+        className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+      />
+    </div>
+
+    <div>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        Plan
+      </label>
+      <select
+        name="plan"
+        className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+      >
+        <option value="free">Free</option>
+        <option value="trial">Trial</option>
+        <option value="pro">Pro</option>
+        <option value="excellence">Excellence</option>
+      </select>
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Date de début
+        </label>
+        <input
+          type="date"
+          name="startDate"
+          className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Date de fin
+        </label>
+        <input
+          type="date"
+          name="endDate"
+          className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        />
+      </div>
+    </div>
+
+    <button
+      type="submit"
+      className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md shadow-sm"
+    >
+      Créer l’abonnement
+    </button>
+  </form>
+</div>
+
+
         <div className="text-xs text-gray-500 dark:text-gray-400">
           * Le calcul s’adapte à votre schéma : si une colonne/table est absente, elle est ignorée. Vous pouvez m’envoyer le schéma réel pour avoir des stats 100% précises (plans, revenus, etc.).
         </div>
