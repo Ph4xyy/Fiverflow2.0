@@ -23,9 +23,13 @@ import {
 import toast from 'react-hot-toast';
 
 /** FullCalendar CSS (v6.1.7 compatible) */
-import '@fullcalendar/daygrid/index.css';
-import '@fullcalendar/timegrid/index.css';
-import '@/styles/calendar-dark.css'; // ton override dark mode
+// CSS FullCalendar
+import '@fullcalendar/core/vdom'; // <-- important pour React 18
+import '@fullcalendar/common/main.css';
+import '@fullcalendar/daygrid/main.css';
+import '@fullcalendar/timegrid/main.css';
+import '@fullcalendar/list/main.css';
+
 
 
 /* ---------------- Types ---------------- */
