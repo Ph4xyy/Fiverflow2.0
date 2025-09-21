@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-/** 👇 Thème sombre FullCalendar (conservé) */
+/** Thème blackout FullCalendar (CSS ci-dessus) */
 import '@/styles/calendar-dark.css';
 
 /* ---------------- Types ---------------- */
@@ -49,7 +49,7 @@ type TaskRow = {
   priority: TaskPriority;
   due_date: string | null;
   color?: string | null;
-  clients?: { name?: string | null } | null; // left-join éventuel
+  client_id?: string | null;
 };
 
 type MixedItem =
@@ -72,7 +72,6 @@ const statusStyle = (status: string) => {
 
 const taskStyleFromPriority = (p: TaskPriority, fallbackHex?: string | null) => {
   if (fallbackHex) {
-    // Couleur personnalisée (task.color) -> on fabrique une puce translucide
     return { bar: fallbackHex, chipBg: 'rgba(255,255,255,0.06)', text: '#e5e7eb' };
   }
   switch (p) {
@@ -85,6 +84,13 @@ const taskStyleFromPriority = (p: TaskPriority, fallbackHex?: string | null) => 
     default:
       return { bar: '#94a3b8', chipBg: 'rgba(148,163,184,0.12)', text: '#e2e8f0' };
   }
+};
+
+/* Util */
+const toDateOnly = (d: Date | null): string | null => {
+  if (!d) return null;
+  const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return z.toISOString().slice(0, 10);
 };
 
 /* ---------------- Page ---------------- */
@@ -134,28 +140,17 @@ const CalendarPage: React.FC = () => {
       setTasks([]);
       return;
     }
-    // LEFT JOIN clients (si FK), sinon cette partie sera simplement null
+
+    // On évite le LEFT JOIN si la FK n’existe pas encore : on ne prend que les colonnes sûres.
     const { data, error } = await supabase
       .from('tasks')
-      .select(`
-        id, title, status, priority, due_date, color,
-        clients(name)
-      `)
+      .select(`id, title, status, priority, due_date, color, client_id`)
       .eq('user_id', user.id)
-      .not('due_date', 'is', null) // uniquement celles qui ont une échéance
+      .not('due_date', 'is', null)
       .order('due_date', { ascending: true });
 
     if (error) throw error;
-    const rows = (data || []) as any[];
-    setTasks(rows.map(r => ({
-      id: r.id,
-      title: r.title,
-      status: r.status,
-      priority: r.priority,
-      due_date: r.due_date,
-      color: r.color ?? null,
-      clients: r.clients ?? null,
-    })) as TaskRow[]);
+    setTasks((data || []) as TaskRow[]);
   }, [user]);
 
   const fetchAll = useCallback(async () => {
@@ -200,13 +195,9 @@ const CalendarPage: React.FC = () => {
   const filteredTasks = useMemo(() => {
     if (!showTasks) return [];
     const q = query.trim().toLowerCase();
-    const base = tasks;
-    if (!q) return base;
-    return base.filter(t => {
-      const hay = [
-        t.title,
-        t.clients?.name || '',
-      ].join(' ').toLowerCase();
+    if (!q) return tasks;
+    return tasks.filter(t => {
+      const hay = [t.title].join(' ').toLowerCase();
       return hay.includes(q);
     });
   }, [tasks, showTasks, query]);
@@ -264,19 +255,63 @@ const CalendarPage: React.FC = () => {
         related_task_id: t.id,
       }));
       const { error } = await supabase.from('calendar_events').upsert(rows, { onConflict: 'related_task_id' });
-      if (error) {
-        // Table/colonnes absentes -> on ignore sans bloquer l’UI
-        console.warn('[calendar backfill]', error.message);
-      }
+      if (error) console.warn('[calendar backfill]', error.message);
     } catch (e) {
       console.warn('[calendar backfill]', e);
     }
   }, [tasks, user]);
 
   useEffect(() => {
-    // Essaie de backfiller quand des tasks avec due_date existent
     if (tasks.length > 0) backfillCalendarEvents();
   }, [tasks, backfillCalendarEvents]);
+
+  /* ---------------- Drag & Drop (update DB) ---------------- */
+  const onEventDrop = useCallback(async (info: any) => {
+    // info.event.id = "task_UUID" ou "order_UUID"
+    const newDate = toDateOnly(info.event.start);
+    if (!newDate) return info.revert();
+
+    const idStr = String(info.event.id);
+    const isTask = idStr.startsWith('task_');
+    const rawId = idStr.replace(/^task_|^order_/, '');
+
+    try {
+      if (!isSupabaseConfigured || !supabase) throw new Error('DB non configurée');
+
+      if (isTask) {
+        // Optimistic local update
+        setTasks(prev => prev.map(t => t.id === rawId ? { ...t, due_date: newDate } : t));
+
+        const { error } = await supabase.from('tasks').update({ due_date: newDate }).eq('id', rawId);
+        if (error) throw error;
+
+        // Sync calendar_events (non bloquant)
+        try {
+          await supabase.from('calendar_events').upsert({
+            user_id: user?.id,
+            title: info.event.title?.replace(/^✓\s*/, '') || 'Task',
+            start: newDate,
+            end: newDate,
+            all_day: true,
+            related_task_id: rawId,
+          }, { onConflict: 'related_task_id' });
+        } catch (e) {
+          console.warn('[eventDrop calendar upsert]', e);
+        }
+      } else {
+        // ORDER
+        setOrders(prev => prev.map(o => o.id === rawId ? { ...o, deadline: newDate } : o));
+        const { error } = await supabase.from('orders').update({ deadline: newDate }).eq('id', rawId);
+        if (error) throw error;
+      }
+
+      toast.success('Date mise à jour');
+    } catch (e: any) {
+      console.error('[onEventDrop]', e);
+      toast.error(`Impossible d’enregistrer: ${e?.message || 'erreur inconnue'}`);
+      info.revert();
+    }
+  }, [user]);
 
   /* ---------------- Controls ---------------- */
   const handleRefresh = async () => {
@@ -316,11 +351,11 @@ const CalendarPage: React.FC = () => {
     const subtitle =
       kind === 'order'
         ? (order?.clients?.platform || order?.clients?.name || null)
-        : (task?.clients?.name || null);
+        : null; // on évite join côté tasks
 
     return (
       <div
-        className="rounded-lg px-2 py-1 text-[12px] leading-[1.1] flex items-center gap-2"
+        className="rounded-lg px-2 py-1 text-[12px] leading-[1.1] flex items-center gap-2 cursor-grab active:cursor-grabbing"
         style={{ background: style.chipBg, borderLeft: `3px solid ${style.bar}` }}
       >
         {kind === 'task' && <ListChecks size={12} className="opacity-80" />}
@@ -339,7 +374,7 @@ const CalendarPage: React.FC = () => {
 
     const tItems: MixedItem[] = tasks
       .filter((t) => t.due_date && new Date(t.due_date) >= new Date(now.toDateString()))
-      .map((t) => ({ kind: 'task', date: t.due_date!, title: t.title, colorBar: taskStyleFromPriority(t.priority, t.color ?? undefined).bar, subtitle: t.clients?.name || null }));
+      .map((t) => ({ kind: 'task', date: t.due_date!, title: t.title, colorBar: taskStyleFromPriority(t.priority, t.color ?? undefined).bar, subtitle: null }));
 
     return [...oItems, ...tItems]
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
@@ -541,7 +576,13 @@ const CalendarPage: React.FC = () => {
                 events={events}
                 eventContent={renderEvent}
                 datesSet={onDatesSet}
-                /** Thème blackout via classes + calendar-dark.css */
+                /* Drag & drop */
+                editable
+                eventStartEditable
+                eventDurationEditable={false}
+                droppable={false}
+                eventDrop={onEventDrop}
+                /* Thème blackout via classes + calendar-dark.css */
                 dayHeaderClassNames="bg-[#0F141C] text-slate-300 border-[#1C2230]"
                 dayCellClassNames="border-[#1C2230] hover:bg-[#0F141C]"
               />
