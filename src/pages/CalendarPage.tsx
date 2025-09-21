@@ -1,4 +1,3 @@
-// src/pages/CalendarPage.tsx
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Layout, { pageBgClass, cardClass } from '@/components/Layout';
 import PlanRestrictedPage from '../components/PlanRestrictedPage';
@@ -23,12 +22,10 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Styles FullCalendar (imports officiels v6)
-import '@fullcalendar/daygrid/index.global.css';
-import '@fullcalendar/timegrid/index.global.css';
-import '@fullcalendar/list/index.global.css';
-
-// Override dark mode
+/** FullCalendar CSS (v6.1.7 compatible) */
+import '@fullcalendar/core/index.css';
+import '@fullcalendar/daygrid/index.css';
+import '@fullcalendar/timegrid/index.css';
 import '@/styles/calendar-dark.css';
 
 /* ---------------- Types ---------------- */
@@ -145,7 +142,6 @@ const CalendarPage: React.FC = () => {
       setTasks([]);
       return;
     }
-
     const { data, error } = await supabase
       .from('tasks')
       .select(`id, title, status, priority, due_date, color, client_id`)
@@ -200,10 +196,7 @@ const CalendarPage: React.FC = () => {
     if (!showTasks) return [];
     const q = query.trim().toLowerCase();
     if (!q) return tasks;
-    return tasks.filter(t => {
-      const hay = [t.title].join(' ').toLowerCase();
-      return hay.includes(q);
-    });
+    return tasks.filter(t => [t.title].join(' ').toLowerCase().includes(q));
   }, [tasks, showTasks, query]);
 
   useEffect(() => {
@@ -243,33 +236,7 @@ const CalendarPage: React.FC = () => {
     setEvents([...orderEvents, ...taskEvents]);
   }, [filteredOrders, filteredTasks]);
 
-  /* ---------------- Backfill calendar_events ---------------- */
-  const backfillCalendarEvents = useCallback(async () => {
-    if (!user || !isSupabaseConfigured || !supabase) return;
-    const withDue = tasks.filter(t => t.due_date);
-    if (withDue.length === 0) return;
-
-    try {
-      const rows = withDue.map(t => ({
-        user_id: user.id,
-        title: t.title || 'Task',
-        start: t.due_date!,
-        end: t.due_date!,
-        all_day: true,
-        related_task_id: t.id,
-      }));
-      const { error } = await supabase.from('calendar_events').upsert(rows, { onConflict: 'related_task_id' });
-      if (error) console.warn('[calendar backfill]', error.message);
-    } catch (e) {
-      console.warn('[calendar backfill]', e);
-    }
-  }, [tasks, user]);
-
-  useEffect(() => {
-    if (tasks.length > 0) backfillCalendarEvents();
-  }, [tasks, backfillCalendarEvents]);
-
-  /* ---------------- Drag & Drop ---------------- */
+  /* ---------------- Event drop ---------------- */
   const onEventDrop = useCallback(async (info: any) => {
     const newDate = toDateOnly(info.event.start);
     if (!newDate) return info.revert();
@@ -283,22 +250,8 @@ const CalendarPage: React.FC = () => {
 
       if (isTask) {
         setTasks(prev => prev.map(t => t.id === rawId ? { ...t, due_date: newDate } : t));
-
         const { error } = await supabase.from('tasks').update({ due_date: newDate }).eq('id', rawId);
         if (error) throw error;
-
-        try {
-          await supabase.from('calendar_events').upsert({
-            user_id: user?.id,
-            title: info.event.title?.replace(/^✓\s*/, '') || 'Task',
-            start: newDate,
-            end: newDate,
-            all_day: true,
-            related_task_id: rawId,
-          }, { onConflict: 'related_task_id' });
-        } catch (e) {
-          console.warn('[eventDrop calendar upsert]', e);
-        }
       } else {
         setOrders(prev => prev.map(o => o.id === rawId ? { ...o, deadline: newDate } : o));
         const { error } = await supabase.from('orders').update({ deadline: newDate }).eq('id', rawId);
@@ -341,17 +294,14 @@ const CalendarPage: React.FC = () => {
     setTitle(arg.view.title);
   };
 
-  /* ---------------- Event renderer ---------------- */
+  /* ---------------- Render event ---------------- */
   const renderEvent = (arg: EventContentArg) => {
     const style = (arg.event.extendedProps as any)?.style as { bar: string; chipBg: string; text: string };
     const kind: 'order' | 'task' | undefined = (arg.event.extendedProps as any)?.kind;
     const order: OrderRow | undefined = (arg.event.extendedProps as any)?.order;
     const task: TaskRow | undefined = (arg.event.extendedProps as any)?.task;
 
-    const subtitle =
-      kind === 'order'
-        ? (order?.clients?.platform || order?.clients?.name || null)
-        : null;
+    const subtitle = kind === 'order' ? (order?.clients?.platform || order?.clients?.name || null) : null;
 
     return (
       <div
@@ -571,7 +521,6 @@ const CalendarPage: React.FC = () => {
                 eventDurationEditable={false}
                 droppable={false}
                 eventDrop={onEventDrop}
-                themeSystem={''}
                 dayHeaderClassNames="bg-[#0F141C] text-slate-300 border-[#1C2230]"
                 dayCellClassNames="border-[#1C2230] hover:bg-[#0F141C]"
               />
