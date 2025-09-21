@@ -23,10 +23,10 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Styles FullCalendar (bypass exports avec chemin absolu node_modules)
-import '../../node_modules/@fullcalendar/daygrid/index.global.css';
-import '../../node_modules/@fullcalendar/timegrid/index.global.css';
-import '../../node_modules/@fullcalendar/list/index.global.css';
+// Styles FullCalendar (imports officiels v6)
+import '@fullcalendar/daygrid/index.global.css';
+import '@fullcalendar/timegrid/index.global.css';
+import '@fullcalendar/list/index.global.css';
 
 // Override dark mode
 import '@/styles/calendar-dark.css';
@@ -109,7 +109,7 @@ const CalendarPage: React.FC = () => {
   const calendarRef = useRef<FullCalendar | null>(null);
 
   // Filters / toggles / search
-  const [statusFilter, setStatusFilter] = useState<string>('all'); // pour Orders uniquement
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showOrders, setShowOrders] = useState<boolean>(true);
   const [showTasks, setShowTasks] = useState<boolean>(true);
   const [query, setQuery] = useState<string>('');
@@ -139,7 +139,7 @@ const CalendarPage: React.FC = () => {
     setOrders((data || []) as OrderRow[]);
   }, [user]);
 
-  /* ---------------- Fetch Tasks (due_date) ---------------- */
+  /* ---------------- Fetch Tasks ---------------- */
   const fetchTasks = useCallback(async () => {
     if (!isSupabaseConfigured || !supabase || !user) {
       setTasks([]);
@@ -177,7 +177,7 @@ const CalendarPage: React.FC = () => {
     }
   }, [fetchAll]);
 
-  /* ---------------- Build events (Orders + Tasks) ---------------- */
+  /* ---------------- Build events ---------------- */
   const filteredOrders = useMemo(() => {
     if (!showOrders) return [];
     const base = statusFilter === 'all'
@@ -243,7 +243,7 @@ const CalendarPage: React.FC = () => {
     setEvents([...orderEvents, ...taskEvents]);
   }, [filteredOrders, filteredTasks]);
 
-  /* ---------------- backfill calendar_events ---------------- */
+  /* ---------------- Backfill calendar_events ---------------- */
   const backfillCalendarEvents = useCallback(async () => {
     if (!user || !isSupabaseConfigured || !supabase) return;
     const withDue = tasks.filter(t => t.due_date);
@@ -269,7 +269,7 @@ const CalendarPage: React.FC = () => {
     if (tasks.length > 0) backfillCalendarEvents();
   }, [tasks, backfillCalendarEvents]);
 
-  /* ---------------- Drag & Drop (update DB) ---------------- */
+  /* ---------------- Drag & Drop ---------------- */
   const onEventDrop = useCallback(async (info: any) => {
     const newDate = toDateOnly(info.event.start);
     if (!newDate) return info.revert();
@@ -365,7 +365,7 @@ const CalendarPage: React.FC = () => {
     );
   };
 
-  /* ---------------- Upcoming (mix Orders + Tasks) ---------------- */
+  /* ---------------- Upcoming ---------------- */
   const upcoming = useMemo<MixedItem[]>(() => {
     const now = new Date();
     const oItems: MixedItem[] = orders
@@ -459,37 +459,25 @@ const CalendarPage: React.FC = () => {
             <div className="inline-flex rounded-lg overflow-hidden ring-1 ring-inset ring-[#1C2230]">
               <button
                 onClick={() => switchView('dayGridMonth')}
-                className={`px-3 py-2 text-sm ${
-                  currentView === 'dayGridMonth'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'
-                }`}
+                className={`px-3 py-2 text-sm ${currentView === 'dayGridMonth' ? 'bg-blue-600 text-white' : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'}`}
               >
                 Month
               </button>
               <button
                 onClick={() => switchView('timeGridWeek')}
-                className={`px-3 py-2 text-sm ${
-                  currentView === 'timeGridWeek'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'
-                }`}
+                className={`px-3 py-2 text-sm ${currentView === 'timeGridWeek' ? 'bg-blue-600 text-white' : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'}`}
               >
                 Week
               </button>
               <button
                 onClick={() => switchView('timeGridDay')}
-                className={`px-3 py-2 text-sm ${
-                  currentView === 'timeGridDay'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'
-                }`}
+                className={`px-3 py-2 text-sm ${currentView === 'timeGridDay' ? 'bg-blue-600 text-white' : 'bg-[#0E121A] text-slate-200 hover:bg-[#121722]'}`}
               >
                 Day
               </button>
             </div>
 
-            {/* Orders status filter */}
+            {/* Status filter */}
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -558,7 +546,7 @@ const CalendarPage: React.FC = () => {
 
         {/* Content */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Main Calendar */}
+          {/* Calendar */}
           <section className="lg:col-span-8 xl:col-span-9">
             <div className={`${cardClass} p-3`}>
               <div className="px-1 pb-3">
@@ -590,14 +578,13 @@ const CalendarPage: React.FC = () => {
             </div>
           </section>
 
-          {/* Upcoming list */}
+          {/* Upcoming */}
           <aside className="lg:col-span-4 xl:col-span-3">
             <div className={`${cardClass} p-4`}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-base font-semibold text-white">Upcoming</h3>
                 <span className="text-xs text-slate-400">{upcoming.length} items</span>
               </div>
-
               {upcoming.length === 0 ? (
                 <p className="text-sm text-slate-400">No upcoming items.</p>
               ) : (
