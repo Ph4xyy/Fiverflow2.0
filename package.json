@@ -12,10 +12,10 @@
   "dependencies": {
     "@fullcalendar/common": "^5.11.5",
     "@fullcalendar/core": "^6.1.17",
-    "@fullcalendar/daygrid": "^6.1.19",
+    "@fullcalendar/daygrid": "6.1.15",
     "@fullcalendar/interaction": "^6.1.17",
     "@fullcalendar/list": "^6.1.17",
-    "@fullcalendar/react": "^6.1.19",
+    "@fullcalendar/react": "6.1.15",
     "@fullcalendar/timegrid": "^6.1.17",
     "@studio-freight/lenis": "^1.0.42",
     "@supabase/supabase-js": "^2.52.0",
