@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import '@fullcalendar/daygrid/index.css';
+import '@fullcalendar/daygrid/main.css';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout, { cardClass, subtleBg } from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
