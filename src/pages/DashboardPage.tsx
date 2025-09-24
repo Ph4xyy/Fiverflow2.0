@@ -23,9 +23,9 @@ import toast from 'react-hot-toast';
 
 
 // Touche pas c limport du css
-import '@fullcalendar/daygrid/index.css';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import '@fullcalendar/daygrid/main.css';
 
 
 
