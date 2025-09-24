@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout, { cardClass, subtleBg } from '../components/Layout';
-import '@fullcalendar/daygrid/index.css';
 import { useAuth } from '../contexts/AuthContext';
 import { useClients } from '../hooks/useClients';
 import { useStripeSubscription } from '../hooks/useStripeSubscription';
@@ -22,8 +21,13 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import '@fullcalendar/daygrid';
+
+// Touche pas c limport du css
 import '@fullcalendar/daygrid/index.css';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+
+
 
 const DashboardPage = () => {
   const navigate = useNavigate();
