@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import '@fullcalendar/daygrid/index.css';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout, { cardClass, subtleBg } from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,7 +26,7 @@ import toast from 'react-hot-toast';
 // Touche pas c limport du css
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import '@fullcalendar/daygrid/main.css';
+
 
 
 
