@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // Import logo
 import LogoImage from '../assets/LogoTransparent.png';
 
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import NotificationsDropdown from './NotificationsDropdown';
+import CentralizedSearchBar from './CentralizedSearchBar';
+import LanguageSwitcher from './LanguageSwitcher';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 import { 
@@ -79,6 +82,7 @@ class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, 
 }
 
 const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
+  const { t } = useLanguage();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
 
@@ -278,6 +282,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       {/* Topbar (dark-only) */}
       <header className="bg-[#0D1117]/80 backdrop-blur-xl border-b border-[#1C2230] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] fixed w-full top-0 z-50">
         <div className="flex items-center justify-between px-3 sm:px-4 py-3">
+          {/* Left section - Logo and mobile menu */}
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -286,17 +291,24 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               {isSidebarOpen ? <X size={40} /> : <Menu size={20} />}
             </button>
             <Link to="/dashboard" className="text-2xl font-extrabold leading-none">
-        {/* Le logo est a gauche et le texte a drete */}
-        <div className="flex items-center space-x-3">
-          <img src={LogoImage} alt="Logo" className="h-8 w-auto" /> {/* Logo */}
-          <span className="text-2x1 font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-accent-blue dark:to-accent-purple bg-clip-text text-transparent">
-            FiverFlow
-              </span>
-            </div>
+              <div className="flex items-center space-x-3">
+                <img src={LogoImage} alt="Logo" className="h-8 w-auto" />
+                <span className="text-2x1 font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-accent-blue dark:to-accent-purple bg-clip-text text-transparent">
+                  FiverFlow
+                </span>
+              </div>
             </Link>
           </div>
+
+          {/* Center section - Search bar */}
+          <div className="hidden md:flex flex-1 max-w-2xl mx-4">
+            <CentralizedSearchBar />
+          </div>
           
+          {/* Right section - Language switcher, notifications, logout */}
           <div className="flex items-center gap-2 sm:gap-3">
+            <LanguageSwitcher />
+            
             <LocalErrorBoundary>
               <div className="size-10 rounded-xl grid place-items-center text-slate-300 hover:text-white bg-[#121722] hover:bg-[#141A26] ring-1 ring-inset ring-[#202839] hover:ring-[#2A3347] transition-all duration-200">
                 <NotificationsDropdown />

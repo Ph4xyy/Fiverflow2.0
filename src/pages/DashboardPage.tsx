@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import Layout, { cardClass, subtleBg } from '@/components/Layout';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useClients } from '@/hooks/useClients';
 import { useStripeSubscription } from '@/hooks/useStripeSubscription';
 import { usePlanRestrictions } from '@/hooks/usePlanRestrictions';
@@ -25,6 +26,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 
 const DashboardPage = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { clients } = useClients();
@@ -172,11 +174,11 @@ const DashboardPage = () => {
       <div className="space-y-6 p-4">
         {/* Titre */}
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-extrabold tracking-tight text-white">
-            {userName 
-              ? `Welcome back, ${userName}!` 
-              : "Welcome to your Dashboard"}
-          </h1>
+        <h1 className="text-3xl font-extrabold tracking-tight text-white">
+          {userName
+            ? `${t('dashboard.welcome')}, ${userName}!`
+            : t('dashboard.welcome.guest')}
+        </h1>
         </div>
 
         {/* Stat cards (cartes très sombres) */}
@@ -226,32 +228,32 @@ const DashboardPage = () => {
           </div>
 
           <div className={`${cardClass} p-5`}>
-            <h2 className="text-lg font-semibold mb-4 text-white">Quick Actions</h2>
+            <h2 className="text-lg font-semibold mb-4 text-white">{t('dashboard.quick.actions')}</h2>
             <div className="grid grid-cols-1 gap-3">
               <button onClick={handleAddClient} className="btn-primary w-full py-3 text-sm font-medium">
-                Add Client
+                {t('dashboard.add.client')}
               </button>
               <button onClick={handleAddOrder} className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-medium px-4 py-3 rounded-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm">
-                Add Order
+                {t('dashboard.add.order')}
               </button>
               <button
                 onClick={handleAddTask}
                 disabled={restrictionsLoading}
                 className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium px-4 py-3 rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-60 text-sm"
               >
-                Add Task
+                {t('dashboard.add.task')}
               </button>
-              <button 
-                onClick={() => navigate('/invoices')} 
+              <button
+                onClick={() => navigate('/invoices')}
                 className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium px-4 py-3 rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm"
               >
-                Add Invoice
+                {t('dashboard.add.invoice')}
               </button>
-              <button 
-                onClick={() => navigate('/workspace/todo')} 
+              <button
+                onClick={() => navigate('/workspace/todo')}
                 className="w-full bg-gradient-to-r from-rose-500 to-rose-600 text-white font-medium px-4 py-3 rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm"
               >
-                Add To-Do List
+                {t('dashboard.add.todo')}
               </button>
             </div>
           </div>
