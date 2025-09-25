@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronDown, X } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
 export type SearchCategory = 'all' | 'clients' | 'orders' | 'tasks' | 'invoices' | 'calendar' | 'network';
 
@@ -15,6 +17,7 @@ interface SearchResult {
 
 const CentralizedSearchBar: React.FC = () => {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,42 +38,124 @@ const CentralizedSearchBar: React.FC = () => {
     { value: 'network' as SearchCategory, label: t('search.network'), icon: '🌐' },
   ];
 
-  // Simuler des résultats de recherche (à remplacer par de vraies données)
-  const mockResults: SearchResult[] = [
-    { id: '1', title: 'John Doe', subtitle: 'Client', category: 'clients', url: '/clients' },
-    { id: '2', title: 'Website Redesign', subtitle: 'Order', category: 'orders', url: '/orders' },
-    { id: '3', title: 'Fix bug in login', subtitle: 'Task', category: 'tasks', url: '/tasks' },
-    { id: '4', title: 'Invoice #INV-001', subtitle: 'Invoice', category: 'invoices', url: '/invoices' },
-    { id: '5', title: 'Meeting with client', subtitle: 'Calendar Event', category: 'calendar', url: '/calendar' },
-  ];
+  // Fonction pour rechercher dans la base de données
+  const searchInDatabase = async (term: string, category: SearchCategory) => {
+    if (!user || !supabase) return [];
+
+    const results: SearchResult[] = [];
+    const searchTerm = term.toLowerCase();
+
+    try {
+      // Rechercher les clients
+      if (category === 'all' || category === 'clients') {
+        const { data: clients, error: clientsError } = await supabase
+          .from('clients')
+          .select('id, name, email, company, platform')
+          .eq('user_id', user.id)
+          .or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,company.ilike.%${searchTerm}%`);
+
+        if (!clientsError && clients) {
+          clients.forEach(client => {
+            results.push({
+              id: client.id,
+              title: client.name || 'Unnamed Client',
+              subtitle: `${client.company || 'No Company'} • ${client.platform || 'No Platform'}`,
+              category: 'clients',
+              url: '/clients'
+            });
+          });
+        }
+      }
+
+      // Rechercher les commandes
+      if (category === 'all' || category === 'orders') {
+        const { data: orders, error: ordersError } = await supabase
+          .from('orders')
+          .select('id, title, client_name, platform, status')
+          .eq('user_id', user.id)
+          .or(`title.ilike.%${searchTerm}%,client_name.ilike.%${searchTerm}%`);
+
+        if (!ordersError && orders) {
+          orders.forEach(order => {
+            results.push({
+              id: order.id,
+              title: order.title || 'Untitled Order',
+              subtitle: `${order.client_name || 'No Client'} • ${order.platform || 'No Platform'}`,
+              category: 'orders',
+              url: '/orders'
+            });
+          });
+        }
+      }
+
+      // Rechercher les tâches
+      if (category === 'all' || category === 'tasks') {
+        const { data: tasks, error: tasksError } = await supabase
+          .from('tasks')
+          .select('id, title, description, status, priority')
+          .eq('user_id', user.id)
+          .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+
+        if (!tasksError && tasks) {
+          tasks.forEach(task => {
+            results.push({
+              id: task.id,
+              title: task.title || 'Untitled Task',
+              subtitle: `${task.status || 'No Status'} • ${task.priority || 'No Priority'}`,
+              category: 'tasks',
+              url: '/tasks'
+            });
+          });
+        }
+      }
+
+      // Rechercher les factures
+      if (category === 'all' || category === 'invoices') {
+        const { data: invoices, error: invoicesError } = await supabase
+          .from('invoices')
+          .select('id, invoice_number, client_name, total_amount, status')
+          .eq('user_id', user.id)
+          .or(`invoice_number.ilike.%${searchTerm}%,client_name.ilike.%${searchTerm}%`);
+
+        if (!invoicesError && invoices) {
+          invoices.forEach(invoice => {
+            results.push({
+              id: invoice.id,
+              title: invoice.invoice_number || 'No Invoice Number',
+              subtitle: `${invoice.client_name || 'No Client'} • $${invoice.total_amount || '0'}`,
+              category: 'invoices',
+              url: '/invoices'
+            });
+          });
+        }
+      }
+
+    } catch (error) {
+      console.error('Erreur lors de la recherche:', error);
+      // En cas d'erreur, retourner un résultat vide plutôt que de planter
+    }
+
+    return results;
+  };
 
   // Filtrer les résultats
   useEffect(() => {
-    if (!searchTerm.trim()) {
+    if (!searchTerm.trim() || !user) {
       setResults([]);
       return;
     }
 
     setIsLoading(true);
     
-    // Simuler un délai de recherche
-    const timer = setTimeout(() => {
-      let filtered = mockResults.filter(result => 
-        result.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (result.subtitle && result.subtitle.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-
-      // Filtrer par catégorie si ce n'est pas "all"
-      if (selectedCategory !== 'all') {
-        filtered = filtered.filter(result => result.category === selectedCategory);
-      }
-
-      setResults(filtered);
+    // Délai pour éviter trop de requêtes
+    const timer = setTimeout(async () => {
+      const searchResults = await searchInDatabase(searchTerm, selectedCategory);
+      setResults(searchResults);
       setIsLoading(false);
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, user]);
 
   // Fermer le dropdown quand on clique à l'extérieur
   useEffect(() => {
@@ -85,7 +170,19 @@ const CentralizedSearchBar: React.FC = () => {
   }, []);
 
   const handleSearch = (result: SearchResult) => {
-    navigate(result.url);
+    // Navigation vers la page avec l'élément spécifique si possible
+    if (result.category === 'clients') {
+      navigate(`/clients?search=${encodeURIComponent(result.title)}`);
+    } else if (result.category === 'orders') {
+      navigate(`/orders?search=${encodeURIComponent(result.title)}`);
+    } else if (result.category === 'tasks') {
+      navigate(`/tasks?search=${encodeURIComponent(result.title)}`);
+    } else if (result.category === 'invoices') {
+      navigate(`/invoices?search=${encodeURIComponent(result.title)}`);
+    } else {
+      navigate(result.url);
+    }
+    
     setSearchTerm('');
     setResults([]);
     setIsOpen(false);
@@ -220,8 +317,8 @@ const CentralizedSearchBar: React.FC = () => {
               ) : (
                 <div className="p-4 text-center text-slate-400">
                   <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <div className="text-sm">No results found</div>
-                  <div className="text-xs">Try a different search term</div>
+                  <div className="text-sm">{t('common.no.results') || 'No results found'}</div>
+                  <div className="text-xs">{t('common.try.different.search') || 'Try a different search term'}</div>
                 </div>
               )}
             </div>

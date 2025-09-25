@@ -60,6 +60,8 @@ const translations = {
     'common.warning': 'Warning',
     'common.info': 'Info',
     'common.language': 'Language',
+    'common.no.results': 'No results found',
+    'common.try.different.search': 'Try a different search term',
     
     // Dashboard
     'dashboard.welcome': 'Welcome back',
@@ -199,6 +201,8 @@ const translations = {
     'common.warning': 'Avertissement',
     'common.info': 'Information',
     'common.language': 'Langue',
+    'common.no.results': 'Aucun résultat trouvé',
+    'common.try.different.search': 'Essayez un autre terme de recherche',
     
     // Dashboard
     'dashboard.welcome': 'Bon retour',
@@ -338,6 +342,8 @@ const translations = {
     'common.warning': 'Advertencia',
     'common.info': 'Información',
     'common.language': 'Idioma',
+    'common.no.results': 'No se encontraron resultados',
+    'common.try.different.search': 'Intenta con un término diferente',
     
     // Dashboard
     'dashboard.welcome': 'Bienvenido de vuelta',
@@ -477,6 +483,8 @@ const translations = {
     'common.warning': 'Warnung',
     'common.info': 'Information',
     'common.language': 'Sprache',
+    'common.no.results': 'Keine Ergebnisse gefunden',
+    'common.try.different.search': 'Versuche einen anderen Suchbegriff',
     
     // Dashboard
     'dashboard.welcome': 'Willkommen zurück',
@@ -616,6 +624,8 @@ const translations = {
     'common.warning': '警告',
     'common.info': '信息',
     'common.language': '语言',
+    'common.no.results': '未找到结果',
+    'common.try.different.search': '尝试不同的搜索词',
     
     // Dashboard
     'dashboard.welcome': '欢迎回来',
@@ -755,6 +765,8 @@ const translations = {
     'common.warning': 'Avviso',
     'common.info': 'Informazione',
     'common.language': 'Lingua',
+    'common.no.results': 'Nessun risultato trovato',
+    'common.try.different.search': 'Prova un termine diverso',
     
     // Dashboard
     'dashboard.welcome': 'Bentornato',
@@ -894,6 +906,8 @@ const translations = {
     'common.warning': 'Aviso',
     'common.info': 'Informação',
     'common.language': 'Idioma',
+    'common.no.results': 'Nenhum resultado encontrado',
+    'common.try.different.search': 'Tente um termo diferente',
     
     // Dashboard
     'dashboard.welcome': 'Bem-vindo de volta',
@@ -1033,6 +1047,8 @@ const translations = {
     'common.warning': 'Предупреждение',
     'common.info': 'Информация',
     'common.language': 'Язык',
+    'common.no.results': 'Результаты не найдены',
+    'common.try.different.search': 'Попробуйте другой поисковый запрос',
     
     // Dashboard
     'dashboard.welcome': 'Добро пожаловать',
@@ -1172,6 +1188,8 @@ const translations = {
     'common.warning': '警告',
     'common.info': '情報',
     'common.language': '言語',
+    'common.no.results': '結果が見つかりません',
+    'common.try.different.search': '別の検索語を試してください',
     
     // Dashboard
     'dashboard.welcome': 'おかえりなさい',
@@ -1311,6 +1329,8 @@ const translations = {
     'common.warning': '경고',
     'common.info': '정보',
     'common.language': '언어',
+    'common.no.results': '결과를 찾을 수 없습니다',
+    'common.try.different.search': '다른 검색어를 시도해보세요',
     
     // Dashboard
     'dashboard.welcome': '다시 오신 것을 환영합니다',
