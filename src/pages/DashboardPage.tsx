@@ -39,6 +39,9 @@ const DashboardPage = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const hasFetchedOrders = useRef(false);
+  
+  // 👉 Nouvel état pour le nom de l'utilisateur
+  const [userName, setUserName] = useState<string | null>(null);
 
   const fetchOrders = useCallback(async () => {
     if (!user) return;
@@ -66,6 +69,25 @@ const DashboardPage = () => {
       fetchOrders();
     }
   }, [fetchOrders]);
+
+  // 👉 Récupérer le nom depuis la table users
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("users")
+        .select("name")
+        .eq("id", user.id)
+        .single();
+
+      if (!error && data) {
+        setUserName(data.name);
+      }
+    };
+
+    fetchUserName();
+  }, [user]);
 
   const stats = [
     { label: 'Total Clients', value: clients.length, icon: Users, color: 'from-accent-blue to-accent-purple' },
