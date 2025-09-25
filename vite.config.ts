@@ -11,10 +11,5 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['lucide-react'],
-    include: [
-      '@fullcalendar/daygrid/index.global.css',
-      '@fullcalendar/timegrid/index.global.css',
-      '@fullcalendar/list/index.global.css',
-    ],
   },
 });

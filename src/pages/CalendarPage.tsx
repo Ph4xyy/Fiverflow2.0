@@ -5,7 +5,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePlanRestrictions } from '@/hooks/usePlanRestrictions';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
-import FullCalendar, { EventContentArg, DatesSetArg } from '@fullcalendar/react';
+import FullCalendar from '@fullcalendar/react';
+import { EventContentArg, DatesSetArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -302,7 +303,6 @@ const CalendarPage: React.FC = () => {
     const style = (arg.event.extendedProps as any)?.style as { bar: string; chipBg: string; text: string };
     const kind: 'order' | 'task' | undefined = (arg.event.extendedProps as any)?.kind;
     const order: OrderRow | undefined = (arg.event.extendedProps as any)?.order;
-    const task: TaskRow | undefined = (arg.event.extendedProps as any)?.task;
 
     const subtitle = kind === 'order' ? (order?.clients?.platform || order?.clients?.name || null) : null;
 
