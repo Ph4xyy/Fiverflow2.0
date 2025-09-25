@@ -388,3 +388,150 @@
   border: 1px solid #bf5af2;
   box-shadow: 0 0 10px rgba(191, 90, 242, 0.3);
 }
+
+/* FullCalendar Dark Theme Customization */
+.fc {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+
+.fc-theme-standard .fc-scrollgrid {
+  border: 1px solid var(--border-primary) !important;
+}
+
+.fc-theme-standard td, 
+.fc-theme-standard th {
+  border-color: var(--border-primary) !important;
+}
+
+.fc-daygrid-day {
+  background-color: var(--bg-secondary) !important;
+}
+
+.fc-daygrid-day:hover {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.fc-daygrid-day-number {
+  color: var(--text-primary) !important;
+}
+
+.fc-daygrid-day-number:hover {
+  background-color: var(--accent-blue) !important;
+  color: white !important;
+  border-radius: 50%;
+}
+
+.fc-col-header-cell {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  font-weight: 600;
+}
+
+.fc-day-today {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+.fc-day-today .fc-daygrid-day-number {
+  background-color: var(--accent-blue) !important;
+  color: white !important;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.fc-button {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.fc-button:hover {
+  background-color: var(--accent-blue) !important;
+  border-color: var(--accent-blue) !important;
+  color: white !important;
+}
+
+.fc-button:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+.fc-button-primary {
+  background-color: var(--accent-blue) !important;
+  border-color: var(--accent-blue) !important;
+  color: white !important;
+}
+
+.fc-button-primary:hover {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.fc-toolbar-title {
+  color: var(--text-primary) !important;
+  font-weight: 700;
+}
+
+.fc-event {
+  border: none !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.fc-event:hover {
+  opacity: 0.8 !important;
+}
+
+.fc-daygrid-event {
+  margin: 1px 2px !important;
+}
+
+.fc-more-link {
+  color: var(--text-secondary) !important;
+  font-size: 11px !important;
+}
+
+.fc-more-link:hover {
+  color: var(--accent-blue) !important;
+}
+
+/* TimeGrid specific styles */
+.fc-timegrid-slot {
+  border-color: var(--border-primary) !important;
+}
+
+.fc-timegrid-slot-label {
+  color: var(--text-secondary) !important;
+  font-size: 11px !important;
+}
+
+.fc-timegrid-axis {
+  border-color: var(--border-primary) !important;
+}
+
+.fc-timegrid-col {
+  border-color: var(--border-primary) !important;
+}
+
+.fc-timegrid-event {
+  border: none !important;
+  border-radius: 4px !important;
+}
+
+/* Popover styles */
+.fc-popover {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-primary) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.fc-popover-header {
+  background-color: var(--bg-tertiary) !important;
+  border-bottom: 1px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.fc-popover-body {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
