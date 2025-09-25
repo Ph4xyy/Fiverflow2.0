@@ -389,7 +389,7 @@
   box-shadow: 0 0 10px rgba(191, 90, 242, 0.3);
 }
 
-/* FullCalendar Dark Theme Customization */
+/* FullCalendar Dark Theme Customization - More Specific */
 .fc {
   background-color: var(--bg-secondary) !important;
   color: var(--text-primary) !important;
@@ -404,16 +404,19 @@
   border-color: var(--border-primary) !important;
 }
 
-.fc-daygrid-day {
+/* Force background color for all day cells */
+.fc-daygrid-day,
+.fc-daygrid-day-frame,
+.fc-daygrid-day-bg,
+.fc-daygrid-day-events,
+.fc-daygrid-day-top {
   background-color: var(--bg-secondary) !important;
 }
 
-.fc-daygrid-day:hover {
-  background-color: var(--bg-tertiary) !important;
-}
-
+/* Specific day cell styling */
 .fc-daygrid-day-number {
   color: var(--text-primary) !important;
+  background-color: transparent !important;
 }
 
 .fc-daygrid-day-number:hover {
@@ -422,12 +425,19 @@
   border-radius: 50%;
 }
 
+/* Column headers */
 .fc-col-header-cell {
   background-color: var(--bg-tertiary) !important;
   color: var(--text-primary) !important;
   font-weight: 600;
 }
 
+.fc-col-header-cell-cushion {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Today styling */
 .fc-day-today {
   background-color: rgba(59, 130, 246, 0.1) !important;
 }
@@ -437,6 +447,24 @@
   color: white !important;
   border-radius: 50%;
   font-weight: 700;
+}
+
+/* Remove any blue backgrounds from day cells */
+.fc-daygrid-day-frame {
+  background-color: var(--bg-secondary) !important;
+}
+
+.fc-daygrid-day-bg {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Override any default blue styling */
+.fc-daygrid-day[style*="background"] {
+  background-color: var(--bg-secondary) !important;
+}
+
+.fc-daygrid-day-frame[style*="background"] {
+  background-color: var(--bg-secondary) !important;
 }
 
 .fc-button {
@@ -534,4 +562,77 @@
 .fc-popover-body {
   background-color: var(--bg-secondary) !important;
   color: var(--text-primary) !important;
+}
+
+/* Additional specific overrides to remove blue backgrounds */
+.fc-daygrid-day-frame.fc-daygrid-day-frame {
+  background-color: var(--bg-secondary) !important;
+}
+
+.fc-daygrid-day-bg.fc-daygrid-day-bg {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Force override any inline styles */
+div[class*="fc-daygrid-day"][style*="background"] {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Override any potential blue backgrounds */
+.fc-daygrid-day:not(.fc-day-today) {
+  background-color: var(--bg-secondary) !important;
+}
+
+.fc-daygrid-day:not(.fc-day-today) .fc-daygrid-day-frame {
+  background-color: var(--bg-secondary) !important;
+}
+
+.fc-daygrid-day:not(.fc-day-today) .fc-daygrid-day-bg {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Ensure no blue in the day content area */
+.fc-daygrid-day-events {
+  background-color: transparent !important;
+}
+
+.fc-daygrid-day-top {
+  background-color: transparent !important;
+}
+
+/* Override any remaining blue backgrounds with more specific selectors */
+.fc .fc-daygrid-day-frame {
+  background-color: var(--bg-secondary) !important;
+}
+
+.fc .fc-daygrid-day-bg {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Nuclear option - override everything with maximum specificity */
+div.fc-daygrid-day-frame,
+div.fc-daygrid-day-bg,
+div.fc-daygrid-day-events,
+div.fc-daygrid-day-top,
+table.fc-scrollgrid-sync-table td.fc-daygrid-day,
+table.fc-scrollgrid-sync-table td.fc-daygrid-day-frame {
+  background-color: var(--bg-secondary) !important;
+  background: var(--bg-secondary) !important;
+}
+
+/* Override any CSS custom properties that might be causing blue backgrounds */
+.fc-daygrid-day {
+  --fc-daygrid-day-bg-color: var(--bg-secondary) !important;
+  --fc-daygrid-day-frame-bg-color: var(--bg-secondary) !important;
+}
+
+/* Force override any potential CSS variables */
+.fc-daygrid-day-frame {
+  background-color: var(--bg-secondary) !important;
+  background: var(--bg-secondary) !important;
+}
+
+.fc-daygrid-day-bg {
+  background-color: var(--bg-secondary) !important;
+  background: var(--bg-secondary) !important;
 }
