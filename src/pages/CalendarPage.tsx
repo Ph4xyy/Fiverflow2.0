@@ -22,12 +22,9 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-/** FullCalendar CSS (v6.1.7 compatible) */
-// CSS FullCalendar
-import '@fullcalendar/common/main.css';
-import '@fullcalendar/daygrid/main.css';   // si tu utilises dayGrid
-import '@fullcalendar/timegrid/main.css'; // si tu utilises timeGrid
-import '@fullcalendar/list/main.css';     // si tu utilises list
+/** FullCalendar CSS (v6.1.17 compatible) */
+// Note: FullCalendar v6 CSS is included automatically when using the packages
+// No manual CSS imports needed for v6+
 
 
 
