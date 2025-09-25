@@ -483,8 +483,8 @@ const OrdersPage: React.FC = () => {
               <div className="flex items-center justify-between px-4 py-3 border-t border-[#1C2230]">
                 <p className="text-sm text-slate-300">
                   {total > 0
-                    ? `Affichage ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)} sur ${total}`
-                    : 'Aucun résultat'}
+                    ? `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)} of ${total}`
+                    : 'No results'}
                 </p>
                 <div className="flex items-center gap-2">
                   <button

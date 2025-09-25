@@ -429,7 +429,7 @@ const ProfilePage: React.FC = () => {
     // validations simples
     if (smtp.enabled) {
       if (!smtp.host || !smtp.port || !smtp.username || !smtp.password) {
-        toast.error('Veuillez compléter host, port, username et password.');
+        toast.error('Please complete host, port, username and password.');
         return;
       }
       if (!smtp.from_email) {

@@ -140,7 +140,7 @@ const InvoicesPage: React.FC = () => {
         const inv = invoices.find((x) => x.id === id);
         if (!inv) {
           setViewLoading(false);
-          toast.error("Facture introuvable (démo).");
+          toast.error("Invoice not found (demo).");
           return;
         }
         const tax_amount =
@@ -149,7 +149,7 @@ const InvoicesPage: React.FC = () => {
           ...inv,
           items: [
             { description: "Design landing", quantity: 1, unit_price: 350, line_total: 350 },
-            { description: "Intégration", quantity: 4, unit_price: 80, line_total: 320 },
+            { description: "Integration", quantity: 4, unit_price: 80, line_total: 320 },
           ],
           payments: [],
           tax_amount,
@@ -234,7 +234,7 @@ const InvoicesPage: React.FC = () => {
       setInvoices(prev => prev.map(i => i.id === row.id ? { ...i, status: next } as InvoiceRow : i));
       return;
     }
-    const toastId = toast.loading("Mise à jour…");
+    const toastId = toast.loading("Updating…");
     try {
       const { error } = await supabase.from("invoices").update({ status: next }).eq("id", row.id);
       if (error) throw error;
@@ -250,7 +250,7 @@ const InvoicesPage: React.FC = () => {
     if (!confirm("Supprimer cette facture ?")) return;
 
     if (!isSupabaseConfigured || !supabase) {
-      toast.success("Supprimée (demo)");
+      toast.success("Deleted (demo)");
       setInvoices((arr) => arr.filter((x) => x.id !== row.id));
       return;
     }
@@ -260,7 +260,7 @@ const InvoicesPage: React.FC = () => {
       await supabase.from("invoice_payments").delete().eq("invoice_id", row.id);
       const { error } = await supabase.from("invoices").delete().eq("id", row.id);
       if (error) throw error;
-      toast.success("Facture supprimée", { id: toastId });
+      toast.success("Invoice deleted", { id: toastId });
       setInvoices((prev) => prev.filter((x) => x.id !== row.id));
     } catch (e) {
       console.error("[Invoices] delete error:", e);
@@ -323,7 +323,7 @@ const InvoicesPage: React.FC = () => {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher (numéro, client)…"
+            placeholder="Search (number, client)…"
             className="w-full pl-9 pr-9 py-2 rounded-lg border border-gray-300 dark:border-slate-700
                        bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100
                        placeholder-gray-400 dark:placeholder-slate-400
@@ -434,14 +434,14 @@ const InvoicesPage: React.FC = () => {
                       <button
                         onClick={() => markStatus(row, "sent")}
                         className="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
-                        title="Marquer envoyé"
+                        title="Mark as sent"
                       >
                         <Send className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => markStatus(row, "paid")}
                         className="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700"
-                        title="Marquer payé"
+                        title="Mark as paid"
                       >
                         <CheckCircle2 className="w-4 h-4" />
                       </button>

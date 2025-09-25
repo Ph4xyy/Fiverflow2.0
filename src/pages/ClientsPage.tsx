@@ -222,7 +222,7 @@ const ClientsPage: React.FC = () => {
         phone_whatsapp: null,
         preferred_contact_method: 'email',
         timezone: 'UTC+1',
-        preferred_language: 'Français',
+        preferred_language: 'English',
         country: row?.country || 'France',
         city: 'Paris',
         industry: 'Technology',
@@ -233,9 +233,9 @@ const ClientsPage: React.FC = () => {
         client_status: row?.client_status || 'prospect',
         priority_level: 'medium',
         payment_terms: 'Net 30',
-        availability_notes: 'Disponible en semaine',
-        important_notes: 'Aime les réponses rapides.',
-        next_action: 'Envoyer un devis',
+        availability_notes: 'Available weekdays',
+        important_notes: 'Likes quick responses.',
+        next_action: 'Send quote',
         next_action_date: new Date().toISOString(),
         tags: ['premium', 'lead-chaud'],
         created_at: row?.created_at || new Date().toISOString(),
@@ -506,8 +506,8 @@ const ClientsPage: React.FC = () => {
               <div className="flex items-center justify-between px-4 py-3 border-t border-[#1C2230]">
                 <p className="text-sm text-slate-300">
                   {total > 0
-                    ? `Affichage ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)} sur ${total}`
-                    : 'Aucun résultat'}
+                    ? `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)} of ${total}`
+                    : 'No results'}
                 </p>
                 <div className="flex items-center gap-2">
                   <button

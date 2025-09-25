@@ -118,24 +118,24 @@ const SupportPage: React.FC = () => {
           <FAQ
             items={[
               {
-                q: "Comment fonctionne l’essai gratuit ?",
-                a: "Vous avez 7 jours avec toutes les fonctionnalités. Aucune carte n’est débitée avant la fin de l’essai.",
+                q: "How does the free trial work?",
+                a: "You have 7 days with all features. No card is charged before the end of the trial.",
               },
               {
-                q: "Puis-je connecter mes plateformes (Fiverr, Upwork) ?",
-                a: "Oui, vous pouvez suivre vos clients et commandes multi-plateformes au même endroit.",
+                q: "Can I connect my platforms (Fiverr, Upwork)?",
+                a: "Yes, you can track your clients and orders across multiple platforms in one place.",
               },
               {
-                q: "Les factures et les paiements ?",
-                a: "Vous créez vos factures et le paiement se fait directement vers votre compte Stripe connecté.",
+                q: "Invoices and payments?",
+                a: "You create your invoices and payment goes directly to your connected Stripe account.",
               },
               {
-                q: "Mes données sont-elles sécurisées ?",
-                a: "Nous utilisons Supabase et des pratiques de sécurité de niveau entreprise (chiffrement, RBAC).",
+                q: "Is my data secure?",
+                a: "We use Supabase and enterprise-level security practices (encryption, RBAC).",
               },
               {
-                q: "Puis-je annuler à tout moment ?",
-                a: "Oui. Vous pouvez annuler ou changer de plan depuis la page de facturation à tout moment.",
+                q: "Can I cancel at any time?",
+                a: "Yes. You can cancel or change your plan from the billing page at any time.",
               },
             ]}
           />

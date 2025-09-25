@@ -116,11 +116,11 @@ const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
   { value: 'done',         label: 'Done' },
 ];
 
-const PRIORITY_OPTIONS: { value: TaskPriority; label: string }[] = [
-  { value: 'urgent', label: 'P1 Urgent' },
-  { value: 'high',   label: 'P2 High'   },
-  { value: 'medium', label: 'P3 Medium' },
-  { value: 'low',    label: 'P4 Low'    },
+const PRIORITY_OPTIONS: { value: TaskPriority; label: string; color: string; bgColor: string }[] = [
+  { value: 'urgent', label: 'P1 Urgent', color: '#EF4444', bgColor: '#FEE2E2' },
+  { value: 'high',   label: 'P2 High',   color: '#F59E0B', bgColor: '#FEF3C7' },
+  { value: 'medium', label: 'P3 Medium', color: '#10B981', bgColor: '#D1FAE5' },
+  { value: 'low',    label: 'P4 Low',    color: '#6B7280', bgColor: '#F3F4F6' },
 ];
 
 const byPositionThenCreated = (a: TaskRow, b: TaskRow) => {
@@ -640,18 +640,31 @@ const TodoListPage: React.FC = () => {
     </div>
   );
 
-  const PriorityCell: React.FC<{ t: TaskRow }> = ({ t }) => (
-    <div className={SELECT_WRAPPER}>
-      <select
-        value={t.priority}
-        onChange={(e) => updateTask(t.id, { priority: e.target.value as TaskPriority })}
-        className={SELECT_BASE}
-      >
-        {PRIORITY_OPTIONS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-      </select>
-      <ChevronDown size={16} className={SELECT_CHEVRON} />
-    </div>
-  );
+  const PriorityCell: React.FC<{ t: TaskRow }> = ({ t }) => {
+    const currentPriority = PRIORITY_OPTIONS.find(p => p.value === t.priority);
+    
+    return (
+      <div className={SELECT_WRAPPER}>
+        <select
+          value={t.priority}
+          onChange={(e) => updateTask(t.id, { priority: e.target.value as TaskPriority })}
+          className={`${SELECT_BASE} font-medium`}
+          style={{
+            color: currentPriority?.color || '#6B7280',
+            backgroundColor: currentPriority?.bgColor ? `${currentPriority.bgColor}20` : 'transparent',
+            borderColor: currentPriority?.color ? `${currentPriority.color}40` : undefined
+          }}
+        >
+          {PRIORITY_OPTIONS.map(p => (
+            <option key={p.value} value={p.value} style={{ color: p.color }}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+        <ChevronDown size={16} className={SELECT_CHEVRON} />
+      </div>
+    );
+  };
 
   const ClientCell: React.FC<{ t: TaskRow }> = ({ t }) => (
     <div className="flex items-center gap-2">
@@ -691,19 +704,55 @@ const TodoListPage: React.FC = () => {
     </div>
   );
 
-  const DueCell: React.FC<{ t: TaskRow }> = ({ t }) => (
-    <div className="flex items-center gap-2">
-      <div className="shrink-0 p-2 rounded-2xl bg-[#111722] ring-1 ring-inset ring-[#20293C]">
-        <CalendarIcon size={16} className="text-slate-300" />
+  const DueCell: React.FC<{ t: TaskRow }> = ({ t }) => {
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const dateInputRef = useRef<HTMLInputElement>(null);
+
+    const handleIconClick = () => {
+      setShowDatePicker(true);
+      // Focus sur l'input après un petit délai pour s'assurer qu'il est rendu
+      setTimeout(() => {
+        dateInputRef.current?.focus();
+        dateInputRef.current?.showPicker?.();
+      }, 100);
+    };
+
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      updateTask(t.id, { due_date: e.target.value || null });
+      setShowDatePicker(false);
+    };
+
+    const handleBlur = () => {
+      setShowDatePicker(false);
+    };
+
+    return (
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleIconClick}
+          className="shrink-0 p-2 rounded-2xl bg-[#111722] ring-1 ring-inset ring-[#20293C] hover:bg-[#1A2332] hover:ring-[#2A3347] transition-colors"
+          title="Set due date"
+        >
+          <CalendarIcon size={16} className="text-slate-300" />
+        </button>
+        {showDatePicker ? (
+          <input
+            ref={dateInputRef}
+            type="date"
+            value={t.due_date || ''}
+            onChange={handleDateChange}
+            onBlur={handleBlur}
+            className="px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[15px]"
+            autoFocus
+          />
+        ) : (
+          <div className="px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] text-[15px] min-h-[44px] flex items-center">
+            {t.due_date ? new Date(t.due_date).toLocaleDateString() : 'No due date'}
+          </div>
+        )}
       </div>
-      <input
-        type="date"
-        value={t.due_date || ''}
-        onChange={(e) => updateTask(t.id, { due_date: e.target.value || null })}
-        className="px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[15px]"
-      />
-    </div>
-  );
+    );
+  };
 
   const TagsCell: React.FC<{ t: TaskRow }> = ({ t }) => {
     const [input, setInput] = useState('');
