@@ -24,7 +24,9 @@ import {
   Package2,
   Pencil,
   Search as SearchIcon,
+  PlusCircle,
 } from 'lucide-react';
+import { AdvancedColorPicker } from '../components/ui/AdvancedColorPicker';
 
 type UUID = string;
 
@@ -194,7 +196,12 @@ const TodoListPage: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<TaskStatus | 'all'>('all');
   const [query, setQuery] = useState<string>('');
 
-  // devient false si la DB n’a pas les colonnes avancées (color/labels/position/collapsed/comments_count)
+  // 👉 États pour le sélecteur de couleurs avancé
+  const [showAdvancedColorPicker, setShowAdvancedColorPicker] = useState(false);
+  const [selectedTaskForColor, setSelectedTaskForColor] = useState<TaskRow | null>(null);
+  const [recentColors, setRecentColors] = useState<string[]>([]);
+
+  // devient false si la DB n'a pas les colonnes avancées (color/labels/position/collapsed/comments_count)
   const colorPersistSupportedRef = useRef<boolean>(true);
 
   const tree = useMemo(() => buildTree(rows), [rows]);
@@ -299,7 +306,7 @@ const TodoListPage: React.FC = () => {
 
   /* ----------- CALENDAR UPSERT ----------- */
   const upsertCalendar = useCallback(async (task: TaskRow) => {
-    if (!user || !task.due_date) return;
+    if (!user || !task.due_date || !supabase) return;
     try {
       await supabase.from('calendar_events').upsert({
         user_id: user.id,
@@ -473,6 +480,34 @@ const TodoListPage: React.FC = () => {
     updateTask(task.id, { color });
   };
 
+  // 👉 Fonctions pour le sélecteur de couleurs avancé
+  const addToRecentColors = useCallback((color: string) => {
+    setRecentColors(prev => {
+      const filtered = prev.filter(c => c !== color);
+      return [color, ...filtered].slice(0, 12); // Garde 12 couleurs récentes max
+    });
+  }, []);
+
+  const openAdvancedColorPicker = (task: TaskRow) => {
+    setSelectedTaskForColor(task);
+    setShowAdvancedColorPicker(true);
+  };
+
+  const closeAdvancedColorPicker = () => {
+    setShowAdvancedColorPicker(false);
+    setSelectedTaskForColor(null);
+  };
+
+  const handleAdvancedColorChange = (color: string | null) => {
+    if (selectedTaskForColor) {
+      setTaskColor(selectedTaskForColor, color);
+      if (color) {
+        addToRecentColors(color);
+      }
+    }
+    closeAdvancedColorPicker();
+  };
+
   /* ----------- Cells (modernisées) ----------- */
   const TitleCell: React.FC<{ t: TaskRow }> = ({ t }) => {
     const [editing, setEditing] = useState(false);
@@ -536,26 +571,56 @@ const TodoListPage: React.FC = () => {
             </button>
           )}
 
-          {/* Choix rapide des couleurs */}
-          <div className="mt-2.5 flex items-center gap-2">
-            <span className="text-xs text-slate-400">Color:</span>
-            <div className="flex flex-wrap gap-1.5">
-              {COLOR_SWATCHES.slice(0, 8).map(c => (
+          {/* Actions de la tâche */}
+          <div className="mt-2.5 flex items-center justify-between">
+            {/* Choix rapide des couleurs */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Color:</span>
+              <div className="flex items-center gap-1.5">
+                {/* Aperçu de la couleur actuelle */}
                 <button
-                  key={c}
-                  onClick={() => setTaskColor(t, c)}
-                  className="w-4 h-4 rounded ring-1 ring-white/20"
-                  style={{ background: c }}
-                  title={c}
-                />
-              ))}
-              <button
-                onClick={() => setTaskColor(t, null)}
-                className="px-1.5 text-[11px] rounded bg-white/5 hover:bg-white/10"
-              >
-                Clear
-              </button>
+                  onClick={() => openAdvancedColorPicker(t)}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#1C2230] hover:bg-[#2A3347] transition-colors"
+                  title="Advanced color picker"
+                >
+                  <div 
+                    className="w-4 h-4 rounded ring-1 ring-white/20" 
+                    style={{ background: t.color || '#3f3f46' }}
+                  />
+                  <Palette size={12} className="text-slate-400" />
+                </button>
+                
+                {/* Couleurs rapides */}
+                {COLOR_SWATCHES.slice(0, 4).map(c => (
+                  <button
+                    key={c}
+                    onClick={() => {
+                      setTaskColor(t, c);
+                      addToRecentColors(c);
+                    }}
+                    className="w-4 h-4 rounded ring-1 ring-white/20 hover:scale-110 transition-transform"
+                    style={{ background: c }}
+                    title={c}
+                  />
+                ))}
+                <button
+                  onClick={() => setTaskColor(t, null)}
+                  className="px-1.5 text-[11px] rounded bg-white/5 hover:bg-white/10 text-slate-400"
+                >
+                  Clear
+                </button>
+              </div>
             </div>
+
+            {/* Bouton d'ajout de sous-tâche */}
+            <button
+              onClick={() => insertTask(t)}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 hover:text-emerald-300 transition-colors text-xs"
+              title="Add subtask"
+            >
+              <PlusCircle size={12} />
+              <span>Add Subtask</span>
+            </button>
           </div>
         </div>
       </div>
@@ -894,7 +959,7 @@ const TodoListPage: React.FC = () => {
                 <div>
                   <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 leading-tight">To-Do List</h1>
                   <p className="text-[13px] text-slate-400 mt-1">
-                    Planifie, organise et exécute — subtasks illimitées & colonnes personnalisables.
+                    Planifie, organise et exécute — subtasks illimitées, sélecteur de couleurs avancé & colonnes personnalisables.
                   </p>
                 </div>
               </div>
@@ -959,6 +1024,17 @@ const TodoListPage: React.FC = () => {
           {/* (Légende P1/P2/P3/P4 retirée comme demandé) */}
         </div>
       </div>
+
+      {/* 👉 Sélecteur de couleurs avancé */}
+      {showAdvancedColorPicker && selectedTaskForColor && (
+        <AdvancedColorPicker
+          currentColor={selectedTaskForColor.color || null}
+          onColorChange={handleAdvancedColorChange}
+          onClose={closeAdvancedColorPicker}
+          recentColors={recentColors}
+          onAddToHistory={addToRecentColors}
+        />
+      )}
     </Layout>
   );
 };
