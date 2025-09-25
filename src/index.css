@@ -404,13 +404,13 @@
   border-color: var(--border-primary) !important;
 }
 
-/* Force background color for all day cells - very dark grey theme */
+/* Force background color for all day cells - pure dark grey theme */
 .fc-daygrid-day,
 .fc-daygrid-day-frame,
 .fc-daygrid-day-bg,
 .fc-daygrid-day-events,
 .fc-daygrid-day-top {
-  background-color: #0a0f1a !important;
+  background-color: #111111 !important;
 }
 
 /* Specific day cell styling */
@@ -449,22 +449,22 @@
   font-weight: 700;
 }
 
-/* Remove any blue backgrounds from day cells - very dark grey theme */
+/* Remove any blue backgrounds from day cells - pure dark grey theme */
 .fc-daygrid-day-frame {
-  background-color: #0a0f1a !important;
+  background-color: #111111 !important;
 }
 
 .fc-daygrid-day-bg {
-  background-color: #0a0f1a !important;
+  background-color: #111111 !important;
 }
 
 /* Override any default blue styling */
 .fc-daygrid-day[style*="background"] {
-  background-color: #0a0f1a !important;
+  background-color: #111111 !important;
 }
 
 .fc-daygrid-day-frame[style*="background"] {
-  background-color: #0a0f1a !important;
+  background-color: #111111 !important;
 }
 
 .fc-button {
@@ -578,17 +578,17 @@ div[class*="fc-daygrid-day"][style*="background"] {
   background-color: var(--bg-secondary) !important;
 }
 
-/* Override any potential blue backgrounds - very dark grey theme */
+/* Override any potential blue backgrounds - pure dark grey theme */
 .fc-daygrid-day:not(.fc-day-today) {
-  background-color: #0a0f1a !important;
+  background-color: #111111 !important;
 }
 
 .fc-daygrid-day:not(.fc-day-today) .fc-daygrid-day-frame {
-  background-color: #0a0f1a !important;
+  background-color: #111111 !important;
 }
 
 .fc-daygrid-day:not(.fc-day-today) .fc-daygrid-day-bg {
-  background-color: #0a0f1a !important;
+  background-color: #111111 !important;
 }
 
 /* Ensure no blue in the day content area */
@@ -600,39 +600,39 @@ div[class*="fc-daygrid-day"][style*="background"] {
   background-color: transparent !important;
 }
 
-/* Override any remaining blue backgrounds with more specific selectors - very dark grey theme */
+/* Override any remaining blue backgrounds with more specific selectors - pure dark grey theme */
 .fc .fc-daygrid-day-frame {
-  background-color: #0a0f1a !important;
+  background-color: #111111 !important;
 }
 
 .fc .fc-daygrid-day-bg {
-  background-color: #0a0f1a !important;
+  background-color: #111111 !important;
 }
 
-/* Nuclear option - override everything with maximum specificity - very dark grey theme */
+/* Nuclear option - override everything with maximum specificity - pure dark grey theme */
 div.fc-daygrid-day-frame,
 div.fc-daygrid-day-bg,
 div.fc-daygrid-day-events,
 div.fc-daygrid-day-top,
 table.fc-scrollgrid-sync-table td.fc-daygrid-day,
 table.fc-scrollgrid-sync-table td.fc-daygrid-day-frame {
-  background-color: #0a0f1a !important;
-  background: #0a0f1a !important;
+  background-color: #111111 !important;
+  background: #111111 !important;
 }
 
-/* Override any CSS custom properties that might be causing blue backgrounds - very dark grey theme */
+/* Override any CSS custom properties that might be causing blue backgrounds - pure dark grey theme */
 .fc-daygrid-day {
-  --fc-daygrid-day-bg-color: #0a0f1a !important;
-  --fc-daygrid-day-frame-bg-color: #0a0f1a !important;
+  --fc-daygrid-day-bg-color: #111111 !important;
+  --fc-daygrid-day-frame-bg-color: #111111 !important;
 }
 
-/* Force override any potential CSS variables - very dark grey theme */
+/* Force override any potential CSS variables - pure dark grey theme */
 .fc-daygrid-day-frame {
-  background-color: #0a0f1a !important;
-  background: #0a0f1a !important;
+  background-color: #111111 !important;
+  background: #111111 !important;
 }
 
 .fc-daygrid-day-bg {
-  background-color: #0a0f1a !important;
-  background: #0a0f1a !important;
+  background-color: #111111 !important;
+  background: #111111 !important;
 }
