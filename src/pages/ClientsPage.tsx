@@ -317,7 +317,7 @@ const ClientsPage: React.FC = () => {
             </div>
             <div>
               <h1 className="text-3xl font-extrabold text-white">Clients</h1>
-              <p className="text-sm text-slate-400">Recherchez, filtrez et gérez vos clients.</p>
+              <p className="text-sm text-slate-400">Search, filter and manage your clients.</p>
             </div>
           </div>
 
@@ -328,7 +328,7 @@ const ClientsPage: React.FC = () => {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher (nom, email, entreprise, plateforme)…"
+                placeholder="Search (name, email, company, platform)…"
                 className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-[#1C2230]
                            bg-[#11151D]/95 text-slate-100 placeholder-slate-400
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -368,11 +368,11 @@ const ClientsPage: React.FC = () => {
               onChange={(e) => setStatus(e.target.value)}
               className="px-3 py-2.5 rounded-xl border border-[#1C2230] bg-[#11151D]/95 text-slate-100 focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Statut (tous)</option>
+              <option value="">Status (all)</option>
               <option value="prospect">Prospect</option>
-              <option value="active">Actif</option>
-              <option value="inactive">Inactif</option>
-              <option value="completed">Projet terminé</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="completed">Project completed</option>
             </select>
 
             <select
@@ -380,7 +380,7 @@ const ClientsPage: React.FC = () => {
               onChange={(e) => setPlatform(e.target.value)}
               className="px-3 py-2.5 rounded-xl border border-[#1C2230] bg-[#11151D]/95 text-slate-100 focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Plateforme (toutes)</option>
+              <option value="">Platform (all)</option>
               {platformOptions.map((p) => (
                 <option key={p} value={p}>{p}</option>
               ))}
@@ -426,9 +426,9 @@ const ClientsPage: React.FC = () => {
             </div>
           ) : clients.length === 0 ? (
             <div className="p-10 text-center">
-              <p className="text-slate-300">Aucun client trouvé.</p>
+              <p className="text-slate-300">No clients found.</p>
               <p className="text-sm text-slate-400 mt-1">
-                Modifiez vos filtres ou créez un nouveau client.
+                Adjust your filters or create a new client.
               </p>
             </div>
           ) : (
@@ -437,12 +437,12 @@ const ClientsPage: React.FC = () => {
                 <table className="min-w-full divide-y divide-[#1C2230]">
                   <thead className="bg-[#0F141C]">
                     <tr>
-                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Nom</th>
-                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Entreprise</th>
-                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Plateforme</th>
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Name</th>
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Company</th>
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Platform</th>
                       <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Email</th>
-                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Pays</th>
-                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Statut</th>
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Country</th>
+                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Status</th>
                       <th className="px-6 py-3" />
                     </tr>
                   </thead>

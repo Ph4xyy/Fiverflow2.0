@@ -258,7 +258,7 @@ const OrdersPage: React.FC = () => {
             </div>
             <div>
               <h1 className="text-3xl font-extrabold text-white">Orders</h1>
-              <p className="text-sm text-slate-400">Suivez, filtrez et gérez toutes vos commandes client.</p>
+              <p className="text-sm text-slate-400">Track, filter and manage all your client orders.</p>
             </div>
           </div>
 
@@ -268,7 +268,7 @@ const OrdersPage: React.FC = () => {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher (titre, client, plateforme)…"
+                placeholder="Search (title, client, platform)…"
                 className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-[#1C2230]
                            bg-[#11151D]/95 text-slate-100 placeholder-slate-400
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -352,7 +352,7 @@ const OrdersPage: React.FC = () => {
               onChange={(e) => setStatus(e.target.value)}
               className="px-3 py-2.5 rounded-xl border border-[#1C2230] bg-[#11151D]/95 text-slate-100 focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Statut (tous)</option>
+              <option value="">Status (all)</option>
               <option value="Pending">Pending</option>
               <option value="In Progress">In Progress</option>
               <option value="Completed">Completed</option>
@@ -363,7 +363,7 @@ const OrdersPage: React.FC = () => {
               onChange={(e) => setPlatform(e.target.value)}
               className="px-3 py-2.5 rounded-xl border border-[#1C2230] bg-[#11151D]/95 text-slate-100 focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Plateforme (toutes)</option>
+              <option value="">Platform (all)</option>
               {platformOptions.map((p) => (
                 <option key={p} value={p}>{p}</option>
               ))}
@@ -442,7 +442,7 @@ const OrdersPage: React.FC = () => {
                           <div className="text-sm font-medium text-white">{o.title}</div>
                           {o.created_at && (
                             <div className="text-xs text-slate-400">
-                              Créé le {new Date(o.created_at).toLocaleDateString()}
+                              Created on {new Date(o.created_at).toLocaleDateString()}
                             </div>
                           )}
                         </td>
