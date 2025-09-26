@@ -24,6 +24,9 @@ interface AdminStats {
     allTimeUsers: number;
     newUsersInRange: number;
     adminsAllTime: number;
+    totalOrders: number;
+    totalInvoices: number;
+    totalClients: number;
   };
   plans: Record<PlanKey, number>;
   revenue: {
@@ -48,10 +51,24 @@ interface AdminStats {
     referral_count: number;
     total_earnings: number;
   }>;
+  recentOrders: Array<{
+    id: string;
+    client_name: string;
+    amount: number;
+    status: string;
+    created_at: string;
+  }>;
+  recentInvoices: Array<{
+    id: string;
+    client_name: string;
+    total_amount: number;
+    status: string;
+    created_at: string;
+  }>;
 }
 
 const mockStats: AdminStats = {
-  totals: { allTimeUsers: 1287, newUsersInRange: 42, adminsAllTime: 2 },
+  totals: { allTimeUsers: 1287, newUsersInRange: 42, adminsAllTime: 2, totalOrders: 0, totalInvoices: 0, totalClients: 0 },
   plans: { free: 820, trial: 0, pro: 320, excellence: 112 },
   revenue: { total: 4823.5, fromSubscriptions: 4410, fromInvoices: 270, fromOther: 143.5, currency: 'EUR' },
   recentUsers: [
@@ -66,6 +83,8 @@ const mockStats: AdminStats = {
     { id: 'r2', email: 'ref2@example.com', name: 'Second Ref', referral_count: 7, total_earnings: 140 },
     { id: 'r3', email: 'ref3@example.com', name: 'Third Ref', referral_count: 5, total_earnings: 93 },
   ],
+  recentOrders: [],
+  recentInvoices: [],
 };
 
 const AdminDashboard: React.FC = () => {
@@ -76,6 +95,7 @@ const AdminDashboard: React.FC = () => {
   const [endDate, setEndDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [working, setWorking] = useState(false);
   const [stats, setStats] = useState<AdminStats>(mockStats);
+  const [dbStatus, setDbStatus] = useState<'connected' | 'disconnected' | 'error'>('disconnected');
 
   const startISO = useMemo(() => new Date(`${startDate}T00:00:00.000Z`).toISOString(), [startDate]);
   const endISO = useMemo(() => new Date(`${endDate}T23:59:59.999Z`).toISOString(), [endDate]);
@@ -96,6 +116,7 @@ const AdminDashboard: React.FC = () => {
 
   const loadAll = async () => {
     if (!isSupabaseConfigured || !supabase) {
+      setDbStatus('disconnected');
       setStats(mockStats);
       setLoading(false);
       return;
@@ -107,6 +128,7 @@ const AdminDashboard: React.FC = () => {
 
     try {
       setLoading(true);
+      setDbStatus('connected');
 
       // ---------- USERS ----------
       const [{ data: usersAll, error: usersAllErr }, { data: usersRange, error: usersRangeErr }] = await Promise.all([
@@ -119,6 +141,21 @@ const AdminDashboard: React.FC = () => {
       const allTimeUsers = usersAll?.length ?? 0;
       const adminsAllTime = (usersAll ?? []).filter(u => (u as any).role === 'admin').length;
       const newUsersInRange = usersRange?.length ?? 0;
+
+      // ---------- ORDERS & INVOICES & CLIENTS ----------
+      const [{ data: ordersData, error: ordersErr }, { data: invoicesData, error: invoicesErr }, { data: clientsData, error: clientsErr }] = await Promise.all([
+        supabase.from('orders').select('id, amount, status, created_at, client_name'),
+        supabase.from('invoices').select('id, total_amount, status, created_at, client_name'),
+        supabase.from('clients').select('id'),
+      ]);
+
+      if (ordersErr) console.warn('Orders error:', ordersErr?.message);
+      if (invoicesErr) console.warn('Invoices error:', invoicesErr?.message);
+      if (clientsErr) console.warn('Clients error:', clientsErr?.message);
+
+      const totalOrders = ordersData?.length ?? 0;
+      const totalInvoices = invoicesData?.length ?? 0;
+      const totalClients = clientsData?.length ?? 0;
 
       // Plans (fallback sans trial_end ni table subscriptions) -> is_pro = pro / sinon free
       const { data: usersRangeFull } = await supabase
@@ -149,6 +186,29 @@ const AdminDashboard: React.FC = () => {
           role: u.role ?? null,
           plan: u.is_pro ? ('pro' as PlanKey) : ('free' as PlanKey),
         })) ?? [];
+
+      // ---------- RECENT ORDERS & INVOICES ----------
+      const recentOrders = (ordersData ?? [])
+        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 5)
+        .map((order: any) => ({
+          id: order.id,
+          client_name: order.client_name || 'Client inconnu',
+          amount: safeNumber(order.amount),
+          status: order.status || 'Unknown',
+          created_at: order.created_at,
+        }));
+
+      const recentInvoices = (invoicesData ?? [])
+        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 5)
+        .map((invoice: any) => ({
+          id: invoice.id,
+          client_name: invoice.client_name || 'Client inconnu',
+          total_amount: safeNumber(invoice.total_amount),
+          status: invoice.status || 'Unknown',
+          created_at: invoice.created_at,
+        }));
 
       // ---------- REVENUE ----------
       let fromSubscriptions = 0;
@@ -253,14 +313,17 @@ const AdminDashboard: React.FC = () => {
       };
 
       setStats({
-        totals: { allTimeUsers, newUsersInRange, adminsAllTime },
+        totals: { allTimeUsers, newUsersInRange, adminsAllTime, totalOrders, totalInvoices, totalClients },
         plans,
         revenue,
         recentUsers,
         topReferrers,
+        recentOrders,
+        recentInvoices,
       });
     } catch (err: any) {
       console.error('💥 Admin load error', err?.message || err);
+      setDbStatus('error');
       toast.error("Erreur lors du chargement des stats Admin");
       setStats(mockStats);
     } finally {
@@ -303,7 +366,21 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Administration</h1>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Tableau de bord — vue globale & période</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Tableau de bord — vue globale & période</p>
+                <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                  dbStatus === 'connected' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                  dbStatus === 'error' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
+                  'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full mr-1 ${
+                    dbStatus === 'connected' ? 'bg-green-500' :
+                    dbStatus === 'error' ? 'bg-red-500' :
+                    'bg-yellow-500'
+                  }`} />
+                  {dbStatus === 'connected' ? 'DB Connectée' : dbStatus === 'error' ? 'DB Erreur' : 'Mode Démo'}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -361,7 +438,7 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4 sm:gap-6">
           <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
             <div className="flex items-center justify-between">
               <div>
@@ -411,6 +488,42 @@ const AdminDashboard: React.FC = () => {
               </div>
             </div>
           </div>
+
+          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Commandes (Total)</p>
+                <p className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 mt-1">{stats.totals.totalOrders}</p>
+              </div>
+              <div className="bg-blue-100 dark:bg-blue-900/30 p-2 sm:p-3 rounded-lg">
+                <BarChart3 className="text-blue-600 dark:text-blue-400" size={20} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Factures (Total)</p>
+                <p className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">{stats.totals.totalInvoices}</p>
+              </div>
+              <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 sm:p-3 rounded-lg">
+                <CalendarIcon className="text-indigo-600 dark:text-indigo-400" size={20} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Clients (Total)</p>
+                <p className="text-2xl sm:text-3xl font-bold text-teal-600 dark:text-teal-400 mt-1">{stats.totals.totalClients}</p>
+              </div>
+              <div className="bg-teal-100 dark:bg-teal-900/30 p-2 sm:p-3 rounded-lg">
+                <Users className="text-teal-600 dark:text-teal-400" size={20} />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Plan breakdown */}
@@ -449,6 +562,93 @@ const AdminDashboard: React.FC = () => {
             <div className="rounded-lg p-3 bg-white/70 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700">
               <div className="text-xs text-gray-500 dark:text-gray-400">Autres revenus</div>
               <div className="mt-1 text-sm text-gray-900 dark:text-white">{formatCurrency(stats.revenue.fromOther)} (période)</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Orders & Invoices */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Commandes récentes</h2>
+              <BarChart3 className="text-gray-400 dark:text-gray-500" size={20} />
+            </div>
+            <div className="space-y-3">
+              {stats.recentOrders.length ? (
+                stats.recentOrders.map((order) => (
+                  <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xs font-semibold">
+                        {order.client_name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {order.client_name}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{formatDate(order.created_at)}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                        {formatCurrency(order.amount)}
+                      </span>
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                        order.status === 'Completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                        order.status === 'In Progress' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+                        'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Aucune commande récente</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Factures récentes</h2>
+              <CalendarIcon className="text-gray-400 dark:text-gray-500" size={20} />
+            </div>
+            <div className="space-y-3">
+              {stats.recentInvoices.length ? (
+                stats.recentInvoices.map((invoice) => (
+                  <div key={invoice.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xs font-semibold">
+                        {invoice.client_name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {invoice.client_name}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{formatDate(invoice.created_at)}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                        {formatCurrency(invoice.total_amount)}
+                      </span>
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                        invoice.status === 'Paid' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                        invoice.status === 'Pending' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
+                        'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200'
+                      }`}>
+                        {invoice.status}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Aucune facture récente</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
