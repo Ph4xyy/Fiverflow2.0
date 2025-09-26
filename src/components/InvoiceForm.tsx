@@ -331,19 +331,21 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
   if (!isOpen) return null;
 
   const inputBase =
-    "w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors " +
-    "border-zinc-800 text-zinc-100 placeholder-zinc-500 bg-zinc-900";
+    "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent " +
+    "border-gray-300 text-gray-900 placeholder-gray-400 " +
+    "dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-400";
 
   const selectBase =
-    "w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors " +
-    "border-zinc-800 text-zinc-100 bg-zinc-900";
+    "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent " +
+    "border-gray-300 text-gray-900 " +
+    "dark:bg-slate-800 dark:border-slate-700 dark:text-white";
 
-  const labelBase = "block text-sm font-semibold mb-2 text-zinc-200";
+  const labelBase = "block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300";
 
   // Étape 1 modifiée → ajout du template
   const Step1 = (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-zinc-100 mb-4 flex items-center">
+      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
         <FileText className="mr-2" size={20} />
         Informations facture
       </h3>
@@ -377,17 +379,17 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-zinc-900 rounded-xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto border border-zinc-800">
+      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
           <div>
-            <h2 className="text-xl font-semibold text-zinc-100">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
               {invoice ? "Modifier la facture" : "Créer / Envoyer une facture"}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-zinc-300 transition-colors"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
             <X size={24} />
           </button>
@@ -416,19 +418,19 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
           )}
 
           {/* Footer */}
-          <div className="flex justify-between mt-2 pt-6 border-t border-zinc-800">
+          <div className="flex justify-between mt-2 pt-6 border-t border-gray-200 dark:border-slate-700">
             <button
               type="button"
               onClick={prevStep}
               disabled={currentStep === 1}
-              className="px-4 py-2 border border-zinc-700 text-zinc-300 rounded-lg hover:bg-zinc-800 transition-colors disabled:opacity-50"
+              className="px-4 py-2 border rounded-lg"
             >
               Précédent
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg"
             >
               {invoice ? "Mettre à jour" : "Créer"}
             </button>

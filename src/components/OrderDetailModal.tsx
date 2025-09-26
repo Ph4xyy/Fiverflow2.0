@@ -77,7 +77,7 @@ const badgeForStatus = (status?: string) => {
     case 'In Progress':
       return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
     case 'Pending':
-      return 'bg-blue-900/30 text-blue-300';
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
     default:
       return 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-300';
   }

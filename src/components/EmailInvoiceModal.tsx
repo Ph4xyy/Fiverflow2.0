@@ -96,17 +96,18 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, 
   };
 
   const inputBase =
-    "w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors " +
-    "border-zinc-800 text-zinc-100 placeholder-zinc-500 bg-zinc-900";
+    "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent " +
+    "border-gray-300 text-gray-900 placeholder-gray-400 " +
+    "dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-400";
 
-  const labelBase = "block text-sm font-semibold mb-2 text-zinc-200";
+  const labelBase = "block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300";
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-zinc-900 rounded-xl shadow-xl w-full max-w-lg border border-zinc-800">
-        <div className="flex items-center justify-between p-5 border-b border-zinc-800">
-          <h3 className="text-lg font-semibold text-zinc-100">Envoyer la facture par email</h3>
-          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-300">
+      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl w-full max-w-lg">
+        <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-slate-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Envoyer la facture par email</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
             <X size={22} />
           </button>
         </div>
@@ -147,7 +148,7 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, 
             <button
               type="submit"
               disabled={sending}
-              className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 inline-flex items-center transition-colors"
+              className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 inline-flex items-center"
             >
               {sending ? (
                 <>

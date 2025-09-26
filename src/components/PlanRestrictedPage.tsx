@@ -55,7 +55,7 @@ const PlanRestrictedPage: React.FC<PlanRestrictedPageProps> = ({
       title: 'Statistiques Avancées',
       description: 'Analysez vos performances avec des rapports détaillés et des métriques avancées.',
       requiredPlan: 'Excellence',
-      color: 'from-blue-500 to-red-600'
+      color: 'from-orange-500 to-red-600'
     }
   };
 

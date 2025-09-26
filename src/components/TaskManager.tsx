@@ -74,7 +74,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ orderId, orderTitle, clientNa
       case 'high':
         return 'text-red-300 bg-red-900/30 border border-red-800';
       case 'medium':
-        return 'text-blue-300 bg-blue-900/30 border border-blue-800';
+        return 'text-yellow-300 bg-yellow-900/30 border border-yellow-800';
       case 'low':
         return 'text-green-300 bg-green-900/30 border border-green-800';
     }
@@ -189,7 +189,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ orderId, orderTitle, clientNa
             </div>
 
             <div className="p-4 sm:p-5 flex items-center gap-4 bg-[#0F141C]">
-              <div className="w-11 h-11 rounded-xl grid place-items-center text-white bg-gradient-to-br from-blue-500 to-blue-600">
+              <div className="w-11 h-11 rounded-xl grid place-items-center text-white bg-gradient-to-br from-amber-500 to-orange-600">
                 <Timer className="w-5 h-5" />
               </div>
               <div>
