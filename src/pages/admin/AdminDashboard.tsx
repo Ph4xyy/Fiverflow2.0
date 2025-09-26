@@ -98,6 +98,7 @@ const AdminDashboard: React.FC = () => {
   const [working, setWorking] = useState(false);
   const [stats, setStats] = useState<AdminStats>(mockStats);
   const [dbStatus, setDbStatus] = useState<'connected' | 'disconnected' | 'error'>('disconnected');
+  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   const startISO = useMemo(() => new Date(`${startDate}T00:00:00.000Z`).toISOString(), [startDate]);
   const endISO = useMemo(() => new Date(`${endDate}T23:59:59.999Z`).toISOString(), [endDate]);
@@ -133,16 +134,36 @@ const AdminDashboard: React.FC = () => {
       setDbStatus('connected');
 
       // ---------- USERS ----------
+      console.log('🔍 Récupération des données utilisateurs...');
+      
       const [{ data: usersAll, error: usersAllErr }, { data: usersRange, error: usersRangeErr }] = await Promise.all([
-        supabase.from('users').select('id, role'),
-        supabase.from('users').select('id').gte('created_at', startISO).lte('created_at', endISO),
+        supabase.from('users').select('id, role, email, created_at'),
+        supabase.from('users').select('id, role, email, created_at').gte('created_at', startISO).lte('created_at', endISO),
       ]);
-      if (usersAllErr) throw usersAllErr;
-      if (usersRangeErr) throw usersRangeErr;
+      
+      if (usersAllErr) {
+        console.error('❌ Erreur usersAll:', usersAllErr);
+        throw usersAllErr;
+      }
+      if (usersRangeErr) {
+        console.error('❌ Erreur usersRange:', usersRangeErr);
+        throw usersRangeErr;
+      }
+
+      console.log('👥 Données utilisateurs récupérées:', {
+        allUsers: usersAll?.length || 0,
+        rangeUsers: usersRange?.length || 0,
+        allUsersData: usersAll,
+        rangeUsersData: usersRange
+      });
 
       const allTimeUsers = usersAll?.length ?? 0;
       const adminsAllTime = (usersAll ?? []).filter(u => (u as any).role === 'admin').length;
       const newUsersInRange = usersRange?.length ?? 0;
+
+      // Debug info pour les admins
+      const adminUsers = (usersAll ?? []).filter(u => (u as any).role === 'admin');
+      console.log('👑 Admins trouvés:', adminUsers);
 
       // ---------- ORDERS & INVOICES & CLIENTS ----------
       const [{ data: ordersData, error: ordersErr }, { data: invoicesData, error: invoicesErr }, { data: clientsData, error: clientsErr }] = await Promise.all([
@@ -346,6 +367,23 @@ const AdminDashboard: React.FC = () => {
         currency,
       };
 
+      // Debug info
+      const debugData = {
+        usersAll: usersAll?.length || 0,
+        usersRange: usersRange?.length || 0,
+        adminUsers: adminUsers,
+        adminsCount: adminsAllTime,
+        ordersCount: totalOrders,
+        invoicesCount: totalInvoices,
+        clientsCount: totalClients,
+        viewsCount: totalViews,
+        activeUsersCount: activeUsers,
+        dateRange: { start: startISO, end: endISO }
+      };
+      
+      console.log('📊 Debug Admin Data:', debugData);
+      setDebugInfo(debugData);
+
       setStats({
         totals: { allTimeUsers, newUsersInRange, adminsAllTime, totalOrders, totalInvoices, totalClients, totalViews, activeUsers },
         plans,
@@ -467,6 +505,13 @@ const AdminDashboard: React.FC = () => {
             >
               <RefreshCw size={14} className={working ? 'animate-spin' : ''} />
               Update
+            </button>
+            <button
+              onClick={() => setDebugInfo(debugInfo ? null : 'show')}
+              className="text-xs px-2 py-1 rounded-md bg-gray-600 text-white hover:bg-gray-700 flex items-center gap-1"
+              title="Afficher Debug Info"
+            >
+              🐛 Debug
             </button>
           </div>
         </div>
@@ -916,9 +961,58 @@ const AdminDashboard: React.FC = () => {
 </div>
         {/* FIN - SYSTEME D'AJOUT D'ABONNEMENTS */}
 
+        {/* DEBUG INFO */}
+        {debugInfo && (
+          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Debug Info</h2>
+              <button
+                onClick={() => setDebugInfo(null)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">Utilisateurs</h3>
+                <div className="space-y-1">
+                  <div>Total utilisateurs: <span className="font-mono text-blue-600 dark:text-blue-400">{debugInfo.usersAll}</span></div>
+                  <div>Nouveaux (période): <span className="font-mono text-green-600 dark:text-green-400">{debugInfo.usersRange}</span></div>
+                  <div>Admins: <span className="font-mono text-red-600 dark:text-red-400">{debugInfo.adminsCount}</span></div>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">Données</h3>
+                <div className="space-y-1">
+                  <div>Commandes: <span className="font-mono text-blue-600 dark:text-blue-400">{debugInfo.ordersCount}</span></div>
+                  <div>Factures: <span className="font-mono text-indigo-600 dark:text-indigo-400">{debugInfo.invoicesCount}</span></div>
+                  <div>Clients: <span className="font-mono text-teal-600 dark:text-teal-400">{debugInfo.clientsCount}</span></div>
+                  <div>Vues: <span className="font-mono text-purple-600 dark:text-purple-400">{debugInfo.viewsCount}</span></div>
+                  <div>Actifs: <span className="font-mono text-emerald-600 dark:text-emerald-400">{debugInfo.activeUsersCount}</span></div>
+                </div>
+              </div>
+            </div>
+            {debugInfo.adminUsers && debugInfo.adminUsers.length > 0 && (
+              <div className="mt-4">
+                <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">Admins détaillés</h3>
+                <div className="space-y-1">
+                  {debugInfo.adminUsers.map((admin: any, index: number) => (
+                    <div key={index} className="text-xs font-mono text-gray-600 dark:text-gray-400">
+                      {admin.email} ({admin.role}) - {new Date(admin.created_at).toLocaleDateString()}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+              Période: {new Date(debugInfo.dateRange.start).toLocaleDateString()} → {new Date(debugInfo.dateRange.end).toLocaleDateString()}
+            </div>
+          </div>
+        )}
 
         <div className="text-xs text-gray-500 dark:text-gray-400">
-          * Le calcul s’adapte à votre schéma : si une colonne/table est absente, elle est ignorée. Vous pouvez m’envoyer le schéma réel pour avoir des stats 100% précises (plans, revenus, etc.).
+          * Le calcul s'adapte à votre schéma : si une colonne/table est absente, elle est ignorée. Vous pouvez m'envoyer le schéma réel pour avoir des stats 100% précises (plans, revenus, etc.).
         </div>
       </div>
 
