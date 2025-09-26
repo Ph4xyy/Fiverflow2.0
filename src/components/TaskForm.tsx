@@ -43,7 +43,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
 
   const priorityOptions = [
     { value: 'low', label: 'Basse', color: 'text-green-600' },
-    { value: 'medium', label: 'Moyenne', color: 'text-yellow-600' },
+    { value: 'medium', label: 'Moyenne', color: 'text-blue-400' },
     { value: 'high', label: 'Haute', color: 'text-red-600' }
   ];
 

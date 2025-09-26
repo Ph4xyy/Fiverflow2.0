@@ -323,7 +323,7 @@ const RegistrationForm: React.FC = () => {
     if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
 
     if (score <= 2) return { score, label: 'Faible', color: 'bg-red-900/200' };
-    if (score <= 3) return { score, label: 'Moyen', color: 'bg-yellow-500' };
+    if (score <= 3) return { score, label: 'Moyen', color: 'bg-blue-500' };
     if (score <= 4) return { score, label: 'Fort', color: 'bg-blue-500' };
     return { score, label: 'Très fort', color: 'bg-green-500' };
   };
@@ -441,7 +441,7 @@ const RegistrationForm: React.FC = () => {
                     <span className="text-xs text-zinc-400">Force du mot de passe</span>
                     <span className={`text-xs font-medium ${
                       passwordStrength.score <= 2 ? 'text-red-400' :
-                      passwordStrength.score <= 3 ? 'text-yellow-400' :
+                      passwordStrength.score <= 3 ? 'text-blue-400' :
                       passwordStrength.score <= 4 ? 'text-blue-400' : 'text-green-400'
                     }`}>
                       {passwordStrength.label}

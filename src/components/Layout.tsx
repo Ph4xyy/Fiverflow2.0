@@ -162,7 +162,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   // Section 3: Workspace
   const workspaceItems = [
     { path: '/clients', label: 'Clients', icon: Users, tone: 'from-emerald-500 to-teal-600' },
-    { path: '/orders',  label: 'Orders',  icon: ShoppingCart, tone: 'from-amber-500 to-orange-600' },
+    { path: '/orders',  label: 'Orders',  icon: ShoppingCart, tone: 'from-blue-500 to-blue-600' },
     { 
       path: '/invoices',
       label: 'Invoices',
@@ -199,7 +199,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       icon: Shield,
       tone: 'from-lime-500 to-green-600'
     }] as const : []),
-    { path: '/upgrade', label: 'Upgrade', icon: Crown, tone: 'from-accent-orange to-accent-yellow', special: 'upgrade' as const },
+    { path: '/upgrade', label: 'Upgrade', icon: Crown, tone: 'from-blue-500 to-blue-600', special: 'upgrade' as const },
   ];
 
   const handleSignOut = async () => {
@@ -222,7 +222,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     // ✅ Build-safe classes
     const rowClass =
       isUpgrade
-        ? 'text-white bg-gradient-to-r from-accent-orange to-accent-yellow shadow-glow-orange hover:shadow-lg hover:-translate-y-0.5'
+        ? 'text-white bg-gradient-to-r from-blue-500 to-blue-600 shadow-glow-blue hover:shadow-lg hover:-translate-y-0.5'
         : isRestricted
         ? 'text-slate-500/70 cursor-pointer'
         : isActive
@@ -434,7 +434,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               backdrop-blur-xl
             "
           >
-            <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-amber-500" />
+            <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-blue-500" />
 
             <div className="px-6 pt-6 pb-3 flex items-start justify-between">
               <div className="flex items-center gap-3">

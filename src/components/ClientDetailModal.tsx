@@ -47,7 +47,7 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ client, isOpen, o
       case 'active':
         return 'bg-green-100 text-green-800';
       case 'prospect':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-blue-900/30 text-blue-300';
       case 'inactive':
         return 'bg-gray-100 text-gray-800';
       case 'completed':
@@ -62,7 +62,7 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ client, isOpen, o
       case 'high':
         return 'bg-red-100 text-red-800';
       case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-blue-900/30 text-blue-300';
       case 'low':
         return 'bg-green-100 text-green-800';
       default:
@@ -328,11 +328,11 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ client, isOpen, o
           {/* Suivi et notes */}
           <div className="mt-8 space-y-6">
             {client.next_action && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-yellow-800 mb-2">Prochaine action</h4>
-                <p className="text-sm text-yellow-700">{client.next_action}</p>
+              <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-blue-300 mb-2">Prochaine action</h4>
+                <p className="text-sm text-blue-200">{client.next_action}</p>
                 {client.next_action_date && (
-                  <p className="text-xs text-yellow-600 mt-1">
+                  <p className="text-xs text-blue-400 mt-1">
                     Prévu pour le {formatDate(client.next_action_date)}
                   </p>
                 )}

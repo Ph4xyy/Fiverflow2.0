@@ -194,7 +194,7 @@ const NotificationsDropdown: React.FC = () => {
     switch (type) {
       case 'task_due':
       case 'deadline_approaching':
-        return <Clock className="text-orange-500" size={16} />;
+        return <Clock className="text-blue-400" size={16} />;
       case 'invoice_pending':
       case 'payment_received':
         return <DollarSign className="text-green-500" size={16} />;

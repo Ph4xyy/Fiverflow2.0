@@ -23,7 +23,7 @@ const TemplateCard: React.FC<Props> = ({ template, onEdit, onDuplicate, onDelete
             onClick={() => onSetDefault(template.id)}
             className={`inline-flex items-center px-2 py-1 rounded-md text-xs ${
               template.is_default
-                ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300"
+                ? "bg-blue-900/30 text-blue-300"
                 : "bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-slate-300"
             }`}
             title={template.is_default ? "Modèle par défaut" : "Définir par défaut"}

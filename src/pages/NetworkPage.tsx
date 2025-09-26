@@ -249,7 +249,7 @@ export default function NetworkPage() {
       case 'processing':
         return `${base} bg-blue-900/30 text-blue-300`;
       case 'pending':
-        return `${base} bg-yellow-900/30 text-yellow-300`;
+        return `${base} bg-blue-900/30 text-blue-300`;
       case 'failed':
       case 'cancelled':
         return `${base} bg-red-900/30 text-red-300`;
@@ -265,7 +265,7 @@ export default function NetworkPage() {
       case 'processing':
         return <Clock className="text-blue-400" size={16} />;
       case 'pending':
-        return <Clock className="text-yellow-400" size={16} />;
+        return <Clock className="text-blue-400" size={16} />;
       case 'failed':
       case 'cancelled':
         return <XCircle className="text-red-400" size={16} />;
@@ -344,18 +344,18 @@ export default function NetworkPage() {
     <Layout>
       <div className="space-y-6 p-4 sm:p-0">
         {(pageError || payoutError) && (
-          <div className="mb-6 rounded-xl p-4 border border-yellow-800 bg-yellow-900/20">
+          <div className="mb-6 rounded-xl p-4 border border-blue-800 bg-blue-900/20">
             <div className="flex items-start space-x-3">
-              <AlertCircle className="text-yellow-400 mt-0.5 flex-shrink-0" size={20} />
+              <AlertCircle className="text-blue-400 mt-0.5 flex-shrink-0" size={20} />
               <div>
-                <h3 className="text-yellow-300 font-medium">Demo Mode Active</h3>
-                <p className="text-yellow-400 text-sm mt-1">
+                <h3 className="text-blue-300 font-medium">Demo Mode Active</h3>
+                <p className="text-blue-400 text-sm mt-1">
                   We're showing demo data because we couldn't connect to the database.
                   Your actual referral data will appear once the connection is restored.
                 </p>
                 <button
                   onClick={handleRetry}
-                  className="mt-2 text-yellow-300 hover:underline text-sm font-medium"
+                  className="mt-2 text-blue-300 hover:underline text-sm font-medium"
                 >
                   Try to reconnect
                 </button>
@@ -399,8 +399,8 @@ export default function NetworkPage() {
 
           <div className={`${card} p-6`}>
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-yellow-900/30">
-                <DollarSign className="h-6 w-6 text-yellow-400" />
+              <div className="p-3 rounded-full bg-blue-900/30">
+                <DollarSign className="h-6 w-6 text-blue-400" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-zinc-400">Total Earnings</p>
@@ -490,7 +490,7 @@ export default function NetworkPage() {
                             className={
                               payoutDetails.payout_enabled
                                 ? 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-900/30 text-green-800 bg-green-900/30 text-green-300'
-                                : 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-yellow-900/30 text-yellow-800 bg-yellow-900/30 text-yellow-300'
+                                : 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-900/30 text-yellow-800 bg-blue-900/30 text-blue-300'
                             }
                           >
                             {payoutDetails.payout_enabled ? 'Verified' : 'Pending Verification'}
@@ -513,10 +513,10 @@ export default function NetworkPage() {
               </div>
 
               {!payoutDetails?.payout_enabled && (
-                <div className="rounded-lg p-3 mb-4 border border-yellow-200 border-yellow-800 bg-yellow-50 bg-yellow-900/20">
+                <div className="rounded-lg p-3 mb-4 border border-yellow-200 border-blue-800 bg-yellow-50 bg-blue-900/20">
                   <div className="flex items-start space-x-2">
-                    <AlertCircle className="text-yellow-400 mt-0.5 flex-shrink-0" size={16} />
-                    <div className="text-sm text-yellow-800 text-yellow-300">
+                    <AlertCircle className="text-blue-400 mt-0.5 flex-shrink-0" size={16} />
+                    <div className="text-sm text-yellow-800 text-blue-300">
                       <p className="font-medium">Account verification required</p>
                       <p className="mt-1">Complete your Stripe Connect setup to receive payouts.</p>
                     </div>
@@ -638,7 +638,7 @@ export default function NetworkPage() {
                           className={
                             referral.subscription_status === 'paid'
                               ? 'inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-900/30 text-green-800 bg-green-900/30 text-green-300'
-                              : 'inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-900/30 text-yellow-800 bg-yellow-900/30 text-yellow-300'
+                              : 'inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-900/30 text-yellow-800 bg-blue-900/30 text-blue-300'
                           }
                         >
                           {referral.subscription_status === 'paid' ? 'Paid' : 'Trial'}

@@ -56,7 +56,7 @@ const TrialBanner: React.FC<TrialBannerProps> = ({
               <h3 className="text-lg font-bold">
                 {isUrgent ? '⚠️ Essai Pro - Expire bientôt !' : '✨ Essai Pro Actif'}
               </h3>
-              {!isUrgent && <Zap className="text-yellow-300 dark:text-accent-yellow animate-pulse" size={16} />}
+              {!isUrgent && <Zap className="text-blue-300 animate-pulse" size={16} />}
             </div>
             <p className="text-white/90">
               {isLastDay ? (
