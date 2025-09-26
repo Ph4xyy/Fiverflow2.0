@@ -294,7 +294,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
       case 1:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+            <h3 className="text-lg font-semibold text-zinc-100 mb-4 flex items-center">
               <FileText className="mr-2" size={20} />
               Basic Information
             </h3>
@@ -306,7 +306,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className={`${inputBase} ${errors.title ? 'border-red-300 dark:border-red-500' : ''}`}
+                  className={`${inputBase} ${errors.title ? 'border-red-400' : ''}`}
                   placeholder="e.g., Logo design for tech startup"
                 />
                 {errors.title && <p className={errorText}><span className="mr-1">⚠️</span>{errors.title}</p>}
@@ -317,7 +317,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
                 <select
                   value={formData.client_id}
                   onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
-                  className={`${selectBase} ${errors.client_id ? 'border-red-300 dark:border-red-500' : ''}`}
+                  className={`${selectBase} ${errors.client_id ? 'border-red-400' : ''}`}
                 >
                   <option value="">Select a client</option>
                   {clients.map((c) => (
@@ -334,7 +334,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
                 <select
                   value={formData.project_type}
                   onChange={(e) => setFormData({ ...formData, project_type: e.target.value })}
-                  className={`${selectBase} ${errors.project_type ? 'border-red-300 dark:border-red-500' : ''}`}
+                  className={`${selectBase} ${errors.project_type ? 'border-red-400' : ''}`}
                 >
                   <option value="">Select project type</option>
                   {projectTypes.map((type) => (
@@ -360,7 +360,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
       case 2:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+            <h3 className="text-lg font-semibold text-zinc-100 mb-4 flex items-center">
               <DollarSign className="mr-2" size={20} />
               Financial Information
             </h3>
@@ -372,7 +372,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
                   type="number"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  className={`${inputBase} ${errors.amount ? 'border-red-300 dark:border-red-500' : ''}`}
+                  className={`${inputBase} ${errors.amount ? 'border-red-400' : ''}`}
                   placeholder="0.00"
                   min="0"
                   step="0.01"
@@ -399,7 +399,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
                   type="number"
                   value={formData.estimated_hours}
                   onChange={(e) => setFormData({ ...formData, estimated_hours: e.target.value })}
-                  className={`${inputBase} ${errors.estimated_hours ? 'border-red-300 dark:border-red-500' : ''}`}
+                  className={`${inputBase} ${errors.estimated_hours ? 'border-red-400' : ''}`}
                   placeholder="0"
                   min="0"
                 />
@@ -412,7 +412,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
                   type="number"
                   value={formData.hourly_rate}
                   onChange={(e) => setFormData({ ...formData, hourly_rate: e.target.value })}
-                  className={`${inputBase} ${errors.hourly_rate ? 'border-red-300 dark:border-red-500' : ''}`}
+                  className={`${inputBase} ${errors.hourly_rate ? 'border-red-400' : ''}`}
                   placeholder="0.00"
                   min="0"
                   step="0.01"
@@ -422,7 +422,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
             </div>
 
             {formData.estimated_hours && formData.hourly_rate && (
-              <div className="rounded-lg p-4 border bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200">
+              <div className="rounded-xl p-4 border bg-blue-900/20 border-blue-800 text-blue-200">
                 <p className="text-sm">
                   <strong>Calculated Total:</strong>{' '}
                   {(
@@ -438,7 +438,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
       case 3:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+            <h3 className="text-lg font-semibold text-zinc-100 mb-4 flex items-center">
               <Calendar className="mr-2" size={20} />
               Timeline & Management
             </h3>
@@ -450,7 +450,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
                   type="date"
                   value={formData.start_date}
                   onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                  className={`${inputBase} ${errors.start_date ? 'border-red-300 dark:border-red-500' : ''}`}
+                  className={`${inputBase} ${errors.start_date ? 'border-red-400' : ''}`}
                 />
                 {errors.start_date && <p className={errorText}><span className="mr-1">⚠️</span>{errors.start_date}</p>}
               </div>
@@ -461,7 +461,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
                   type="date"
                   value={formData.deadline}
                   onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
-                  className={`${inputBase} ${errors.deadline ? 'border-red-300 dark:border-red-500' : ''}`}
+                  className={`${inputBase} ${errors.deadline ? 'border-red-400' : ''}`}
                 />
                 {errors.deadline && <p className={errorText}><span className="mr-1">⚠️</span>{errors.deadline}</p>}
               </div>
@@ -521,7 +521,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
       case 4:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Additional Information</h3>
+            <h3 className="text-lg font-semibold text-zinc-100 mb-4">Additional Information</h3>
 
             <div className="space-y-4">
               <div>
@@ -558,14 +558,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
                       <span
                         key={`${tag}-${i}`}
                         className="inline-flex items-center px-2 py-1 rounded-full text-xs
-                                   bg-blue-100 text-blue-800
-                                   dark:bg-blue-900/30 dark:text-blue-300"
+                                   bg-blue-900/30 text-blue-300"
                       >
                         {tag}
                         <button
                           type="button"
                           onClick={() => removeTag(tag)}
-                          className="ml-1 text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
+                          className="ml-1 text-blue-300 hover:text-blue-200"
                         >
                           ×
                         </button>
@@ -585,10 +584,10 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-slate-800">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-800">
+      <div className="bg-zinc-900 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-zinc-800">
+        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-xl font-semibold text-zinc-100">
               {order ? 'Edit Order' : 'Create New Order'}
             </h2>
             <div className="flex items-center mt-2">
@@ -598,7 +597,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                       step <= currentStep
                         ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-600 dark:bg-slate-700 dark:text-gray-300'
+                        : 'bg-zinc-700 text-zinc-300'
                     }`}
                   >
                     {step < currentStep ? <CheckCircle size={16} /> : step}
@@ -606,7 +605,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
                   {step < 4 && (
                     <div
                       className={`w-12 h-1 mx-2 ${
-                        step < currentStep ? 'bg-blue-600' : 'bg-gray-200 dark:bg-slate-700'
+                        step < currentStep ? 'bg-blue-600' : 'bg-zinc-700'
                       }`}
                     />
                   )}
@@ -616,7 +615,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            className="text-zinc-400 hover:text-zinc-300 transition-colors"
           >
             <X size={24} />
           </button>
@@ -625,14 +624,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
         <form onSubmit={handleSubmit} className="p-6">
           {renderStep()}
 
-          <div className="flex justify-between mt-8 pt-6 border-t border-gray-200 dark:border-slate-800">
+          <div className="flex justify-between mt-8 pt-6 border-t border-zinc-800">
             <button
               type="button"
               onClick={prevStep}
               disabled={currentStep === 1}
               className="px-4 py-2 border rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed
-                         border-gray-300 text-gray-700 hover:bg-gray-50
-                         dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                         border-zinc-700 text-zinc-200 hover:bg-zinc-800"
             >
               Previous
             </button>
@@ -642,8 +640,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
                 type="button"
                 onClick={onClose}
                 className="px-4 py-2 border rounded-lg transition-colors
-                           border-gray-300 text-gray-700 hover:bg-gray-50
-                           dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                           border-zinc-700 text-zinc-200 hover:bg-zinc-800"
                 disabled={loading}
               >
                 Cancel
