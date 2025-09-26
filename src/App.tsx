@@ -6,6 +6,7 @@ import { UserDataProvider } from './contexts/UserDataContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
+import AnalyticsWrapper from './components/AnalyticsWrapper';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
 
 // Core pages
@@ -61,8 +62,9 @@ function App() {
     <AppErrorBoundary>
       <UserDataProvider>
         <Router>
-          <Suspense fallback={<div style={{ padding: 16 }}>Loading…</div>}>
-            <Routes>
+          <AnalyticsWrapper>
+            <Suspense fallback={<div style={{ padding: 16 }}>Loading…</div>}>
+              <Routes>
               {/* Pages publiques */}
               <Route path="/" element={<LandingPage />} />
               <Route path="/pricing" element={<PricingPage />} />
@@ -118,8 +120,9 @@ function App() {
 
               {/* Onboarding */}
               <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
-            </Routes>
-          </Suspense>
+              </Routes>
+            </Suspense>
+          </AnalyticsWrapper>
         </Router>
       </UserDataProvider>
     </AppErrorBoundary>
