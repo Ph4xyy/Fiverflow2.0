@@ -277,17 +277,17 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
   if (!isOpen) return null;
 
   const inputBase =
-    'w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent ' +
-    'bg-white text-gray-900 border-gray-300 placeholder-gray-400 ' +
-    'dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder-slate-400';
+    'w-full px-4 py-2.5 rounded-xl border transition-colors ' +
+    'bg-zinc-900 text-zinc-100 placeholder-zinc-500 border-zinc-800 ' +
+    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
 
   const selectBase =
-    'w-full px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent ' +
-    'bg-white text-gray-900 border-gray-300 ' +
-    'dark:bg-slate-800 dark:text-white dark:border-slate-700';
+    'w-full px-4 py-2.5 rounded-xl border transition-colors ' +
+    'bg-zinc-900 text-zinc-100 border-zinc-800 ' +
+    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
 
-  const labelBase = 'block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300';
-  const errorText = 'mt-1 text-sm text-red-600 flex items-center';
+  const labelBase = 'block text-sm font-semibold mb-2 text-zinc-200';
+  const errorText = 'mt-1 text-sm text-red-400 flex items-center';
 
   const renderStep = () => {
     switch (currentStep) {
