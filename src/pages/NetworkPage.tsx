@@ -121,16 +121,16 @@ export default function NetworkPage() {
   const referralCode = (user as any)?.referral_code || '';
   const referralLink = `${window.location.origin}/register?ref=${referralCode}`;
 
-  // --------- UI helpers (dark‑ready)
-  const card = 'bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700';
-  const pSub = 'text-gray-600 dark:text-gray-400';
-  const h1 = 'text-3xl font-bold text-gray-900 dark:text-white';
-  const h2 = 'text-xl font-semibold text-gray-900 dark:text-white';
+  // --------- UI helpers (dark theme)
+  const card = 'bg-zinc-900 rounded-xl shadow-sm border border-zinc-800';
+  const pSub = 'text-zinc-400';
+  const h1 = 'text-3xl font-bold text-zinc-100';
+  const h2 = 'text-xl font-semibold text-zinc-100';
   const tableWrap = 'overflow-x-auto';
   const thBase =
-    'px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300';
-  const tdMuted = 'text-sm text-gray-500 dark:text-gray-400';
-  const tdStrong = 'text-sm font-medium text-gray-900 dark:text-white';
+    'px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-400';
+  const tdMuted = 'text-sm text-zinc-400';
+  const tdStrong = 'text-sm font-medium text-zinc-100';
 
   useEffect(() => {
     if (user) fetchReferralData();
@@ -245,32 +245,32 @@ export default function NetworkPage() {
     const base = 'inline-flex px-2 py-1 text-xs font-medium rounded-full';
     switch (status) {
       case 'completed':
-        return `${base} bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300`;
+        return `${base} bg-green-900/30 text-green-300`;
       case 'processing':
-        return `${base} bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300`;
+        return `${base} bg-blue-900/30 text-blue-300`;
       case 'pending':
-        return `${base} bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300`;
+        return `${base} bg-yellow-900/30 text-yellow-300`;
       case 'failed':
       case 'cancelled':
-        return `${base} bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300`;
+        return `${base} bg-red-900/30 text-red-300`;
       default:
-        return `${base} bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-300`;
+        return `${base} bg-zinc-800 text-zinc-300`;
     }
   };
 
   const getPayoutStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="text-green-600" size={16} />;
+        return <CheckCircle className="text-green-400" size={16} />;
       case 'processing':
-        return <Clock className="text-blue-600" size={16} />;
+        return <Clock className="text-blue-400" size={16} />;
       case 'pending':
-        return <Clock className="text-yellow-600" size={16} />;
+        return <Clock className="text-yellow-400" size={16} />;
       case 'failed':
       case 'cancelled':
-        return <XCircle className="text-red-600" size={16} />;
+        return <XCircle className="text-red-400" size={16} />;
       default:
-        return <AlertCircle className="text-gray-600" size={16} />;
+        return <AlertCircle className="text-zinc-400" size={16} />;
     }
   };
 
@@ -286,7 +286,7 @@ export default function NetworkPage() {
       <Layout>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-          <p className="ml-3 text-gray-600 dark:text-gray-400">Checking your access…</p>
+          <p className="ml-3 text-zinc-400">Checking your access…</p>
         </div>
       </Layout>
     );
@@ -306,10 +306,10 @@ export default function NetworkPage() {
   // Loading state (data)
   if ((loading && payoutLoading) || (loading && !pageError && !payoutError)) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading referral network...</p>
+          <p className="mt-4 text-zinc-400">Loading referral network...</p>
         </div>
       </div>
     );
@@ -318,20 +318,20 @@ export default function NetworkPage() {
   // Critical error state
   if (pageError && payoutError) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-zinc-900 flex items-center justify-center p-4">
         <div className={`${card} max-w-md w-full p-8 text-center`}>
-          <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Unable to Load Network Page</h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-400 mb-4" />
+          <h1 className="text-xl font-bold text-zinc-100 mb-4">Unable to Load Network Page</h1>
+          <p className="text-zinc-400 mb-6">
             We're having trouble connecting to our services. Please check your internet connection and try again.
           </p>
-          <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-6 text-left">
+          <div className="space-y-2 text-sm text-zinc-400 mb-6 text-left">
             <p><strong>Referral Error:</strong> {pageError}</p>
             <p><strong>Payout Error:</strong> {payoutError}</p>
           </div>
           <button
             onClick={handleRetry}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            className="w-full bg-blue-600 text-zinc-100 py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
           >
             Try Again
           </button>
@@ -344,18 +344,18 @@ export default function NetworkPage() {
     <Layout>
       <div className="space-y-6 p-4 sm:p-0">
         {(pageError || payoutError) && (
-          <div className="mb-6 rounded-lg p-4 border border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20">
+          <div className="mb-6 rounded-xl p-4 border border-yellow-800 bg-yellow-900/20">
             <div className="flex items-start space-x-3">
-              <AlertCircle className="text-yellow-600 mt-0.5 flex-shrink-0" size={20} />
+              <AlertCircle className="text-yellow-400 mt-0.5 flex-shrink-0" size={20} />
               <div>
-                <h3 className="text-yellow-800 dark:text-yellow-300 font-medium">Demo Mode Active</h3>
-                <p className="text-yellow-700 dark:text-yellow-400 text-sm mt-1">
+                <h3 className="text-yellow-300 font-medium">Demo Mode Active</h3>
+                <p className="text-yellow-400 text-sm mt-1">
                   We're showing demo data because we couldn't connect to the database.
                   Your actual referral data will appear once the connection is restored.
                 </p>
                 <button
                   onClick={handleRetry}
-                  className="mt-2 text-yellow-800 dark:text-yellow-300 hover:underline text-sm font-medium"
+                  className="mt-2 text-yellow-300 hover:underline text-sm font-medium"
                 >
                   Try to reconnect
                 </button>
@@ -373,24 +373,24 @@ export default function NetworkPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className={`${card} p-6`}>
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                <Users className="h-6 w-6 text-blue-600" />
+              <div className="p-3 rounded-full bg-blue-900/30">
+                <Users className="h-6 w-6 text-blue-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Referrals</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{referrals.length}</p>
+                <p className="text-sm font-medium text-zinc-400">Total Referrals</p>
+                <p className="text-2xl font-bold text-zinc-100">{referrals.length}</p>
               </div>
             </div>
           </div>
 
           <div className={`${card} p-6`}>
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100 dark:bg-green-900/30">
-                <TrendingUp className="h-6 w-6 text-green-600" />
+              <div className="p-3 rounded-full bg-green-900/30">
+                <TrendingUp className="h-6 w-6 text-green-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Paid Referrals</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-sm font-medium text-zinc-400">Paid Referrals</p>
+                <p className="text-2xl font-bold text-zinc-100">
                   {referrals.filter((r) => r.subscription_status === 'paid').length}
                 </p>
               </div>
@@ -399,12 +399,12 @@ export default function NetworkPage() {
 
           <div className={`${card} p-6`}>
             <div className="flex items-center">
-              <div className="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/30">
-                <DollarSign className="h-6 w-6 text-yellow-600" />
+              <div className="p-3 rounded-full bg-yellow-900/30">
+                <DollarSign className="h-6 w-6 text-yellow-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Earnings</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(totalEarnings)}</p>
+                <p className="text-sm font-medium text-zinc-400">Total Earnings</p>
+                <p className="text-2xl font-bold text-zinc-100">{formatCurrency(totalEarnings)}</p>
               </div>
             </div>
           </div>
@@ -415,14 +415,14 @@ export default function NetworkPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className={h2 + ' flex items-center'}>
-                <Wallet className="mr-2 text-green-600" size={24} />
+                <Wallet className="mr-2 text-green-400" size={24} />
                 Payout Management
               </h2>
               <p className={pSub + ' mt-1'}>Manage your earnings and request payouts</p>
             </div>
             <button
               onClick={handleCheckStatus}
-              className="inline-flex items-center px-3 py-2 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-200 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+              className="inline-flex items-center px-3 py-2 bg-zinc-800 text-zinc-200 text-sm rounded-lg hover:bg-zinc-700 transition-colors"
             >
               <RefreshCw size={16} className="mr-2" />
               Refresh Status
@@ -431,23 +431,23 @@ export default function NetworkPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Available Earnings */}
-            <div className="rounded-lg p-6 border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
+            <div className="rounded-lg p-6 border border-green-200 border-green-800 bg-green-50 bg-green-900/20">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-green-900 dark:text-green-300">Available Earnings</h3>
-                  <p className="text-3xl font-bold text-green-700 dark:text-green-400 mt-2">
+                  <h3 className="text-lg font-semibold text-green-900 text-green-300">Available Earnings</h3>
+                  <p className="text-3xl font-bold text-green-700 text-green-400 mt-2">
                     {formatCurrency(availableEarnings)}
                   </p>
-                  <p className="text-sm text-green-700 dark:text-green-400 mt-1">Ready for withdrawal</p>
+                  <p className="text-sm text-green-700 text-green-400 mt-1">Ready for withdrawal</p>
                 </div>
-                <DollarSign className="text-green-600" size={32} />
+                <DollarSign className="text-green-400" size={32} />
               </div>
 
               {payoutDetails?.payout_enabled ? (
                 <button
                   onClick={() => setIsPayoutModalOpen(true)}
                   disabled={availableEarnings < 20}
-                  className="w-full inline-flex items-center justify-center px-4 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full inline-flex items-center justify-center px-4 py-3 bg-green-600 text-zinc-100 font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ArrowUpRight size={16} className="mr-2" />
                   Request Payout
@@ -456,7 +456,7 @@ export default function NetworkPage() {
                 <button
                   onClick={handleSetupPayout}
                   disabled={setupLoading}
-                  className="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  className="w-full inline-flex items-center justify-center px-4 py-3 bg-blue-600 text-zinc-100 font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                 >
                   {setupLoading ? (
                     <>
@@ -473,15 +473,15 @@ export default function NetworkPage() {
               )}
 
               {availableEarnings < 20 && (
-                <p className="text-xs text-green-700 dark:text-green-400 mt-2 text-center">Minimum payout: $20.00</p>
+                <p className="text-xs text-green-700 text-green-400 mt-2 text-center">Minimum payout: $20.00</p>
               )}
             </div>
 
             {/* Payout Account Status */}
-            <div className="rounded-lg p-6 border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
+            <div className="rounded-lg p-6 border border-blue-200 border-blue-800 bg-blue-50 bg-blue-900/20">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-300">Payout Account</h3>
+                  <h3 className="text-lg font-semibold text-blue-900 text-blue-300">Payout Account</h3>
                   <div className="mt-2">
                     {payoutDetails ? (
                       <div className="space-y-2">
@@ -489,34 +489,34 @@ export default function NetworkPage() {
                           <span
                             className={
                               payoutDetails.payout_enabled
-                                ? 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                                : 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                ? 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-900/30 text-green-800 bg-green-900/30 text-green-300'
+                                : 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-yellow-900/30 text-yellow-800 bg-yellow-900/30 text-yellow-300'
                             }
                           >
                             {payoutDetails.payout_enabled ? 'Verified' : 'Pending Verification'}
                           </span>
                         </div>
                         {payoutDetails.bank_account_last4 && (
-                          <p className="text-sm text-blue-700 dark:text-blue-300">
+                          <p className="text-sm text-blue-700 text-blue-300">
                             Bank: •••• {payoutDetails.bank_account_last4} ({payoutDetails.bank_account_country})
                           </p>
                         )}
                       </div>
                     ) : (
-                      <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-300">
+                      <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-zinc-800 text-zinc-200 bg-zinc-800 text-zinc-300">
                         Not Set Up
                       </span>
                     )}
                   </div>
                 </div>
-                <Bank className="text-blue-600" size={32} />
+                <Bank className="text-blue-400" size={32} />
               </div>
 
               {!payoutDetails?.payout_enabled && (
-                <div className="rounded-lg p-3 mb-4 border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20">
+                <div className="rounded-lg p-3 mb-4 border border-yellow-200 border-yellow-800 bg-yellow-50 bg-yellow-900/20">
                   <div className="flex items-start space-x-2">
-                    <AlertCircle className="text-yellow-600 mt-0.5 flex-shrink-0" size={16} />
-                    <div className="text-sm text-yellow-800 dark:text-yellow-300">
+                    <AlertCircle className="text-yellow-400 mt-0.5 flex-shrink-0" size={16} />
+                    <div className="text-sm text-yellow-800 text-yellow-300">
                       <p className="font-medium">Account verification required</p>
                       <p className="mt-1">Complete your Stripe Connect setup to receive payouts.</p>
                     </div>
@@ -532,8 +532,8 @@ export default function NetworkPage() {
           <div className={`${card} p-6 mb-8`}>
             <h2 className={h2 + ' mb-4'}>Payout History</h2>
             <div className={tableWrap}>
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
-                <thead className="bg-gray-50 dark:bg-slate-800/60">
+              <table className="min-w-full divide-y divide-zinc-800 divide-zinc-800">
+                <thead className="bg-zinc-900 bg-zinc-800/60">
                   <tr>
                     <th className={thBase}>Amount</th>
                     <th className={thBase}>Status</th>
@@ -541,7 +541,7 @@ export default function NetworkPage() {
                     <th className={thBase}>Processed</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
+                <tbody className="bg-zinc-900 bg-zinc-900 divide-y divide-zinc-800 divide-zinc-800">
                   {payoutRequests.map((request) => (
                     <tr key={request.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -558,7 +558,7 @@ export default function NetworkPage() {
                           </span>
                         </div>
                         {request.failure_reason && (
-                          <p className="text-xs text-red-600 dark:text-red-400 mt-1">{request.failure_reason}</p>
+                          <p className="text-xs text-red-400 text-red-400 mt-1">{request.failure_reason}</p>
                         )}
                       </td>
                       <td className={`px-6 py-4 whitespace-nowrap ${tdMuted}`}>{formatDate(request.requested_at)}</td>
@@ -582,12 +582,12 @@ export default function NetworkPage() {
                 type="text"
                 value={referralLink}
                 readOnly
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-lg bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-slate-400"
+                className="w-full px-4 py-2 border border-zinc-800 rounded-lg bg-zinc-900 text-zinc-200 placeholder-zinc-500"
               />
             </div>
             <button
               onClick={copyReferralLink}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center px-4 py-2 bg-blue-600 text-zinc-100 rounded-lg hover:bg-blue-700 transition-colors"
             >
               {copied ? (
                 <>
@@ -610,21 +610,21 @@ export default function NetworkPage() {
           <h2 className={h2 + ' mb-4'}>My Referrals</h2>
           {referrals.length === 0 ? (
             <div className="text-center py-8">
-              <Users className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">No referrals yet</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Share your link to start earning commissions</p>
+              <Users className="h-12 w-12 text-zinc-400 text-zinc-400 mx-auto mb-4" />
+              <p className="text-zinc-400 text-zinc-400">No referrals yet</p>
+              <p className="text-sm text-zinc-400 text-zinc-400 mt-2">Share your link to start earning commissions</p>
             </div>
           ) : (
             <div className={tableWrap}>
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
-                <thead className="bg-gray-50 dark:bg-slate-800/60">
+              <table className="min-w-full divide-y divide-zinc-800 divide-zinc-800">
+                <thead className="bg-zinc-900 bg-zinc-800/60">
                   <tr>
                     <th className={thBase}>User</th>
                     <th className={thBase}>Status</th>
                     <th className={thBase}>Registration Date</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
+                <tbody className="bg-zinc-900 bg-zinc-900 divide-y divide-zinc-800 divide-zinc-800">
                   {referrals.map((referral) => (
                     <tr key={referral.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -637,8 +637,8 @@ export default function NetworkPage() {
                         <span
                           className={
                             referral.subscription_status === 'paid'
-                              ? 'inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                              : 'inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                              ? 'inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-900/30 text-green-800 bg-green-900/30 text-green-300'
+                              : 'inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-900/30 text-yellow-800 bg-yellow-900/30 text-yellow-300'
                           }
                         >
                           {referral.subscription_status === 'paid' ? 'Paid' : 'Trial'}
@@ -658,23 +658,23 @@ export default function NetworkPage() {
           <h2 className={h2 + ' mb-4'}>Earnings History</h2>
           {referralLogs.length === 0 ? (
             <div className="text-center py-8">
-              <DollarSign className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">No earnings yet</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              <DollarSign className="h-12 w-12 text-zinc-400 text-zinc-400 mx-auto mb-4" />
+              <p className="text-zinc-400 text-zinc-400">No earnings yet</p>
+              <p className="text-sm text-zinc-400 text-zinc-400 mt-2">
                 Your commissions will appear here when your referrals subscribe
               </p>
             </div>
           ) : (
             <div className={tableWrap}>
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
-                <thead className="bg-gray-50 dark:bg-slate-800/60">
+              <table className="min-w-full divide-y divide-zinc-800 divide-zinc-800">
+                <thead className="bg-zinc-900 bg-zinc-800/60">
                   <tr>
                     <th className={thBase}>User</th>
                     <th className={thBase}>Commission</th>
                     <th className={thBase}>Date</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
+                <tbody className="bg-zinc-900 bg-zinc-900 divide-y divide-zinc-800 divide-zinc-800">
                   {referralLogs.map((log) => (
                     <tr key={log.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -684,7 +684,7 @@ export default function NetworkPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                        <span className="text-sm font-medium text-green-400 text-green-400">
                           {formatCurrency(Number(log.amount_earned))}
                         </span>
                       </td>
