@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useStripeSubscription } from '../hooks/useStripeSubscription';
+import { useImageUpload } from '../hooks/useImageUpload';
+import ImageUpload from '../components/ImageUpload';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import {
   User,
@@ -30,6 +32,8 @@ interface UserProfile {
   referrer_id: string | null;
   role: string | null;
   created_at: string | null;
+  banner_url?: string | null;
+  logo_url?: string | null;
 }
 
 /* ---------- Types ajoutés pour l’onglet Branding & Email ---------- */
@@ -111,6 +115,24 @@ const ProfilePage: React.FC = () => {
   const [smtp, setSmtp] = useState<SmtpSettings | null>(null);
   const [smtpLoading, setSmtpLoading] = useState(false);
   const [smtpSaving, setSmtpSaving] = useState(false);
+
+  /* ---------- State Images ---------- */
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [savingImages, setSavingImages] = useState(false);
+
+  // Hooks pour l'upload d'images
+  const { uploadImage: uploadBanner, uploading: uploadingBanner } = useImageUpload({ 
+    bucketName: 'user-assets', 
+    folder: 'banners' 
+  });
+  const { uploadImage: uploadLogo, uploading: uploadingLogo } = useImageUpload({ 
+    bucketName: 'user-assets', 
+    folder: 'logos' 
+  });
+
+  // Variables pour l'état de chargement
+  const isUploading = uploadingBanner || uploadingLogo || savingImages;
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
@@ -358,6 +380,125 @@ const ProfilePage: React.FC = () => {
   const selectBase = inputBase;
   const monoMuted = 'text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-mono mt-1 break-all';
   const divider = 'border-t border-gray-200 dark:border-slate-700';
+
+  /* ---------- Fonctions Images ---------- */
+  const saveImages = async () => {
+    if (!user || !isSupabaseConfigured || !supabase) {
+      toast.error('Supabase non configuré');
+      return;
+    }
+
+    try {
+      setSavingImages(true);
+      let bannerUrl = profile?.banner_url;
+      let logoUrl = profile?.logo_url;
+
+      // Upload bannière si un fichier est sélectionné
+      if (bannerFile) {
+        const uploadedBannerUrl = await uploadBanner(bannerFile, user.id);
+        if (uploadedBannerUrl) {
+          bannerUrl = uploadedBannerUrl;
+        }
+      }
+
+      // Upload logo si un fichier est sélectionné
+      if (logoFile) {
+        const uploadedLogoUrl = await uploadLogo(logoFile, user.id);
+        if (uploadedLogoUrl) {
+          logoUrl = uploadedLogoUrl;
+        }
+      }
+
+      // Mettre à jour le profil avec les nouvelles URLs
+      const { error } = await supabase
+        .from('users')
+        .update({
+          banner_url: bannerUrl,
+          logo_url: logoUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Erreur mise à jour images:', error);
+        toast.error('Erreur lors de la sauvegarde des images');
+        return;
+      }
+
+      // Mettre à jour l'état local
+      setProfile(prev => prev ? {
+        ...prev,
+        banner_url: bannerUrl,
+        logo_url: logoUrl
+      } : null);
+
+      // Réinitialiser les fichiers
+      setBannerFile(null);
+      setLogoFile(null);
+
+      toast.success('Images sauvegardées avec succès');
+
+    } catch (error) {
+      console.error('Erreur sauvegarde images:', error);
+      toast.error('Erreur lors de la sauvegarde des images');
+    } finally {
+      setSavingImages(false);
+    }
+  };
+
+  const removeBanner = async () => {
+    if (!user || !isSupabaseConfigured || !supabase) return;
+
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          banner_url: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Erreur suppression bannière:', error);
+        toast.error('Erreur lors de la suppression de la bannière');
+        return;
+      }
+
+      setProfile(prev => prev ? { ...prev, banner_url: null } : null);
+      toast.success('Bannière supprimée');
+
+    } catch (error) {
+      console.error('Erreur suppression bannière:', error);
+      toast.error('Erreur lors de la suppression de la bannière');
+    }
+  };
+
+  const removeLogo = async () => {
+    if (!user || !isSupabaseConfigured || !supabase) return;
+
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          logo_url: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Erreur suppression logo:', error);
+        toast.error('Erreur lors de la suppression du logo');
+        return;
+      }
+
+      setProfile(prev => prev ? { ...prev, logo_url: null } : null);
+      toast.success('Logo supprimé');
+
+    } catch (error) {
+      console.error('Erreur suppression logo:', error);
+      toast.error('Erreur lors de la suppression du logo');
+    }
+  };
 
   /* ---------- Onglet Branding & Email : data access ---------- */
   const fetchSmtpSettings = async () => {
@@ -859,6 +1000,100 @@ const ProfilePage: React.FC = () => {
               </div>
             )}
 
+            {/* Section Images */}
+            <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
+              <div className="flex items-center gap-2 mb-4">
+                <Palette size={18} />
+                <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">Images de profil</h4>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Bannière */}
+                <div>
+                  <label className={labelBase}>Bannière de profil</label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    Image d'en-tête de votre profil (recommandé: 1200x400px)
+                  </p>
+                  <ImageUpload
+                    currentImage={profile?.banner_url}
+                    onImageChange={setBannerFile}
+                    onImageRemove={removeBanner}
+                    placeholder="Uploader une bannière"
+                    aspectRatio="banner"
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Logo */}
+                <div>
+                  <label className={labelBase}>Logo de profil</label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    Logo carré pour votre profil (recommandé: 200x200px)
+                  </p>
+                  <ImageUpload
+                    currentImage={profile?.logo_url}
+                    onImageChange={setLogoFile}
+                    onImageRemove={removeLogo}
+                    placeholder="Uploader un logo"
+                    aspectRatio="logo"
+                    className="w-full max-w-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Boutons d'action */}
+              <div className="flex items-center gap-3 mt-4">
+                <button
+                  onClick={saveImages}
+                  disabled={isUploading || (!bannerFile && !logoFile)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isUploading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      {uploadingBanner ? 'Upload bannière...' : uploadingLogo ? 'Upload logo...' : 'Sauvegarde...'}
+                    </>
+                  ) : (
+                    <>
+                      <Save size={16} />
+                      Sauvegarder les images
+                    </>
+                  )}
+                </button>
+
+                {(bannerFile || logoFile) && (
+                  <button
+                    onClick={() => {
+                      setBannerFile(null);
+                      setLogoFile(null);
+                    }}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    Annuler
+                  </button>
+                )}
+              </div>
+
+              {/* Aperçu des images actuelles */}
+              {(profile?.banner_url || profile?.logo_url) && (
+                <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Images actuelles :</h5>
+                  <div className="flex items-center gap-4">
+                    {profile?.banner_url && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        Bannière: <span className="font-mono break-all">{profile.banner_url}</span>
+                      </div>
+                    )}
+                    {profile?.logo_url && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        Logo: <span className="font-mono break-all">{profile.logo_url}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${soft} p-3 sm:p-4 rounded-lg`}>
               <div>
                 <label className={labelBase}>From name</label>
@@ -1026,18 +1261,38 @@ const ProfilePage: React.FC = () => {
           <p className={pSub}>Manage your personal information and account settings.</p>
         </div>
 
-        {/* Profile Card (d’origine) */}
+        {/* Profile Card (d'origine) */}
         <div className={card}>
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 h-24 sm:h-32"></div>
+          {/* Bannière personnalisée ou par défaut */}
+          <div className="h-24 sm:h-32 relative overflow-hidden">
+            {profile.banner_url ? (
+              <img
+                src={profile.banner_url}
+                alt="Bannière de profil"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 h-full"></div>
+            )}
+          </div>
           <div className="relative px-4 sm:px-6 pb-6">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-12 sm:-mt-16">
               <div className="flex flex-col sm:flex-row sm:items-end space-y-4 sm:space-y-0 sm:space-x-4">
+                {/* Logo personnalisé ou par défaut */}
                 <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-slate-900 rounded-full border-4 border-white dark:border-slate-900 shadow-lg flex items-center justify-center mx-auto sm:mx-0">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-lg sm:text-xl">
-                      {getInitials(profile.name, profile.email)}
-                    </span>
-                  </div>
+                  {profile.logo_url ? (
+                    <img
+                      src={profile.logo_url}
+                      alt="Logo de profil"
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-lg sm:text-xl">
+                        {getInitials(profile.name, profile.email)}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="text-center sm:text-left mb-4 sm:mb-2">
