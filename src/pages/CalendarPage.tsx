@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import Layout, { pageBgClass, cardClass } from '@/components/Layout';
 import PlanRestrictedPage from '../components/PlanRestrictedPage';
 import SubscriptionManager from '@/components/SubscriptionManager';
+import EventPreviewModal from '@/components/EventPreviewModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePlanRestrictions } from '@/hooks/usePlanRestrictions';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
@@ -130,6 +131,10 @@ const CalendarPage: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const hasFetchedRef = useRef(false);
+
+  // Event preview states
+  const [previewEvent, setPreviewEvent] = useState<any>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   /* ---------------- Fetch Orders ---------------- */
   const fetchOrders = useCallback(async () => {
@@ -278,6 +283,27 @@ const CalendarPage: React.FC = () => {
 
     setEvents([...orderEvents, ...taskEvents, ...subscriptionEvents]);
   }, [filteredOrders, filteredTasks, filteredSubscriptions]);
+
+  /* ---------------- Event click handler ---------------- */
+  const handleEventClick = useCallback((info: any) => {
+    const event = info.event;
+    const extendedProps = event.extendedProps;
+    const kind = extendedProps?.kind;
+
+    if (kind === 'order') {
+      const order = extendedProps.order;
+      setPreviewEvent({ kind: 'order', order });
+      setIsPreviewOpen(true);
+    } else if (kind === 'task') {
+      const task = extendedProps.task;
+      setPreviewEvent({ kind: 'task', task });
+      setIsPreviewOpen(true);
+    } else if (kind === 'subscription') {
+      const subscription = extendedProps.subscription;
+      setPreviewEvent({ kind: 'subscription', subscription });
+      setIsPreviewOpen(true);
+    }
+  }, []);
 
   /* ---------------- Event drop ---------------- */
   const onEventDrop = useCallback(async (info: any) => {
@@ -587,6 +613,7 @@ const CalendarPage: React.FC = () => {
                 eventDurationEditable={false}
                 droppable={false}
                 eventDrop={onEventDrop}
+                eventClick={handleEventClick}
                 dayHeaderClassNames="bg-[#0F141C] text-slate-300 border-[#1C2230]"
                 dayCellClassNames="border-[#1C2230] hover:bg-[#0F141C]"
               />
@@ -609,8 +636,29 @@ const CalendarPage: React.FC = () => {
                     return (
                       <div
                         key={idx}
-                        className="rounded-xl p-3 bg-[#0E121A] ring-1 ring-inset ring-[#1C2230] hover:bg-[#121722] transition"
+                        className="rounded-xl p-3 bg-[#0E121A] ring-1 ring-inset ring-[#1C2230] hover:bg-[#121722] transition cursor-pointer group"
                         style={{ borderLeft: `3px solid ${it.colorBar}` }}
+                        onClick={() => {
+                          if (it.kind === 'order') {
+                            const order = orders.find(o => o.title === it.title);
+                            if (order) {
+                              setPreviewEvent({ kind: 'order', order });
+                              setIsPreviewOpen(true);
+                            }
+                          } else if (it.kind === 'task') {
+                            const task = tasks.find(t => t.title === it.title);
+                            if (task) {
+                              setPreviewEvent({ kind: 'task', task });
+                              setIsPreviewOpen(true);
+                            }
+                          } else if (it.kind === 'subscription') {
+                            const subscription = subscriptions.find(s => s.name === it.title);
+                            if (subscription) {
+                              setPreviewEvent({ kind: 'subscription', subscription });
+                              setIsPreviewOpen(true);
+                            }
+                          }
+                        }}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
@@ -629,7 +677,14 @@ const CalendarPage: React.FC = () => {
                               </div>
                             )}
                           </div>
-                          <span className="text-xs text-slate-300">{date}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-slate-300">{date}</span>
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="text-xs text-slate-500 bg-[#0E121A] px-2 py-1 rounded">
+                                Click to view
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     );
@@ -644,6 +699,16 @@ const CalendarPage: React.FC = () => {
         <div className="mt-6">
           <SubscriptionManager />
         </div>
+
+        {/* Event Preview Modal */}
+        <EventPreviewModal
+          event={previewEvent}
+          isOpen={isPreviewOpen}
+          onClose={() => {
+            setIsPreviewOpen(false);
+            setPreviewEvent(null);
+          }}
+        />
       </div>
     </Layout>
   );
