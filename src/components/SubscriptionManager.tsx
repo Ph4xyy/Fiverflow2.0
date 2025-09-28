@@ -14,7 +14,7 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { formatDateSafe } from '@/utils/dateUtils';
 
 const BILLING_CYCLES: { value: BillingCycle; label: string }[] = [
   { value: 'monthly', label: 'Monthly' },
@@ -401,7 +401,7 @@ const SubscriptionManager: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-400">Next renewal</span>
                   <span className="text-sm text-slate-300">
-                    {format(new Date(subscription.next_renewal_date), 'dd MMM yyyy')}
+                    {formatDateSafe(subscription.next_renewal_date)}
                   </span>
                 </div>
               </div>

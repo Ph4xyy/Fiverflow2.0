@@ -19,14 +19,12 @@ export const useSubscriptions = () => {
 
     try {
       setError(null);
-      console.log('Fetching subscriptions for user:', user.id);
       const { data, error: fetchError } = await supabase
         .from('subscriptions')
         .select('*')
         .eq('user_id', user.id)
         .order('next_renewal_date', { ascending: true });
 
-      console.log('Subscriptions fetch result:', { data, error: fetchError });
       if (fetchError) throw fetchError;
       setSubscriptions(data || []);
     } catch (err: any) {

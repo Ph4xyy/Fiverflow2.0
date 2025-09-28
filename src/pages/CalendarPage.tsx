@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePlanRestrictions } from '@/hooks/usePlanRestrictions';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { formatDateSafe } from '@/utils/dateUtils';
 
 import FullCalendar from '@fullcalendar/react';
 import { EventContentArg, DatesSetArg } from '@fullcalendar/core';
@@ -108,9 +109,6 @@ const CalendarPage: React.FC = () => {
   const { user } = useAuth();
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
   const { subscriptions, loading: subscriptionsLoading } = useSubscriptions();
-  
-  // Debug subscriptions
-  console.log('Calendar subscriptions:', subscriptions);
 
   // View + UI
   const [currentView, setCurrentView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay'>('dayGridMonth');
@@ -607,8 +605,7 @@ const CalendarPage: React.FC = () => {
               ) : (
                 <div className="space-y-2">
                   {upcoming.map((it, idx) => {
-                    const d = new Date(it.date);
-                    const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    const date = formatDateSafe(it.date);
                     return (
                       <div
                         key={idx}
@@ -619,16 +616,16 @@ const CalendarPage: React.FC = () => {
                           <div className="min-w-0">
                             <div className="text-sm font-medium text-white truncate">
                               {it.kind === 'task' ? <span className="inline-flex items-center gap-1 mr-1"><ListChecks size={14} /> Task:</span> : null}
-                              {it.kind === 'subscription' ? <span className="inline-flex items-center gap-1 mr-1"><CreditCard size={14} /> Abonnement:</span> : null}
+                              {it.kind === 'subscription' ? <span className="inline-flex items-center gap-1 mr-1"><CreditCard size={14} /> Subscription:</span> : null}
                               {it.title}
                             </div>
                             {it.subtitle && <div className="text-xs text-slate-400 truncate">{it.subtitle}</div>}
                             {it.kind === 'subscription' && 'amount' in it && (
                               <div className="text-xs text-slate-500">
-                                {new Intl.NumberFormat('fr-FR', {
+                                {new Intl.NumberFormat('en-US', {
                                   style: 'currency',
                                   currency: it.currency,
-                                }).format(it.amount)} - {it.billing_cycle === 'monthly' ? 'Mensuel' : it.billing_cycle === 'yearly' ? 'Annuel' : it.billing_cycle}
+                                }).format(it.amount)} - {it.billing_cycle === 'monthly' ? 'Monthly' : it.billing_cycle === 'yearly' ? 'Yearly' : it.billing_cycle}
                               </div>
                             )}
                           </div>
