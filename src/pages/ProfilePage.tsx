@@ -18,6 +18,7 @@ import {
   Save,
   Mail,
   Server,
+  X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -34,6 +35,7 @@ interface UserProfile {
   created_at: string | null;
   banner_url?: string | null;
   logo_url?: string | null;
+  avatar_url?: string | null;
 }
 
 /* ---------- Types ajoutés pour l’onglet Branding & Email ---------- */
@@ -119,7 +121,9 @@ const ProfilePage: React.FC = () => {
   /* ---------- State Images ---------- */
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [savingImages, setSavingImages] = useState(false);
+  const [showAvatarUpload, setShowAvatarUpload] = useState(false);
 
   // Hooks pour l'upload d'images
   const { uploadImage: uploadBanner, uploading: uploadingBanner } = useImageUpload({ 
@@ -130,9 +134,13 @@ const ProfilePage: React.FC = () => {
     bucketName: 'user-assets', 
     folder: 'logos' 
   });
+  const { uploadImage: uploadAvatar, uploading: uploadingAvatar } = useImageUpload({ 
+    bucketName: 'user-assets', 
+    folder: 'avatars' 
+  });
 
   // Variables pour l'état de chargement
-  const isUploading = uploadingBanner || uploadingLogo || savingImages;
+  const isUploading = uploadingBanner || uploadingLogo || uploadingAvatar || savingImages;
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
@@ -409,12 +417,22 @@ const ProfilePage: React.FC = () => {
         }
       }
 
+      // Upload avatar si un fichier est sélectionné
+      let avatarUrl = profile?.avatar_url;
+      if (avatarFile) {
+        const uploadedAvatarUrl = await uploadAvatar(avatarFile, user.id);
+        if (uploadedAvatarUrl) {
+          avatarUrl = uploadedAvatarUrl;
+        }
+      }
+
       // Mettre à jour le profil avec les nouvelles URLs
       const { error } = await supabase
         .from('users')
         .update({
           banner_url: bannerUrl,
           logo_url: logoUrl,
+          avatar_url: avatarUrl,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
@@ -429,12 +447,15 @@ const ProfilePage: React.FC = () => {
       setProfile(prev => prev ? {
         ...prev,
         banner_url: bannerUrl,
-        logo_url: logoUrl
+        logo_url: logoUrl,
+        avatar_url: avatarUrl
       } : null);
 
       // Réinitialiser les fichiers
       setBannerFile(null);
       setLogoFile(null);
+      setAvatarFile(null);
+      setShowAvatarUpload(false);
 
       toast.success('Images sauvegardées avec succès');
 
@@ -497,6 +518,33 @@ const ProfilePage: React.FC = () => {
     } catch (error) {
       console.error('Erreur suppression logo:', error);
       toast.error('Erreur lors de la suppression du logo');
+    }
+  };
+
+  const removeAvatar = async () => {
+    if (!user || !isSupabaseConfigured || !supabase) return;
+
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          avatar_url: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Erreur suppression avatar:', error);
+        toast.error('Erreur lors de la suppression de l\'avatar');
+        return;
+      }
+
+      setProfile(prev => prev ? { ...prev, avatar_url: null } : null);
+      toast.success('Avatar supprimé');
+
+    } catch (error) {
+      console.error('Erreur suppression avatar:', error);
+      toast.error('Erreur lors de la suppression de l\'avatar');
     }
   };
 
@@ -1278,9 +1326,19 @@ const ProfilePage: React.FC = () => {
           <div className="relative px-4 sm:px-6 pb-6">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-12 sm:-mt-16">
               <div className="flex flex-col sm:flex-row sm:items-end space-y-4 sm:space-y-0 sm:space-x-4">
-                {/* Logo personnalisé ou par défaut */}
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-slate-900 rounded-full border-4 border-white dark:border-slate-900 shadow-lg flex items-center justify-center mx-auto sm:mx-0">
-                  {profile.logo_url ? (
+                {/* Avatar personnalisé ou par défaut */}
+                <div 
+                  className="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-slate-900 rounded-full border-4 border-white dark:border-slate-900 shadow-lg flex items-center justify-center mx-auto sm:mx-0 cursor-pointer hover:opacity-80 transition-opacity relative group"
+                  onClick={() => setShowAvatarUpload(true)}
+                  title="Cliquer pour changer la photo de profil"
+                >
+                  {profile.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt="Avatar de profil"
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover"
+                    />
+                  ) : profile.logo_url ? (
                     <img
                       src={profile.logo_url}
                       alt="Logo de profil"
@@ -1293,6 +1351,14 @@ const ProfilePage: React.FC = () => {
                       </span>
                     </div>
                   )}
+                  
+                  {/* Overlay au survol */}
+                  <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="text-white text-center">
+                      <User size={16} className="mx-auto mb-1" />
+                      <span className="text-xs">Changer</span>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="text-center sm:text-left mb-4 sm:mb-2">
@@ -1399,6 +1465,77 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal d'upload d'avatar */}
+      {showAvatarUpload && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-slate-900 rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Changer la photo de profil
+              </h3>
+              <button
+                onClick={() => {
+                  setShowAvatarUpload(false);
+                  setAvatarFile(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <ImageUpload
+                currentImage={profile?.avatar_url}
+                onImageChange={setAvatarFile}
+                onImageRemove={removeAvatar}
+                placeholder="Uploader une photo de profil"
+                aspectRatio="logo"
+                className="w-full max-w-xs mx-auto"
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={async () => {
+                  if (avatarFile) {
+                    await saveImages();
+                  }
+                }}
+                disabled={!avatarFile || isUploading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isUploading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    {uploadingAvatar ? 'Upload...' : 'Sauvegarde...'}
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    Sauvegarder
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowAvatarUpload(false);
+                  setAvatarFile(null);
+                }}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                Annuler
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+              Format recommandé: 200x200px, PNG, JPG, GIF jusqu'à 5MB
+            </p>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };

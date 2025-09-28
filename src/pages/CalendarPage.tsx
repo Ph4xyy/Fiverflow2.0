@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Layout, { pageBgClass, cardClass } from '@/components/Layout';
 import PlanRestrictedPage from '../components/PlanRestrictedPage';
+import SubscriptionManager from '@/components/SubscriptionManager';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePlanRestrictions } from '@/hooks/usePlanRestrictions';
+import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 import FullCalendar from '@fullcalendar/react';
@@ -20,6 +22,7 @@ import {
   ChevronRight,
   ListChecks,
   Search as SearchIcon,
+  CreditCard,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -60,7 +63,8 @@ type TaskRow = {
 
 type MixedItem =
   | { kind: 'order'; date: string; title: string; colorBar: string; subtitle?: string | null }
-  | { kind: 'task'; date: string; title: string; colorBar: string; subtitle?: string | null };
+  | { kind: 'task'; date: string; title: string; colorBar: string; subtitle?: string | null }
+  | { kind: 'subscription'; date: string; title: string; colorBar: string; subtitle?: string | null; amount: number; currency: string; billing_cycle: string };
 
 /* ---------------- Styles helpers ---------------- */
 const statusStyle = (status: string) => {
@@ -103,6 +107,7 @@ const toDateOnly = (d: Date | null): string | null => {
 const CalendarPage: React.FC = () => {
   const { user } = useAuth();
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
+  const { subscriptions } = useSubscriptions();
 
   // View + UI
   const [currentView, setCurrentView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay'>('dayGridMonth');
@@ -113,6 +118,7 @@ const CalendarPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showOrders, setShowOrders] = useState<boolean>(true);
   const [showTasks, setShowTasks] = useState<boolean>(true);
+  const [showSubscriptions, setShowSubscriptions] = useState<boolean>(true);
   const [query, setQuery] = useState<string>('');
 
   // Data states
@@ -203,6 +209,17 @@ const CalendarPage: React.FC = () => {
     return tasks.filter(t => [t.title].join(' ').toLowerCase().includes(q));
   }, [tasks, showTasks, query]);
 
+  const filteredSubscriptions = useMemo(() => {
+    if (!showSubscriptions) return [];
+    const q = query.trim().toLowerCase();
+    if (!q) return subscriptions.filter((s: any) => s.is_active);
+    return subscriptions.filter((s: any) => s.is_active && [
+      s.name,
+      s.provider || '',
+      s.description || '',
+    ].join(' ').toLowerCase().includes(q));
+  }, [subscriptions, showSubscriptions, query]);
+
   useEffect(() => {
     const orderEvents = filteredOrders
       .filter((o) => !!o.deadline)
@@ -237,8 +254,29 @@ const CalendarPage: React.FC = () => {
         };
       });
 
-    setEvents([...orderEvents, ...taskEvents]);
-  }, [filteredOrders, filteredTasks]);
+    const subscriptionEvents = filteredSubscriptions
+      .filter((s: any) => !!s.next_renewal_date)
+      .map((s: any) => {
+        const color = s.color || '#8b5cf6';
+        const style = {
+          bar: color,
+          chipBg: `${color}20`,
+          text: '#e5e7eb'
+        };
+        return {
+          id: `subscription_${s.id}`,
+          title: s.name,
+          start: s.next_renewal_date,
+          allDay: true,
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+          textColor: style.text,
+          extendedProps: { kind: 'subscription', subscription: s, style }
+        };
+      });
+
+    setEvents([...orderEvents, ...taskEvents, ...subscriptionEvents]);
+  }, [filteredOrders, filteredTasks, filteredSubscriptions]);
 
   /* ---------------- Event drop ---------------- */
   const onEventDrop = useCallback(async (info: any) => {
@@ -301,10 +339,15 @@ const CalendarPage: React.FC = () => {
   /* ---------------- Render event ---------------- */
   const renderEvent = (arg: EventContentArg) => {
     const style = (arg.event.extendedProps as any)?.style as { bar: string; chipBg: string; text: string };
-    const kind: 'order' | 'task' | undefined = (arg.event.extendedProps as any)?.kind;
+    const kind: 'order' | 'task' | 'subscription' | undefined = (arg.event.extendedProps as any)?.kind;
     const order: OrderRow | undefined = (arg.event.extendedProps as any)?.order;
+    const subscription: any = (arg.event.extendedProps as any)?.subscription;
 
-    const subtitle = kind === 'order' ? (order?.clients?.platform || order?.clients?.name || null) : null;
+    const subtitle = kind === 'order' 
+      ? (order?.clients?.platform || order?.clients?.name || null)
+      : kind === 'subscription' 
+        ? (subscription?.provider || null)
+        : null;
 
     return (
       <div
@@ -312,6 +355,7 @@ const CalendarPage: React.FC = () => {
         style={{ background: style.chipBg, borderLeft: `3px solid ${style.bar}` }}
       >
         {kind === 'task' && <ListChecks size={12} className="opacity-80" />}
+        {kind === 'subscription' && <CreditCard size={12} className="opacity-80" />}
         <span className="truncate font-medium">{arg.event.title}</span>
         {subtitle && <span className="text-[11px] opacity-80 truncate">{subtitle}</span>}
       </div>
@@ -329,10 +373,23 @@ const CalendarPage: React.FC = () => {
       .filter((t) => t.due_date && new Date(t.due_date) >= new Date(now.toDateString()))
       .map((t) => ({ kind: 'task', date: t.due_date!, title: t.title, colorBar: taskStyleFromPriority(t.priority, t.color ?? undefined).bar, subtitle: null }));
 
-    return [...oItems, ...tItems]
+    const sItems: MixedItem[] = subscriptions
+      .filter((s: any) => s.is_active && s.next_renewal_date && new Date(s.next_renewal_date) >= new Date(now.toDateString()))
+      .map((s: any) => ({ 
+        kind: 'subscription', 
+        date: s.next_renewal_date!, 
+        title: s.name, 
+        colorBar: s.color || '#8b5cf6', 
+        subtitle: s.provider || null,
+        amount: s.amount,
+        currency: s.currency,
+        billing_cycle: s.billing_cycle
+      }));
+
+    return [...oItems, ...tItems, ...sItems]
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(0, 8);
-  }, [orders, tasks]);
+  }, [orders, tasks, subscriptions]);
 
   /* ---------------- Gates ---------------- */
   if (restrictionsLoading) {
@@ -454,6 +511,11 @@ const CalendarPage: React.FC = () => {
                 <input type="checkbox" className="accent-fuchsia-500" checked={showTasks} onChange={(e) => setShowTasks(e.target.checked)} />
                 <span className="text-sm">Tasks</span>
               </label>
+              <span className="text-slate-600">|</span>
+              <label className="flex items-center gap-1">
+                <input type="checkbox" className="accent-purple-500" checked={showSubscriptions} onChange={(e) => setShowSubscriptions(e.target.checked)} />
+                <span className="text-sm">Subscriptions</span>
+              </label>
             </div>
 
             {/* Search */}
@@ -554,9 +616,18 @@ const CalendarPage: React.FC = () => {
                           <div className="min-w-0">
                             <div className="text-sm font-medium text-white truncate">
                               {it.kind === 'task' ? <span className="inline-flex items-center gap-1 mr-1"><ListChecks size={14} /> Task:</span> : null}
+                              {it.kind === 'subscription' ? <span className="inline-flex items-center gap-1 mr-1"><CreditCard size={14} /> Abonnement:</span> : null}
                               {it.title}
                             </div>
                             {it.subtitle && <div className="text-xs text-slate-400 truncate">{it.subtitle}</div>}
+                            {it.kind === 'subscription' && 'amount' in it && (
+                              <div className="text-xs text-slate-500">
+                                {new Intl.NumberFormat('fr-FR', {
+                                  style: 'currency',
+                                  currency: it.currency,
+                                }).format(it.amount)} - {it.billing_cycle === 'monthly' ? 'Mensuel' : it.billing_cycle === 'yearly' ? 'Annuel' : it.billing_cycle}
+                              </div>
+                            )}
                           </div>
                           <span className="text-xs text-slate-300">{date}</span>
                         </div>
@@ -567,6 +638,11 @@ const CalendarPage: React.FC = () => {
               )}
             </div>
           </aside>
+        </div>
+
+        {/* Subscription Management Section */}
+        <div className="mt-6">
+          <SubscriptionManager />
         </div>
       </div>
     </Layout>

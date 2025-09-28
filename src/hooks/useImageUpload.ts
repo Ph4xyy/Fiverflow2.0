@@ -95,3 +95,4 @@ export const useImageUpload = ({ bucketName, folder = 'uploads' }: UseImageUploa
     uploading
   };
 };
+

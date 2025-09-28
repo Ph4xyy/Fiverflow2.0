@@ -17,6 +17,7 @@
     "@fullcalendar/timegrid": "^6.1.17",
     "@supabase/supabase-js": "^2.52.0",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.23.13",
     "fullcalendar": "^6.1.19",
     "i18next": "^25.5.2",
