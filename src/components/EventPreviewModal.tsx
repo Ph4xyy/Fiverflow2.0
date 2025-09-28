@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { formatDateSafe } from '@/utils/dateUtils';
 import OrderDetailModal from './OrderDetailModal';
 import ClientViewModal from './ClientViewModal';
-import SubscriptionPreview from './SubscriptionManager';
+import SubscriptionPreviewModal from './SubscriptionPreviewModal';
 
 // Types for different event kinds
 type OrderEvent = {
@@ -66,12 +66,13 @@ const EventPreviewModal: React.FC<EventPreviewModalProps> = ({ event, isOpen, on
 
   if (event.kind === 'subscription') {
     return (
-      <SubscriptionPreview
+      <SubscriptionPreviewModal
         subscription={event.subscription}
+        isOpen={isOpen}
         onClose={onClose}
-        onEdit={onEdit ? () => onEdit(event) : () => {}}
-        onDelete={() => {}}
-        onToggle={() => {}}
+        onEdit={onEdit ? () => onEdit(event) : undefined}
+        onDelete={undefined}
+        onToggle={undefined}
       />
     );
   }
