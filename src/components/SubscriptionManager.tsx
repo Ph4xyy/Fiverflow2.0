@@ -80,8 +80,8 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-[#0E121A] border-[#1C2230] text-white">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl !bg-[#0E121A] !border-[#1C2230] text-white">
+        <DialogHeader className="!border-[#1C2230]">
           <h2 className="text-xl font-semibold text-white">
             {subscription ? 'Edit Subscription' : 'New Subscription'}
           </h2>
@@ -237,7 +237,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
           </div>
         </form>
 
-        <DialogFooter>
+        <DialogFooter className="!border-[#1C2230]">
           <Button
             type="button"
             onClick={onClose}
