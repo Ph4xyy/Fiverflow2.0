@@ -107,7 +107,10 @@ const toDateOnly = (d: Date | null): string | null => {
 const CalendarPage: React.FC = () => {
   const { user } = useAuth();
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
-  const { subscriptions } = useSubscriptions();
+  const { subscriptions, loading: subscriptionsLoading } = useSubscriptions();
+  
+  // Debug subscriptions
+  console.log('Calendar subscriptions:', subscriptions);
 
   // View + UI
   const [currentView, setCurrentView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay'>('dayGridMonth');

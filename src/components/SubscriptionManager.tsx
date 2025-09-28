@@ -15,14 +15,13 @@ import {
   XCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 const BILLING_CYCLES: { value: BillingCycle; label: string }[] = [
-  { value: 'monthly', label: 'Mensuel' },
-  { value: 'yearly', label: 'Annuel' },
-  { value: 'weekly', label: 'Hebdomadaire' },
-  { value: 'quarterly', label: 'Trimestriel' },
-  { value: 'one_time', label: 'Unique' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'yearly', label: 'Yearly' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'quarterly', label: 'Quarterly' },
+  { value: 'one_time', label: 'One-time' },
 ];
 
 const CATEGORIES = [
@@ -84,7 +83,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
       <DialogContent className="max-w-2xl bg-[#0E121A] border-[#1C2230] text-white">
         <DialogHeader>
           <h2 className="text-xl font-semibold text-white">
-            {subscription ? 'Modifier l\'abonnement' : 'Nouvel abonnement'}
+            {subscription ? 'Edit Subscription' : 'New Subscription'}
           </h2>
         </DialogHeader>
         
@@ -92,28 +91,28 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Nom de l'abonnement *
+                Subscription Name *
               </label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="ex: Netflix, Spotify..."
+                className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                placeholder="e.g. Netflix, Spotify..."
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Fournisseur
+                Provider
               </label>
               <input
                 type="text"
                 value={formData.provider}
                 onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="ex: Netflix, Adobe..."
+                className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                placeholder="e.g. Netflix, Adobe..."
               />
             </div>
           </div>
@@ -125,16 +124,16 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
               rows={2}
-              placeholder="Description optionnelle..."
+              placeholder="Optional description..."
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Montant *
+                Amount *
               </label>
               <div className="relative">
                 <input
@@ -143,7 +142,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
                   min="0"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="0.00"
                   required
                 />
@@ -152,12 +151,12 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Devise
+                Currency
               </label>
               <select
                 value={formData.currency}
                 onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 <option value="USD">USD</option>
                 <option value="EUR">EUR</option>
@@ -168,12 +167,12 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Cycle de facturation *
+                Billing Cycle *
               </label>
               <select
                 value={formData.billing_cycle}
                 onChange={(e) => setFormData({ ...formData, billing_cycle: e.target.value as BillingCycle })}
-                className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                 required
               >
                 {BILLING_CYCLES.map(cycle => (
@@ -188,27 +187,27 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Prochaine date de renouvellement *
+                Next Renewal Date *
               </label>
               <input
                 type="date"
                 value={formData.next_renewal_date}
                 onChange={(e) => setFormData({ ...formData, next_renewal_date: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Catégorie
+                Category
               </label>
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 rounded-lg bg-[#121722] border border-[#1C2230] text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
-                <option value="">Sélectionner une catégorie</option>
+                <option value="">Select a category</option>
                 {CATEGORIES.map(category => (
                   <option key={category} value={category}>
                     {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -220,7 +219,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Couleur
+              Color
             </label>
             <div className="flex flex-wrap gap-2">
               {COLORS.map(color => (
@@ -244,14 +243,15 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
             onClick={onClose}
             className="bg-[#121722] text-slate-300 hover:bg-[#1C2230] border border-[#1C2230]"
           >
-            Annuler
+            Cancel
           </Button>
           <Button
             type="submit"
             onClick={handleSubmit}
             disabled={!formData.name || !formData.amount || !formData.next_renewal_date}
+            className="bg-purple-600 hover:bg-purple-700"
           >
-            {subscription ? 'Mettre à jour' : 'Créer'}
+            {subscription ? 'Update' : 'Create'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -277,7 +277,7 @@ const SubscriptionManager: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet abonnement ?')) {
+    if (confirm('Are you sure you want to delete this subscription?')) {
       await deleteSubscription(id);
       setShowActions(null);
     }
@@ -297,11 +297,11 @@ const SubscriptionManager: React.FC = () => {
 
   const formatBillingCycle = (cycle: string) => {
     const cycleMap: Record<string, string> = {
-      monthly: 'Mensuel',
-      yearly: 'Annuel',
-      weekly: 'Hebdomadaire',
-      quarterly: 'Trimestriel',
-      one_time: 'Unique',
+      monthly: 'Monthly',
+      yearly: 'Yearly',
+      weekly: 'Weekly',
+      quarterly: 'Quarterly',
+      one_time: 'One-time',
     };
     return cycleMap[cycle] || cycle;
   };
@@ -310,8 +310,8 @@ const SubscriptionManager: React.FC = () => {
     return (
       <div className="bg-[#0E121A] rounded-xl p-6 border border-[#1C2230]">
         <div className="flex items-center justify-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-          <p className="ml-4 text-slate-400">Chargement des abonnements...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
+          <p className="ml-4 text-slate-400">Loading subscriptions...</p>
         </div>
       </div>
     );
@@ -325,8 +325,8 @@ const SubscriptionManager: React.FC = () => {
             <CreditCard className="text-white" size={18} />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-white">Gestion des abonnements</h2>
-            <p className="text-sm text-slate-400">Suivez vos abonnements et leurs renouvellements</p>
+            <h2 className="text-xl font-semibold text-white">Subscription Management</h2>
+            <p className="text-sm text-slate-400">Track your subscriptions and renewals</p>
           </div>
         </div>
         <Button
@@ -334,21 +334,21 @@ const SubscriptionManager: React.FC = () => {
           className="bg-purple-600 hover:bg-purple-700"
         >
           <Plus size={16} className="mr-2" />
-          Nouvel abonnement
+          New Subscription
         </Button>
       </div>
 
       {subscriptions.length === 0 ? (
         <div className="text-center py-12">
           <CreditCard size={48} className="mx-auto text-slate-600 mb-4" />
-          <h3 className="text-lg font-medium text-slate-300 mb-2">Aucun abonnement</h3>
-          <p className="text-slate-500 mb-4">Commencez par ajouter votre premier abonnement</p>
+          <h3 className="text-lg font-medium text-slate-300 mb-2">No subscriptions</h3>
+          <p className="text-slate-500 mb-4">Start by adding your first subscription</p>
           <Button
             onClick={() => setShowForm(true)}
             className="bg-purple-600 hover:bg-purple-700"
           >
             <Plus size={16} className="mr-2" />
-            Ajouter un abonnement
+            Add Subscription
           </Button>
         </div>
       ) : (
@@ -387,7 +387,7 @@ const SubscriptionManager: React.FC = () => {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-400">Montant</span>
+                  <span className="text-sm text-slate-400">Amount</span>
                   <span className="font-semibold text-white">
                     {formatCurrency(subscription.amount, subscription.currency)}
                   </span>
@@ -399,9 +399,9 @@ const SubscriptionManager: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-400">Prochain renouvellement</span>
+                  <span className="text-sm text-slate-400">Next renewal</span>
                   <span className="text-sm text-slate-300">
-                    {format(new Date(subscription.next_renewal_date), 'dd MMM yyyy', { locale: fr })}
+                    {format(new Date(subscription.next_renewal_date), 'dd MMM yyyy')}
                   </span>
                 </div>
               </div>
@@ -417,7 +417,7 @@ const SubscriptionManager: React.FC = () => {
                       className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-[#121722] rounded"
                     >
                       <Edit2 size={14} />
-                      Modifier
+                      Edit
                     </button>
                     <button
                       onClick={() => handleToggle(subscription.id)}
@@ -426,12 +426,12 @@ const SubscriptionManager: React.FC = () => {
                       {subscription.is_active ? (
                         <>
                           <XCircle size={14} />
-                          Désactiver
+                          Deactivate
                         </>
                       ) : (
                         <>
                           <CheckCircle size={14} />
-                          Activer
+                          Activate
                         </>
                       )}
                     </button>
@@ -440,7 +440,7 @@ const SubscriptionManager: React.FC = () => {
                       className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-[#121722] rounded"
                     >
                       <Trash2 size={14} />
-                      Supprimer
+                      Delete
                     </button>
                   </div>
                 </div>
