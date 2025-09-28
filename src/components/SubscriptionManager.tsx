@@ -259,10 +259,189 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
   );
 };
 
+// Subscription Preview Modal Component
+const SubscriptionPreview: React.FC<{
+  subscription: Subscription;
+  onClose: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onToggle: () => void;
+}> = ({ subscription, onClose, onEdit, onDelete, onToggle }) => {
+  const formatCurrency = (amount: number, currency: string) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount);
+  };
+
+  const formatBillingCycle = (cycle: string) => {
+    const cycleMap: Record<string, string> = {
+      monthly: 'Monthly',
+      yearly: 'Yearly',
+      weekly: 'Weekly',
+      quarterly: 'Quarterly',
+      one_time: 'One-time',
+    };
+    return cycleMap[cycle] || cycle;
+  };
+
+  const getCategoryDisplay = (category: string | null) => {
+    if (!category) return 'Not specified';
+    return category.charAt(0).toUpperCase() + category.slice(1);
+  };
+
+  const getStatusColor = (isActive: boolean) => {
+    return isActive ? 'text-green-400' : 'text-red-400';
+  };
+
+  const getStatusText = (isActive: boolean) => {
+    return isActive ? 'Active' : 'Inactive';
+  };
+
+  return (
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl !bg-[#0E121A] !border-[#1C2230] text-white">
+        <DialogHeader className="!border-[#1C2230]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-12 h-12 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: subscription.color || '#8b5cf6' }}
+              >
+                <CreditCard className="text-white" size={20} />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-white">{subscription.name}</h2>
+                {subscription.provider && (
+                  <p className="text-sm text-slate-400">{subscription.provider}</p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`text-sm font-medium ${getStatusColor(subscription.is_active)}`}>
+                {getStatusText(subscription.is_active)}
+              </span>
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: subscription.color || '#8b5cf6' }} />
+            </div>
+          </div>
+        </DialogHeader>
+        
+        <div className="p-6 space-y-6">
+          {/* Description */}
+          {subscription.description && (
+            <div>
+              <h3 className="text-sm font-medium text-slate-300 mb-2">Description</h3>
+              <p className="text-slate-400">{subscription.description}</p>
+            </div>
+          )}
+
+          {/* Main Info Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium text-slate-300 mb-2">Amount</h3>
+                <p className="text-2xl font-bold text-white">
+                  {formatCurrency(subscription.amount, subscription.currency)}
+                </p>
+                <p className="text-sm text-slate-400">
+                  {formatBillingCycle(subscription.billing_cycle)}
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium text-slate-300 mb-2">Next Renewal</h3>
+                <p className="text-lg font-semibold text-white">
+                  {formatDateSafe(subscription.next_renewal_date)}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium text-slate-300 mb-2">Category</h3>
+                <p className="text-white">{getCategoryDisplay(subscription.category)}</p>
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-medium text-slate-300 mb-2">Status</h3>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${subscription.is_active ? 'bg-green-400' : 'bg-red-400'}`} />
+                  <span className={`font-medium ${getStatusColor(subscription.is_active)}`}>
+                    {getStatusText(subscription.is_active)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Additional Info */}
+          <div className="border-t border-[#1C2230] pt-6">
+            <h3 className="text-sm font-medium text-slate-300 mb-4">Additional Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-slate-400">Created:</span>
+                <span className="text-white ml-2">
+                  {subscription.created_at ? formatDateSafe(subscription.created_at.split('T')[0]) : 'Unknown'}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-400">Last Updated:</span>
+                <span className="text-white ml-2">
+                  {subscription.updated_at ? formatDateSafe(subscription.updated_at.split('T')[0]) : 'Unknown'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter className="!border-[#1C2230]">
+          <div className="flex justify-between w-full">
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                onClick={onToggle}
+                className={`${subscription.is_active ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+              >
+                {subscription.is_active ? 'Deactivate' : 'Activate'}
+              </Button>
+              <Button
+                type="button"
+                onClick={onDelete}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                <Trash2 size={16} className="mr-2" />
+                Delete
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                onClick={onClose}
+                className="bg-[#121722] text-slate-300 hover:bg-[#1C2230] border border-[#1C2230]"
+              >
+                Close
+              </Button>
+              <Button
+                type="button"
+                onClick={onEdit}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                <Edit2 size={16} className="mr-2" />
+                Edit
+              </Button>
+            </div>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const SubscriptionManager: React.FC = () => {
   const { subscriptions, loading, createSubscription, updateSubscription, deleteSubscription, toggleSubscription } = useSubscriptions();
   const [showForm, setShowForm] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
+  const [viewingSubscription, setViewingSubscription] = useState<Subscription | null>(null);
   const [showActions, setShowActions] = useState<string | null>(null);
 
   const handleCreate = async (data: CreateSubscriptionData) => {
@@ -286,6 +465,32 @@ const SubscriptionManager: React.FC = () => {
   const handleToggle = async (id: string) => {
     await toggleSubscription(id);
     setShowActions(null);
+  };
+
+  const handleViewSubscription = (subscription: Subscription) => {
+    setViewingSubscription(subscription);
+    setShowActions(null);
+  };
+
+  const handleEditFromPreview = () => {
+    if (viewingSubscription) {
+      setEditingSubscription(viewingSubscription);
+      setViewingSubscription(null);
+    }
+  };
+
+  const handleDeleteFromPreview = () => {
+    if (viewingSubscription) {
+      handleDelete(viewingSubscription.id);
+      setViewingSubscription(null);
+    }
+  };
+
+  const handleToggleFromPreview = () => {
+    if (viewingSubscription) {
+      handleToggle(viewingSubscription.id);
+      setViewingSubscription(null);
+    }
   };
 
   const formatCurrency = (amount: number, currency: string) => {
@@ -356,8 +561,9 @@ const SubscriptionManager: React.FC = () => {
           {subscriptions.map((subscription) => (
             <div
               key={subscription.id}
-              className="relative bg-[#121722] rounded-lg p-4 border border-[#1C2230] hover:border-[#2A3441] transition-colors"
-              style={{ borderLeft: `4px solid ${subscription.color || '#3b82f6'}` }}
+              className="relative bg-[#121722] rounded-lg p-4 border border-[#1C2230] hover:border-[#2A3441] transition-colors cursor-pointer group"
+              style={{ borderLeft: `4px solid ${subscription.color || '#8b5cf6'}` }}
+              onClick={() => handleViewSubscription(subscription)}
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
@@ -368,8 +574,11 @@ const SubscriptionManager: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setShowActions(showActions === subscription.id ? null : subscription.id)}
-                    className="p-1 hover:bg-[#1C2230] rounded"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowActions(showActions === subscription.id ? null : subscription.id);
+                    }}
+                    className="p-1 hover:bg-[#1C2230] rounded opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <MoreVertical size={16} className="text-slate-400" />
                   </button>
@@ -410,7 +619,8 @@ const SubscriptionManager: React.FC = () => {
                 <div className="absolute top-2 right-2 bg-[#0E121A] border border-[#1C2230] rounded-lg p-2 shadow-lg z-10">
                   <div className="flex flex-col gap-1">
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setEditingSubscription(subscription);
                         setShowActions(null);
                       }}
@@ -420,7 +630,10 @@ const SubscriptionManager: React.FC = () => {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleToggle(subscription.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleToggle(subscription.id);
+                      }}
                       className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-[#121722] rounded"
                     >
                       {subscription.is_active ? (
@@ -436,7 +649,10 @@ const SubscriptionManager: React.FC = () => {
                       )}
                     </button>
                     <button
-                      onClick={() => handleDelete(subscription.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(subscription.id);
+                      }}
                       className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-[#121722] rounded"
                     >
                       <Trash2 size={14} />
@@ -445,6 +661,13 @@ const SubscriptionManager: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Click indicator */}
+              <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="text-xs text-slate-500 bg-[#0E121A] px-2 py-1 rounded">
+                  Click to view
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -463,6 +686,16 @@ const SubscriptionManager: React.FC = () => {
           subscription={editingSubscription}
           onClose={() => setEditingSubscription(null)}
           onSubmit={handleUpdate}
+        />
+      )}
+
+      {viewingSubscription && (
+        <SubscriptionPreview
+          subscription={viewingSubscription}
+          onClose={() => setViewingSubscription(null)}
+          onEdit={handleEditFromPreview}
+          onDelete={handleDeleteFromPreview}
+          onToggle={handleToggleFromPreview}
         />
       )}
     </div>
