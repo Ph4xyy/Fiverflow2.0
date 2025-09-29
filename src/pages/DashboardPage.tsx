@@ -132,6 +132,19 @@ const DashboardPage = () => {
     { label: 'Total Revenue', value: `$${orders.reduce((sum, o) => sum + (o.amount || 0), 0)}`, icon: DollarSign, color: 'from-emerald-500 to-teal-600' }
   ];
 
+  const getOrderStatusBadge = (s: string) => {
+    switch (s) {
+      case 'Completed':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+      case 'In Progress':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+      case 'Pending':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-300';
+    }
+  };
+
   const handleAddClient = () => setIsClientFormOpen(true);
   const handleAddOrder = () => setIsOrderFormOpen(true);
 
@@ -315,16 +328,37 @@ const DashboardPage = () => {
             {loadingOrders ? (
               <p className="text-slate-400">Loading...</p>
             ) : orders.length > 0 ? (
-              <div className="space-y-3">
-                {orders.slice(0, 5).map((order) => (
-                  <div key={order.id} className="flex items-center justify-between rounded-xl px-2 py-2 hover:bg-[#141922] transition-colors">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-white">{order.title}</p>
-                      <p className="text-xs text-slate-400">{order.clients?.name}</p>
+              <div className="space-y-2">
+                {orders.slice(0, 5).map((order) => {
+                  let barColor = '#2563eb';
+                  if (order.status === 'Completed') barColor = '#059669';
+                  else if (order.status === 'In Progress') barColor = '#d97706';
+                  else if (order.status === 'Pending') barColor = '#dc2626';
+                  const amountStr = typeof order.amount === 'number' ? `$${order.amount.toLocaleString()}` : '—';
+                  return (
+                    <div
+                      key={order.id}
+                      className="rounded-xl p-3 bg-[#0E121A] ring-1 ring-inset ring-[#1C2230] hover:bg-[#121722] transition"
+                      style={{ borderLeft: `3px solid ${barColor}` }}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="truncate text-sm font-medium text-white">{order.title}</p>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getOrderStatusBadge(order.status)}`}>{order.status}</span>
+                          </div>
+                          <div className="text-xs text-slate-400 truncate">{order.clients?.name || '—'}</div>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="text-sm font-semibold text-white">{amountStr}</span>
+                          {order.deadline && (
+                            <span className="text-[11px] text-slate-400">{new Date(order.deadline).toLocaleDateString()}</span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-sm font-semibold text-white">${order.amount}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-slate-400">No recent orders.</p>
