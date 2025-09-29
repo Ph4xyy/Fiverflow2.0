@@ -357,6 +357,9 @@ const DashboardPage = () => {
                   events={calendarEvents}
                   eventContent={renderEvent}
                 />
+              <div className="mt-4">
+                <SubscriptionManager />
+              </div>
               </div>
             ) : (
               <div className="relative">
@@ -430,10 +433,6 @@ const DashboardPage = () => {
           </div>
         </div>
 
-        {/* Subscriptions manager (same as Calendar page) */}
-        <div className="mt-2">
-          <SubscriptionManager />
-        </div>
 
         <ClientForm
           isOpen={isClientFormOpen}
