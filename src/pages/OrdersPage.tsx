@@ -247,13 +247,16 @@ const OrdersPage: React.FC = () => {
     setPlatform('');
   };
 
-  // ----- Status toggle (Pending -> In Progress -> Completed) -----
-  const STATUS_SEQUENCE: Array<OrderRow['status']> = ['Pending', 'In Progress', 'Completed'];
-  const nextStatus = (current: OrderRow['status']): OrderRow['status'] => {
-    const idx = STATUS_SEQUENCE.indexOf(current as any);
-    if (idx === -1) return 'Pending';
-    return STATUS_SEQUENCE[(idx + 1) % STATUS_SEQUENCE.length];
-  };
+  // ----- Status options (dropdown) -----
+  const ALL_STATUSES: Array<OrderRow['status']> = [
+    'Pending',
+    'In Progress',
+    'Completed',
+    'On Hold',
+    'Cancelled',
+    'Awaiting Payment',
+    'In Review'
+  ];
 
   const updateOrderStatus = async (orderId: string, newStatus: OrderRow['status']) => {
     if (!isSupabaseConfigured || !supabase) {
@@ -277,10 +280,16 @@ const OrdersPage: React.FC = () => {
     }
   };
 
-  const handleToggleStatus = (e: React.MouseEvent, order: OrderRow) => {
+  // Dropdown state & handlers
+  const [openStatusFor, setOpenStatusFor] = useState<string | null>(null);
+  const toggleStatusMenu = (e: React.MouseEvent, orderId: string) => {
     e.stopPropagation();
-    const newStatus = nextStatus(order.status);
-    // Optimistic update
+    setOpenStatusFor(prev => (prev === orderId ? null : orderId));
+  };
+  const selectStatus = (e: React.MouseEvent, order: OrderRow, newStatus: OrderRow['status']) => {
+    e.stopPropagation();
+    setOpenStatusFor(null);
+    if (order.status === newStatus) return;
     setOrders(prev => prev.map(o => (o.id === order.id ? { ...o, status: newStatus } : o)));
     updateOrderStatus(order.id, newStatus);
   };
@@ -495,15 +504,35 @@ const OrdersPage: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                           {typeof o.amount === 'number' ? `$${o.amount.toLocaleString()}` : '—'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap relative">
                           <button
                             type="button"
-                            onClick={(e) => handleToggleStatus(e, o)}
+                            onClick={(e) => toggleStatusMenu(e, o.id)}
                             className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${getStatusBadge(o.status)} hover:opacity-90 transition`}
-                            title="Click to change status"
+                            title="Change status"
                           >
                             {o.status}
                           </button>
+                          {openStatusFor === o.id && (
+                            <div
+                              className="absolute z-20 mt-2 w-44 rounded-xl border border-[#1C2230] bg-[#0E121A] shadow-lg"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ul className="py-1 max-h-64 overflow-auto">
+                                {ALL_STATUSES.map((st) => (
+                                  <li key={st}>
+                                    <button
+                                      className={`w-full text-left px-3 py-2 text-sm hover:bg-[#141922] ${st === o.status ? 'text-white' : 'text-slate-300'}`}
+                                      onClick={(e) => selectStatus(e, o, st)}
+                                    >
+                                      <span className={`inline-block w-2 h-2 rounded-full mr-2 align-middle ${getStatusBadge(st).includes('green') ? 'bg-green-500' : getStatusBadge(st).includes('blue') ? 'bg-blue-500' : getStatusBadge(st).includes('yellow') ? 'bg-yellow-500' : getStatusBadge(st).includes('red') ? 'bg-red-500' : getStatusBadge(st).includes('orange') ? 'bg-orange-500' : getStatusBadge(st).includes('indigo') ? 'bg-indigo-500' : getStatusBadge(st).includes('amber') ? 'bg-amber-500' : 'bg-slate-500'}`}></span>
+                                      {st}
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">
                           {o.deadline ? new Date(o.deadline).toLocaleDateString() : '—'}
