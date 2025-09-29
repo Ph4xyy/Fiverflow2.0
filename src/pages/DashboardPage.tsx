@@ -11,6 +11,7 @@ import ClientForm from '@/components/ClientForm';
 import OrderForm from '@/components/OrderForm';
 import TaskForm from '@/components/TaskForm';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { formatDateForCalendar, formatDateSafe } from '@/utils/dateUtils';
 import {
   Users,
   ShoppingCart,
@@ -177,7 +178,7 @@ const DashboardPage = () => {
         return {
           id: `order_${order.id}`,
           title: order.title,
-          start: order.deadline,
+          start: formatDateForCalendar(order.deadline),
           allDay: true,
           backgroundColor: 'transparent',
           borderColor: 'transparent',
@@ -197,7 +198,7 @@ const DashboardPage = () => {
         return {
           id: `task_${task.id}`,
           title: task.title,
-          start: task.due_date,
+          start: formatDateForCalendar(task.due_date),
           allDay: true,
           backgroundColor: 'transparent',
           borderColor: 'transparent',
@@ -212,6 +213,18 @@ const DashboardPage = () => {
 
     return [...orderEvents, ...taskEvents];
   }, [orders, tasks]);
+
+  const renderEvent = (arg: any) => {
+    const style = (arg.event.extendedProps as any)?.style as { bar: string; chipBg: string; text: string };
+    return (
+      <div
+        className="rounded-lg px-2 py-1 text-[12px] leading-[1.1] flex items-center gap-2"
+        style={{ background: style?.chipBg, borderLeft: `3px solid ${style?.bar}` }}
+      >
+        <span className="truncate font-medium">{arg.event.title}</span>
+      </div>
+    );
+  };
 
   const upcoming = useMemo(() => {
     const now = new Date();
@@ -341,6 +354,7 @@ const DashboardPage = () => {
                   dayMaxEvents={2}
                   eventDisplay="block"
                   events={calendarEvents}
+                  eventContent={renderEvent}
                 />
               </div>
             ) : (
@@ -397,12 +411,7 @@ const DashboardPage = () => {
                   const isOrder = u.kind === 'order';
                   const data: any = u.item;
                   const date = isOrder ? data.deadline : data.due_date;
-                  const d = new Date(date);
-                  const dateStr = d.toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                  });
+                  const dateStr = formatDateSafe(date);
                   return (
                     <li key={`${u.kind}_${data.id}`} className="py-3 flex items-start justify-between">
                       <div className="pr-3">
