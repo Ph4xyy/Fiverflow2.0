@@ -10,7 +10,6 @@ import { usePlanLimits } from '@/hooks/usePlanLimits';
 import ClientForm from '@/components/ClientForm';
 import OrderForm from '@/components/OrderForm';
 import TaskForm from '@/components/TaskForm';
-import SubscriptionManager from '@/components/SubscriptionManager';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { formatDateForCalendar, formatDateSafe } from '@/utils/dateUtils';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
@@ -22,6 +21,8 @@ import {
   Calendar as CalendarIcon,
   Clock,
   Lock,
+  ListChecks,
+  CreditCard,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -240,11 +241,14 @@ const DashboardPage = () => {
 
   const renderEvent = (arg: any) => {
     const style = (arg.event.extendedProps as any)?.style as { bar: string; chipBg: string; text: string };
+    const kind: 'order' | 'task' | 'subscription' | undefined = (arg.event.extendedProps as any)?.kind;
     return (
       <div
         className="rounded-lg px-2 py-1 text-[12px] leading-[1.1] flex items-center gap-2"
         style={{ background: style?.chipBg, borderLeft: `3px solid ${style?.bar}` }}
       >
+        {kind === 'task' && <ListChecks size={12} className="opacity-80" />}
+        {kind === 'subscription' && <CreditCard size={12} className="opacity-80" />}
         <span className="truncate font-medium">{arg.event.title}</span>
       </div>
     );
@@ -384,9 +388,6 @@ const DashboardPage = () => {
                   events={calendarEvents}
                   eventContent={renderEvent}
                 />
-              <div className="mt-4">
-                <SubscriptionManager />
-              </div>
               </div>
             ) : (
               <div className="relative">
