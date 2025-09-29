@@ -65,3 +65,4 @@ export interface SubscriptionUpcomingItem {
   currency: string;
   billing_cycle: BillingCycle;
 }
+

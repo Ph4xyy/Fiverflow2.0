@@ -8,28 +8,25 @@ export interface InvoicePayment {
   id: string;
   invoice_id: string;
   amount: number;
-  payment_date: string;
-  payment_method?: string;
-  reference?: string;
-  notes?: string;
+  paid_at: string;
+  method?: string;
+  note?: string;
   created_at: string;
 }
 
 export interface CreateInvoicePaymentData {
   invoice_id: string;
   amount: number;
-  payment_date: string;
-  payment_method?: string;
-  reference?: string;
-  notes?: string;
+  paid_at: string;
+  method?: string;
+  note?: string;
 }
 
 export interface UpdateInvoicePaymentData {
   amount?: number;
-  payment_date?: string;
-  payment_method?: string;
-  reference?: string;
-  notes?: string;
+  paid_at?: string;
+  method?: string;
+  note?: string;
 }
 
 export function useInvoicePayments(invoiceId?: string) {
@@ -48,15 +45,14 @@ export function useInvoicePayments(invoiceId?: string) {
 
     if (!isSupabaseConfigured || !supabase) {
       // Demo data
-      const demo: InvoicePayment[] = [
+        const demo: InvoicePayment[] = [
         {
           id: `demo-payment-1-${targetInvoiceId}`,
           invoice_id: targetInvoiceId,
           amount: 500,
-          payment_date: new Date().toISOString().split('T')[0],
-          payment_method: "Bank Transfer",
-          reference: "TXN-123456",
-          notes: "Partial payment",
+          paid_at: new Date().toISOString().split('T')[0],
+          method: "Bank Transfer",
+          note: "Partial payment",
           created_at: new Date().toISOString()
         }
       ];
@@ -73,7 +69,7 @@ export function useInvoicePayments(invoiceId?: string) {
         .from("invoice_payments")
         .select("*")
         .eq("invoice_id", targetInvoiceId)
-        .order("payment_date", { ascending: false });
+        .order("paid_at", { ascending: false });
 
       if (fetchError) throw fetchError;
       setPayments(data || []);
@@ -103,10 +99,9 @@ export function useInvoicePayments(invoiceId?: string) {
         id: `demo-payment-${Date.now()}`,
         invoice_id: data.invoice_id,
         amount: data.amount,
-        payment_date: data.payment_date,
-        payment_method: data.payment_method,
-        reference: data.reference,
-        notes: data.notes,
+        paid_at: data.paid_at,
+        method: data.method,
+        note: data.note,
         created_at: new Date().toISOString()
       };
       setPayments(prev => [newPayment, ...prev]);
@@ -122,10 +117,9 @@ export function useInvoicePayments(invoiceId?: string) {
         .insert([{
           invoice_id: data.invoice_id,
           amount: data.amount,
-          payment_date: data.payment_date,
-          payment_method: data.payment_method,
-          reference: data.reference,
-          notes: data.notes
+          paid_at: data.paid_at,
+          method: data.method,
+          note: data.note
         }])
         .select()
         .single();

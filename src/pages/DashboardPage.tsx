@@ -51,10 +51,9 @@ const DashboardPage = () => {
 
     const { data, error } = await supabase
       .from('orders')
-      .select('id, title, amount, status, deadline, created_at, clients!inner(name, user_id)')
+      .select('id, title, amount, status, deadline, created_at, clients!inner(name, platform, user_id)')
       .eq('clients.user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(20);
+      .order('deadline', { ascending: true });
 
     if (error) {
       console.error('Failed to fetch orders:', error);
@@ -136,27 +135,28 @@ const DashboardPage = () => {
     return orders
       .filter(o => o.deadline)
       .map(order => {
-        let bgColor = '#3b82f6';
-        let borderColor = '#2563eb';
-
+        let barColor = '#2563eb';
         if (order.status === 'Completed') {
-          bgColor = '#10b981';
-          borderColor = '#059669';
+          barColor = '#059669';
         } else if (order.status === 'In Progress') {
-          bgColor = '#f59e0b';
-          borderColor = '#d97706';
+          barColor = '#d97706';
         } else if (order.status === 'Pending') {
-          bgColor = '#ef4444';
-          borderColor = '#dc2626';
+          barColor = '#dc2626';
         }
 
         return {
-          id: order.id,
+          id: `order_${order.id}`,
           title: order.title,
-          date: order.deadline,
-          backgroundColor: bgColor,
-          borderColor: borderColor,
-          textColor: '#ffffff'
+          start: order.deadline,
+          allDay: true,
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+          textColor: '#e5e7eb',
+          extendedProps: {
+            kind: 'order',
+            style: { bar: barColor, chipBg: 'rgba(148,163,184,0.14)', text: '#e2e8f0' },
+            order
+          }
         };
       });
   }, [orders]);

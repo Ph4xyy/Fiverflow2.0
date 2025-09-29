@@ -484,3 +484,4 @@ GRANT EXECUTE ON FUNCTION add_invoice_item(UUID, TEXT, DECIMAL, DECIMAL, INTEGER
 GRANT EXECUTE ON FUNCTION get_invoice_full(UUID, UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION mark_invoice_paid(UUID, UUID, DECIMAL, DATE, TEXT, TEXT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION check_overdue_invoices() TO authenticated;
+
