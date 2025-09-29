@@ -438,26 +438,50 @@ const DashboardPage = () => {
             ) : upcoming.length === 0 ? (
               <p className="text-slate-400">No upcoming deadlines.</p>
             ) : (
-              <ul className="divide-y divide-[#1C2230]">
+              <div className="space-y-2">
                 {upcoming.map((u) => {
                   const isOrder = u.kind === 'order';
                   const isSubscription = u.kind === 'subscription';
                   const data: any = u.item;
                   const date = isOrder ? data.deadline : isSubscription ? data.next_renewal_date : data.due_date;
                   const dateStr = formatDateSafe(date);
+                  const barColor = isOrder
+                    ? (data.status === 'Completed' ? '#059669' : data.status === 'In Progress' ? '#d97706' : data.status === 'Pending' ? '#dc2626' : '#2563eb')
+                    : isSubscription
+                      ? (data.color || '#8b5cf6')
+                      : (data.color || '#94a3b8');
+                  const subtitle = isOrder ? (data.clients?.platform || data.clients?.name || null)
+                    : isSubscription ? (data.provider || null)
+                    : null;
                   return (
-                    <li key={`${u.kind}_${data.id}`} className="py-3 flex items-start justify-between">
-                      <div className="pr-3">
-                        <p className="text-sm font-medium text-white">{data.title}</p>
-                        <p className="text-xs text-slate-400">{isOrder ? (data.clients?.name || '—') : isSubscription ? (data.provider || 'Subscription') : 'Task'}</p>
+                    <div
+                      key={`${u.kind}_${data.id}`}
+                      className="rounded-xl p-3 bg-[#0E121A] ring-1 ring-inset ring-[#1C2230] hover:bg-[#121722] transition"
+                      style={{ borderLeft: `3px solid ${barColor}` }}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium text-white truncate">
+                            {u.kind === 'task' && <span className="inline-flex items-center gap-1 mr-1"><ListChecks size={14} /> Task:</span>}
+                            {u.kind === 'subscription' && <span className="inline-flex items-center gap-1 mr-1"><CreditCard size={14} /> Subscription:</span>}
+                            {data.title}
+                          </div>
+                          {subtitle && <div className="text-xs text-slate-400 truncate">{subtitle}</div>}
+                          {isSubscription && typeof data.amount === 'number' && data.currency && data.billing_cycle && (
+                            <div className="text-xs text-slate-500">
+                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.amount)}
+                              {` - ${data.billing_cycle === 'monthly' ? 'Monthly' : data.billing_cycle === 'yearly' ? 'Yearly' : data.billing_cycle}`}
+                            </div>
+                          )}
+                        </div>
+                        <span className={`text-xs px-2.5 py-1 rounded-full ${subtleBg} text-slate-200`}>
+                          {dateStr}
+                        </span>
                       </div>
-                      <span className={`text-xs px-2.5 py-1 rounded-full ${subtleBg} text-slate-200`}>
-                        {dateStr}
-                      </span>
-                    </li>
+                    </div>
                   );
                 })}
-              </ul>
+              </div>
             )}
           </div>
         </div>
