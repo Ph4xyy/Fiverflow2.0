@@ -38,11 +38,12 @@ import {
   RadialBar,
 } from 'recharts';
 
-type Period = '7d' | '30d' | '90d';
+type Period = '7d' | '30d' | '90d' | 'custom';
 const periodOptions: { label: string; value: Period }[] = [
   { label: 'Last 7 Days', value: '7d' },
   { label: 'Last 30 Days', value: '30d' },
   { label: 'Last 90 Days', value: '90d' },
+  { label: 'Custom…', value: 'custom' },
 ];
 
 const parseNum = (v: any) => (typeof v === 'number' ? v : parseFloat(v) || 0);
@@ -82,6 +83,9 @@ const StatsPage: React.FC = () => {
   const { restrictions, loading: planLoading, checkAccess } = usePlanRestrictions();
 
   const [period, setPeriod] = useState<Period>('30d');
+  const [customStart, setCustomStart] = useState<string>(''); // YYYY-MM-DD
+  const [customEnd, setCustomEnd] = useState<string>(''); // YYYY-MM-DD
+  const [appliedCustom, setAppliedCustom] = useState<{ start: string; end: string } | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [offline, setOffline] = useState(false);
 
@@ -89,14 +93,24 @@ const StatsPage: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
 
   const { sinceTimestamp, sinceDateOnly, daysArray } = useMemo(() => {
-    const end = new Date();
-    const start = new Date();
-    if (period === '7d') start.setDate(end.getDate() - 6);
-    if (period === '30d') start.setDate(end.getDate() - 29);
-    if (period === '90d') start.setDate(end.getDate() - 89);
+    // Determine start and end based on preset or applied custom
+    let end = new Date();
+    let start = new Date();
+    if (period === 'custom' && appliedCustom?.start) {
+      start = new Date(appliedCustom.start + 'T00:00:00');
+      end = new Date((appliedCustom.end || appliedCustom.start) + 'T00:00:00');
+    } else {
+      if (period === '7d') start.setDate(end.getDate() - 6);
+      if (period === '30d') start.setDate(end.getDate() - 29);
+      if (period === '90d') start.setDate(end.getDate() - 89);
+    }
 
+    // Build day buckets inclusive
     const days: Date[] = [];
     const cursor = new Date(start);
+    // normalize time
+    cursor.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
     while (cursor <= end) {
       days.push(new Date(cursor));
       cursor.setDate(cursor.getDate() + 1);
@@ -104,7 +118,7 @@ const StatsPage: React.FC = () => {
 
     const iso = start.toISOString();
     return { sinceTimestamp: iso, sinceDateOnly: iso.slice(0, 10), daysArray: days };
-  }, [period]);
+  }, [period, appliedCustom]);
 
   // -------------------- DATA FETCH --------------------
   const fetchStatsData = useCallback(async () => {
@@ -382,17 +396,50 @@ const StatsPage: React.FC = () => {
                 Offline preview
               </span>
             )}
-            <select
-              value={period}
-              onChange={(e) => setPeriod(e.target.value as Period)}
-              className="px-3 py-2 text-sm rounded-lg bg-[#0E121A] text-slate-100 ring-1 ring-inset ring-[#1C2230] focus:outline-none"
-            >
-              {periodOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center gap-2">
+              <select
+                value={period}
+                onChange={(e) => setPeriod(e.target.value as Period)}
+                className="px-3 py-2 text-sm rounded-lg bg-[#0E121A] text-slate-100 ring-1 ring-inset ring-[#1C2230] focus:outline-none"
+              >
+                {periodOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              {period === 'custom' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={customStart}
+                    onChange={(e) => setCustomStart(e.target.value)}
+                    className="px-3 py-2 text-sm rounded-lg bg-[#0E121A] text-slate-100 ring-1 ring-inset ring-[#1C2230] focus:outline-none"
+                  />
+                  <span className="text-slate-400">to</span>
+                  <input
+                    type="date"
+                    value={customEnd}
+                    onChange={(e) => setCustomEnd(e.target.value)}
+                    className="px-3 py-2 text-sm rounded-lg bg-[#0E121A] text-slate-100 ring-1 ring-inset ring-[#1C2230] focus:outline-none"
+                  />
+                  <button
+                    onClick={() => {
+                      if (!customStart) return;
+                      const endVal = customEnd || customStart;
+                      // basic validation
+                      if (new Date(customStart) > new Date(endVal)) return;
+                      setAppliedCustom({ start: customStart, end: endVal });
+                      // trigger refresh
+                      fetchStatsData();
+                    }}
+                    className="inline-flex items-center px-3 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition"
+                  >
+                    Apply
+                  </button>
+                </div>
+              )}
+            </div>
             <button
               onClick={fetchStatsData}
               className="inline-flex items-center px-3 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition"
