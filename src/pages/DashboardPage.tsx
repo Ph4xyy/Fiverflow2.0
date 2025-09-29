@@ -13,6 +13,7 @@ import TaskForm from '@/components/TaskForm';
 import SubscriptionManager from '@/components/SubscriptionManager';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { formatDateForCalendar, formatDateSafe } from '@/utils/dateUtils';
+import { useSubscriptions } from '@/hooks/useSubscriptions';
 import {
   Users,
   ShoppingCart,
@@ -35,6 +36,7 @@ const DashboardPage = () => {
   const { subscription: stripeSubscription } = useStripeSubscription();
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
   const { checkClientLimit, checkOrderLimit } = usePlanLimits();
+  const { subscriptions } = useSubscriptions();
 
   const [isClientFormOpen, setIsClientFormOpen] = useState(false);
   const [isOrderFormOpen, setIsOrderFormOpen] = useState(false);
@@ -212,8 +214,29 @@ const DashboardPage = () => {
         };
       });
 
-    return [...orderEvents, ...taskEvents];
-  }, [orders, tasks]);
+    const subscriptionEvents = (subscriptions || [])
+      .filter((s: any) => s.is_active && s.next_renewal_date)
+      .map((s: any) => {
+        const color = s.color || '#8b5cf6';
+        const style = { bar: color, chipBg: `${color}20`, text: '#e5e7eb' };
+        return {
+          id: `subscription_${s.id}`,
+          title: s.name,
+          start: formatDateForCalendar(s.next_renewal_date),
+          allDay: true,
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+          textColor: style.text,
+          extendedProps: {
+            kind: 'subscription',
+            style,
+            subscription: s
+          }
+        };
+      });
+
+    return [...orderEvents, ...taskEvents, ...subscriptionEvents];
+  }, [orders, tasks, subscriptions]);
 
   const renderEvent = (arg: any) => {
     const style = (arg.event.extendedProps as any)?.style as { bar: string; chipBg: string; text: string };
@@ -237,10 +260,14 @@ const DashboardPage = () => {
       .filter(t => t.due_date && new Date(t.due_date) >= new Date(now.toDateString()))
       .map(t => ({ kind: 'task' as const, date: t.due_date as string, item: t }));
 
-    return [...orderItems, ...taskItems]
+    const subscriptionItems = (subscriptions || [])
+      .filter((s: any) => s.is_active && s.next_renewal_date && new Date(s.next_renewal_date) >= new Date(now.toDateString()))
+      .map((s: any) => ({ kind: 'subscription' as const, date: s.next_renewal_date as string, item: s }));
+
+    return [...orderItems, ...taskItems, ...subscriptionItems]
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(0, 8);
-  }, [orders, tasks]);
+  }, [orders, tasks, subscriptions]);
 
   return (
     <Layout>
@@ -413,14 +440,15 @@ const DashboardPage = () => {
               <ul className="divide-y divide-[#1C2230]">
                 {upcoming.map((u) => {
                   const isOrder = u.kind === 'order';
+                  const isSubscription = u.kind === 'subscription';
                   const data: any = u.item;
-                  const date = isOrder ? data.deadline : data.due_date;
+                  const date = isOrder ? data.deadline : isSubscription ? data.next_renewal_date : data.due_date;
                   const dateStr = formatDateSafe(date);
                   return (
                     <li key={`${u.kind}_${data.id}`} className="py-3 flex items-start justify-between">
                       <div className="pr-3">
                         <p className="text-sm font-medium text-white">{data.title}</p>
-                        <p className="text-xs text-slate-400">{isOrder ? (data.clients?.name || '—') : 'Task'}</p>
+                        <p className="text-xs text-slate-400">{isOrder ? (data.clients?.name || '—') : isSubscription ? (data.provider || 'Subscription') : 'Task'}</p>
                       </div>
                       <span className={`text-xs px-2.5 py-1 rounded-full ${subtleBg} text-slate-200`}>
                         {dateStr}
