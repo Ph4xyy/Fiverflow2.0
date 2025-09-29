@@ -145,6 +145,14 @@ const DashboardPage = () => {
     }
   };
 
+  const recentOrders = useMemo(() => {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    return orders
+      .filter((o: any) => o.created_at && new Date(o.created_at) >= oneWeekAgo)
+      .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [orders]);
+
   const handleAddClient = () => setIsClientFormOpen(true);
   const handleAddOrder = () => setIsOrderFormOpen(true);
 
@@ -322,14 +330,14 @@ const DashboardPage = () => {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-white">Recent Orders</h2>
               <div className="text-xs px-2 py-1 rounded-full bg-[#141922] text-slate-200">
-                last 20
+                last 7 days
               </div>
             </div>
             {loadingOrders ? (
               <p className="text-slate-400">Loading...</p>
-            ) : orders.length > 0 ? (
+            ) : recentOrders.length > 0 ? (
               <div className="space-y-2">
-                {orders.slice(0, 5).map((order) => {
+                {recentOrders.slice(0, 5).map((order) => {
                   let barColor = '#2563eb';
                   if (order.status === 'Completed') barColor = '#059669';
                   else if (order.status === 'In Progress') barColor = '#d97706';
