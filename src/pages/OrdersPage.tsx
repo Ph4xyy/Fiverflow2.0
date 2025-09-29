@@ -302,6 +302,22 @@ const OrdersPage: React.FC = () => {
     updateOrderStatus(order.id, newStatus);
   };
 
+  // Close dropdown on outside click or Esc
+  useEffect(() => {
+    const handleClickOutside = () => setOpenStatusFor(null);
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenStatusFor(null);
+    };
+    if (openStatusFor) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKey);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [openStatusFor]);
+
   return (
     <Layout>
       <div className="space-y-6 p-4 sm:p-0">
