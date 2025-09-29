@@ -10,6 +10,7 @@ import { usePlanLimits } from '@/hooks/usePlanLimits';
 import ClientForm from '@/components/ClientForm';
 import OrderForm from '@/components/OrderForm';
 import TaskForm from '@/components/TaskForm';
+import SubscriptionManager from '@/components/SubscriptionManager';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { formatDateForCalendar, formatDateSafe } from '@/utils/dateUtils';
 import {
@@ -427,6 +428,11 @@ const DashboardPage = () => {
               </ul>
             )}
           </div>
+        </div>
+
+        {/* Subscriptions manager (same as Calendar page) */}
+        <div className="mt-2">
+          <SubscriptionManager />
         </div>
 
         <ClientForm
