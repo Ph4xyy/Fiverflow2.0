@@ -247,6 +247,44 @@ const OrdersPage: React.FC = () => {
     setPlatform('');
   };
 
+  // ----- Status toggle (Pending -> In Progress -> Completed) -----
+  const STATUS_SEQUENCE: Array<OrderRow['status']> = ['Pending', 'In Progress', 'Completed'];
+  const nextStatus = (current: OrderRow['status']): OrderRow['status'] => {
+    const idx = STATUS_SEQUENCE.indexOf(current as any);
+    if (idx === -1) return 'Pending';
+    return STATUS_SEQUENCE[(idx + 1) % STATUS_SEQUENCE.length];
+  };
+
+  const updateOrderStatus = async (orderId: string, newStatus: OrderRow['status']) => {
+    if (!isSupabaseConfigured || !supabase) {
+      // Demo mode: just update local state
+      setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o)));
+      toast.success(`Status updated to ${newStatus}`);
+      return;
+    }
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
+      if (error) throw error;
+      toast.success(`Status updated to ${newStatus}`);
+    } catch (e: any) {
+      console.error('Failed to update status', e);
+      toast.error('Failed to update status');
+      // force refresh to revert optimistic update
+      fetchOrders();
+    }
+  };
+
+  const handleToggleStatus = (e: React.MouseEvent, order: OrderRow) => {
+    e.stopPropagation();
+    const newStatus = nextStatus(order.status);
+    // Optimistic update
+    setOrders(prev => prev.map(o => (o.id === order.id ? { ...o, status: newStatus } : o)));
+    updateOrderStatus(order.id, newStatus);
+  };
+
   return (
     <Layout>
       <div className="space-y-6 p-4 sm:p-0">
@@ -458,9 +496,14 @@ const OrdersPage: React.FC = () => {
                           {typeof o.amount === 'number' ? `$${o.amount.toLocaleString()}` : '—'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${getStatusBadge(o.status)}`}>
+                          <button
+                            type="button"
+                            onClick={(e) => handleToggleStatus(e, o)}
+                            className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${getStatusBadge(o.status)} hover:opacity-90 transition`}
+                            title="Click to change status"
+                          >
                             {o.status}
-                          </span>
+                          </button>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">
                           {o.deadline ? new Date(o.deadline).toLocaleDateString() : '—'}
