@@ -1,5 +1,5 @@
 // src/pages/OrdersPage.tsx
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Layout, { cardClass } from '@/components/Layout';
 import OrderForm from '@/components/OrderForm';
 import OrderDetailModal from '@/components/OrderDetailModal';
@@ -290,6 +290,7 @@ const OrdersPage: React.FC = () => {
 
   // Dropdown state & handlers
   const [openStatusFor, setOpenStatusFor] = useState<string | null>(null);
+  const statusMenuRef = useRef<HTMLDivElement | null>(null);
   const toggleStatusMenu = (e: React.MouseEvent, orderId: string) => {
     e.stopPropagation();
     setOpenStatusFor(prev => (prev === orderId ? null : orderId));
@@ -304,16 +305,21 @@ const OrdersPage: React.FC = () => {
 
   // Close dropdown on outside click or Esc
   useEffect(() => {
-    const handleClickOutside = () => setOpenStatusFor(null);
+    const handleClickOutside = (e: MouseEvent) => {
+      if (statusMenuRef.current && statusMenuRef.current.contains(e.target as Node)) {
+        return;
+      }
+      setOpenStatusFor(null);
+    };
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpenStatusFor(null);
     };
     if (openStatusFor) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('click', handleClickOutside);
       document.addEventListener('keydown', handleKey);
     }
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('click', handleClickOutside);
       document.removeEventListener('keydown', handleKey);
     };
   }, [openStatusFor]);
@@ -528,7 +534,7 @@ const OrdersPage: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                           {typeof o.amount === 'number' ? `$${o.amount.toLocaleString()}` : '—'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap relative">
+                        <td className="px-6 py-4 whitespace-nowrap relative" ref={openStatusFor === o.id ? statusMenuRef : undefined}>
                           <button
                             type="button"
                             onClick={(e) => toggleStatusMenu(e, o.id)}
