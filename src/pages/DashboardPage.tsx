@@ -153,6 +153,52 @@ const DashboardPage = () => {
       .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }, [orders]);
 
+  const recentActivities = useMemo(() => {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    const orderItems = (orders || [])
+      .filter((o: any) => o.created_at && new Date(o.created_at) >= oneWeekAgo)
+      .map((o: any) => ({
+        kind: 'order' as const,
+        id: o.id,
+        title: o.title,
+        subtitle: o.clients?.name || null,
+        date: o.created_at,
+        amount: typeof o.amount === 'number' ? o.amount : null,
+        status: o.status,
+      }));
+
+    const taskItems = (tasks || [])
+      .filter((t: any) => t.created_at && new Date(t.created_at) >= oneWeekAgo)
+      .map((t: any) => ({
+        kind: 'task' as const,
+        id: t.id,
+        title: t.title,
+        subtitle: null,
+        date: t.created_at,
+        amount: null,
+        status: t.status,
+        color: t.color || null,
+      }));
+
+    const subscriptionItems = (subscriptions || [])
+      .filter((s: any) => (s.created_at && new Date(s.created_at) >= oneWeekAgo) || (s.updated_at && new Date(s.updated_at) >= oneWeekAgo))
+      .map((s: any) => ({
+        kind: 'subscription' as const,
+        id: s.id,
+        title: s.name,
+        subtitle: s.provider || null,
+        date: s.updated_at || s.created_at,
+        amount: typeof s.amount === 'number' ? s.amount : null,
+        currency: s.currency || 'USD',
+        color: s.color || '#8b5cf6',
+      }));
+
+    return [...orderItems, ...taskItems, ...subscriptionItems]
+      .sort((a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime());
+  }, [orders, tasks, subscriptions]);
+
   const handleAddClient = () => setIsClientFormOpen(true);
   const handleAddOrder = () => setIsOrderFormOpen(true);
 
@@ -328,40 +374,52 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className={`${cardClass} p-5`}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Recent Orders</h2>
+              <h2 className="text-lg font-semibold text-white">Recent Activities</h2>
               <div className="text-xs px-2 py-1 rounded-full bg-[#141922] text-slate-200">
                 last 7 days
               </div>
             </div>
             {loadingOrders ? (
               <p className="text-slate-400">Loading...</p>
-            ) : recentOrders.length > 0 ? (
+            ) : recentActivities.length > 0 ? (
               <div className="space-y-2">
-                {recentOrders.slice(0, 5).map((order) => {
+                {recentActivities.slice(0, 5).map((it: any) => {
+                  const isOrder = it.kind === 'order';
+                  const isSub = it.kind === 'subscription';
                   let barColor = '#2563eb';
-                  if (order.status === 'Completed') barColor = '#059669';
-                  else if (order.status === 'In Progress') barColor = '#d97706';
-                  else if (order.status === 'Pending') barColor = '#dc2626';
-                  const amountStr = typeof order.amount === 'number' ? `$${order.amount.toLocaleString()}` : '—';
+                  if (isOrder) {
+                    if (it.status === 'Completed') barColor = '#059669';
+                    else if (it.status === 'In Progress') barColor = '#d97706';
+                    else if (it.status === 'Pending') barColor = '#dc2626';
+                  } else if (it.kind === 'task') {
+                    barColor = it.color || '#94a3b8';
+                  } else if (isSub) {
+                    barColor = it.color || '#8b5cf6';
+                  }
+                  const amountStr = isOrder && typeof it.amount === 'number'
+                    ? `$${it.amount.toLocaleString()}`
+                    : isSub && typeof it.amount === 'number'
+                      ? new Intl.NumberFormat('en-US', { style: 'currency', currency: it.currency || 'USD' }).format(it.amount)
+                      : '—';
                   return (
                     <div
-                      key={order.id}
+                      key={`${it.kind}_${it.id}`}
                       className="rounded-xl p-3 bg-[#0E121A] ring-1 ring-inset ring-[#1C2230] hover:bg-[#121722] transition"
                       style={{ borderLeft: `3px solid ${barColor}` }}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="truncate text-sm font-medium text-white">{order.title}</p>
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getOrderStatusBadge(order.status)}`}>{order.status}</span>
+                            <p className="truncate text-sm font-medium text-white">{it.title}</p>
+                            {isOrder && <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getOrderStatusBadge(it.status)}`}>{it.status}</span>}
+                            {it.kind === 'task' && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-slate-200">Task</span>}
+                            {isSub && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-slate-200">Subscription</span>}
                           </div>
-                          <div className="text-xs text-slate-400 truncate">{order.clients?.name || '—'}</div>
+                          <div className="text-xs text-slate-400 truncate">{it.subtitle || '—'}</div>
                         </div>
                         <div className="flex flex-col items-end gap-1">
                           <span className="text-sm font-semibold text-white">{amountStr}</span>
-                          {order.deadline && (
-                            <span className="text-[11px] text-slate-400">{new Date(order.deadline).toLocaleDateString()}</span>
-                          )}
+                          <span className="text-[11px] text-slate-400">{new Date(it.date).toLocaleDateString()}</span>
                         </div>
                       </div>
                     </div>
