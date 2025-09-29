@@ -10,7 +10,7 @@ import { usePlanLimits } from '@/hooks/usePlanLimits';
 import ClientForm from '@/components/ClientForm';
 import OrderForm from '@/components/OrderForm';
 import TaskForm from '@/components/TaskForm';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import {
   Users,
   ShoppingCart,
@@ -40,13 +40,19 @@ const DashboardPage = () => {
 
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(true);
   const hasFetchedOrders = useRef(false);
   
   // 👉 Nouvel état pour le nom de l'utilisateur
   const [userName, setUserName] = useState<string | null>(null);
 
   const fetchOrders = useCallback(async () => {
-    if (!user) return;
+    if (!isSupabaseConfigured || !supabase || !user) {
+      setOrders([]);
+      setLoadingOrders(false);
+      return;
+    }
     setLoadingOrders(true);
 
     const { data, error } = await supabase
@@ -64,12 +70,36 @@ const DashboardPage = () => {
     setLoadingOrders(false);
   }, [user]);
 
+  const fetchTasks = useCallback(async () => {
+    if (!isSupabaseConfigured || !supabase || !user) {
+      setTasks([]);
+      setLoadingTasks(false);
+      return;
+    }
+    setLoadingTasks(true);
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('id, title, status, priority, due_date, color, client_id')
+      .eq('user_id', user.id)
+      .not('due_date', 'is', null)
+      .order('due_date', { ascending: true });
+
+    if (error) {
+      console.error('Failed to fetch tasks:', error);
+      setTasks([]);
+    } else {
+      setTasks(data || []);
+    }
+    setLoadingTasks(false);
+  }, [user]);
+
   useEffect(() => {
     if (!hasFetchedOrders.current) {
       hasFetchedOrders.current = true;
       fetchOrders();
+      fetchTasks();
     }
-  }, [fetchOrders]);
+  }, [fetchOrders, fetchTasks]);
 
   // 👉 Récupérer le nom depuis la table users
   useEffect(() => {
@@ -132,7 +162,7 @@ const DashboardPage = () => {
   };
 
   const calendarEvents = useMemo(() => {
-    return orders
+    const orderEvents = orders
       .filter(o => o.deadline)
       .map(order => {
         let barColor = '#2563eb';
@@ -159,15 +189,44 @@ const DashboardPage = () => {
           }
         };
       });
-  }, [orders]);
+
+    const taskEvents = tasks
+      .filter(t => t.due_date)
+      .map(task => {
+        const bar = task.color || '#94a3b8';
+        return {
+          id: `task_${task.id}`,
+          title: task.title,
+          start: task.due_date,
+          allDay: true,
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+          textColor: '#e5e7eb',
+          extendedProps: {
+            kind: 'task',
+            style: { bar, chipBg: 'rgba(255,255,255,0.06)', text: '#e5e7eb' },
+            task
+          }
+        };
+      });
+
+    return [...orderEvents, ...taskEvents];
+  }, [orders, tasks]);
 
   const upcoming = useMemo(() => {
     const now = new Date();
-    return orders
+    const orderItems = orders
       .filter(o => o.deadline && new Date(o.deadline) >= new Date(now.toDateString()))
-      .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+      .map(o => ({ kind: 'order' as const, date: o.deadline as string, item: o }));
+
+    const taskItems = tasks
+      .filter(t => t.due_date && new Date(t.due_date) >= new Date(now.toDateString()))
+      .map(t => ({ kind: 'task' as const, date: t.due_date as string, item: t }));
+
+    return [...orderItems, ...taskItems]
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(0, 8);
-  }, [orders]);
+  }, [orders, tasks]);
 
   return (
     <Layout>
@@ -328,24 +387,27 @@ const DashboardPage = () => {
               <h2 className="text-lg font-semibold text-white">Upcoming Events</h2>
             </div>
 
-            {loadingOrders ? (
+            {loadingOrders || loadingTasks ? (
               <p className="text-slate-400">Loading...</p>
             ) : upcoming.length === 0 ? (
               <p className="text-slate-400">No upcoming deadlines.</p>
             ) : (
               <ul className="divide-y divide-[#1C2230]">
-                {upcoming.map((o) => {
-                  const d = new Date(o.deadline);
+                {upcoming.map((u) => {
+                  const isOrder = u.kind === 'order';
+                  const data: any = u.item;
+                  const date = isOrder ? data.deadline : data.due_date;
+                  const d = new Date(date);
                   const dateStr = d.toLocaleDateString(undefined, {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric'
                   });
                   return (
-                    <li key={o.id} className="py-3 flex items-start justify-between">
+                    <li key={`${u.kind}_${data.id}`} className="py-3 flex items-start justify-between">
                       <div className="pr-3">
-                        <p className="text-sm font-medium text-white">{o.title}</p>
-                        <p className="text-xs text-slate-400">{o.clients?.name || '—'}</p>
+                        <p className="text-sm font-medium text-white">{data.title}</p>
+                        <p className="text-xs text-slate-400">{isOrder ? (data.clients?.name || '—') : 'Task'}</p>
                       </div>
                       <span className={`text-xs px-2.5 py-1 rounded-full ${subtleBg} text-slate-200`}>
                         {dateStr}
