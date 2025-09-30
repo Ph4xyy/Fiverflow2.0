@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 // Import logo
-import LogoImage from '../assets/LogoTransparent.png';
+import LogoImage from '../assets/LogoFiverFlow.png';
 
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import NotificationsDropdown from './NotificationsDropdown';
@@ -292,10 +292,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             </button>
             <Link to="/dashboard" className="text-2xl font-extrabold leading-none">
               <div className="flex items-center space-x-3">
-                <img src={LogoImage} alt="Logo" className="h-8 w-auto" />
-                <span className="text-2x1 font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-accent-blue dark:to-accent-purple bg-clip-text text-transparent">
-                  FiverFlow
-                </span>
+                <img src={LogoImage} alt="full" className="h-8 w-auto" />
               </div>
             </Link>
           </div>
