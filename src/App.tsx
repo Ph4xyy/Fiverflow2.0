@@ -13,7 +13,9 @@ import DatabaseTest from './components/DatabaseTest';
 import DebugShortcuts from './components/DebugShortcuts';
 import KeyboardTest from './components/KeyboardTest';
 import SimpleTest from './components/SimpleTest';
+import InfiniteLoopDetector from './components/InfiniteLoopDetector';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
+import useCleanup from './hooks/useCleanup';
 
 // Core pages
 import LandingPage from './pages/LandingPage';
@@ -64,12 +66,14 @@ const PlanGate: React.FC<{ feature: 'calendar' | 'referrals' | 'stats' | 'tasks'
 };
 
 function App() {
+  useCleanup(); // Nettoyer les écouteurs d'événements problématiques
+  
   return (
     <AppErrorBoundary>
       <UserDataProvider>
-          <Router>
-            <AnalyticsWrapper>
-              <GlobalLoadingManager>
+        <Router>
+          <AnalyticsWrapper>
+            <GlobalLoadingManager>
               <Suspense fallback={<div className="p-6"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-slate-500"></div></div>}>
               <Routes>
               {/* Pages publiques */}
@@ -130,11 +134,12 @@ function App() {
               </Routes>
               </Suspense>
               </GlobalLoadingManager>
-              <LoadingDebugger />
-              <DatabaseTest />
-              <DebugShortcuts />
-              <KeyboardTest />
-              <SimpleTest />
+                   <LoadingDebugger />
+                   <DatabaseTest />
+                   <DebugShortcuts />
+                   <KeyboardTest />
+                   <SimpleTest />
+                   <InfiniteLoopDetector />
             </AnalyticsWrapper>
           </Router>
         </UserDataProvider>

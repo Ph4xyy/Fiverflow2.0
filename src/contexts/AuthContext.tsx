@@ -82,7 +82,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserSafe(nextSession?.user ?? null);
         await deriveAndCacheRole(nextSession);
         setLoadingSafe(false);
-        // Removed ff:session:refreshed event dispatch to prevent cascade of re-renders
+        // Emit cleanup event to clean up problematic listeners
+        try {
+          window.dispatchEvent(new CustomEvent('ff:cleanup', { detail: { userId: nextSession?.user?.id || null } }));
+        } catch {}
       });
 
       unsubscribe = () => {

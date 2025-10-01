@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import useDebugRenders from './useDebugRenders';
 
 interface Client {
   id: string;
@@ -49,6 +50,7 @@ export const useClients = (): UseClientsReturn => {
   const [error, setError] = useState<string | null>(null);
   const isMountedRef = useRef(true);
   const hasFetchedRef = useRef(false);
+  const debug = useDebugRenders('useClients');
 
   const fetchClients = useCallback(async () => {
     if (!isMountedRef.current) return;
@@ -98,6 +100,8 @@ export const useClients = (): UseClientsReturn => {
   }, [fetchClients]);
 
   useEffect(() => {
+    debug.logRender({ user: user?.id, hasFetched: hasFetchedRef.current }, [fetchClients, user]);
+    
     if (!hasFetchedRef.current && user !== undefined) {
       hasFetchedRef.current = true;
       fetchClients();
@@ -107,7 +111,7 @@ export const useClients = (): UseClientsReturn => {
     return () => {
       window.removeEventListener('ff:session:refreshed', onRefreshed as any);
     };
-  }, [fetchClients, user]);
+  }, [fetchClients, user, debug]);
 
   useEffect(() => {
     return () => {

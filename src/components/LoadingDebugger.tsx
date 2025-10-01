@@ -83,6 +83,26 @@ export const LoadingDebugger: React.FC = () => {
     window.location.reload();
   }, []);
 
+  const handleDebugInfiniteLoop = useCallback(() => {
+    console.log('🔍 Debugging infinite loop...');
+    
+    // Log all active event listeners
+    console.log('📊 Active event listeners:');
+    const events = ['ff:session:refreshed', 'ff:tab:refocus', 'ff:cleanup'];
+    events.forEach(eventName => {
+      const listeners = (window as any)._eventListeners?.[eventName] || [];
+      console.log(`${eventName}: ${listeners.length} listeners`);
+    });
+    
+    // Check for infinite re-renders
+    console.log('🔄 Checking for infinite re-renders...');
+    const renderCount = (window as any)._renderCount || 0;
+    console.log(`Total renders: ${renderCount}`);
+    
+    // Force cleanup
+    window.dispatchEvent(new CustomEvent('ff:cleanup'));
+  }, []);
+
   if (!isVisible) return null;
 
   return (
@@ -126,9 +146,16 @@ export const LoadingDebugger: React.FC = () => {
 
       <button
         onClick={handleForceRefresh}
-        className="w-full px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded text-white text-xs mb-4"
+        className="w-full px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded text-white text-xs mb-2"
       >
         Force Refresh
+      </button>
+
+      <button
+        onClick={handleDebugInfiniteLoop}
+        className="w-full px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 rounded text-white text-xs mb-4"
+      >
+        Debug Infinite Loop
       </button>
 
       <div className="mb-2">
