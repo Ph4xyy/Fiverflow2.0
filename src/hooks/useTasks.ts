@@ -482,7 +482,7 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
   useEffect(() => {
     fetchTasks();
     // Removed event listener to prevent infinite loop
-  }, [user, orderId]); // Only depend on user and orderId, not fetchTasks
+  }, [user?.id, orderId]); // Only depend on user.id and orderId, not fetchTasks
 
   return {
     tasks,

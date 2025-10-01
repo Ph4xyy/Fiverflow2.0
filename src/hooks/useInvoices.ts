@@ -145,7 +145,7 @@ export function useInvoices() {
   useEffect(() => {
     fetchInvoices();
     // Removed event listener to prevent infinite loop
-  }, [user]); // Only depend on user, not fetchInvoices
+  }, [user?.id]); // Only depend on user.id, not the entire user object
 
   const createInvoice = useCallback(async (data: CreateInvoiceData) => {
     if (!user) {

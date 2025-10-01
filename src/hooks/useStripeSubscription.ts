@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { globalLock } from '../utils/globalLock';
 import { getProductByPriceId } from '../stripe-config';
 import toast from 'react-hot-toast';
 
@@ -32,25 +33,42 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
   const [subscription, setSubscription] = useState<StripeSubscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const hasFetchedRef = useRef(false);
+  const lastUserIdRef = useRef<string | null>(null);
 
   const fetchSubscription = useCallback(async () => {
-    console.log('💳 Fetching Stripe subscription...');
+    const lockKey = `stripe_subscription_${user?.id}`;
     
-    if (!isSupabaseConfigured || !supabase) {
-      console.log('🎭 Supabase not configured, no subscription data');
-      setSubscription(null);
-      setLoading(false);
+    // Vérifier si déjà en cours d'exécution
+    if (globalLock.isLocked(lockKey)) {
+      console.log('💳 Subscription fetch already in progress, skipping...');
       return;
     }
 
-    if (!user) {
-      console.log('❌ No user found for subscription');
-      setSubscription(null);
-      setLoading(false);
+    // Acquérir le verrou
+    const acquired = await globalLock.acquire(lockKey);
+    if (!acquired) {
+      console.log('💳 Could not acquire lock, skipping...');
       return;
     }
 
     try {
+      console.log('💳 Fetching Stripe subscription...');
+      
+      if (!isSupabaseConfigured || !supabase) {
+        console.log('🎭 Supabase not configured, no subscription data');
+        setSubscription(null);
+        setLoading(false);
+        return;
+      }
+
+      if (!user) {
+        console.log('❌ No user found for subscription');
+        setSubscription(null);
+        setLoading(false);
+        return;
+      }
+
       setError(null);
       
       console.log('🔍 Querying user subscription...');
@@ -85,8 +103,10 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
       setSubscription(null);
     } finally {
       setLoading(false);
+      // Libérer le verrou
+      globalLock.release(lockKey);
     }
-  }, [user]);
+  }, [user?.id]); // Only depend on user.id
 
   const createCheckoutSession = useCallback(async (priceId: string, mode: 'subscription' | 'payment', trialDays?: number): Promise<string | null> => {
     console.log('🛒 Creating checkout session...', { priceId, mode });
@@ -155,9 +175,22 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
   }, [fetchSubscription]);
 
   useEffect(() => {
-    fetchSubscription();
+    const currentUserId = user?.id || null;
+    
+    // Ne fetch que si l'utilisateur change ou si on n'a pas encore fetché
+    if (currentUserId && (currentUserId !== lastUserIdRef.current || !hasFetchedRef.current)) {
+      lastUserIdRef.current = currentUserId;
+      hasFetchedRef.current = true;
+      fetchSubscription();
+    } else if (!currentUserId) {
+      // Réinitialiser si l'utilisateur se déconnecte
+      hasFetchedRef.current = false;
+      lastUserIdRef.current = null;
+      setSubscription(null);
+      setLoading(false);
+    }
     // Removed event listener to prevent infinite loop
-  }, [user]); // Only depend on user, not fetchSubscription
+  }, [user?.id]); // Only depend on user.id, not the entire user object
 
   return {
     subscription,

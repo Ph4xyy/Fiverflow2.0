@@ -99,7 +99,7 @@ export function useInvoiceItems(invoiceId?: string) {
       fetchItems();
     }
     // Removed event listener to prevent infinite loop
-  }, [user, invoiceId]); // Only depend on user and invoiceId, not fetchItems
+  }, [user?.id, invoiceId]); // Only depend on user.id and invoiceId, not fetchItems
 
   const createItem = useCallback(async (data: CreateInvoiceItemData) => {
     if (!user) {

@@ -143,7 +143,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
       setLoading(false);
     }
     // Removed event listener to prevent infinite loop
-  }, [user]); // Only depend on user, not checkTrialStatus
+  }, [user?.id]); // Only depend on user.id, not the entire user object
 
   // Check for expired trials on mount (simulates login check)
   useEffect(() => {

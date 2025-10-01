@@ -103,7 +103,7 @@ export const useClients = (): UseClientsReturn => {
       fetchClients();
     }
     // Removed event listener to prevent infinite loop
-  }, [user]); // Only depend on user, not fetchClients
+  }, [user?.id]); // Only depend on user.id, not the entire user object
 
   useEffect(() => {
     return () => {

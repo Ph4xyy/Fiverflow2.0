@@ -134,7 +134,7 @@ export const useSubscriptions = () => {
       fetchSubscriptions();
     }
     // Removed event listener to prevent infinite loop
-  }, [user]); // Only depend on user, not fetchSubscriptions
+  }, [user?.id]); // Only depend on user.id, not the entire user object
 
   return {
     subscriptions,
