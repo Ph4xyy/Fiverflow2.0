@@ -52,8 +52,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <GlobalErrorBoundary>
       <LanguageProvider>
-        <AuthProvider>
-          <App />
+        <LoadingProvider>
+          <AuthProvider>
+            <App />
             <Toaster
           position="top-right"
           toastOptions={{
@@ -103,7 +104,8 @@ createRoot(document.getElementById('root')!).render(
             },
           }}
         />
-        </AuthProvider>
+          </AuthProvider>
+        </LoadingProvider>
       </LanguageProvider>
     </GlobalErrorBoundary>
   </StrictMode>

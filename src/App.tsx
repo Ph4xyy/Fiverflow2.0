@@ -3,7 +3,6 @@ import "./i18n";
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { UserDataProvider } from './contexts/UserDataContext';
-import { LoadingProvider } from './contexts/LoadingContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
@@ -63,8 +62,7 @@ const PlanGate: React.FC<{ feature: 'calendar' | 'referrals' | 'stats' | 'tasks'
 function App() {
   return (
     <AppErrorBoundary>
-      <LoadingProvider>
-        <UserDataProvider>
+      <UserDataProvider>
           <Router>
             <AnalyticsWrapper>
               <GlobalLoadingManager>
@@ -132,7 +130,6 @@ function App() {
             </AnalyticsWrapper>
           </Router>
         </UserDataProvider>
-      </LoadingProvider>
     </AppErrorBoundary>
   );
 }
