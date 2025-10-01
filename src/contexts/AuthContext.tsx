@@ -65,23 +65,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let unsubscribe: (() => void) | undefined;
 
     const init = async () => {
+      console.log('🔐 AuthContext: Initializing...');
+      
       if (!isSupabaseConfigured || !supabase) {
+        console.log('❌ AuthContext: Supabase not configured');
         setUserSafe(null);
         setLoadingSafe(false);
         return;
       }
 
+      console.log('🔍 AuthContext: Getting session...');
       const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) console.error('[Auth] getSession error:', error.message);
+      
+      if (error) {
+        console.error('[Auth] getSession error:', error.message);
+      } else {
+        console.log('✅ AuthContext: Session retrieved', {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userId: session?.user?.id
+        });
+      }
 
       setUserSafe(session?.user ?? null);
       await deriveAndCacheRole(session);
       setLoadingSafe(false);
+      console.log('🏁 AuthContext: Initialization complete');
 
-      const { data } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
+      const { data } = supabase.auth.onAuthStateChange(async (event, nextSession) => {
+        console.log('🔄 AuthContext: Auth state changed', {
+          event,
+          hasSession: !!nextSession,
+          hasUser: !!nextSession?.user,
+          userId: nextSession?.user?.id
+        });
+        
         setUserSafe(nextSession?.user ?? null);
         await deriveAndCacheRole(nextSession);
         setLoadingSafe(false);
+        
         // Emit cleanup event to clean up problematic listeners
         try {
           window.dispatchEvent(new CustomEvent('ff:cleanup', { detail: { userId: nextSession?.user?.id || null } }));

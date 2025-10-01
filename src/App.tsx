@@ -19,6 +19,7 @@ import SimpleTest from './components/SimpleTest';
 import DiagnosticPanel from './components/DiagnosticPanel';
 import EnvironmentDiagnostic from './components/EnvironmentDiagnostic';
 import EmergencyFallback from './components/EmergencyFallback';
+import SessionTest from './components/SessionTest';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
 
 // Core pages
@@ -139,15 +140,14 @@ function App() {
               </Routes>
               </Suspense>
                 </GlobalLoadingManager>
-                     {/* Composants de debug temporairement désactivés */}
-                     {/* <LoadingDebugger />
-                     <LoadingTest />
-                     <DatabaseTest />
-                     <DebugShortcuts />
-                     <KeyboardTest />
-                     <SimpleTest />
-                     <DiagnosticPanel />
-                     <EnvironmentDiagnostic /> */}
+                     {/* Composants de debug - seulement en développement */}
+                     {import.meta.env.DEV && (
+                       <>
+                         <DiagnosticPanel />
+                         <EnvironmentDiagnostic />
+                         <SessionTest />
+                       </>
+                     )}
               </UserDataProvider>
             </LoadingProvider>
           </AnalyticsWrapper>
