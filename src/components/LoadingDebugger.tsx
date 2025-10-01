@@ -109,7 +109,8 @@ export const LoadingDebugger: React.FC = () => {
 
         <p><strong>Session Storage:</strong></p>
         <p className="ml-2">Role: {sessionStorage.getItem('role') || 'none'}</p>
-        <p className="ml-2">User ID: {sessionStorage.getItem('sb-auth-token') ? JSON.parse(sessionStorage.getItem('sb-auth-token')!).user.id : 'none'}</p>
+        <p className="ml-2">User ID: {user?.id || 'none'}</p>
+        <p className="ml-2">Auth Token: {sessionStorage.getItem('sb-auth-token') ? 'Present' : 'None'}</p>
 
         <p><strong>Tab Visibility:</strong></p>
         <p className="ml-2">Visible: {document.visibilityState === 'visible' ? '✅' : '❌'}</p>
