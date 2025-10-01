@@ -20,14 +20,15 @@ export const debugAuth = {
       
       if (error) {
         console.error('❌ Database error:', error);
-        return { success: false, error };
+        return { success: false, error, duration };
       }
       
       console.log('✅ Query result:', data);
-      return { success: true, data };
+      return { success: true, data, duration };
     } catch (err) {
+      const duration = Date.now() - startTime;
       console.error('💥 Unexpected error:', err);
-      return { success: false, error: err };
+      return { success: false, error: err, duration };
     }
   },
 

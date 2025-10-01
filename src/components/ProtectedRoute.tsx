@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useOptimizedAuth } from '../hooks/useOptimizedAuth';
-import { useTabSwitchOptimization } from '../hooks/useTabSwitchOptimization';
 import { OptimizedLoadingScreen } from './OptimizedLoadingScreen';
 
 interface ProtectedRouteProps {
@@ -12,35 +11,10 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const { user, loading, role, roleLoading } = useOptimizedAuth();
-  const { isTabVisible } = useTabSwitchOptimization();
   const location = useLocation();
-  const [, setRefreshKey] = useState(0);
 
-  const effectiveRole = role;
-
-  // Listen for session refresh to re-evaluate access (debounced)
-  useEffect(() => {
-    let refreshTimeout: number | undefined;
-    const onRefreshed = () => {
-      console.log('🔄 ProtectedRoute: Session refreshed, re-evaluating access...');
-      // Debounced re-evaluation to avoid multiple rapid updates
-      if (refreshTimeout) clearTimeout(refreshTimeout);
-      refreshTimeout = window.setTimeout(() => {
-        setRefreshKey(prev => prev + 1);
-      }, 150);
-    };
-    
-    window.addEventListener('ff:session:refreshed', onRefreshed as any);
-    return () => {
-      if (refreshTimeout) clearTimeout(refreshTimeout);
-      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-    };
-  }, []);
-
-  // Ne pas afficher le loading si l'onglet n'est pas visible (évite les flashs)
-  if ((loading || roleLoading) && isTabVisible) {
-    console.log('🔄 ProtectedRoute: Loading state - auth:', loading, 'role:', roleLoading, 'user:', !!user, 'role value:', role);
-    console.log('🔄 ProtectedRoute: Tab visible:', isTabVisible, 'Document visibility:', document.visibilityState);
+  // Show loading screen while authentication is in progress
+  if (loading || roleLoading) {
     return (
       <OptimizedLoadingScreen 
         message="Checking session..." 
@@ -53,7 +27,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  if (requireAdmin && effectiveRole !== 'admin') {
+  if (requireAdmin && role !== 'admin') {
     return <Navigate to="/not-authorized" replace />;
   }
 

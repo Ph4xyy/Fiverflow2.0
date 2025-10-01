@@ -63,7 +63,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     mountedRef.current = true;
 
     let unsubscribe: (() => void) | undefined;
-    let heartbeatTimer: number | undefined;
 
     const init = async () => {
       if (!isSupabaseConfigured || !supabase) {
@@ -96,66 +95,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       };
 
-      // Heartbeat: refresh session periodically and on focus/visibility
-      const HEARTBEAT_MS = 15 * 60 * 1000; // 15 minutes
-      const safeRefresh = async () => {
-        if (!isSupabaseConfigured || !supabase) return;
-        try {
-          const { data: { session: s } } = await supabase.auth.getSession();
-          // Ne pas déclencher de loading pour les refreshs silencieux
-          setUserSafe(s?.user ?? null);
-          await deriveAndCacheRole(s ?? null);
-          try {
-            window.dispatchEvent(new CustomEvent('ff:session:refreshed', { detail: { userId: s?.user?.id || null } }));
-          } catch {}
-        } catch (e) {
-          // network errors are tolerated; next tick will retry
-          // console.debug('[Auth] heartbeat refresh failed', e);
-        }
-      };
-
-      // Setup periodic refresh (TEMPORAIREMENT DÉSACTIVÉ pour debug)
-      console.log('🔄 Periodic refresh DISABLED for debugging');
-      // heartbeatTimer = window.setInterval(safeRefresh, HEARTBEAT_MS) as unknown as number;
-
-      // Resync on tab focus/visibility (TEMPORAIREMENT DÉSACTIVÉ pour debug)
-      let refreshTimeout: number | undefined;
-      const debouncedRefresh = () => {
-        console.log('🔄 Debounced refresh triggered - SKIPPED for debugging');
-        // Temporairement désactivé pour debug
-        // if (refreshTimeout) clearTimeout(refreshTimeout);
-        // refreshTimeout = window.setTimeout(safeRefresh, 500);
-      };
-      
-      const onFocus = () => {
-        console.log('🔄 Focus event - SKIPPED for debugging');
-        // debouncedRefresh();
-      };
+      // Simple visibility change handler - only reset loading state, no complex refresh logic
       const onVisible = () => {
         if (document.visibilityState === 'visible') {
-          try {
-            // Ensure UI is interactive and not stuck in loading after tab switch
-            setLoadingSafe(false);
-            // Best-effort refocus
-            window.focus?.();
-          } catch {}
+          // Simply ensure loading is false when tab becomes visible
+          setLoadingSafe(false);
         }
       };
-      window.addEventListener('focus', onFocus);
+      
       document.addEventListener('visibilitychange', onVisible);
-
-      // Cleanup listeners
-      const cleanupExtra = () => {
-        if (heartbeatTimer) window.clearInterval(heartbeatTimer);
-        if (refreshTimeout) clearTimeout(refreshTimeout);
-        window.removeEventListener('focus', onFocus);
-        document.removeEventListener('visibilitychange', onVisible);
-      };
 
       // attach to unsubscribe chain
       const oldUnsub = unsubscribe;
       unsubscribe = () => {
-        cleanupExtra();
+        document.removeEventListener('visibilitychange', onVisible);
         if (oldUnsub) oldUnsub();
       };
     };

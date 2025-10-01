@@ -50,42 +50,42 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     console.log('🔄 UserDataContext useEffect triggered for user:', user?.id);
+    
+    if (!user) {
+      setRole('user');
+      setLoading(false);
+      return;
+    }
+
+    // Check cache first to avoid unnecessary loading
+    const cachedRole = sessionStorage.getItem('role');
+    if (cachedRole) {
+      console.log('🔄 UserDataContext: Using cached role:', cachedRole);
+      setRole(cachedRole === 'admin' ? 'admin' : 'user');
+      setLoading(false);
+      return;
+    }
+
+    // Only fetch if no cached role
     setLoading(true);
     fetchUserRole();
     
-    // Debounced refresh to avoid multiple rapid calls
-    let refreshTimeout: number | undefined;
+    // Simple refresh handler - no complex debouncing
     const onRefreshed = () => {
       console.log('🔄 UserDataContext: ff:session:refreshed event received');
-      if (refreshTimeout) clearTimeout(refreshTimeout);
-      // Délai plus long pour éviter les rechargements trop fréquents
-      refreshTimeout = window.setTimeout(() => {
-        console.log('🔄 UserDataContext: Timeout triggered, checking if refresh needed');
-        // Ne recharger que si l'utilisateur a vraiment changé
-        if (user?.id) {
-          // Vérifier le cache avant de recharger
-          const cachedRole = sessionStorage.getItem('role');
-          console.log('🔄 UserDataContext: Cached role:', cachedRole);
-          if (!cachedRole) {
-            console.log('🔄 UserDataContext: No cached role, fetching...');
-            fetchUserRole();
-          } else {
-            console.log('🔄 UserDataContext: Using cached role, skipping fetch');
-            // Utiliser le cache et ne pas afficher de loading
-            setRole(cachedRole === 'admin' ? 'admin' : 'user');
-            setLoading(false);
-          }
-        }
-      }, 2000); // Délai encore plus long
+      // Only refresh if we don't have a cached role
+      const currentCachedRole = sessionStorage.getItem('role');
+      if (!currentCachedRole && user?.id) {
+        fetchUserRole();
+      }
     };
     
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
     return () => {
       console.log('🔄 UserDataContext: Cleanup triggered');
-      if (refreshTimeout) clearTimeout(refreshTimeout);
       window.removeEventListener('ff:session:refreshed', onRefreshed as any);
     };
-  }, [user?.id]); // relancer si l'id change + sur resync
+  }, [user?.id]);
 
   return (
     <UserDataContext.Provider value={{ role, loading, refreshUserRole: fetchUserRole }}>
