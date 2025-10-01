@@ -70,20 +70,9 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setLoading(true);
     fetchUserRole();
     
-    // Simple refresh handler - no complex debouncing
-    const onRefreshed = () => {
-      console.log('🔄 UserDataContext: ff:session:refreshed event received');
-      // Only refresh if we don't have a cached role
-      const currentCachedRole = sessionStorage.getItem('role');
-      if (!currentCachedRole && user?.id) {
-        fetchUserRole();
-      }
-    };
-    
-    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    // No event listeners - just fetch role when user changes
     return () => {
       console.log('🔄 UserDataContext: Cleanup triggered');
-      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
     };
   }, [user?.id]);
 

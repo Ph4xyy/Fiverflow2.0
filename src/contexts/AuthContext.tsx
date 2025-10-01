@@ -82,9 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserSafe(nextSession?.user ?? null);
         await deriveAndCacheRole(nextSession);
         setLoadingSafe(false);
-        try {
-          window.dispatchEvent(new CustomEvent('ff:session:refreshed', { detail: { userId: nextSession?.user?.id || null } }));
-        } catch {}
+        // Removed ff:session:refreshed event dispatch to prevent cascade of re-renders
       });
 
       unsubscribe = () => {
@@ -95,20 +93,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       };
 
-      // Simple visibility change handler - only reset loading state, no complex refresh logic
-      const onVisible = () => {
-        if (document.visibilityState === 'visible') {
-          // Simply ensure loading is false when tab becomes visible
-          setLoadingSafe(false);
-        }
-      };
-      
-      document.addEventListener('visibilitychange', onVisible);
-
+      // No visibility change listeners - let useTabSwitchOptimization handle this
       // attach to unsubscribe chain
       const oldUnsub = unsubscribe;
       unsubscribe = () => {
-        document.removeEventListener('visibilitychange', onVisible);
         if (oldUnsub) oldUnsub();
       };
     };

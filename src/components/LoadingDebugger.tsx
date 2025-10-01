@@ -72,8 +72,8 @@ export const LoadingDebugger: React.FC = () => {
   const handleRefocusWindow = useCallback(() => {
     window.focus();
     console.log('Window focus manually triggered.');
-    // Optionally, dispatch a custom event to trigger re-evaluation in contexts
-    window.dispatchEvent(new CustomEvent('ff:session:refreshed', { detail: { manual: true } }));
+    // Force a page refresh to reset any stuck states
+    window.location.reload();
   }, []);
 
   const handleForceRefresh = useCallback(() => {
