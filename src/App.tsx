@@ -10,6 +10,7 @@ import AnalyticsWrapper from './components/AnalyticsWrapper';
 import { GlobalLoadingManager } from './components/GlobalLoadingManager';
 import LoadingDebugger from './components/LoadingDebugger';
 import DatabaseTest from './components/DatabaseTest';
+import DebugShortcuts from './components/DebugShortcuts';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
 
 // Core pages
@@ -129,6 +130,7 @@ function App() {
               </GlobalLoadingManager>
               <LoadingDebugger />
               <DatabaseTest />
+              <DebugShortcuts />
             </AnalyticsWrapper>
           </Router>
         </UserDataProvider>

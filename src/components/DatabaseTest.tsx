@@ -50,10 +50,10 @@ export const DatabaseTest: React.FC = () => {
     setTestResults(results);
   };
 
-  // Toggle visibility with Ctrl+Shift+T
+  // Toggle visibility with Ctrl+Alt+D (Database test)
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'T') {
+      if (e.ctrlKey && e.altKey && e.key === 'D') {
         setIsVisible(prev => !prev);
       }
     };
