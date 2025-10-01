@@ -1,74 +1,67 @@
-/**
- * Cache système pour éviter les requêtes d'authentification répétitives
- * et les états de loading multiples
- */
-
-interface AuthCacheData {
-  user: any;
-  role: string | null;
+interface CacheEntry<T> {
+  data: T;
   timestamp: number;
-  ttl: number; // Time to live in milliseconds
+  ttl: number;
 }
 
 class AuthCache {
-  private cache: Map<string, AuthCacheData> = new Map();
-  private readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
+  private cache = new Map<string, CacheEntry<any>>();
 
-  set(key: string, data: Partial<AuthCacheData>, ttl?: number): void {
-    const now = Date.now();
+  set<T>(key: string, data: T, ttl: number = 5 * 60 * 1000): void {
     this.cache.set(key, {
-      user: data.user || null,
-      role: data.role || null,
-      timestamp: now,
-      ttl: ttl || this.DEFAULT_TTL
+      data,
+      timestamp: Date.now(),
+      ttl
     });
   }
 
-  get(key: string): AuthCacheData | null {
-    const cached = this.cache.get(key);
-    if (!cached) return null;
+  get<T>(key: string): T | null {
+    const entry = this.cache.get(key);
+    if (!entry) return null;
 
     const now = Date.now();
-    if (now - cached.timestamp > cached.ttl) {
+    if (now - entry.timestamp > entry.ttl) {
       this.cache.delete(key);
       return null;
     }
 
-    return cached;
+    return entry.data;
   }
 
   has(key: string): boolean {
-    const cached = this.get(key);
-    return cached !== null;
+    const entry = this.cache.get(key);
+    if (!entry) return false;
+
+    const now = Date.now();
+    if (now - entry.timestamp > entry.ttl) {
+      this.cache.delete(key);
+      return false;
+    }
+
+    return true;
   }
 
   clear(): void {
     this.cache.clear();
   }
 
-  clearExpired(): void {
-    const now = Date.now();
-    for (const [key, data] of this.cache.entries()) {
-      if (now - data.timestamp > data.ttl) {
-        this.cache.delete(key);
-      }
-    }
+  getRoleKey(userId: string): string {
+    return `role:${userId}`;
   }
 
-  // Cache key generators
   getUserKey(userId: string): string {
     return `user:${userId}`;
   }
 
-  getRoleKey(userId: string): string {
-    return `role:${userId}`;
+  // Vérifie si les données sont encore fraîches (moins de 2 minutes)
+  isFresh(key: string): boolean {
+    const entry = this.cache.get(key);
+    if (!entry) return false;
+
+    const now = Date.now();
+    const age = now - entry.timestamp;
+    return age < 2 * 60 * 1000; // 2 minutes
   }
 }
 
 export const authCache = new AuthCache();
-
-// Clean up expired entries every 10 minutes
-setInterval(() => {
-  authCache.clearExpired();
-}, 10 * 60 * 1000);
-

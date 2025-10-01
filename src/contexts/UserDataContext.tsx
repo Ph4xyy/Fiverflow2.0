@@ -52,7 +52,21 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     let refreshTimeout: number | undefined;
     const onRefreshed = () => {
       if (refreshTimeout) clearTimeout(refreshTimeout);
-      refreshTimeout = window.setTimeout(fetchUserRole, 100);
+      // Délai plus long pour éviter les rechargements trop fréquents
+      refreshTimeout = window.setTimeout(() => {
+        // Ne recharger que si l'utilisateur a vraiment changé
+        if (user?.id) {
+          // Vérifier le cache avant de recharger
+          const cachedRole = sessionStorage.getItem('role');
+          if (!cachedRole) {
+            fetchUserRole();
+          } else {
+            // Utiliser le cache et ne pas afficher de loading
+            setRole(cachedRole === 'admin' ? 'admin' : 'user');
+            setLoading(false);
+          }
+        }
+      }, 2000); // Délai encore plus long
     };
     
     window.addEventListener('ff:session:refreshed', onRefreshed as any);

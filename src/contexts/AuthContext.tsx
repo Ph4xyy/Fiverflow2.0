@@ -102,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!isSupabaseConfigured || !supabase) return;
         try {
           const { data: { session: s } } = await supabase.auth.getSession();
+          // Ne pas déclencher de loading pour les refreshs silencieux
           setUserSafe(s?.user ?? null);
           await deriveAndCacheRole(s ?? null);
           try {

@@ -51,6 +51,26 @@ export const useOptimizedAuth = (): OptimizedAuthState => {
       setIsInitialized(true);
     }
   }, [authLoading, isInitialized]);
+
+  // Écouter les événements de changement d'onglet pour éviter les rechargements inutiles
+  useEffect(() => {
+    const handleTabRefocus = (event: CustomEvent) => {
+      if (event.detail?.shouldRefresh && user?.id) {
+        // Recharger seulement si nécessaire et sans afficher de loading
+        const cachedRole = authCache.get(authCache.getRoleKey(user.id));
+        if (!cachedRole || !authCache.isFresh(authCache.getRoleKey(user.id))) {
+          // Recharger silencieusement en arrière-plan
+          // Le UserDataContext se chargera automatiquement
+          window.dispatchEvent(new CustomEvent('ff:session:refreshed'));
+        }
+      }
+    };
+
+    window.addEventListener('ff:tab:refocus', handleTabRefocus as any);
+    return () => {
+      window.removeEventListener('ff:tab:refocus', handleTabRefocus as any);
+    };
+  }, [user?.id]);
   
   // Get role from multiple sources with fallback and cache
   const roleFromSessionCache = sessionStorage.getItem('role');
