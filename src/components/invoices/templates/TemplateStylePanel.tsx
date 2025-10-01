@@ -53,6 +53,33 @@ const TemplateStylePanel: React.FC<Props> = ({ value, onChange }) => {
         />
       </Field>
 
+      <div className="rounded-md p-3 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+        <div className="text-xs mb-2 text-gray-600 dark:text-gray-300">Thèmes rapides</div>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { name: 'Bleu', primary: '#2563eb', secondary: '#111827' },
+            { name: 'Émeraude', primary: '#10b981', secondary: '#064e3b' },
+            { name: 'Violet', primary: '#7c3aed', secondary: '#2e1065' },
+            { name: 'Orange', primary: '#f97316', secondary: '#7c2d12' },
+            { name: 'Gris', primary: '#6b7280', secondary: '#111827' },
+          ].map((t) => (
+            <button
+              key={t.name}
+              type="button"
+              onClick={() => onChange({ ...value, style: { ...s, primaryColor: t.primary, secondaryColor: t.secondary } })}
+              className="px-2 py-1 rounded border border-gray-200 dark:border-slate-700 text-xs"
+              title={`Appliquer le thème ${t.name}`}
+              style={{
+                background: t.primary,
+                color: '#fff',
+              }}
+            >
+              {t.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <Field label="Police">
         <select
           value={s.fontFamily}

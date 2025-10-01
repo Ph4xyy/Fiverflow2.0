@@ -102,21 +102,20 @@ export async function renderInvoiceWithTemplateToPdf(
     doc.setFont(schema.style.fontFamily || "helvetica", "normal");
     if (schema.style.logoUrl) {
       try {
-        // Supports data URLs or same-origin URLs
-        // jsPDF addImage requires base64 or HTMLImageElement/canvas
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.src = String(schema.style.logoUrl);
-        // naive await image load via Promise
-        await new Promise<void>((resolve, reject) => {
+        await new Promise<void>((resolve) => {
           img.onload = () => resolve();
-          img.onerror = () => resolve(); // non bloquant
+          img.onerror = () => resolve();
         });
-        const logoW = Number(schema.style.logoWidth ?? 120);
-        const logoH = (logoW * 0.28) /* rough aspect ratio fallback */;
-        // jsPDF can accept HTMLImageElement directly in modern builds
-        // @ts-ignore
-        doc.addImage(img, 'PNG', margin, y - 10, logoW, logoH, undefined, 'FAST');
+        const natW = (img as any).naturalWidth || img.width || 1;
+        const natH = (img as any).naturalHeight || img.height || 1;
+        const targetW = Math.max(16, Number(schema.style.logoWidth ?? 120));
+        const ratio = natH / natW;
+        const targetH = Math.max(16, Math.round(targetW * ratio));
+        // @ts-ignore jsPDF can accept HTMLImageElement
+        doc.addImage(img, 'PNG', margin, y - targetH + 4, targetW, targetH, undefined, 'FAST');
       } catch {}
     }
     doc.text(String(data.company?.name || "Your Company"), margin, y);

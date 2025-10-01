@@ -36,13 +36,13 @@ const TemplateCanvas: React.FC<Props> = ({ value }) => {
             {/* LOGO (privé) */}
             {logoPath ? (
               <LogoDisplayPrivate
-                key={logoPath || "no-logo"}          // ✅ force le remount quand le path change
+                key={logoPath || "no-logo"}
                 path={logoPath}
-                className="h-10 w-auto object-contain"
+                className="h-12 w-auto object-contain"
                 alt="Logo société"
               />
             ) : (
-              <div className="h-10 w-10 rounded bg-gray-100 dark:bg-slate-800" />
+              <div className="h-12 w-12 rounded bg-gray-100 dark:bg-slate-800" />
             )}
 
             <div className="text-2xl font-semibold" style={{ color: secondary }}>
