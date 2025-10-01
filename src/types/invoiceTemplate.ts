@@ -11,11 +11,16 @@ export type TemplateStyle = {
   primaryColor: string;
   secondaryColor: string;
   fontFamily: string;
-  logoUrl?: string | null;
+  logoUrl?: string | null; // storage path or direct URL
+  logoPath?: string | null; // optional explicit storage path
   logoWidth?: number; // px
   pageSize?: "A4" | "LETTER";
   margin?: number; // px
   tableStripe?: boolean;
+  // Typography controls
+  titleSize?: number; // pt
+  bodySize?: number; // pt
+  tableHeaderSize?: number; // pt
 };
 
 export type TemplateSchema = {

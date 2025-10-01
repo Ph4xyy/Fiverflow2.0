@@ -8,6 +8,7 @@ import TemplateStylePanel from "@/components/invoices/templates/TemplateStylePan
 import TemplateCanvas from "@/components/invoices/templates/TemplateCanvas";
 import LogoUploader from "@/components/invoices/templates/LogoUploader";
 import { renderInvoiceWithTemplateToPdf } from "@/utils/invoiceTemplate";
+import { getFileUrl } from "@/lib/storage";
 import toast from "react-hot-toast";
 
 const sampleData = {
@@ -113,14 +114,22 @@ const InvoiceTemplateEditorPage: React.FC = () => {
           <div className="p-4 border-b border-gray-200 dark:border-slate-700">
             <LogoUploader
               value={schema.style.logoUrl || null}
-              onChange={async (url: string | null) => {
-                const next: TemplateSchema = { ...schema!, style: { ...schema!.style, logoUrl: url || undefined } };
-                setSchema(next);
+              onChange={async (path: string | null) => {
                 try {
+                  const publicUrl = path ? await getFileUrl(path) : null;
+                  const next: TemplateSchema = {
+                    ...schema!,
+                    style: {
+                      ...schema!.style,
+                      logoUrl: publicUrl || undefined,
+                      logoPath: path || undefined,
+                    },
+                  };
+                  setSchema(next);
                   await update(tpl.id, { schema: next });
                   toast.success("Logo enregistré dans le template");
                 } catch (e: any) {
-                  console.error("[TemplateEditor] save logoUrl", e);
+                  console.error("[TemplateEditor] save logo", e);
                   toast.error("Échec de la sauvegarde du logo");
                 }
               }}

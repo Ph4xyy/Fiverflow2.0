@@ -91,7 +91,7 @@ export async function renderInvoiceWithTemplateToPdf(
 
   // Header
   if (schema.sections.header?.visible !== false) {
-    doc.setFontSize(20);
+    doc.setFontSize(schema.style.titleSize ?? 20);
     doc.text(schema.labels?.invoiceTitle || "INVOICE", margin, y);
     y += 26;
   }
@@ -101,7 +101,23 @@ export async function renderInvoiceWithTemplateToPdf(
     doc.setFontSize(11);
     doc.setFont(schema.style.fontFamily || "helvetica", "normal");
     if (schema.style.logoUrl) {
-      // hint: jsPDF can't load remote images cross-origin reliably; leave to caller if needed
+      try {
+        // Supports data URLs or same-origin URLs
+        // jsPDF addImage requires base64 or HTMLImageElement/canvas
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = String(schema.style.logoUrl);
+        // naive await image load via Promise
+        await new Promise<void>((resolve, reject) => {
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // non bloquant
+        });
+        const logoW = Number(schema.style.logoWidth ?? 120);
+        const logoH = (logoW * 0.28) /* rough aspect ratio fallback */;
+        // jsPDF can accept HTMLImageElement directly in modern builds
+        // @ts-ignore
+        doc.addImage(img, 'PNG', margin, y - 10, logoW, logoH, undefined, 'FAST');
+      } catch {}
     }
     doc.text(String(data.company?.name || "Your Company"), margin, y);
   }
@@ -117,6 +133,7 @@ export async function renderInvoiceWithTemplateToPdf(
 
   // Meta
   doc.setFont(schema.style.fontFamily || "helvetica", "normal");
+  doc.setFontSize(schema.style.bodySize ?? 11);
   doc.text(
     `${schema.labels?.invoiceNumber || "Invoice #"}: ${data.invoice.number || "—"}`,
     margin,
@@ -149,7 +166,7 @@ export async function renderInvoiceWithTemplateToPdf(
     const colQty = 340;
     const colUP = 400;
     const colTotal = 480;
-    doc.setFontSize(10);
+    doc.setFontSize(schema.style.tableHeaderSize ?? 10);
     doc.text(schema.labels?.items || "Description", colDesc, y);
     doc.text(schema.labels?.qty || "Qty", colQty, y);
     doc.text(schema.labels?.unitPrice || "Unit", colUP, y);
@@ -158,6 +175,7 @@ export async function renderInvoiceWithTemplateToPdf(
     doc.line(margin, y, 548, y);
     y += 16;
     doc.setFont(schema.style.fontFamily || "helvetica", "normal");
+    doc.setFontSize(schema.style.bodySize ?? 11);
 
     (data.invoice.items || []).forEach((it, i) => {
       if (y > 720) {
@@ -192,6 +210,7 @@ export async function renderInvoiceWithTemplateToPdf(
     const rightLabelX = 400;
     const rightValueX = 548;
     const currency = data.invoice.currency || "USD";
+    doc.setFontSize(schema.style.bodySize ?? 11);
     doc.text((schema.labels?.subtotal || "Subtotal") + ":", rightLabelX, y);
     doc.text(`${fmt(data.invoice.subtotal)} ${currency}`, rightValueX, y, { align: "right" });
     y += 16;

@@ -9,7 +9,7 @@ type Props = {
 
 const TemplateCanvas: React.FC<Props> = ({ value }) => {
   // Plusieurs emplacements possibles selon ton schéma
-  const logoPath =
+  const logoPath = value?.style?.logoUrl ||
     (value as any)?.assets?.logo_path ||
     (value as any)?.logo_path ||
     (value as any)?.brand?.logo_path ||
