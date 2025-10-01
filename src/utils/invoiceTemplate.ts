@@ -23,7 +23,7 @@ type RenderData = {
 export function defaultSchema(): TemplateSchema {
   return {
     style: {
-      primaryColor: "#2563eb",
+      primaryColor: "#6b7280", // neutral gray by default (no blue)
       secondaryColor: "#111827",
       fontFamily: "helvetica",
       logoUrl: null,

@@ -46,6 +46,17 @@ const InvoiceTemplateEditorPage: React.FC = () => {
     if (tpl) {
       setName(tpl.name);
       setSchema(tpl.schema);
+      // Normalize old default blue to neutral on open
+      const current = tpl.schema?.style?.primaryColor;
+      if (current && current.toLowerCase() === '#2563eb') {
+        const next: TemplateSchema = {
+          ...tpl.schema,
+          style: { ...tpl.schema.style, primaryColor: '#6b7280' },
+        };
+        setSchema(next);
+        // best effort persist (no await in effect)
+        update(tpl.id, { schema: next }).catch(() => {});
+      }
     }
   }, [tpl]);
 
