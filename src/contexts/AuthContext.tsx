@@ -63,6 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     mountedRef.current = true;
 
     let unsubscribe: (() => void) | undefined;
+    let heartbeatTimer: number | undefined;
 
     const init = async () => {
       if (!isSupabaseConfigured || !supabase) {
@@ -90,6 +91,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch {
           // already unsubscribed / hot-reload safety
         }
+      };
+
+      // Heartbeat: refresh session periodically and on focus/visibility
+      const HEARTBEAT_MS = 15 * 60 * 1000; // 15 minutes
+      const safeRefresh = async () => {
+        if (!isSupabaseConfigured || !supabase) return;
+        try {
+          const { data: { session: s } } = await supabase.auth.getSession();
+          setUserSafe(s?.user ?? null);
+          await deriveAndCacheRole(s ?? null);
+        } catch (e) {
+          // network errors are tolerated; next tick will retry
+          // console.debug('[Auth] heartbeat refresh failed', e);
+        }
+      };
+
+      // Setup periodic refresh
+      heartbeatTimer = window.setInterval(safeRefresh, HEARTBEAT_MS) as unknown as number;
+
+      // Resync on tab focus/visibility
+      const onFocus = () => safeRefresh();
+      const onVisible = () => { if (document.visibilityState === 'visible') safeRefresh(); };
+      window.addEventListener('focus', onFocus);
+      document.addEventListener('visibilitychange', onVisible);
+
+      // Cleanup listeners
+      const cleanupExtra = () => {
+        if (heartbeatTimer) window.clearInterval(heartbeatTimer);
+        window.removeEventListener('focus', onFocus);
+        document.removeEventListener('visibilitychange', onVisible);
+      };
+
+      // attach to unsubscribe chain
+      const oldUnsub = unsubscribe;
+      unsubscribe = () => {
+        cleanupExtra();
+        if (oldUnsub) oldUnsub();
       };
     };
 

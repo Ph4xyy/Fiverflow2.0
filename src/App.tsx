@@ -63,7 +63,7 @@ function App() {
       <UserDataProvider>
         <Router>
           <AnalyticsWrapper>
-            <Suspense fallback={<div style={{ padding: 16 }}>Loading…</div>}>
+            <Suspense fallback={<div className="p-6"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-slate-500"></div></div>}>
               <Routes>
               {/* Pages publiques */}
               <Route path="/" element={<LandingPage />} />
