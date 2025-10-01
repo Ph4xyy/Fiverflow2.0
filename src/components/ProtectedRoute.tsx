@@ -39,7 +39,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
 
   // Ne pas afficher le loading si l'onglet n'est pas visible (évite les flashs)
   if ((loading || roleLoading) && isTabVisible) {
-    console.log('🔄 ProtectedRoute: Loading state - auth:', loading, 'role:', roleLoading);
+    console.log('🔄 ProtectedRoute: Loading state - auth:', loading, 'role:', roleLoading, 'user:', !!user, 'role value:', role);
+    console.log('🔄 ProtectedRoute: Tab visible:', isTabVisible, 'Document visibility:', document.visibilityState);
     return (
       <OptimizedLoadingScreen 
         message="Checking session..." 

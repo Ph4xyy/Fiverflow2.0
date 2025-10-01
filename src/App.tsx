@@ -8,6 +8,8 @@ import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
 import { GlobalLoadingManager } from './components/GlobalLoadingManager';
+import LoadingDebugger from './components/LoadingDebugger';
+import DatabaseTest from './components/DatabaseTest';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
 
 // Core pages
@@ -125,6 +127,8 @@ function App() {
               </Routes>
               </Suspense>
               </GlobalLoadingManager>
+              <LoadingDebugger />
+              <DatabaseTest />
             </AnalyticsWrapper>
           </Router>
         </UserDataProvider>

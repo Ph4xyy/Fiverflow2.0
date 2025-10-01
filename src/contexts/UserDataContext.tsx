@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { debugAuth } from '../utils/debugAuth';
 
 interface UserDataContextType {
   role: 'admin' | 'user';
@@ -17,29 +18,32 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [loading, setLoading] = useState(true);
 
   const fetchUserRole = async () => {
+    console.log('🔄 fetchUserRole called for user:', user?.id);
+    
     if (!user || !isSupabaseConfigured) {
+      console.log('❌ No user or Supabase not configured');
       setRole('user');
       setLoading(false);
       return;
     }
 
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('❌ Error fetching user role:', error);
+      console.log('🌐 Making database query for role...');
+      const result = await debugAuth.testUserRoleQuery(user.id);
+      
+      if (!result.success) {
+        console.error('❌ Error fetching user role:', result.error);
         setRole('user');
       } else {
-        setRole(data?.role === 'admin' ? 'admin' : 'user');
+        const role = result.data?.role === 'admin' ? 'admin' : 'user';
+        console.log('✅ Role fetched:', role);
+        setRole(role);
       }
     } catch (err) {
       console.error('💥 Unexpected error while fetching role:', err);
       setRole('user');
     } finally {
+      console.log('🏁 fetchUserRole completed, setting loading to false');
       setLoading(false);
     }
   };
