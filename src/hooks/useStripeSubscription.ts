@@ -156,6 +156,9 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
 
   useEffect(() => {
     fetchSubscription();
+    const onRefreshed = () => fetchSubscription();
+    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
   }, [fetchSubscription]);
 
   return {
