@@ -62,7 +62,19 @@ export const DatabaseTest: React.FC = () => {
     };
     setTestResults([...results]);
 
-    // Test 4: Fetch clients (RLS test)
+    // Test 4: RLS Policies test
+    results.push({ name: 'RLS Policies Test', status: 'loading', message: 'Testing...' });
+    setTestResults([...results]);
+    const rlsTest = await debugAuth.testRLSPolicies(user.id);
+    results[results.length - 1] = {
+      name: 'RLS Policies Test',
+      status: rlsTest.success ? 'success' : 'error',
+      message: rlsTest.success ? 'RLS policies working correctly' : `Error: ${rlsTest.error}`,
+      duration: rlsTest.duration
+    };
+    setTestResults([...results]);
+
+    // Test 5: Fetch clients (RLS test)
     results.push({ name: 'Fetch Clients (RLS)', status: 'loading', message: 'Fetching...' });
     setTestResults([...results]);
     const clientsStartTime = Date.now();
