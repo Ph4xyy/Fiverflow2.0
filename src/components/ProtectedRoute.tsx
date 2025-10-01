@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useUserData } from '../contexts/UserDataContext';
+import { useOptimizedAuth } from '../hooks/useOptimizedAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,31 +9,29 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, role, roleLoading } = useOptimizedAuth();
   const location = useLocation();
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [, setRefreshKey] = useState(0);
 
-  // Try to get role from UserDataContext if present; otherwise fallback to cached/session values
-  const userData = useUserData();
-  const roleFromCache =
-    user?.app_metadata?.role ||
-    user?.user_metadata?.role ||
-    sessionStorage.getItem('role');
+  const effectiveRole = role;
 
-  const effectiveRole = (userData?.role ?? roleFromCache ?? null) as string | null;
-  const roleLoading = Boolean(userData?.loading);
-
-  // Listen for session refresh to re-evaluate access
+  // Listen for session refresh to re-evaluate access (debounced)
   useEffect(() => {
+    let refreshTimeout: number | undefined;
     const onRefreshed = () => {
       console.log('🔄 ProtectedRoute: Session refreshed, re-evaluating access...');
-      // Force re-evaluation with a small delay to ensure contexts are updated
-      setTimeout(() => {
+      // Debounced re-evaluation to avoid multiple rapid updates
+      if (refreshTimeout) clearTimeout(refreshTimeout);
+      refreshTimeout = window.setTimeout(() => {
         setRefreshKey(prev => prev + 1);
-      }, 100);
+      }, 150);
     };
+    
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
-    return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+    return () => {
+      if (refreshTimeout) clearTimeout(refreshTimeout);
+      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+    };
   }, []);
 
   if (loading || roleLoading) {

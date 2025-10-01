@@ -47,10 +47,20 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     setLoading(true);
     fetchUserRole();
-    const onRefreshed = () => fetchUserRole();
+    
+    // Debounced refresh to avoid multiple rapid calls
+    let refreshTimeout: number | undefined;
+    const onRefreshed = () => {
+      if (refreshTimeout) clearTimeout(refreshTimeout);
+      refreshTimeout = window.setTimeout(fetchUserRole, 100);
+    };
+    
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
-    return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-  }, [user?.id]); // relancer si l’id change + sur resync
+    return () => {
+      if (refreshTimeout) clearTimeout(refreshTimeout);
+      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+    };
+  }, [user?.id]); // relancer si l'id change + sur resync
 
   return (
     <UserDataContext.Provider value={{ role, loading, refreshUserRole: fetchUserRole }}>

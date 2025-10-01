@@ -98,10 +98,18 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
     };
 
     fetchRole();
-    const onRefreshed = () => fetchRole();
+    
+    // Debounced refresh to avoid multiple rapid calls
+    let refreshTimeout: number | undefined;
+    const onRefreshed = () => {
+      if (refreshTimeout) clearTimeout(refreshTimeout);
+      refreshTimeout = window.setTimeout(fetchRole, 200);
+    };
+    
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
     return () => {
       isMounted = false;
+      if (refreshTimeout) clearTimeout(refreshTimeout);
       window.removeEventListener('ff:session:refreshed', onRefreshed as any);
     };
   }, [user, ctxRole]);

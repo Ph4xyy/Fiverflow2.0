@@ -116,15 +116,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Setup periodic refresh
       heartbeatTimer = window.setInterval(safeRefresh, HEARTBEAT_MS) as unknown as number;
 
-      // Resync on tab focus/visibility
-      const onFocus = () => safeRefresh();
-      const onVisible = () => { if (document.visibilityState === 'visible') safeRefresh(); };
+      // Resync on tab focus/visibility (debounced to avoid multiple calls)
+      let refreshTimeout: number | undefined;
+      const debouncedRefresh = () => {
+        if (refreshTimeout) clearTimeout(refreshTimeout);
+        refreshTimeout = window.setTimeout(safeRefresh, 500);
+      };
+      
+      const onFocus = () => debouncedRefresh();
+      const onVisible = () => { if (document.visibilityState === 'visible') debouncedRefresh(); };
       window.addEventListener('focus', onFocus);
       document.addEventListener('visibilitychange', onVisible);
 
       // Cleanup listeners
       const cleanupExtra = () => {
         if (heartbeatTimer) window.clearInterval(heartbeatTimer);
+        if (refreshTimeout) clearTimeout(refreshTimeout);
         window.removeEventListener('focus', onFocus);
         document.removeEventListener('visibilitychange', onVisible);
       };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
+// import { useLanguage } from '../contexts/LanguageContext';
 
 // Import logo
 import LogoImage from '../assets/LogoFiverFlow.png';
@@ -10,6 +10,7 @@ import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import NotificationsDropdown from './NotificationsDropdown';
 import CentralizedSearchBar from './CentralizedSearchBar';
 import LanguageSwitcher from './LanguageSwitcher';
+import AuthDebugPanel from './AuthDebugPanel';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 import { 
@@ -82,7 +83,6 @@ class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, 
 }
 
 const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
-  const { t } = useLanguage();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
 
@@ -94,34 +94,41 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const { signOut, user } = useAuth();
   const { restrictions, checkAccess } = usePlanRestrictions();
 
-  const SAFE_MODE_DISABLE_NOTIFICATIONS = false;
-
   useEffect(() => {
-    const checkUserRole = async () => {
-      if (!user || !isSupabaseConfigured || !supabase) {
-        setUserRole('user');
-        return;
-      }
-      try {
-        const { data, error } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', user.id)
-          .maybeSingle();
+    // Use cached role first, then fallback to user metadata
+    if (!user) {
+      setUserRole('user');
+      return;
+    }
 
-        if (error) {
-          console.error('Error fetching user role:', error);
-          setUserRole('user');
-        } else {
-          setUserRole(data?.role || 'user');
+    // Try to get role from cache or metadata first
+    const cachedRole = sessionStorage.getItem('role');
+    const metaRole = user.app_metadata?.role || user.user_metadata?.role;
+    const effectiveRole = metaRole || cachedRole || 'user';
+    
+    setUserRole(effectiveRole);
+    
+    // Only fetch from DB if no role found in cache/metadata
+    if (!cachedRole && !metaRole && isSupabaseConfigured && supabase) {
+      const fetchRole = async () => {
+        try {
+          const { data, error } = await supabase!
+            .from('users')
+            .select('role')
+            .eq('id', user.id)
+            .maybeSingle();
+
+          if (!error && data?.role) {
+            setUserRole(data.role);
+            sessionStorage.setItem('role', data.role);
+          }
+        } catch (error) {
+          console.error('Error checking user role:', error);
         }
-      } catch (error) {
-        console.error('Error checking user role:', error);
-        setUserRole('user');
-      }
-    };
-
-    checkUserRole();
+      };
+      
+      fetchRole();
+    }
   }, [user]);
 
   const isAdmin = useIsAdminFromEverywhere(user, userRole);
@@ -156,8 +163,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     },
   ];
 
-  // Section 2: AI (vide pour l’instant)
-  const aiItems: any[] = [];
+  // Section 2: AI (vide pour l'instant)
+  // const aiItems: any[] = [];
 
   // Section 3: Workspace
   const workspaceItems = [
@@ -549,6 +556,9 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </div>
       )}
+      
+      {/* Debug Panel (development only) */}
+      <AuthDebugPanel />
     </div>
   );
 };

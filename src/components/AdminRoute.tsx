@@ -1,6 +1,6 @@
 import React from 'react'
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
+import { useOptimizedAuth } from '../hooks/useOptimizedAuth'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 import { useState, useEffect } from 'react'
 
@@ -9,13 +9,21 @@ interface AdminRouteProps {
 }
 
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, role: contextRole } = useOptimizedAuth()
   const [userRole, setUserRole] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const checkAdminRole = async () => {
       console.log('🔐 Checking admin role...')
+      
+      // Use context role first if available
+      if (contextRole) {
+        console.log('✅ Using context role:', contextRole)
+        setUserRole(contextRole)
+        setLoading(false)
+        return
+      }
       
       // If Supabase is not configured, deny access
       if (!isSupabaseConfigured || !supabase) {
@@ -59,15 +67,21 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
       checkAdminRole()
     }
 
+    // Debounced refresh to avoid multiple rapid calls
+    let refreshTimeout: number | undefined;
     const onRefreshed = () => {
-      // Force re-evaluation with a small delay to ensure contexts are updated
-      setTimeout(() => {
+      if (refreshTimeout) clearTimeout(refreshTimeout);
+      refreshTimeout = window.setTimeout(() => {
         if (!authLoading) checkAdminRole();
-      }, 100);
+      }, 300);
     };
+    
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
-    return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-  }, [user, authLoading])
+    return () => {
+      if (refreshTimeout) clearTimeout(refreshTimeout);
+      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+    };
+  }, [user, authLoading, contextRole])
 
   // Show loading while checking auth and role
   if (authLoading || loading) {

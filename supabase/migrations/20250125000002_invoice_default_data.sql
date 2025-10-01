@@ -486,3 +486,5 @@ GRANT EXECUTE ON FUNCTION mark_invoice_paid(UUID, UUID, DECIMAL, DATE, TEXT, TEX
 GRANT EXECUTE ON FUNCTION check_overdue_invoices() TO authenticated;
 
 
+
+
