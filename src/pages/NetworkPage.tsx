@@ -136,6 +136,15 @@ export default function NetworkPage() {
     if (user) fetchReferralData();
   }, [user]);
 
+  // Listen for session refresh to refetch data
+  useEffect(() => {
+    const onRefreshed = () => {
+      if (user) fetchReferralData();
+    };
+    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+  }, [user, fetchReferralData]);
+
   const fetchReferralData = async () => {
     // If Supabase is not configured, use mock data
     if (!isSupabaseConfigured || !supabase) {

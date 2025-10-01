@@ -106,6 +106,17 @@ const DashboardPage = () => {
     }
   }, [fetchOrders, fetchTasks]);
 
+  // Listen for session refresh to refetch data
+  useEffect(() => {
+    const onRefreshed = () => {
+      hasFetchedOrders.current = false;
+      fetchOrders();
+      fetchTasks();
+    };
+    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+  }, [fetchOrders, fetchTasks]);
+
   // 👉 Récupérer le nom depuis la table users
   useEffect(() => {
     const fetchUserName = async () => {

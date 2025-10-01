@@ -189,6 +189,16 @@ const CalendarPage: React.FC = () => {
     }
   }, [fetchAll]);
 
+  // Listen for session refresh to refetch data
+  useEffect(() => {
+    const onRefreshed = () => {
+      hasFetchedRef.current = false;
+      fetchAll();
+    };
+    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+  }, [fetchAll]);
+
   /* ---------------- Build events ---------------- */
   const filteredOrders = useMemo(() => {
     if (!showOrders) return [];

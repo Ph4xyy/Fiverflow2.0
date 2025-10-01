@@ -304,6 +304,15 @@ const TodoListPage: React.FC = () => {
     loadAll();
   }, [loadAll]);
 
+  // Listen for session refresh to refetch data
+  useEffect(() => {
+    const onRefreshed = () => {
+      loadAll();
+    };
+    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+  }, [loadAll]);
+
   /* ----------- CALENDAR UPSERT ----------- */
   const upsertCalendar = useCallback(async (task: TaskRow) => {
     if (!user || !task.due_date || !supabase) return;

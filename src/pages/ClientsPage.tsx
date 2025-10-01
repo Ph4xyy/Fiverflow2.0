@@ -189,6 +189,15 @@ const ClientsPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, debouncedSearch, status, platform, country, page]);
 
+  // Listen for session refresh to refetch data
+  useEffect(() => {
+    const onRefreshed = () => {
+      fetchClients();
+    };
+    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+  }, [fetchClients]);
+
   const openCreate = () => {
     setEditingClient(null);
     setIsModalOpen(true);

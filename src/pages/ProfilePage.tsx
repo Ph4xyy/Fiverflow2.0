@@ -159,6 +159,17 @@ const ProfilePage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // Listen for session refresh to refetch data
+  useEffect(() => {
+    const onRefreshed = () => {
+      fetchProfile();
+      fetchPreferences();
+      fetchSmtpSettings();
+    };
+    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+  }, [fetchProfile, fetchPreferences, fetchSmtpSettings]);
+
   /* ---------- Chargement profil (d’origine) ---------- */
   const fetchProfile = async () => {
     if (!isSupabaseConfigured || !supabase) {
