@@ -83,6 +83,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserSafe(nextSession?.user ?? null);
         await deriveAndCacheRole(nextSession);
         setLoadingSafe(false);
+        try {
+          window.dispatchEvent(new CustomEvent('ff:session:refreshed', { detail: { userId: nextSession?.user?.id || null } }));
+        } catch {}
       });
 
       unsubscribe = () => {
