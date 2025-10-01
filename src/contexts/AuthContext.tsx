@@ -114,18 +114,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       };
 
-      // Setup periodic refresh
-      heartbeatTimer = window.setInterval(safeRefresh, HEARTBEAT_MS) as unknown as number;
+      // Setup periodic refresh (TEMPORAIREMENT DÉSACTIVÉ pour debug)
+      console.log('🔄 Periodic refresh DISABLED for debugging');
+      // heartbeatTimer = window.setInterval(safeRefresh, HEARTBEAT_MS) as unknown as number;
 
-      // Resync on tab focus/visibility (debounced to avoid multiple calls)
+      // Resync on tab focus/visibility (TEMPORAIREMENT DÉSACTIVÉ pour debug)
       let refreshTimeout: number | undefined;
       const debouncedRefresh = () => {
-        if (refreshTimeout) clearTimeout(refreshTimeout);
-        refreshTimeout = window.setTimeout(safeRefresh, 500);
+        console.log('🔄 Debounced refresh triggered - SKIPPED for debugging');
+        // Temporairement désactivé pour debug
+        // if (refreshTimeout) clearTimeout(refreshTimeout);
+        // refreshTimeout = window.setTimeout(safeRefresh, 500);
       };
       
-      const onFocus = () => debouncedRefresh();
-      const onVisible = () => { if (document.visibilityState === 'visible') debouncedRefresh(); };
+      const onFocus = () => {
+        console.log('🔄 Focus event - SKIPPED for debugging');
+        // debouncedRefresh();
+      };
+      const onVisible = () => {
+        console.log('🔄 Visibility change - SKIPPED for debugging');
+        // if (document.visibilityState === 'visible') debouncedRefresh();
+      };
       window.addEventListener('focus', onFocus);
       document.addEventListener('visibilitychange', onVisible);
 
