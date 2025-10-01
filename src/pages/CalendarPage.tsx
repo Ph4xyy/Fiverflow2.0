@@ -101,8 +101,8 @@ const taskStyleFromPriority = (p: TaskPriority, fallbackHex?: string | null) => 
 /* Util */
 const toDateOnly = (d: Date | null): string | null => {
   if (!d) return null;
-  const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-  return z.toISOString().slice(0, 10);
+  const localDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return localDate.toISOString().slice(0, 10);
 };
 
 /* ---------------- Page ---------------- */
