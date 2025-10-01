@@ -16,6 +16,9 @@ import DatabaseTest from './components/DatabaseTest';
 import DebugShortcuts from './components/DebugShortcuts';
 import KeyboardTest from './components/KeyboardTest';
 import SimpleTest from './components/SimpleTest';
+import DiagnosticPanel from './components/DiagnosticPanel';
+import EnvironmentDiagnostic from './components/EnvironmentDiagnostic';
+import EmergencyFallback from './components/EmergencyFallback';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
 
 // Core pages
@@ -142,10 +145,13 @@ function App() {
                      <DebugShortcuts />
                      <KeyboardTest />
                      <SimpleTest />
+                     <DiagnosticPanel />
+                     <EnvironmentDiagnostic />
               </UserDataProvider>
             </LoadingProvider>
           </AnalyticsWrapper>
         </Router>
+        <EmergencyFallback />
       </AuthProvider>
     </AppErrorBoundary>
   );

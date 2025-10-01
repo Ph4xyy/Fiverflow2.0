@@ -3,21 +3,27 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 /**
- * Composant de redirection racine simplifié qui :
- * - Redirige vers /dashboard si l'utilisateur est connecté
- * - Redirige vers /login si l'utilisateur n'est pas connecté
- * - Affiche un loader simple avec timeout de sécurité
+ * Composant de redirection racine avec diagnostic amélioré
  */
 const RootRedirect: React.FC = () => {
   const { user, loading } = useAuth();
   const [timeoutReached, setTimeoutReached] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>('');
+
+  // Debug info pour diagnostiquer les problèmes
+  useEffect(() => {
+    const info = `User: ${user ? '✅' : '❌'} | Loading: ${loading ? '⏳' : '✅'} | Timeout: ${timeoutReached ? '🚨' : '⏱️'}`;
+    setDebugInfo(info);
+    console.log('🔍 RootRedirect Debug:', info);
+  }, [user, loading, timeoutReached]);
 
   // Timeout de sécurité pour éviter un écran bleu infini
   useEffect(() => {
     const timeout = setTimeout(() => {
       console.warn('⚠️ RootRedirect timeout reached - forcing redirect');
+      console.warn('🔍 Debug info at timeout:', { user: !!user, loading, timestamp: Date.now() });
       setTimeoutReached(true);
-    }, 2000); // 2 secondes max
+    }, 3000); // 3 secondes max
 
     return () => clearTimeout(timeout);
   }, []);
@@ -26,10 +32,11 @@ const RootRedirect: React.FC = () => {
   if (timeoutReached || !loading) {
     const target = user ? '/dashboard' : '/login';
     console.log('🚀 RootRedirect: Redirecting to', target, '| Reason:', timeoutReached ? 'timeout' : 'auth-ready');
+    console.log('🔍 Final state:', { user: user?.id, loading, timeoutReached, target });
     return <Navigate to={target} replace />;
   }
 
-  // Écran de chargement simple
+  // Écran de chargement avec debug
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900">
       <div className="flex flex-col items-center space-y-4">
@@ -37,6 +44,12 @@ const RootRedirect: React.FC = () => {
         <p className="text-slate-400 text-sm">Chargement...</p>
         <div className="text-xs text-slate-600 text-center max-w-xs">
           Redirection automatique en cours...
+        </div>
+        <div className="text-xs text-slate-500 text-center">
+          {debugInfo}
+        </div>
+        <div className="text-xs text-slate-500 text-center">
+          Environment: {import.meta.env.MODE}
         </div>
       </div>
     </div>
