@@ -35,10 +35,11 @@ export const LoadingDebugger: React.FC = () => {
     };
   }, []);
 
-  // Toggle visibility with Ctrl+Alt+L (Loading debugger)
+  // Toggle visibility with Ctrl+Shift+L (Loading debugger)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.altKey && e.key === 'L') {
+      if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+        e.preventDefault();
         setIsVisible(prev => !prev);
       }
     };

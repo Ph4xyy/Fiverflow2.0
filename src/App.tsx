@@ -11,6 +11,7 @@ import { GlobalLoadingManager } from './components/GlobalLoadingManager';
 import LoadingDebugger from './components/LoadingDebugger';
 import DatabaseTest from './components/DatabaseTest';
 import DebugShortcuts from './components/DebugShortcuts';
+import KeyboardTest from './components/KeyboardTest';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
 
 // Core pages
@@ -131,6 +132,7 @@ function App() {
               <LoadingDebugger />
               <DatabaseTest />
               <DebugShortcuts />
+              <KeyboardTest />
             </AnalyticsWrapper>
           </Router>
         </UserDataProvider>

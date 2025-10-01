@@ -7,9 +7,10 @@ export const DebugShortcuts: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Toggle visibility with Ctrl+Alt+H (Help)
+    // Toggle visibility with Ctrl+Shift+H (Help)
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.altKey && e.key === 'H') {
+      if (e.ctrlKey && e.shiftKey && e.key === 'H') {
+        e.preventDefault();
         setIsVisible(prev => !prev);
       }
     };
@@ -35,17 +36,17 @@ export const DebugShortcuts: React.FC = () => {
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <span>Loading Debugger:</span>
-          <kbd className="px-2 py-1 bg-gray-700 rounded text-xs">Ctrl + Alt + L</kbd>
+          <kbd className="px-2 py-1 bg-gray-700 rounded text-xs">Ctrl + Shift + L</kbd>
         </div>
         
         <div className="flex justify-between items-center">
           <span>Database Test:</span>
-          <kbd className="px-2 py-1 bg-gray-700 rounded text-xs">Ctrl + Alt + D</kbd>
+          <kbd className="px-2 py-1 bg-gray-700 rounded text-xs">Ctrl + Shift + D</kbd>
         </div>
         
         <div className="flex justify-between items-center">
           <span>This Help:</span>
-          <kbd className="px-2 py-1 bg-gray-700 rounded text-xs">Ctrl + Alt + H</kbd>
+          <kbd className="px-2 py-1 bg-gray-700 rounded text-xs">Ctrl + Shift + H</kbd>
         </div>
       </div>
 
