@@ -1,5 +1,5 @@
 // src/contexts/UserDataContext.tsx
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { debugAuth } from '../utils/debugAuth';
@@ -17,7 +17,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [role, setRole] = useState<'admin' | 'user'>('user');
   const [loading, setLoading] = useState(true);
 
-  const fetchUserRole = async () => {
+  const fetchUserRole = useCallback(async () => {
     console.log('🔄 fetchUserRole called for user:', user?.id);
     
     if (!user || !isSupabaseConfigured) {
@@ -46,7 +46,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.log('🏁 fetchUserRole completed, setting loading to false');
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     console.log('🔄 UserDataContext useEffect triggered for user:', user?.id);
@@ -69,12 +69,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Only fetch if no cached role
     setLoading(true);
     fetchUserRole();
-    
-    // No event listeners - just fetch role when user changes
-    return () => {
-      console.log('🔄 UserDataContext: Cleanup triggered');
-    };
-  }, [user?.id]);
+  }, [user?.id, fetchUserRole]);
 
   return (
     <UserDataContext.Provider value={{ role, loading, refreshUserRole: fetchUserRole }}>

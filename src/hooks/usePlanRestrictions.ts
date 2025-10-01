@@ -99,17 +99,8 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
 
     fetchRole();
     
-    // Debounced refresh to avoid multiple rapid calls
-    let refreshTimeout: number | undefined;
-    const onRefreshed = () => {
-      if (refreshTimeout) clearTimeout(refreshTimeout);
-      refreshTimeout = window.setTimeout(fetchRole, 200);
-    };
-    
-    // Removed event listener to prevent infinite loop
     return () => {
       isMounted = false;
-      if (refreshTimeout) clearTimeout(refreshTimeout);
     };
   }, [user?.id, ctxRole]); // Only depend on user.id and ctxRole
 

@@ -1,7 +1,7 @@
 // src/hooks/useInvoices.ts
 import { useCallback, useEffect, useState } from "react";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { useAuth } from "@/contexts/AuthContext";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import { useAuth } from "../contexts/AuthContext";
 import toast from "react-hot-toast";
 
 export interface Invoice {
@@ -144,8 +144,7 @@ export function useInvoices() {
 
   useEffect(() => {
     fetchInvoices();
-    // Removed event listener to prevent infinite loop
-  }, [user?.id]); // Only depend on user.id, not the entire user object
+  }, [user?.id, fetchInvoices]); // Add fetchInvoices to dependencies
 
   const createInvoice = useCallback(async (data: CreateInvoiceData) => {
     if (!user) {

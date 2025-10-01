@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContext';
-import { Subscription, CreateSubscriptionData, UpdateSubscriptionData } from '@/types/subscription';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import { Subscription, CreateSubscriptionData, UpdateSubscriptionData } from '../types/subscription';
 import toast from 'react-hot-toast';
 
 export const useSubscriptions = () => {
@@ -133,8 +133,7 @@ export const useSubscriptions = () => {
     if (user) {
       fetchSubscriptions();
     }
-    // Removed event listener to prevent infinite loop
-  }, [user?.id]); // Only depend on user.id, not the entire user object
+  }, [user?.id, fetchSubscriptions]); // Add fetchSubscriptions to dependencies
 
   return {
     subscriptions,

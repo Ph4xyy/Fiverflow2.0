@@ -8,11 +8,35 @@ interface GlobalLoadingManagerProps {
 
 /**
  * Composant qui gère l'affichage global du loading
- * Version simplifiée pour éviter les conflits
+ * Version améliorée avec gestion des timeouts
  */
 export const GlobalLoadingManager: React.FC<GlobalLoadingManagerProps> = ({ children }) => {
-  // Pour l'instant, on retourne simplement les enfants
-  // Le loading sera géré par les composants individuels
+  const { loading, isLoading } = useLoading();
+  const [showGlobalLoading, setShowGlobalLoading] = useState(false);
+
+  useEffect(() => {
+    const isAnyLoading = isLoading();
+    setShowGlobalLoading(isAnyLoading);
+    
+    // Auto-hide loading after 15 seconds to prevent infinite loading
+    if (isAnyLoading) {
+      const timeout = setTimeout(() => {
+        setShowGlobalLoading(false);
+      }, 15000);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [loading, isLoading]);
+
+  if (showGlobalLoading) {
+    return (
+      <OptimizedLoadingScreen 
+        message="Loading application..." 
+        showSpinner={true}
+      />
+    );
+  }
+
   return <>{children}</>;
 };
 

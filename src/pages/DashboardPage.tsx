@@ -115,7 +115,7 @@ const DashboardPage = () => {
     };
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
     return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-  }, [fetchOrders, fetchTasks]);
+  }, []); // Remove dependencies to prevent infinite loops
 
   // 👉 Récupérer le nom depuis la table users
   useEffect(() => {

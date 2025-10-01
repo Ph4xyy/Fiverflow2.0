@@ -177,8 +177,7 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
       setSubscription(null);
       setLoading(false);
     }
-    // Removed event listener to prevent infinite loop
-  }, [user?.id]); // Only depend on user.id, not the entire user object
+  }, [user?.id, fetchSubscription]); // Add fetchSubscription to dependencies
 
   return {
     subscription,

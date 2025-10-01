@@ -102,8 +102,7 @@ export const useClients = (): UseClientsReturn => {
       hasFetchedRef.current = true;
       fetchClients();
     }
-    // Removed event listener to prevent infinite loop
-  }, [user?.id]); // Only depend on user.id, not the entire user object
+  }, [user?.id, fetchClients]); // Add fetchClients to dependencies
 
   useEffect(() => {
     return () => {
