@@ -184,20 +184,27 @@ export function useInvoices() {
 
     try {
       setError(null);
-      
-      const { data: result, error: createError } = await supabase
-        .from("invoices")
-        .insert([{
-          user_id: user.id,
-          client_id: data.client_id,
-          currency: data.currency || 'USD',
-          issue_date: data.issue_date,
-          due_date: data.due_date,
-          notes: data.notes,
-          terms: data.terms,
-          tags: data.tags,
-          template_id: data.template_id
-        }])
+
+      // Use RPC to generate invoice number and create the record server-side
+      const { data: createdId, error: rpcError } = await supabase.rpc(
+        'create_invoice_with_number',
+        {
+          p_user_id: user.id,
+          p_client_id: data.client_id,
+          p_issue_date: data.issue_date as any,
+          p_due_date: data.due_date as any,
+          p_currency: data.currency || 'USD',
+          p_notes: data.notes ?? null,
+          p_terms: data.terms ?? null,
+          p_template_id: data.template_id ?? null,
+        }
+      );
+
+      if (rpcError) throw rpcError;
+
+      // Fetch the full created invoice row with joined client
+      const { data: result, error: fetchError } = await supabase
+        .from('invoices')
         .select(`
           id,
           user_id,
@@ -223,13 +230,15 @@ export function useInvoices() {
             platform
           )
         `)
+        .eq('id', createdId as unknown as string)
+        .eq('user_id', user.id)
         .single();
 
-      if (createError) throw createError;
-      
-      setInvoices(prev => [result, ...prev]);
-      toast.success("Invoice created successfully");
-      return result;
+      if (fetchError) throw fetchError;
+
+      setInvoices(prev => [result as Invoice, ...prev]);
+      toast.success('Invoice created successfully');
+      return result as Invoice;
     } catch (err: any) {
       console.error("[useInvoices] createInvoice error:", err);
       const errorMessage = err.message || "Failed to create invoice";
@@ -362,7 +371,7 @@ export function useInvoices() {
     }
   }, [user, invoices]);
 
-  const markAsPaid = useCallback(async (id: string, paymentAmount?: number) => {
+  const markAsPaid = useCallback(async (id: string) => {
     if (!user) {
       throw new Error("User not authenticated");
     }
