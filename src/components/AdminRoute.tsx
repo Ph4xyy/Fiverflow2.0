@@ -60,7 +60,10 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     }
 
     const onRefreshed = () => {
-      if (!authLoading) checkAdminRole();
+      // Force re-evaluation with a small delay to ensure contexts are updated
+      setTimeout(() => {
+        if (!authLoading) checkAdminRole();
+      }, 100);
     };
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
     return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
