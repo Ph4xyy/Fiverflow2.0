@@ -72,8 +72,8 @@ export const LoadingDebugger: React.FC = () => {
   const handleRefocusWindow = useCallback(() => {
     window.focus();
     console.log('Window focus manually triggered.');
-    // Force a page refresh to reset any stuck states
-    window.location.reload();
+    // Don't reload automatically - just focus the window
+    console.log('⚠️ Manual refocus - no reload to prevent infinite loops');
   }, []);
 
   const handleForceRefresh = useCallback(() => {
@@ -88,7 +88,7 @@ export const LoadingDebugger: React.FC = () => {
     
     // Log all active event listeners
     console.log('📊 Active event listeners:');
-    const events = ['ff:session:refreshed', 'ff:tab:refocus', 'ff:cleanup'];
+    const events = ['ff:session:refreshed', 'ff:cleanup']; // Removed ff:tab:refocus to prevent infinite loops
     events.forEach(eventName => {
       const listeners = (window as any)._eventListeners?.[eventName] || [];
       console.log(`${eventName}: ${listeners.length} listeners`);

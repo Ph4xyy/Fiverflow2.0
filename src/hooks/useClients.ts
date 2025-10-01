@@ -90,7 +90,7 @@ export const useClients = (): UseClientsReturn => {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user?.id]); // Only depend on user.id to prevent infinite loops
 
   const refetchClients = useCallback(async () => {
     hasFetchedRef.current = false;
@@ -102,7 +102,7 @@ export const useClients = (): UseClientsReturn => {
       hasFetchedRef.current = true;
       fetchClients();
     }
-  }, [user?.id, fetchClients]); // Add fetchClients to dependencies
+  }, [user?.id]); // Remove fetchClients from dependencies to prevent infinite loops
 
   useEffect(() => {
     return () => {

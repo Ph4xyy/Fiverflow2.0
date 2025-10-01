@@ -77,7 +77,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user?.id]); // Only depend on user.id to prevent infinite loops
 
   const activateProTrial = useCallback(async (): Promise<boolean> => {
     console.log('🚀 Activating Pro trial...');
@@ -132,7 +132,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
       toast.error('Erreur lors de l\'activation de l\'essai');
       return false;
     }
-  }, [user, checkTrialStatus]);
+  }, [user?.id]); // Only depend on user.id to prevent infinite loops // Remove checkTrialStatus from dependencies to prevent infinite loops
 
   // Check trial status on mount and when user changes
   useEffect(() => {
@@ -193,7 +193,7 @@ export const useSubscription = (): UseSubscriptionReturn => {
     } else {
       checkExpiredTrials();
     }
-  }, [user, checkTrialStatus]);
+  }, [user?.id]); // Only depend on user.id to prevent infinite loops // Remove checkTrialStatus from dependencies to prevent infinite loops
 
   return {
     subscription,

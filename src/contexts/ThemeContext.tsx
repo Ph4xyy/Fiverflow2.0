@@ -84,7 +84,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     loadThemePreference();
-  }, [user]);
+  }, [user?.id]); // Only depend on user.id to prevent infinite loops
 
   // Save theme preference to Supabase and localStorage
   const saveThemePreference = async (darkMode: boolean) => {

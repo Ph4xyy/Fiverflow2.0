@@ -104,7 +104,7 @@ const DashboardPage = () => {
       fetchOrders();
       fetchTasks();
     }
-  }, [fetchOrders, fetchTasks]);
+  }, []); // Remove fetch functions from dependencies to prevent infinite loops
 
   // Listen for session refresh to refetch data
   useEffect(() => {

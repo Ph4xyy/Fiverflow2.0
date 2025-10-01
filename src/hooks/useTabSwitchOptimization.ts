@@ -21,10 +21,11 @@ export const useTabSwitchOptimization = () => {
         // Ne recharger que si l'onglet a été inactif pendant plus de 5 minutes
         if (timeSinceLastActivity > 5 * 60 * 1000) {
           lastActivityRef.current = Date.now();
-          // Déclencher un refresh silencieux sans loading
-          window.dispatchEvent(new CustomEvent('ff:tab:refocus', { 
-            detail: { shouldRefresh: true } 
-          }));
+          // DISABLED: Déclencher un refresh silencieux sans loading
+          // window.dispatchEvent(new CustomEvent('ff:tab:refocus', { 
+          //   detail: { shouldRefresh: true } 
+          // }));
+          console.log('🔄 Tab refocus detected but refresh disabled to prevent infinite loops');
         }
       } else {
         // L'onglet devient invisible, enregistrer le timestamp

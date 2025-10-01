@@ -180,7 +180,7 @@ const CalendarPage: React.FC = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [fetchOrders, fetchTasks]);
+  }, []); // Remove fetch functions from dependencies to prevent infinite loops
 
   useEffect(() => {
     if (!hasFetchedRef.current) {
