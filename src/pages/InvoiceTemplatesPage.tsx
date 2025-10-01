@@ -33,7 +33,8 @@ const InvoiceTemplatesPage: React.FC = () => {
               setName("");
               navigate(`/invoices/templates/${created.id}`);
             }}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+            className="px-4 py-2 rounded-lg text-white"
+            style={{ backgroundColor: '#111827' }}
           >
             Créer
           </button>

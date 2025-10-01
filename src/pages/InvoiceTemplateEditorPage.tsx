@@ -92,7 +92,11 @@ const InvoiceTemplateEditorPage: React.FC = () => {
           <button onClick={() => navigate("/invoices/templates")} className="px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700">
             Retour
           </button>
-          <button onClick={save} className="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+          <button
+            onClick={save}
+            className="px-3 py-2 rounded-lg text-white"
+            style={{ backgroundColor: schema.style.primaryColor || '#2563eb' }}
+          >
             Enregistrer
           </button>
           <button onClick={previewPdf} className="px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700">
