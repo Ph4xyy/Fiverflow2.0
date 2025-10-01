@@ -14,7 +14,7 @@ export const LoadingTest: React.FC = () => {
 
   useEffect(() => {
     setRenderCount(prev => prev + 1);
-  });
+  }, [authLoading, roleLoading, user, role]); // Ajouter les dépendances pour éviter les re-renders infinis
 
   return (
     <div className="fixed bottom-4 left-4 bg-black/90 text-white p-4 rounded-lg text-xs font-mono z-50 max-w-sm">

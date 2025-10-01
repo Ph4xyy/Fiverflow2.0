@@ -2,6 +2,7 @@
 import "./i18n"; 
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import { UserDataProvider } from './contexts/UserDataContext';
 import { LoadingProvider } from './contexts/LoadingContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -68,11 +69,12 @@ const PlanGate: React.FC<{ feature: 'calendar' | 'referrals' | 'stats' | 'tasks'
 function App() {
   return (
     <AppErrorBoundary>
-      <LoadingProvider>
-        <UserDataProvider>
-          <Router>
-            <AnalyticsWrapper>
-              <GlobalLoadingManager>
+      <AuthProvider>
+        <Router>
+          <AnalyticsWrapper>
+            <LoadingProvider>
+              <UserDataProvider>
+                <GlobalLoadingManager>
               <Suspense fallback={<div className="p-6"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-slate-500"></div></div>}>
               <Routes>
               {/* Redirection racine intelligente */}
@@ -133,17 +135,18 @@ function App() {
               <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
               </Routes>
               </Suspense>
-              </GlobalLoadingManager>
-                   <LoadingDebugger />
-                   <LoadingTest />
-                   <DatabaseTest />
-                   <DebugShortcuts />
-                   <KeyboardTest />
-                   <SimpleTest />
-            </AnalyticsWrapper>
-          </Router>
-        </UserDataProvider>
-      </LoadingProvider>
+                </GlobalLoadingManager>
+                     <LoadingDebugger />
+                     <LoadingTest />
+                     <DatabaseTest />
+                     <DebugShortcuts />
+                     <KeyboardTest />
+                     <SimpleTest />
+              </UserDataProvider>
+            </LoadingProvider>
+          </AnalyticsWrapper>
+        </Router>
+      </AuthProvider>
     </AppErrorBoundary>
   );
 }
