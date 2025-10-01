@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import type { User, AuthError, Session, PostgrestError } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { useLoading } from './LoadingContext';
 
 interface AuthContextType {
   user: User | null;
@@ -16,7 +15,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const { setLoading, loading } = useLoading();
+  const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
 
   const safeSetState = <T,>(setter: React.Dispatch<React.SetStateAction<T>>) =>
@@ -25,6 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
   const setUserSafe = safeSetState(setUser);
+  const setLoadingSafe = safeSetState(setLoading);
 
   const deriveAndCacheRole = async (session: Session | null) => {
     try {
@@ -68,22 +68,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const init = async () => {
       if (!isSupabaseConfigured || !supabase) {
         setUserSafe(null);
-        setLoading('auth', false);
+        setLoadingSafe(false);
         return;
       }
 
-      setLoading('auth', true);
       const { data: { session }, error } = await supabase.auth.getSession();
       if (error) console.error('[Auth] getSession error:', error.message);
 
       setUserSafe(session?.user ?? null);
       await deriveAndCacheRole(session);
-      setLoading('auth', false);
+      setLoadingSafe(false);
 
       const { data } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
         setUserSafe(nextSession?.user ?? null);
         await deriveAndCacheRole(nextSession);
-        setLoading('auth', false);
+        setLoadingSafe(false);
         try {
           window.dispatchEvent(new CustomEvent('ff:session:refreshed', { detail: { userId: nextSession?.user?.id || null } }));
         } catch {}

@@ -8,7 +8,6 @@ import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
 import { GlobalLoadingManager } from './components/GlobalLoadingManager';
-import LoadingDebugPanel from './components/LoadingDebugPanel';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
 
 // Core pages
@@ -126,7 +125,6 @@ function App() {
               </Routes>
               </Suspense>
               </GlobalLoadingManager>
-              <LoadingDebugPanel />
             </AnalyticsWrapper>
           </Router>
         </UserDataProvider>
