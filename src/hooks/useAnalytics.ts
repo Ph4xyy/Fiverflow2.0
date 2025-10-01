@@ -32,7 +32,7 @@ export const useAnalytics = () => {
       // Terminer les sessions actives existantes
       await supabase
         .from('user_sessions')
-        .update({ is_active: false, session_end: NOW() })
+        .update({ is_active: false, session_end: new Date().toISOString() })
         .eq('user_id', user.id)
         .eq('is_active', true);
 
