@@ -43,7 +43,7 @@ const InvoiceTemplatesPage: React.FC = () => {
 
       {loading ? (
         <div className="p-10 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600" />
+          <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-slate-500" />
           <span className="ml-3 text-gray-600 dark:text-gray-400">Chargement…</span>
         </div>
       ) : items.length === 0 ? (

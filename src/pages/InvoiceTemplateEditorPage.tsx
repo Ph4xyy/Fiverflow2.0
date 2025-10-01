@@ -147,12 +147,12 @@ const InvoiceTemplateEditorPage: React.FC = () => {
 
       <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
         <div className="flex items-center justify-between">
-          <div className="text-sm font-medium text-gray-900 dark:text-white">Aperçu PDF intégré</div>
+          <div className="text-sm font-medium" style={{ color: schema.style.secondaryColor || '#111827' }}>Aperçu PDF intégré</div>
           <div className="flex gap-2">
-            <button onClick={generateInlinePreview} className="px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700">
+            <button onClick={generateInlinePreview} className="px-3 py-2 rounded-lg text-white" style={{ backgroundColor: schema.style.primaryColor || '#111827' }}>
               Générer l’aperçu
             </button>
-            <button onClick={previewPdf} className="px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700">
+            <button onClick={previewPdf} className="px-3 py-2 rounded-lg" style={{ border: `1px solid ${schema.style.secondaryColor || '#111827'}`, color: schema.style.secondaryColor || '#111827' }}>
               Télécharger le PDF
             </button>
           </div>
