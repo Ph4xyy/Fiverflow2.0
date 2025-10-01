@@ -17,10 +17,10 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [role, setRole] = useState<'admin' | 'user'>('user');
   const [loading, setLoading] = useState(true);
 
-  const fetchUserRole = useCallback(async () => {
-    console.log('🔄 fetchUserRole called for user:', user?.id);
+  const fetchUserRole = useCallback(async (userId: string) => {
+    console.log('🔄 fetchUserRole called for user:', userId);
     
-    if (!user || !isSupabaseConfigured) {
+    if (!userId || !isSupabaseConfigured) {
       console.log('❌ No user or Supabase not configured');
       setRole('user');
       setLoading(false);
@@ -29,7 +29,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     try {
       console.log('🌐 Making database query for role...');
-      const result = await debugAuth.testUserRoleQuery(user.id);
+      const result = await debugAuth.testUserRoleQuery(userId);
       
       if (!result.success) {
         console.error('❌ Error fetching user role:', result.error);
@@ -46,7 +46,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.log('🏁 fetchUserRole completed, setting loading to false');
       setLoading(false);
     }
-  }, [user]);
+  }, []); // Pas de dépendances pour éviter les loops
 
   useEffect(() => {
     console.log('🔄 UserDataContext useEffect triggered for user:', user?.id);
@@ -68,11 +68,17 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     // Only fetch if no cached role
     setLoading(true);
-    fetchUserRole();
+    fetchUserRole(user.id);
+  }, [user?.id]); // Seulement dépendre de user?.id
+
+  const refreshUserRole = useCallback(() => {
+    if (user?.id) {
+      fetchUserRole(user.id);
+    }
   }, [user?.id, fetchUserRole]);
 
   return (
-    <UserDataContext.Provider value={{ role, loading, refreshUserRole: fetchUserRole }}>
+    <UserDataContext.Provider value={{ role, loading, refreshUserRole }}>
       {children}
     </UserDataContext.Provider>
   );

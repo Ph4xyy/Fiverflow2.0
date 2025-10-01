@@ -179,7 +179,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
 
     setRestrictions(calculated);
     setError(null);
-  }, [user, role, roleLoading, stripeSubscription]);
+  }, [user?.id, role, roleLoading]); // Seulement dépendre de user.id
 
   const checkAccess = (feature: FeatureKey) => {
     if (!restrictions) return false;

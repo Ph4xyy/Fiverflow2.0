@@ -139,14 +139,15 @@ function App() {
               </Routes>
               </Suspense>
                 </GlobalLoadingManager>
-                     <LoadingDebugger />
+                     {/* Composants de debug temporairement désactivés */}
+                     {/* <LoadingDebugger />
                      <LoadingTest />
                      <DatabaseTest />
                      <DebugShortcuts />
                      <KeyboardTest />
                      <SimpleTest />
                      <DiagnosticPanel />
-                     <EnvironmentDiagnostic />
+                     <EnvironmentDiagnostic /> */}
               </UserDataProvider>
             </LoadingProvider>
           </AnalyticsWrapper>

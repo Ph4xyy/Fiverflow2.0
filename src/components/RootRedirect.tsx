@@ -3,54 +3,38 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 /**
- * Composant de redirection racine avec diagnostic amélioré
+ * Composant de redirection racine ULTRA-SIMPLIFIÉ
+ * Élimine tous les problèmes de loading loops
  */
 const RootRedirect: React.FC = () => {
   const { user, loading } = useAuth();
-  const [timeoutReached, setTimeoutReached] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string>('');
+  const [forceRedirect, setForceRedirect] = useState(false);
 
-  // Debug info pour diagnostiquer les problèmes
-  useEffect(() => {
-    const info = `User: ${user ? '✅' : '❌'} | Loading: ${loading ? '⏳' : '✅'} | Timeout: ${timeoutReached ? '🚨' : '⏱️'}`;
-    setDebugInfo(info);
-    console.log('🔍 RootRedirect Debug:', info);
-  }, [user, loading, timeoutReached]);
-
-  // Timeout de sécurité pour éviter un écran bleu infini
+  // Timeout de sécurité ABSOLU - 2 secondes max
   useEffect(() => {
     const timeout = setTimeout(() => {
-      console.warn('⚠️ RootRedirect timeout reached - forcing redirect');
-      console.warn('🔍 Debug info at timeout:', { user: !!user, loading, timestamp: Date.now() });
-      setTimeoutReached(true);
-    }, 3000); // 3 secondes max
+      console.warn('🚨 RootRedirect: Force redirect after timeout');
+      setForceRedirect(true);
+    }, 2000);
 
     return () => clearTimeout(timeout);
   }, []);
 
-  // Si timeout atteint ou loading terminé, on redirige
-  if (timeoutReached || !loading) {
+  // Redirection immédiate si :
+  // 1. Force redirect (timeout)
+  // 2. Auth loading terminé
+  if (forceRedirect || !loading) {
     const target = user ? '/dashboard' : '/login';
-    console.log('🚀 RootRedirect: Redirecting to', target, '| Reason:', timeoutReached ? 'timeout' : 'auth-ready');
-    console.log('🔍 Final state:', { user: user?.id, loading, timeoutReached, target });
+    console.log('🚀 RootRedirect: Redirecting to', target);
     return <Navigate to={target} replace />;
   }
 
-  // Écran de chargement avec debug
+  // Écran de chargement minimal
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900">
       <div className="flex flex-col items-center space-y-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-slate-500"></div>
-        <p className="text-slate-400 text-sm">Chargement...</p>
-        <div className="text-xs text-slate-600 text-center max-w-xs">
-          Redirection automatique en cours...
-        </div>
-        <div className="text-xs text-slate-500 text-center">
-          {debugInfo}
-        </div>
-        <div className="text-xs text-slate-500 text-center">
-          Environment: {import.meta.env.MODE}
-        </div>
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
+        <p className="text-white text-sm">Chargement...</p>
       </div>
     </div>
   );
