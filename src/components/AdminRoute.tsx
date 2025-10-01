@@ -58,6 +58,12 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     if (!authLoading) {
       checkAdminRole()
     }
+
+    const onRefreshed = () => {
+      if (!authLoading) checkAdminRole();
+    };
+    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
   }, [user, authLoading])
 
   // Show loading while checking auth and role
@@ -65,7 +71,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-500 mx-auto"></div>
           <p className="mt-2 text-gray-600">Vérification des droits d'accès...</p>
         </div>
       </div>
