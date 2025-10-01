@@ -106,11 +106,10 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
       refreshTimeout = window.setTimeout(fetchRole, 200);
     };
     
-    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    // Removed event listener to prevent infinite loop
     return () => {
       isMounted = false;
       if (refreshTimeout) clearTimeout(refreshTimeout);
-      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
     };
   }, [user, ctxRole]);
 

@@ -144,12 +144,8 @@ export function useInvoices() {
 
   useEffect(() => {
     fetchInvoices();
-    const onRefreshed = () => fetchInvoices();
-    window.addEventListener('ff:session:refreshed', onRefreshed as any);
-    return () => {
-      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-    };
-  }, [fetchInvoices]);
+    // Removed event listener to prevent infinite loop
+  }, [user]); // Only depend on user, not fetchInvoices
 
   const createInvoice = useCallback(async (data: CreateInvoiceData) => {
     if (!user) {

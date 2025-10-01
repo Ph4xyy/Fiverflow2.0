@@ -142,12 +142,8 @@ export const useSubscription = (): UseSubscriptionReturn => {
       setSubscription(null);
       setLoading(false);
     }
-    const onRefreshed = () => user ? checkTrialStatus() : null;
-    window.addEventListener('ff:session:refreshed', onRefreshed as any);
-    return () => {
-      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-    };
-  }, [user, checkTrialStatus]);
+    // Removed event listener to prevent infinite loop
+  }, [user]); // Only depend on user, not checkTrialStatus
 
   // Check for expired trials on mount (simulates login check)
   useEffect(() => {

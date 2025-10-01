@@ -13,9 +13,7 @@ import DatabaseTest from './components/DatabaseTest';
 import DebugShortcuts from './components/DebugShortcuts';
 import KeyboardTest from './components/KeyboardTest';
 import SimpleTest from './components/SimpleTest';
-import InfiniteLoopDetector from './components/InfiniteLoopDetector';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
-import useCleanup from './hooks/useCleanup';
 
 // Core pages
 import LandingPage from './pages/LandingPage';
@@ -66,8 +64,6 @@ const PlanGate: React.FC<{ feature: 'calendar' | 'referrals' | 'stats' | 'tasks'
 };
 
 function App() {
-  useCleanup(); // Nettoyer les écouteurs d'événements problématiques
-  
   return (
     <AppErrorBoundary>
       <UserDataProvider>
@@ -139,7 +135,6 @@ function App() {
                    <DebugShortcuts />
                    <KeyboardTest />
                    <SimpleTest />
-                   <InfiniteLoopDetector />
             </AnalyticsWrapper>
           </Router>
         </UserDataProvider>

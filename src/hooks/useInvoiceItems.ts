@@ -98,12 +98,8 @@ export function useInvoiceItems(invoiceId?: string) {
     if (invoiceId) {
       fetchItems();
     }
-    const onRefreshed = () => invoiceId && fetchItems();
-    window.addEventListener('ff:session:refreshed', onRefreshed as any);
-    return () => {
-      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-    };
-  }, [fetchItems, invoiceId]);
+    // Removed event listener to prevent infinite loop
+  }, [user, invoiceId]); // Only depend on user and invoiceId, not fetchItems
 
   const createItem = useCallback(async (data: CreateInvoiceItemData) => {
     if (!user) {

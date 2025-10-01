@@ -56,12 +56,8 @@ export function useInvoiceTemplates(userId?: string | null) {
 
   useEffect(() => {
     fetchAll();
-    const onRefreshed = () => fetchAll();
-    window.addEventListener('ff:session:refreshed', onRefreshed as any);
-    return () => {
-      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-    };
-  }, [fetchAll]);
+    // Removed event listener to prevent infinite loop
+  }, [userId]); // Only depend on userId, not fetchAll
 
   const create = useCallback(
     async (name: string) => {
