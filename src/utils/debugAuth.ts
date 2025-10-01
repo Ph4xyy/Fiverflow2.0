@@ -10,13 +10,23 @@ export const debugAuth = {
     try {
       const startTime = Date.now();
       
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Query timeout after 10 seconds')), 10000);
+      });
+      
       // First, let's try a simple query to see if the user exists at all
       console.log('🔍 Step 1: Checking if user exists...');
-      const { data: userData, error: userError } = await supabase
+      const userQueryPromise = supabase
         .from('users')
         .select('id, email, role, created_at')
         .eq('id', userId)
         .maybeSingle();
+      
+      const { data: userData, error: userError } = await Promise.race([
+        userQueryPromise,
+        timeoutPromise
+      ]) as any;
       
       const duration = Date.now() - startTime;
       console.log(`⏱️ Query took ${duration}ms`);
@@ -35,11 +45,16 @@ export const debugAuth = {
       
       // Now try the role-specific query
       console.log('🔍 Step 2: Fetching role specifically...');
-      const { data: roleData, error: roleError } = await supabase
+      const roleQueryPromise = supabase
         .from('users')
         .select('role')
         .eq('id', userId)
         .maybeSingle();
+      
+      const { data: roleData, error: roleError } = await Promise.race([
+        roleQueryPromise,
+        timeoutPromise
+      ]) as any;
       
       if (roleError) {
         console.error('❌ Role query error:', roleError);

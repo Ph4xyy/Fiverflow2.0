@@ -141,13 +141,28 @@ export const DatabaseTest: React.FC = () => {
         </button>
       </div>
       
-      <button 
-        onClick={runTests}
-        disabled={isTesting}
-        className="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white text-xs mb-4 disabled:opacity-50"
-      >
-        {isTesting ? 'Running Tests...' : 'Run Tests'}
-      </button>
+      <div className="flex gap-2 mb-4">
+        <button 
+          onClick={runTests}
+          disabled={isTesting}
+          className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white text-xs disabled:opacity-50"
+        >
+          {isTesting ? 'Running Tests...' : 'Run Tests'}
+        </button>
+        <button 
+          onClick={() => {
+            setTestResults([{
+              name: 'Quick Test',
+              status: 'success',
+              message: 'Test completed without database query',
+              duration: 0
+            }]);
+          }}
+          className="px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded text-white text-xs"
+        >
+          Quick Test
+        </button>
+      </div>
 
       <div className="space-y-2">
         {testResults.map((result, index) => (
