@@ -1,15 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-
-// Optional: if you have this context, it will be used; otherwise we fall back to sessionStorage/app_metadata
-let useUserData: undefined | (() => { role?: string | null; loading?: boolean }) = undefined;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  // @ts-expect-error dynamic optional import
-  const mod = require('../contexts/UserDataContext');
-  useUserData = mod?.useUserData as typeof useUserData;
-} catch { /* no-op */ }
+import { useUserData } from '../contexts/UserDataContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -22,7 +14,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
   const location = useLocation();
 
   // Try to get role from UserDataContext if present; otherwise fallback to cached/session values
-  const userData = useUserData ? useUserData() : { role: null, loading: false };
+  const userData = useUserData();
   const roleFromCache =
     user?.app_metadata?.role ||
     user?.user_metadata?.role ||

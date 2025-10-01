@@ -2,15 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useStripeSubscription } from './useStripeSubscription';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-
-// Optional import: if UserDataContext exists, we'll use it. Otherwise we fetch role ourselves.
-let useUserData: undefined | (() => { role?: string | null; loading?: boolean }) = undefined;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  // @ts-expect-error dynamic optional import
-  const mod = require('../contexts/UserDataContext');
-  useUserData = mod?.useUserData as typeof useUserData;
-} catch { /* no-op */ }
+import { useUserData } from '../contexts/UserDataContext';
 
 export type UserPlan = 'free' | 'pro' | 'excellence';
 
@@ -37,7 +29,7 @@ interface UsePlanRestrictionsReturn {
 
 export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
   const { user } = useAuth();
-  const userData = useUserData ? useUserData() : { role: null, loading: false };
+  const userData = useUserData();
   const ctxRole = (userData?.role ?? null) as string | null;
 
   const { subscription: stripeSubscription, loading: stripeLoading } = useStripeSubscription();
