@@ -144,6 +144,11 @@ export function useInvoices() {
 
   useEffect(() => {
     fetchInvoices();
+    const onRefreshed = () => fetchInvoices();
+    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    return () => {
+      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+    };
   }, [fetchInvoices]);
 
   const createInvoice = useCallback(async (data: CreateInvoiceData) => {

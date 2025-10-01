@@ -106,8 +106,11 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
     };
 
     fetchRole();
+    const onRefreshed = () => fetchRole();
+    window.addEventListener('ff:session:refreshed', onRefreshed as any);
     return () => {
       isMounted = false;
+      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
     };
   }, [user, ctxRole]);
 

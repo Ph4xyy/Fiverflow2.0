@@ -101,6 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const { data: { session: s } } = await supabase.auth.getSession();
           setUserSafe(s?.user ?? null);
           await deriveAndCacheRole(s ?? null);
+          try {
+            window.dispatchEvent(new CustomEvent('ff:session:refreshed', { detail: { userId: s?.user?.id || null } }));
+          } catch {}
         } catch (e) {
           // network errors are tolerated; next tick will retry
           // console.debug('[Auth] heartbeat refresh failed', e);

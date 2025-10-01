@@ -102,6 +102,11 @@ export const useClients = (): UseClientsReturn => {
       hasFetchedRef.current = true;
       fetchClients();
     }
+    const onRefreshed = () => fetchClients();
+    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    return () => {
+      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+    };
   }, [fetchClients, user]);
 
   useEffect(() => {

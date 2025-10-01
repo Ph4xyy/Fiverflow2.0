@@ -133,6 +133,11 @@ export const useSubscriptions = () => {
     if (user) {
       fetchSubscriptions();
     }
+    const onRefreshed = () => user && fetchSubscriptions();
+    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    return () => {
+      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+    };
   }, [user, fetchSubscriptions]);
 
   return {

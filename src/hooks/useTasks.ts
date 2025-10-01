@@ -481,6 +481,11 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
 
   useEffect(() => {
     fetchTasks();
+    const onRefreshed = () => fetchTasks();
+    window.addEventListener('ff:session:refreshed', onRefreshed as any);
+    return () => {
+      window.removeEventListener('ff:session:refreshed', onRefreshed as any);
+    };
   }, [fetchTasks]);
 
   return {
