@@ -1,5 +1,5 @@
 import React from "react";
-import { MoreHorizontal, Star, Copy, Trash2, Edit } from "lucide-react";
+import { MoreHorizontal, Star, Copy, Trash2, Edit, Eye } from "lucide-react";
 import type { InvoiceTemplate } from "@/types/invoiceTemplate";
 
 type Props = {
@@ -8,9 +8,10 @@ type Props = {
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
   onSetDefault: (id: string) => void;
+  onPreview?: (id: string) => void;
 };
 
-const TemplateCard: React.FC<Props> = ({ template, onEdit, onDuplicate, onDelete, onSetDefault }) => {
+const TemplateCard: React.FC<Props> = ({ template, onEdit, onDuplicate, onDelete, onSetDefault, onPreview }) => {
   return (
     <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden">
       <div className="h-40 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center text-sm text-slate-500">
@@ -34,6 +35,14 @@ const TemplateCard: React.FC<Props> = ({ template, onEdit, onDuplicate, onDelete
         </div>
 
         <div className="mt-3 flex gap-2">
+          {onPreview && (
+            <button
+              onClick={() => onPreview(template.id)}
+              className="inline-flex items-center px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-200 text-sm"
+            >
+              <Eye className="w-4 h-4 mr-1" /> Aperçu
+            </button>
+          )}
           <button
             onClick={() => onEdit(template.id)}
             className="inline-flex items-center px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-200 text-sm"

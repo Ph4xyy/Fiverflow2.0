@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInvoiceTemplates } from "@/hooks/useInvoiceTemplates";
+import type { InvoiceTemplate, TemplateSchema } from "@/types/invoiceTemplate";
 import TemplateStylePanel from "@/components/invoices/templates/TemplateStylePanel";
 import TemplateCanvas from "@/components/invoices/templates/TemplateCanvas";
 import LogoUploader from "@/components/invoices/templates/LogoUploader";
@@ -35,9 +36,10 @@ const InvoiceTemplateEditorPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { items, update } = useInvoiceTemplates(user?.id);
-  const tpl = useMemo(() => items.find((t) => t.id === id), [items, id]);
+  const tpl = useMemo(() => items.find((t: InvoiceTemplate) => t.id === id), [items, id]);
   const [name, setName] = useState<string>(tpl?.name || "");
-  const [schema, setSchema] = useState(tpl?.schema);
+  const [schema, setSchema] = useState<TemplateSchema | undefined>(tpl?.schema);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (tpl) {
@@ -62,6 +64,20 @@ const InvoiceTemplateEditorPage: React.FC = () => {
   const previewPdf = async () => {
     const doc = await renderInvoiceWithTemplateToPdf(schema, sampleData as any);
     doc.save(`${name || "template"}.pdf`);
+  };
+
+  const generateInlinePreview = async () => {
+    try {
+      const doc = await renderInvoiceWithTemplateToPdf(schema, sampleData as any);
+      const blob = doc.output("blob");
+      const nextUrl = URL.createObjectURL(blob);
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+      setPdfUrl(nextUrl);
+      toast.success("Aperçu PDF généré");
+    } catch (e: any) {
+      console.error("[TemplateEditor] inline preview", e);
+      toast.error("Impossible de générer l’aperçu PDF");
+    }
   };
 
   return (
@@ -97,13 +113,44 @@ const InvoiceTemplateEditorPage: React.FC = () => {
           <div className="p-4 border-b border-gray-200 dark:border-slate-700">
             <LogoUploader
               value={schema.style.logoUrl || null}
-              onChange={(url) => setSchema({ ...schema, style: { ...schema.style, logoUrl: url || undefined } })}
+              onChange={async (url: string | null) => {
+                const next: TemplateSchema = { ...schema!, style: { ...schema!.style, logoUrl: url || undefined } };
+                setSchema(next);
+                try {
+                  await update(tpl.id, { schema: next });
+                  toast.success("Logo enregistré dans le template");
+                } catch (e: any) {
+                  console.error("[TemplateEditor] save logoUrl", e);
+                  toast.error("Échec de la sauvegarde du logo");
+                }
+              }}
             />
           </div>
           <TemplateStylePanel value={schema} onChange={setSchema} />
         </div>
 
         <TemplateCanvas value={schema} />
+      </div>
+
+      <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+        <div className="flex items-center justify-between">
+          <div className="text-sm font-medium text-gray-900 dark:text-white">Aperçu PDF intégré</div>
+          <div className="flex gap-2">
+            <button onClick={generateInlinePreview} className="px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700">
+              Générer l’aperçu
+            </button>
+            <button onClick={previewPdf} className="px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700">
+              Télécharger le PDF
+            </button>
+          </div>
+        </div>
+        {pdfUrl ? (
+          <div className="mt-4">
+            <iframe title="template-pdf-preview" src={pdfUrl} className="w-full h-[720px] rounded-lg border border-gray-200 dark:border-slate-700" />
+          </div>
+        ) : (
+          <div className="mt-4 text-sm text-gray-600 dark:text-gray-300">Cliquez sur "Générer l’aperçu" pour afficher le PDF ici.</div>
+        )}
       </div>
     </div>
   );

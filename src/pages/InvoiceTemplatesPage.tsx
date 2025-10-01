@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useInvoiceTemplates } from "@/hooks/useInvoiceTemplates";
+import type { InvoiceTemplate } from "@/types/invoiceTemplate";
 import TemplateCard from "@/components/invoices/templates/TemplateCard";
 import { useNavigate } from "react-router-dom";
 
@@ -50,14 +51,15 @@ const InvoiceTemplatesPage: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((t) => (
+          {items.map((t: InvoiceTemplate) => (
             <TemplateCard
               key={t.id}
               template={t}
-              onEdit={(id) => navigate(`/invoices/templates/${id}`)}
+              onEdit={(id: string) => navigate(`/invoices/templates/${id}`)}
               onDuplicate={duplicate}
-              onDelete={(id) => remove(id)}
+              onDelete={(id: string) => remove(id)}
               onSetDefault={setDefault}
+              onPreview={(id: string) => navigate(`/invoices/templates/${id}`)}
             />
           ))}
         </div>
