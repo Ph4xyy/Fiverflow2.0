@@ -19,8 +19,8 @@ const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
 export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [loading, setLoadingState] = useState<LoadingState>({
-    auth: true,
-    role: true,
+    auth: false,
+    role: false,
     subscription: false,
     data: false
   });
@@ -62,8 +62,8 @@ export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     // Reset to initial state
     setLoadingState({
-      auth: true,
-      role: true,
+      auth: false,
+      role: false,
       subscription: false,
       data: false
     });

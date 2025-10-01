@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useOptimizedAuth } from '../hooks/useOptimizedAuth';
-import { useLoading } from '../contexts/LoadingContext';
 import { OptimizedLoadingScreen } from './OptimizedLoadingScreen';
 
 interface ProtectedRouteProps {
@@ -12,7 +11,6 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const { user, loading, role, roleLoading } = useOptimizedAuth();
-  const { loading: globalLoading } = useLoading();
   const location = useLocation();
   const [, setRefreshKey] = useState(0);
 
@@ -37,8 +35,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
     };
   }, []);
 
-  if (loading || roleLoading || globalLoading.auth || globalLoading.role) {
-    console.log('🔄 ProtectedRoute: Loading state - auth:', loading, 'role:', roleLoading, 'global:', globalLoading);
+  if (loading || roleLoading) {
+    console.log('🔄 ProtectedRoute: Loading state - auth:', loading, 'role:', roleLoading);
     return (
       <OptimizedLoadingScreen 
         message="Checking session..." 

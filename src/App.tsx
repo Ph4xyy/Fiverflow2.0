@@ -3,6 +3,7 @@ import "./i18n";
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { UserDataProvider } from './contexts/UserDataContext';
+import { LoadingProvider } from './contexts/LoadingContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
@@ -62,10 +63,11 @@ const PlanGate: React.FC<{ feature: 'calendar' | 'referrals' | 'stats' | 'tasks'
 function App() {
   return (
     <AppErrorBoundary>
-      <UserDataProvider>
-        <Router>
-          <AnalyticsWrapper>
-            <GlobalLoadingManager>
+      <LoadingProvider>
+        <UserDataProvider>
+          <Router>
+            <AnalyticsWrapper>
+              <GlobalLoadingManager>
               <Suspense fallback={<div className="p-6"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-slate-500"></div></div>}>
               <Routes>
               {/* Pages publiques */}
@@ -125,11 +127,12 @@ function App() {
               <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
               </Routes>
               </Suspense>
-            </GlobalLoadingManager>
-            <LoadingDebugPanel />
-          </AnalyticsWrapper>
-        </Router>
-      </UserDataProvider>
+              </GlobalLoadingManager>
+              <LoadingDebugPanel />
+            </AnalyticsWrapper>
+          </Router>
+        </UserDataProvider>
+      </LoadingProvider>
     </AppErrorBoundary>
   );
 }
