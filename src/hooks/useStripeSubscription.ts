@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { globalLock } from '../utils/globalLock';
 import { getProductByPriceId } from '../stripe-config';
 import toast from 'react-hot-toast';
 
@@ -37,38 +36,23 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
   const lastUserIdRef = useRef<string | null>(null);
 
   const fetchSubscription = useCallback(async () => {
-    const lockKey = `stripe_subscription_${user?.id}`;
+    console.log('💳 Fetching Stripe subscription...');
     
-    // Vérifier si déjà en cours d'exécution
-    if (globalLock.isLocked(lockKey)) {
-      console.log('💳 Subscription fetch already in progress, skipping...');
+    if (!isSupabaseConfigured || !supabase) {
+      console.log('🎭 Supabase not configured, no subscription data');
+      setSubscription(null);
+      setLoading(false);
       return;
     }
 
-    // Acquérir le verrou
-    const acquired = await globalLock.acquire(lockKey);
-    if (!acquired) {
-      console.log('💳 Could not acquire lock, skipping...');
+    if (!user) {
+      console.log('❌ No user found for subscription');
+      setSubscription(null);
+      setLoading(false);
       return;
     }
 
     try {
-      console.log('💳 Fetching Stripe subscription...');
-      
-      if (!isSupabaseConfigured || !supabase) {
-        console.log('🎭 Supabase not configured, no subscription data');
-        setSubscription(null);
-        setLoading(false);
-        return;
-      }
-
-      if (!user) {
-        console.log('❌ No user found for subscription');
-        setSubscription(null);
-        setLoading(false);
-        return;
-      }
-
       setError(null);
       
       console.log('🔍 Querying user subscription...');
@@ -103,8 +87,6 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
       setSubscription(null);
     } finally {
       setLoading(false);
-      // Libérer le verrou
-      globalLock.release(lockKey);
     }
   }, [user?.id]); // Only depend on user.id
 
@@ -181,7 +163,13 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
     if (currentUserId && (currentUserId !== lastUserIdRef.current || !hasFetchedRef.current)) {
       lastUserIdRef.current = currentUserId;
       hasFetchedRef.current = true;
-      fetchSubscription();
+      
+      // Debounce pour éviter les appels multiples
+      const timeoutId = setTimeout(() => {
+        fetchSubscription();
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
     } else if (!currentUserId) {
       // Réinitialiser si l'utilisateur se déconnecte
       hasFetchedRef.current = false;

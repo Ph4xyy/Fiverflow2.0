@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useStripeSubscription } from './useStripeSubscription';
-import { globalLock } from '../utils/globalLock';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useUserData } from '../contexts/UserDataContext';
 
@@ -45,27 +44,11 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
     let isMounted = true;
 
     const fetchRole = async () => {
-      const lockKey = `plan_restrictions_${user?.id}`;
-      
-      // Vérifier si déjà en cours d'exécution
-      if (globalLock.isLocked(lockKey)) {
-        console.log('📊 Plan restrictions fetch already in progress, skipping...');
+      if (!user) {
+        setRole(null);
+        setRoleLoading(false);
         return;
       }
-
-      // Acquérir le verrou
-      const acquired = await globalLock.acquire(lockKey);
-      if (!acquired) {
-        console.log('📊 Could not acquire lock, skipping...');
-        return;
-      }
-
-      try {
-        if (!user) {
-          setRole(null);
-          setRoleLoading(false);
-          return;
-        }
 
       // If role already provided by context, trust it
       if (ctxRole) {
@@ -112,10 +95,6 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
         if (data?.role) sessionStorage.setItem('role', String(data.role));
       }
       setRoleLoading(false);
-      } finally {
-        // Libérer le verrou
-        globalLock.release(lockKey);
-      }
     };
 
     fetchRole();
@@ -132,7 +111,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
       isMounted = false;
       if (refreshTimeout) clearTimeout(refreshTimeout);
     };
-  }, [user?.id, ctxRole]); // Only depend on user.id, not the entire user object
+  }, [user?.id, ctxRole]); // Only depend on user.id and ctxRole
 
   useEffect(() => {
     if (!user || roleLoading) return;
