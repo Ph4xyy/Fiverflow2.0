@@ -132,8 +132,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // debouncedRefresh();
       };
       const onVisible = () => {
-        console.log('🔄 Visibility change - SKIPPED for debugging');
-        // if (document.visibilityState === 'visible') debouncedRefresh();
+        if (document.visibilityState === 'visible') {
+          try {
+            // Ensure UI is interactive and not stuck in loading after tab switch
+            setLoadingSafe(false);
+            // Best-effort refocus
+            window.focus?.();
+          } catch {}
+        }
       };
       window.addEventListener('focus', onFocus);
       document.addEventListener('visibilitychange', onVisible);

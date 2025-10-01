@@ -108,6 +108,17 @@ export const LoadingDebugger: React.FC = () => {
             <div>Focused: {document.hasFocus() ? '✅' : '❌'}</div>
           </div>
         </div>
+
+        <div className="pt-2">
+          <button
+            onClick={() => {
+              try { window.focus?.(); } catch {}
+            }}
+            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded"
+          >
+            Refocus Window
+          </button>
+        </div>
       </div>
     </div>
   );
