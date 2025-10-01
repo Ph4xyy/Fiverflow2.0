@@ -18,7 +18,7 @@ import SimpleTest from './components/SimpleTest';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
 
 // Core pages
-import LandingPage from './pages/LandingPage';
+import RootRedirect from './components/RootRedirect';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -75,8 +75,9 @@ function App() {
               <GlobalLoadingManager>
               <Suspense fallback={<div className="p-6"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-slate-500"></div></div>}>
               <Routes>
+              {/* Redirection racine intelligente */}
+              <Route path="/" element={<RootRedirect />} />
               {/* Pages publiques */}
-              <Route path="/" element={<LandingPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/support" element={<SupportPage />} />
               <Route path="/login" element={<LoginPage />} />
