@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { useLoading } from './LoadingContext';
 
 interface UserDataContextType {
   role: 'admin' | 'user';
@@ -14,12 +15,12 @@ const UserDataContext = createContext<UserDataContextType | undefined>(undefined
 export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [role, setRole] = useState<'admin' | 'user'>('user');
-  const [loading, setLoading] = useState(true);
+  const { setLoading, loading } = useLoading();
 
   const fetchUserRole = async () => {
     if (!user || !isSupabaseConfigured) {
       setRole('user');
-      setLoading(false);
+      setLoading('role', false);
       return;
     }
 
@@ -40,12 +41,12 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.error('💥 Unexpected error while fetching role:', err);
       setRole('user');
     } finally {
-      setLoading(false);
+      setLoading('role', false);
     }
   };
 
   useEffect(() => {
-    setLoading(true);
+    setLoading('role', true);
     fetchUserRole();
     
     // Debounced refresh to avoid multiple rapid calls
@@ -63,7 +64,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [user?.id]); // relancer si l'id change + sur resync
 
   return (
-    <UserDataContext.Provider value={{ role, loading, refreshUserRole: fetchUserRole }}>
+    <UserDataContext.Provider value={{ role, loading: loading.role, refreshUserRole: fetchUserRole }}>
       {children}
     </UserDataContext.Provider>
   );

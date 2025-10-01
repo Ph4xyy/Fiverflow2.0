@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserData } from '../contexts/UserDataContext';
+import { useLoading } from '../contexts/LoadingContext';
 import { authCache } from '../lib/authCache';
 
 interface OptimizedAuthState {
@@ -17,6 +18,7 @@ interface OptimizedAuthState {
 export const useOptimizedAuth = (): OptimizedAuthState => {
   const { user, loading: authLoading } = useAuth();
   const userData = useUserData();
+  const { loading: globalLoading } = useLoading();
   
   const [isInitialized, setIsInitialized] = useState(false);
   const refreshTimeoutRef = useRef<number | undefined>();
@@ -73,8 +75,8 @@ export const useOptimizedAuth = (): OptimizedAuthState => {
   
   return {
     user,
-    loading: authLoading || !isInitialized,
+    loading: authLoading || globalLoading.auth || !isInitialized,
     role: effectiveRole,
-    roleLoading
+    roleLoading: roleLoading || globalLoading.role
   };
 };

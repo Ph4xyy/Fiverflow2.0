@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import type { User, AuthError, Session, PostgrestError } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { useLoading } from './LoadingContext';
 
 interface AuthContextType {
   user: User | null;
@@ -15,7 +16,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { setLoading, loading } = useLoading();
   const mountedRef = useRef(true);
 
   const safeSetState = <T,>(setter: React.Dispatch<React.SetStateAction<T>>) =>
@@ -24,7 +25,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
   const setUserSafe = safeSetState(setUser);
-  const setLoadingSafe = safeSetState(setLoading);
 
   const deriveAndCacheRole = async (session: Session | null) => {
     try {
@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const init = async () => {
       if (!isSupabaseConfigured || !supabase) {
         setUserSafe(null);
-        setLoadingSafe(false);
+        setLoading('auth', false);
         return;
       }
 
@@ -77,12 +77,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUserSafe(session?.user ?? null);
       await deriveAndCacheRole(session);
-      setLoadingSafe(false);
+      setLoading('auth', false);
 
       const { data } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
         setUserSafe(nextSession?.user ?? null);
         await deriveAndCacheRole(nextSession);
-        setLoadingSafe(false);
+        setLoading('auth', false);
         try {
           window.dispatchEvent(new CustomEvent('ff:session:refreshed', { detail: { userId: nextSession?.user?.id || null } }));
         } catch {}

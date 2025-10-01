@@ -7,6 +7,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
+import { GlobalLoadingManager } from './components/GlobalLoadingManager';
+import LoadingDebugPanel from './components/LoadingDebugPanel';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
 
 // Core pages
@@ -63,7 +65,8 @@ function App() {
       <UserDataProvider>
         <Router>
           <AnalyticsWrapper>
-            <Suspense fallback={<div className="p-6"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-slate-500"></div></div>}>
+            <GlobalLoadingManager>
+              <Suspense fallback={<div className="p-6"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-slate-500"></div></div>}>
               <Routes>
               {/* Pages publiques */}
               <Route path="/" element={<LandingPage />} />
@@ -121,7 +124,9 @@ function App() {
               {/* Onboarding */}
               <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
               </Routes>
-            </Suspense>
+              </Suspense>
+            </GlobalLoadingManager>
+            <LoadingDebugPanel />
           </AnalyticsWrapper>
         </Router>
       </UserDataProvider>

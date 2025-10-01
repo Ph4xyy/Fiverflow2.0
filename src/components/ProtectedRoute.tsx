@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useOptimizedAuth } from '../hooks/useOptimizedAuth';
+import { useLoading } from '../contexts/LoadingContext';
+import { OptimizedLoadingScreen } from './OptimizedLoadingScreen';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,6 +12,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const { user, loading, role, roleLoading } = useOptimizedAuth();
+  const { loading: globalLoading } = useLoading();
   const location = useLocation();
   const [, setRefreshKey] = useState(0);
 
@@ -34,15 +37,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
     };
   }, []);
 
-  if (loading || roleLoading) {
-    console.log('🔄 ProtectedRoute: Loading state - auth:', loading, 'role:', roleLoading);
+  if (loading || roleLoading || globalLoading.auth || globalLoading.role) {
+    console.log('🔄 ProtectedRoute: Loading state - auth:', loading, 'role:', roleLoading, 'global:', globalLoading);
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-500 mx-auto" />
-          <p className="mt-2 text-gray-600 dark:text-gray-300">Checking session...</p>
-        </div>
-      </div>
+      <OptimizedLoadingScreen 
+        message="Checking session..." 
+        showSpinner={true}
+      />
     );
   }
 
