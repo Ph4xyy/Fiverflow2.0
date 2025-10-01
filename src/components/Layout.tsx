@@ -222,7 +222,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     // ✅ Build-safe classes
     const rowClass =
       isUpgrade
-        ? 'text-white bg-gradient-to-r from-accent-orange to-accent-yellow shadow-glow-orange hover:shadow-lg hover:-translate-y-0.5'
+        ? 'text-white bg-gradient-to-r from-amber-500 to-yellow-500 shadow-glow-orange hover:shadow-lg hover:-translate-y-0.5'
         : isRestricted
         ? 'text-slate-500/70 cursor-pointer'
         : isActive
@@ -271,7 +271,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
         )}
 
         {isActive && (
-          <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-accent-blue/10 shadow-[0_0_20px_rgba(74,158,255,0.12)]" />
+          <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-slate-400/10 shadow-[0_0_20px_rgba(100,116,139,0.12)]" />
         )}
       </Link>
     );
