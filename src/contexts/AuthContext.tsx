@@ -77,6 +77,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       try {
         console.log('🔍 AuthContext: Getting session...');
+        console.log('🔍 AuthContext: localStorage check:', {
+          hasLocalStorage: typeof window !== 'undefined' && window.localStorage,
+          authToken: typeof window !== 'undefined' ? localStorage.getItem('sb-auth-token') : 'N/A'
+        });
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -155,11 +159,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // 🔥 Timeout de sécurité réduit pour une authentification plus fluide
+    // 🔥 Timeout de sécurité pour éviter les loading infinis
     initTimeout = window.setTimeout(() => {
       console.warn('🚨 AuthContext: Initialization timeout, forcing completion');
       setLoadingSafe(false);
-    }, 2000); // Réduit de 5s à 2s
+    }, 5000); // Augmenté à 5s pour laisser le temps à la session de se charger
 
     init().finally(() => {
       if (initTimeout) {
