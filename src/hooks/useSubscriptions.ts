@@ -131,10 +131,10 @@ export const useSubscriptions = () => {
   // 🔥 Auto-fetch on mount and when user changes - éviter les loops
   useEffect(() => {
     if (user) {
-      // 🔥 Debounce pour éviter les appels multiples
+      // 🔥 Debounce minimal pour une authentification fluide
       const timeoutId = setTimeout(() => {
         fetchSubscriptions();
-      }, 200);
+      }, 50); // Réduit de 200ms à 50ms
       
       return () => clearTimeout(timeoutId);
     }

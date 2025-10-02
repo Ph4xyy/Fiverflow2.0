@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { AuthProvider } from './contexts/AuthContext';
 import { UserDataProvider } from './contexts/UserDataContext';
 import { LoadingProvider } from './contexts/LoadingContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import InstantProtectedRoute from './components/InstantProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
@@ -87,33 +87,33 @@ function App() {
 
               {/* Dashboard */}
               <Route path="/dashboard" element={
-                <ProtectedRoute>
+                <InstantProtectedRoute>
                   <DashboardPage />
-                </ProtectedRoute>
+                </InstantProtectedRoute>
               } />
 
               {/* Autres pages internes du dashboard */}
-              <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
-              <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
-              <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-              <Route path="/tasks" element={<ProtectedRoute><TasksPage /></ProtectedRoute>} />
-              <Route path="/templates" element={<ProtectedRoute><TemplatesPage /></ProtectedRoute>} />
-              <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-              <Route path="/network" element={<ProtectedRoute><NetworkPage /></ProtectedRoute>} />
-              <Route path="/upgrade" element={<ProtectedRoute><UpgradePage /></ProtectedRoute>} />
+              <Route path="/clients" element={<InstantProtectedRoute><ClientsPage /></InstantProtectedRoute>} />
+              <Route path="/orders" element={<InstantProtectedRoute><OrdersPage /></InstantProtectedRoute>} />
+              <Route path="/calendar" element={<InstantProtectedRoute><CalendarPage /></InstantProtectedRoute>} />
+              <Route path="/tasks" element={<InstantProtectedRoute><TasksPage /></InstantProtectedRoute>} />
+              <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
+              <Route path="/stats" element={<InstantProtectedRoute><StatsPage /></InstantProtectedRoute>} />
+              <Route path="/profile" element={<InstantProtectedRoute><ProfilePage /></InstantProtectedRoute>} />
+              <Route path="/network" element={<InstantProtectedRoute><NetworkPage /></InstantProtectedRoute>} />
+              <Route path="/upgrade" element={<InstantProtectedRoute><UpgradePage /></InstantProtectedRoute>} />
               <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-              <Route path="/success" element={<ProtectedRoute><SuccessPage /></ProtectedRoute>} />
+              <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
 
               {/* Nouvelle route : To-Do (Pro & Plus/Excellence seulement) */}
               <Route
                 path="/workspace/todo"
                 element={
-                  <ProtectedRoute>
+                  <InstantProtectedRoute>
                     <PlanGate feature="todo">
                       <TodoListPage />
                     </PlanGate>
-                  </ProtectedRoute>
+                  </InstantProtectedRoute>
                 }
               />
 
@@ -123,7 +123,7 @@ function App() {
               <Route path="/cookie-policy" element={<CookiePolicy />} />
 
               {/* Invoices */}
-              <Route path="/invoices" element={<ProtectedRoute><InvoicesLayout /></ProtectedRoute>}>
+              <Route path="/invoices" element={<InstantProtectedRoute><InvoicesLayout /></InstantProtectedRoute>}>
                 <Route index element={<InvoicesPage />} />
                 <Route path="sent" element={<InvoicesPage />} />
                 <Route path="create" element={<InvoicesPage />} />
@@ -132,7 +132,7 @@ function App() {
               </Route>
 
               {/* Onboarding */}
-              <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
+              <Route path="/onboarding" element={<InstantProtectedRoute><OnboardingPage /></InstantProtectedRoute>} />
               </Routes>
               </Suspense>
                 </GlobalLoadingManager>

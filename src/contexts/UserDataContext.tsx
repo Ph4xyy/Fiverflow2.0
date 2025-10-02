@@ -57,7 +57,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
 
-    // Check cache first to avoid unnecessary loading
+    // 🔥 Check cache first to avoid unnecessary loading
     const cachedRole = sessionStorage.getItem('role');
     if (cachedRole) {
       console.log('🔄 UserDataContext: Using cached role:', cachedRole);
@@ -66,9 +66,13 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
 
-    // Only fetch if no cached role
-    setLoading(true);
-    fetchUserRole(user.id);
+    // 🔥 Debounce minimal pour éviter les loading loops
+    const timeoutId = setTimeout(() => {
+      setLoading(true);
+      fetchUserRole(user.id);
+    }, 50); // Debounce minimal
+
+    return () => clearTimeout(timeoutId);
   }, [user?.id]); // Seulement dépendre de user?.id
 
   const refreshUserRole = useCallback(() => {

@@ -80,20 +80,20 @@ export const useSessionManager = () => {
       return;
     }
 
-    // Vérifier la session immédiatement
-    checkAndRefreshSession();
-
-    // Vérifier la session toutes les 2 minutes
+    // 🔥 Vérification immédiate seulement si nécessaire
+    // Ne pas vérifier automatiquement pour éviter les délais
+    
+    // 🔥 Vérifier la session toutes les 5 minutes (moins intrusif)
     sessionCheckIntervalRef.current = window.setInterval(() => {
       checkAndRefreshSession();
-    }, 2 * 60 * 1000);
+    }, 5 * 60 * 1000); // Réduit de 2min à 5min
 
-    // Écouter les changements de visibilité pour vérifier la session
+    // 🔥 Écouter les changements de visibilité de manière moins intrusive
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         const timeSinceLastCheck = Date.now() - lastSessionCheckRef.current;
-        // Vérifier seulement si ça fait plus de 30 secondes
-        if (timeSinceLastCheck > 30 * 1000) {
+        // 🔥 Vérifier seulement si ça fait plus de 2 minutes (moins intrusif)
+        if (timeSinceLastCheck > 2 * 60 * 1000) {
           checkAndRefreshSession();
         }
       }

@@ -107,7 +107,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
   useEffect(() => {
     if (!user || roleLoading) return;
 
-    // 🔥 Debounce pour éviter les recalculs multiples
+    // 🔥 Debounce minimal pour une authentification fluide
     const timeoutId = setTimeout(() => {
       // ADMIN OVERRIDE (guarantee admin full access regardless of plan)
       if (role === 'admin') {
@@ -181,7 +181,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
 
       setRestrictions(calculated);
       setError(null);
-    }, 100);
+    }, 50); // Réduit de 100ms à 50ms
 
     return () => clearTimeout(timeoutId);
   }, [user?.id, role, roleLoading, stripeSubscription]); // 🔥 Ajouter stripeSubscription aux dépendances

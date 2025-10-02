@@ -1,29 +1,46 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useOptimizedAuth } from '../hooks/useOptimizedAuth';
+import { useInstantAuth } from '../hooks/useInstantAuth';
 import { OptimizedLoadingScreen } from './OptimizedLoadingScreen';
 
-interface ProtectedRouteProps {
+interface InstantProtectedRouteProps {
   children: React.ReactNode;
   /** Set to true if this route requires admin role */
   requireAdmin?: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
-  const { user, loading, role, roleLoading } = useOptimizedAuth();
+/**
+ * Version ultra-optimisée de ProtectedRoute pour une authentification instantanée
+ * Évite complètement les loading loops
+ */
+const InstantProtectedRoute: React.FC<InstantProtectedRouteProps> = ({ children, requireAdmin = false }) => {
+  const { user, loading, role, roleLoading, isReady } = useInstantAuth();
   const location = useLocation();
   const [loadingTimeout, setLoadingTimeout] = React.useState(false);
 
-  // 🔥 Timeout de sécurité réduit pour une authentification plus fluide
+  // 🔥 Timeout ultra-court pour une authentification fluide
   React.useEffect(() => {
     const timeout = setTimeout(() => {
       setLoadingTimeout(true);
-    }, 3000); // Réduit de 8s à 3s
+    }, 1500); // Réduit à 1.5s
 
     return () => clearTimeout(timeout);
   }, []);
 
-  // Show loading screen while authentication is in progress
+  // 🔥 Si on a un cache, on peut rediriger immédiatement
+  if (isReady && !loading && !roleLoading) {
+    if (!user) {
+      return <Navigate to="/login" replace state={{ from: location }} />;
+    }
+
+    if (requireAdmin && role !== 'admin') {
+      return <Navigate to="/not-authorized" replace />;
+    }
+
+    return <>{children}</>;
+  }
+
+  // 🔥 Show loading screen seulement si vraiment nécessaire
   if ((loading || roleLoading) && !loadingTimeout) {
     return (
       <OptimizedLoadingScreen 
@@ -35,8 +52,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
 
   // 🔥 Si timeout, forcer la vérification
   if (loadingTimeout && (loading || roleLoading)) {
-    console.warn('🚨 ProtectedRoute: Loading timeout, forcing check');
-    // Forcer la vérification en redirigeant vers login si pas d'utilisateur
+    console.warn('🚨 InstantProtectedRoute: Loading timeout, forcing check');
     if (!user) {
       return <Navigate to="/login" replace state={{ from: location }} />;
     }
@@ -53,4 +69,4 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
   return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default InstantProtectedRoute;

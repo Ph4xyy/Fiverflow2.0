@@ -20,8 +20,8 @@ export const useTabSwitchOptimization = () => {
         // L'onglet redevient visible
         const timeSinceLastActivity = Date.now() - lastActivityRef.current;
         
-        // 🔥 Vérifier la session si l'onglet a été inactif pendant plus de 2 minutes
-        if (timeSinceLastActivity > 2 * 60 * 1000) {
+        // 🔥 Vérifier la session seulement si l'onglet a été inactif pendant plus de 5 minutes
+        if (timeSinceLastActivity > 5 * 60 * 1000) {
           lastActivityRef.current = Date.now();
           
           // 🔥 Vérification silencieuse de la session sans déclencher de loading
@@ -48,7 +48,7 @@ export const useTabSwitchOptimization = () => {
             } catch (err) {
               console.log('🔄 Tab refocus: Session check error:', err);
             }
-          }, 500); // Petit délai pour éviter les appels multiples
+          }, 100); // Réduit de 500ms à 100ms
         }
       } else {
         // L'onglet devient invisible, enregistrer le timestamp
@@ -86,7 +86,7 @@ export const useTabSwitchOptimization = () => {
 
   return {
     isTabVisible,
-    shouldRefresh: (minInactiveMinutes = 2) => {
+    shouldRefresh: (minInactiveMinutes = 5) => { // Changé de 2 à 5 minutes
       const timeSinceLastActivity = Date.now() - lastActivityRef.current;
       return timeSinceLastActivity > minInactiveMinutes * 60 * 1000;
     }

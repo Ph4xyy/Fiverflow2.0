@@ -155,11 +155,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // 🔥 Timeout de sécurité pour éviter les chargements infinis
+    // 🔥 Timeout de sécurité réduit pour une authentification plus fluide
     initTimeout = window.setTimeout(() => {
       console.warn('🚨 AuthContext: Initialization timeout, forcing completion');
       setLoadingSafe(false);
-    }, 5000);
+    }, 2000); // Réduit de 5s à 2s
 
     init().finally(() => {
       if (initTimeout) {
