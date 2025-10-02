@@ -44,7 +44,7 @@ export const useInstantAuth = (): InstantAuthState => {
         setIsReady(true);
       }
     }
-  }, [authLoading, user, roleFromSessionCache, roleFromMeta]);
+  }, [authLoading, user]); // 🔥 FIXED: Remove roleFromSessionCache and roleFromMeta from dependencies to prevent infinite loops
 
   // 🔥 Marquer comme prêt dès que l'auth est terminée
   useEffect(() => {

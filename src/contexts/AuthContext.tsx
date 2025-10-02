@@ -209,7 +209,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      setUserSafe(data.user ?? null);
+      // 🔥 FIXED: Ne pas mettre à jour l'état directement ici, laisser onAuthStateChange le faire
+      // setUserSafe(data.user ?? null);
       await deriveAndCacheRole(data.session ?? null);
       return { user: data.user, error };
     } catch (error) {
