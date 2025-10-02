@@ -13,11 +13,13 @@ export const supabase: SupabaseClient | null = isSupabaseConfigured
         detectSessionInUrl: true,
         flowType: 'pkce',
         // 🔥 Configuration améliorée pour la persistance
-        storage: window.localStorage,
+        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
         storageKey: 'sb-auth-token',
         // 🔥 Refresh token plus agressif
         refreshTokenRetryInterval: 1000,
         refreshTokenRetryAttempts: 3,
+        // 🔥 Configuration pour éviter les problèmes de persistance
+        debug: import.meta.env.DEV,
       },
     })
   : null;
