@@ -107,79 +107,84 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
   useEffect(() => {
     if (!user || roleLoading) return;
 
-    // ADMIN OVERRIDE (guarantee admin full access regardless of plan)
-    if (role === 'admin') {
-      const adminRestrictions: PlanRestrictions = {
-        plan: 'excellence',
-        canAccessCalendar: true,
-        canAccessReferrals: true,
-        canAccessStats: true,
-        canAccessTasks: true,
-        canAccessInvoices: true,
-        isTrialActive: false,
-        trialDaysRemaining: null,
-        isAdmin: true
+    // 🔥 Debounce pour éviter les recalculs multiples
+    const timeoutId = setTimeout(() => {
+      // ADMIN OVERRIDE (guarantee admin full access regardless of plan)
+      if (role === 'admin') {
+        const adminRestrictions: PlanRestrictions = {
+          plan: 'excellence',
+          canAccessCalendar: true,
+          canAccessReferrals: true,
+          canAccessStats: true,
+          canAccessTasks: true,
+          canAccessInvoices: true,
+          isTrialActive: false,
+          trialDaysRemaining: null,
+          isAdmin: true
+        };
+        setRestrictions(adminRestrictions);
+        setError(null);
+        return;
+      }
+
+      // Default role = user
+      let plan: UserPlan = 'free';
+      let isTrialActive = false;
+      let trialDaysRemaining: number | null = null;
+
+      // Stripe subscription parsing
+      let isPaidActive = false; // only true when subscription is actually active (not trial)
+      if (stripeSubscription) {
+        switch (stripeSubscription.price_id) {
+          // PRO
+          case 'price_1RoRLDENcVsHr4WI6TViAPNb':
+          case 'price_1RoXOgENcVsHr4WIitiOEaaz':
+            plan = 'pro';
+            break;
+          // EXCELLENCE (a.k.a. Plus)
+          case 'price_1RoRMdENcVsHr4WIVRYCy8JL':
+          case 'price_1RoXNwENcVsHr4WI3SP8AYYu':
+            plan = 'excellence';
+            break;
+        }
+
+        isTrialActive = stripeSubscription.subscription_status === 'trialing';
+        isPaidActive = stripeSubscription.subscription_status === 'active';
+
+        if (isTrialActive && stripeSubscription.current_period_end) {
+          const end = new Date(stripeSubscription.current_period_end * 1000);
+          const now = new Date();
+          const daysLeft = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          trialDaysRemaining = Math.max(0, daysLeft);
+        }
+      }
+
+      const calculated: PlanRestrictions = {
+        plan,
+        // Calendar & Tasks (& Todo): available for PRO/EXCELLENCE and also during trial
+        canAccessCalendar: plan !== 'free' || isTrialActive,
+        canAccessTasks: plan !== 'free' || isTrialActive,
+
+        // Referrals: only for paying users (active subscription)
+        canAccessReferrals: isPaidActive,
+
+        // Invoices: Excellence only
+        canAccessInvoices: plan === 'excellence',
+
+        // Stats: Excellence only
+        canAccessStats: plan === 'excellence',
+
+        isTrialActive,
+        trialDaysRemaining,
+        isAdmin: false
       };
-      setRestrictions(adminRestrictions);
+
+      setRestrictions(calculated);
       setError(null);
-      return;
-    }
+    }, 100);
 
-    // Default role = user
-    let plan: UserPlan = 'free';
-    let isTrialActive = false;
-    let trialDaysRemaining: number | null = null;
-
-    // Stripe subscription parsing
-    let isPaidActive = false; // only true when subscription is actually active (not trial)
-    if (stripeSubscription) {
-      switch (stripeSubscription.price_id) {
-        // PRO
-        case 'price_1RoRLDENcVsHr4WI6TViAPNb':
-        case 'price_1RoXOgENcVsHr4WIitiOEaaz':
-          plan = 'pro';
-          break;
-        // EXCELLENCE (a.k.a. Plus)
-        case 'price_1RoRMdENcVsHr4WIVRYCy8JL':
-        case 'price_1RoXNwENcVsHr4WI3SP8AYYu':
-          plan = 'excellence';
-          break;
-      }
-
-      isTrialActive = stripeSubscription.subscription_status === 'trialing';
-      isPaidActive = stripeSubscription.subscription_status === 'active';
-
-      if (isTrialActive && stripeSubscription.current_period_end) {
-        const end = new Date(stripeSubscription.current_period_end * 1000);
-        const now = new Date();
-        const daysLeft = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-        trialDaysRemaining = Math.max(0, daysLeft);
-      }
-    }
-
-    const calculated: PlanRestrictions = {
-      plan,
-      // Calendar & Tasks (& Todo): available for PRO/EXCELLENCE and also during trial
-      canAccessCalendar: plan !== 'free' || isTrialActive,
-      canAccessTasks: plan !== 'free' || isTrialActive,
-
-      // Referrals: only for paying users (active subscription)
-      canAccessReferrals: isPaidActive,
-
-      // Invoices: Excellence only
-      canAccessInvoices: plan === 'excellence',
-
-      // Stats: Excellence only
-      canAccessStats: plan === 'excellence',
-
-      isTrialActive,
-      trialDaysRemaining,
-      isAdmin: false
-    };
-
-    setRestrictions(calculated);
-    setError(null);
-  }, [user?.id, role, roleLoading]); // Seulement dépendre de user.id
+    return () => clearTimeout(timeoutId);
+  }, [user?.id, role, roleLoading, stripeSubscription]); // 🔥 Ajouter stripeSubscription aux dépendances
 
   const checkAccess = (feature: FeatureKey) => {
     if (!restrictions) return false;

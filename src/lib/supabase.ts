@@ -12,6 +12,12 @@ export const supabase: SupabaseClient | null = isSupabaseConfigured
         autoRefreshToken: true,
         detectSessionInUrl: true,
         flowType: 'pkce',
+        // 🔥 Configuration améliorée pour la persistance
+        storage: window.localStorage,
+        storageKey: 'sb-auth-token',
+        // 🔥 Refresh token plus agressif
+        refreshTokenRetryInterval: 1000,
+        refreshTokenRetryAttempts: 3,
       },
     })
   : null;

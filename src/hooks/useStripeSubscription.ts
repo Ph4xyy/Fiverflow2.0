@@ -159,15 +159,15 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
   useEffect(() => {
     const currentUserId = user?.id || null;
     
-    // Ne fetch que si l'utilisateur change ou si on n'a pas encore fetché
+    // 🔥 Ne fetch que si l'utilisateur change ou si on n'a pas encore fetché
     if (currentUserId && (currentUserId !== lastUserIdRef.current || !hasFetchedRef.current)) {
       lastUserIdRef.current = currentUserId;
       hasFetchedRef.current = true;
       
-      // Debounce pour éviter les appels multiples
+      // 🔥 Debounce plus long pour éviter les appels multiples
       const timeoutId = setTimeout(() => {
         fetchSubscription();
-      }, 100);
+      }, 300);
       
       return () => clearTimeout(timeoutId);
     } else if (!currentUserId) {
@@ -177,7 +177,7 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
       setSubscription(null);
       setLoading(false);
     }
-  }, [user?.id, fetchSubscription]); // Add fetchSubscription to dependencies
+  }, [user?.id]); // 🔥 Retirer fetchSubscription des dépendances pour éviter les loops
 
   return {
     subscription,

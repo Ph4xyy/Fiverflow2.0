@@ -10,17 +10,12 @@ import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
 import { GlobalLoadingManager } from './components/GlobalLoadingManager';
-import LoadingDebugger from './components/LoadingDebugger';
-import LoadingTest from './components/LoadingTest';
-import DatabaseTest from './components/DatabaseTest';
-import DebugShortcuts from './components/DebugShortcuts';
-import KeyboardTest from './components/KeyboardTest';
-import SimpleTest from './components/SimpleTest';
 import DiagnosticPanel from './components/DiagnosticPanel';
 import EnvironmentDiagnostic from './components/EnvironmentDiagnostic';
-import EmergencyFallback from './components/EmergencyFallback';
 import SessionTest from './components/SessionTest';
+import AuthDiagnostic from './components/AuthDiagnostic';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
+import { useSessionManager } from './hooks/useSessionManager';
 
 // Core pages
 import RootRedirect from './components/RootRedirect';
@@ -78,7 +73,8 @@ function App() {
           <AnalyticsWrapper>
             <LoadingProvider>
               <UserDataProvider>
-                <GlobalLoadingManager>
+                <SessionManagerWrapper>
+                  <GlobalLoadingManager>
               <Suspense fallback={<div className="p-6"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-slate-500"></div></div>}>
               <Routes>
               {/* Redirection racine intelligente */}
@@ -140,12 +136,14 @@ function App() {
               </Routes>
               </Suspense>
                 </GlobalLoadingManager>
+                </SessionManagerWrapper>
                      {/* Composants de debug - seulement en développement */}
                      {import.meta.env.DEV && (
                        <>
                          <DiagnosticPanel />
                          <EnvironmentDiagnostic />
                          <SessionTest />
+                         <AuthDiagnostic />
                        </>
                      )}
               </UserDataProvider>
@@ -158,5 +156,13 @@ function App() {
     </AppErrorBoundary>
   );
 }
+
+/**
+ * Wrapper pour initialiser le gestionnaire de session
+ */
+const SessionManagerWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  useSessionManager(); // Initialiser le gestionnaire de session
+  return <>{children}</>;
+};
 
 export default App;

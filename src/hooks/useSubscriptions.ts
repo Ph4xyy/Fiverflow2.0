@@ -128,12 +128,17 @@ export const useSubscriptions = () => {
     return await updateSubscription(id, { is_active: !subscription.is_active });
   }, [subscriptions, updateSubscription]);
 
-  // Auto-fetch on mount and when user changes
+  // 🔥 Auto-fetch on mount and when user changes - éviter les loops
   useEffect(() => {
     if (user) {
-      fetchSubscriptions();
+      // 🔥 Debounce pour éviter les appels multiples
+      const timeoutId = setTimeout(() => {
+        fetchSubscriptions();
+      }, 200);
+      
+      return () => clearTimeout(timeoutId);
     }
-  }, [user?.id, fetchSubscriptions]); // Add fetchSubscriptions to dependencies
+  }, [user?.id]); // 🔥 Retirer fetchSubscriptions des dépendances pour éviter les loops
 
   return {
     subscriptions,

@@ -63,6 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     mountedRef.current = true;
 
     let unsubscribe: (() => void) | undefined;
+    let initTimeout: number | undefined;
 
     const init = async () => {
       console.log('🔐 AuthContext: Initializing...');
@@ -74,63 +75,102 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      console.log('🔍 AuthContext: Getting session...');
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('[Auth] getSession error:', error.message);
-      } else {
+      try {
+        console.log('🔍 AuthContext: Getting session...');
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('[Auth] getSession error:', error.message);
+          // 🔥 Si erreur de session, essayer de rafraîchir le token
+          if (error.message.includes('refresh_token') || error.message.includes('expired')) {
+            console.log('🔄 AuthContext: Attempting token refresh...');
+            try {
+              const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+              if (!refreshError && refreshData.session) {
+                console.log('✅ AuthContext: Token refreshed successfully');
+                setUserSafe(refreshData.session.user);
+                await deriveAndCacheRole(refreshData.session);
+                setLoadingSafe(false);
+                return;
+              }
+            } catch (refreshErr) {
+              console.error('❌ AuthContext: Token refresh failed:', refreshErr);
+            }
+          }
+          setUserSafe(null);
+          setLoadingSafe(false);
+          return;
+        }
+
         console.log('✅ AuthContext: Session retrieved', {
           hasSession: !!session,
           hasUser: !!session?.user,
-          userId: session?.user?.id
+          userId: session?.user?.id,
+          expiresAt: session?.expires_at
         });
-      }
 
-      setUserSafe(session?.user ?? null);
-      await deriveAndCacheRole(session);
-      setLoadingSafe(false);
-      console.log('🏁 AuthContext: Initialization complete');
-
-      const { data } = supabase.auth.onAuthStateChange(async (event, nextSession) => {
-        console.log('🔄 AuthContext: Auth state changed', {
-          event,
-          hasSession: !!nextSession,
-          hasUser: !!nextSession?.user,
-          userId: nextSession?.user?.id
-        });
-        
-        setUserSafe(nextSession?.user ?? null);
-        await deriveAndCacheRole(nextSession);
+        setUserSafe(session?.user ?? null);
+        await deriveAndCacheRole(session);
         setLoadingSafe(false);
-        
-        // Emit cleanup event to clean up problematic listeners
-        try {
-          window.dispatchEvent(new CustomEvent('ff:cleanup', { detail: { userId: nextSession?.user?.id || null } }));
-        } catch {}
-      });
+        console.log('🏁 AuthContext: Initialization complete');
 
-      unsubscribe = () => {
-        try {
-          data.subscription.unsubscribe();
-        } catch {
-          // already unsubscribed / hot-reload safety
-        }
-      };
+        const { data } = supabase.auth.onAuthStateChange(async (event, nextSession) => {
+          console.log('🔄 AuthContext: Auth state changed', {
+            event,
+            hasSession: !!nextSession,
+            hasUser: !!nextSession?.user,
+            userId: nextSession?.user?.id
+          });
+          
+          // 🔥 Gestion spéciale pour les événements de refresh
+          if (event === 'TOKEN_REFRESHED') {
+            console.log('🔄 AuthContext: Token refreshed automatically');
+          } else if (event === 'SIGNED_OUT') {
+            console.log('🚪 AuthContext: User signed out');
+            sessionStorage.removeItem('role');
+          }
+          
+          setUserSafe(nextSession?.user ?? null);
+          await deriveAndCacheRole(nextSession);
+          setLoadingSafe(false);
+          
+          // Emit cleanup event to clean up problematic listeners
+          try {
+            window.dispatchEvent(new CustomEvent('ff:cleanup', { detail: { userId: nextSession?.user?.id || null } }));
+          } catch {}
+        });
 
-      // No visibility change listeners - let useTabSwitchOptimization handle this
-      // attach to unsubscribe chain
-      const oldUnsub = unsubscribe;
-      unsubscribe = () => {
-        if (oldUnsub) oldUnsub();
-      };
+        unsubscribe = () => {
+          try {
+            data.subscription.unsubscribe();
+          } catch {
+            // already unsubscribed / hot-reload safety
+          }
+        };
+
+      } catch (err) {
+        console.error('💥 AuthContext: Initialization error:', err);
+        setUserSafe(null);
+        setLoadingSafe(false);
+      }
     };
 
-    init();
+    // 🔥 Timeout de sécurité pour éviter les chargements infinis
+    initTimeout = window.setTimeout(() => {
+      console.warn('🚨 AuthContext: Initialization timeout, forcing completion');
+      setLoadingSafe(false);
+    }, 5000);
+
+    init().finally(() => {
+      if (initTimeout) {
+        clearTimeout(initTimeout);
+      }
+    });
 
     return () => {
       mountedRef.current = false;
       if (unsubscribe) unsubscribe();
+      if (initTimeout) clearTimeout(initTimeout);
     };
   }, []);
 
