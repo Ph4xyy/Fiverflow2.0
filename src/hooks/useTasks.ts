@@ -481,7 +481,7 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
 
   useEffect(() => {
     fetchTasks();
-  }, [user?.id, orderId]); // Remove fetchTasks from dependencies to prevent infinite loops
+  }, [user?.id, orderId]); // 🔥 FIXED: Remove fetchTasks from dependencies to prevent infinite loops
 
   return {
     tasks,

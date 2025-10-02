@@ -197,7 +197,7 @@ const CalendarPage: React.FC = () => {
     };
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
     return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-  }, [fetchAll]);
+  }, []); // 🔥 FIXED: Empty dependencies to prevent infinite loops
 
   /* ---------------- Build events ---------------- */
   const filteredOrders = useMemo(() => {

@@ -144,7 +144,7 @@ export function useInvoices() {
 
   useEffect(() => {
     fetchInvoices();
-  }, [user?.id, fetchInvoices]); // Add fetchInvoices to dependencies
+  }, [user?.id]); // 🔥 FIXED: Remove fetchInvoices from dependencies to prevent infinite loops
 
   const createInvoice = useCallback(async (data: CreateInvoiceData) => {
     if (!user) {

@@ -194,7 +194,7 @@ const OrdersPage: React.FC = () => {
     };
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
     return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-  }, [fetchOrders]);
+  }, []); // 🔥 FIXED: Empty dependencies to prevent infinite loops
 
   const handleAddOrder = async () => {
     const canAdd = await checkOrderLimit();

@@ -196,7 +196,7 @@ const ClientsPage: React.FC = () => {
     };
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
     return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-  }, []); // Remove fetchClients from dependencies to prevent infinite loops
+  }, []); // 🔥 FIXED: Empty dependencies to prevent infinite loops
 
   const openCreate = () => {
     setEditingClient(null);

@@ -168,7 +168,7 @@ const ProfilePage: React.FC = () => {
     };
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
     return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-  }, [fetchProfile, fetchPreferences, fetchSmtpSettings]);
+  }, []); // 🔥 FIXED: Empty dependencies to prevent infinite loops
 
   /* ---------- Chargement profil (d’origine) ---------- */
   const fetchProfile = async () => {
