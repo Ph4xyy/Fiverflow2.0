@@ -107,7 +107,7 @@ export const useSessionManager = () => {
       }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [user?.id, checkAndRefreshSession]);
+  }, [user?.id]); // 🔥 FIXED: Remove checkAndRefreshSession from dependencies to prevent infinite loops
 
   return {
     checkAndRefreshSession

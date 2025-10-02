@@ -60,7 +60,7 @@ export const useOptimizedLoading = (options: UseOptimizedLoadingOptions) => {
     if (initialLoading) {
       setLoadingState(true);
     }
-  }, [initialLoading, setLoadingState]);
+  }, [initialLoading]); // 🔥 FIXED: Remove setLoadingState from dependencies to prevent infinite loops
 
   return {
     loading: loading[key as keyof typeof loading] || false,

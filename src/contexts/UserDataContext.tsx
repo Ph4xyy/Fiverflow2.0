@@ -79,7 +79,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (user?.id) {
       fetchUserRole(user.id);
     }
-  }, [user?.id, fetchUserRole]);
+  }, [user?.id]); // 🔥 FIXED: Remove fetchUserRole from dependencies to prevent infinite loops
 
   return (
     <UserDataContext.Provider value={{ role, loading, refreshUserRole }}>

@@ -129,7 +129,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       
       fetchRole();
     }
-  }, [user]);
+  }, [user?.id]); // 🔥 FIXED: Only depend on user.id to prevent infinite loops
 
   const isAdmin = useIsAdminFromEverywhere(user, userRole);
 
