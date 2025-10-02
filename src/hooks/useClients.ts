@@ -95,7 +95,7 @@ export const useClients = (): UseClientsReturn => {
   const refetchClients = useCallback(async () => {
     hasFetchedRef.current = false;
     await fetchClients();
-  }, [fetchClients]);
+  }, []); // 🔥 FIXED: Remove fetchClients from dependencies to prevent infinite loops
 
   useEffect(() => {
     if (!hasFetchedRef.current && user !== undefined) {

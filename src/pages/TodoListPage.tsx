@@ -311,7 +311,7 @@ const TodoListPage: React.FC = () => {
     };
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
     return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-  }, [loadAll]);
+  }, []); // 🔥 FIXED: Remove loadAll from dependencies to prevent infinite loops
 
   /* ----------- CALENDAR UPSERT ----------- */
   const upsertCalendar = useCallback(async (task: TaskRow) => {

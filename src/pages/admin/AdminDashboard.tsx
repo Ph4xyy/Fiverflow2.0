@@ -106,7 +106,7 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     void loadAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user]); // 🔥 FIXED: Remove loadAll from dependencies to prevent infinite loops
 
   const preset = (days: number) => {
     const today = new Date(); today.setHours(0,0,0,0);

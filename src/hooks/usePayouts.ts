@@ -255,7 +255,7 @@ export const usePayouts = (): UsePayoutsReturn => {
       console.error('💥 Error checking account status:', error);
       toast.error('Failed to check account status');
     }
-  }, [user, fetchPayoutData]);
+  }, [user]); // 🔥 FIXED: Remove fetchPayoutData from dependencies to prevent infinite loops
 
   const requestPayout = useCallback(async (amount: number): Promise<boolean> => {
     console.log('💸 Requesting payout:', amount);
@@ -309,15 +309,15 @@ export const usePayouts = (): UsePayoutsReturn => {
       toast.error(error instanceof Error ? error.message : 'Failed to request payout');
       return false;
     }
-  }, [user, fetchPayoutData]);
+  }, [user]); // 🔥 FIXED: Remove fetchPayoutData from dependencies to prevent infinite loops
 
   const refreshData = useCallback(async () => {
     await fetchPayoutData();
-  }, [fetchPayoutData]);
+  }, []); // 🔥 FIXED: Remove fetchPayoutData from dependencies to prevent infinite loops
 
   useEffect(() => {
     fetchPayoutData();
-  }, [fetchPayoutData]);
+  }, [user?.id]); // 🔥 FIXED: Only depend on user.id to prevent infinite loops
 
   return {
     payoutDetails,

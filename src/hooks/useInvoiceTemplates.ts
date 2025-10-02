@@ -99,7 +99,7 @@ export function useInvoiceTemplates(userId?: string | null) {
       await fetchAll();
       return data as { id: string };
     },
-    [userId, items.length, fetchAll]
+    [userId, items.length] // 🔥 FIXED: Remove fetchAll from dependencies to prevent infinite loops
   );
 
   const update = useCallback(
@@ -116,7 +116,7 @@ export function useInvoiceTemplates(userId?: string | null) {
       if (error) throw error;
       await fetchAll();
     },
-    [fetchAll]
+    [] // 🔥 FIXED: Remove fetchAll from dependencies to prevent infinite loops
   );
 
   const remove = useCallback(
@@ -128,7 +128,7 @@ export function useInvoiceTemplates(userId?: string | null) {
       await supabase.from("invoice_templates").delete().eq("id", id);
       await fetchAll();
     },
-    [fetchAll]
+    [] // 🔥 FIXED: Remove fetchAll from dependencies to prevent infinite loops
   );
 
   const duplicate = useCallback(
@@ -165,7 +165,7 @@ export function useInvoiceTemplates(userId?: string | null) {
       if (error) throw error;
       await fetchAll();
     },
-    [items, userId, fetchAll]
+    [items, userId] // 🔥 FIXED: Remove fetchAll from dependencies to prevent infinite loops
   );
 
   const setDefault = useCallback(
@@ -179,7 +179,7 @@ export function useInvoiceTemplates(userId?: string | null) {
       await supabase.from("invoice_templates").update({ is_default: true }).eq("id", id);
       await fetchAll();
     },
-    [userId, fetchAll]
+    [userId] // 🔥 FIXED: Remove fetchAll from dependencies to prevent infinite loops
   );
 
   return { loading, items, error, fetchAll, create, update, remove, duplicate, setDefault };

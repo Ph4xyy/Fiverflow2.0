@@ -85,14 +85,14 @@ export const useAnalytics = () => {
     if (user) {
       trackPageView(location.pathname, document.title);
     }
-  }, [location.pathname, user, trackPageView]);
+  }, [location.pathname, user?.id]); // 🔥 FIXED: Remove trackPageView from dependencies to prevent infinite loops
 
   // Démarrer une session au montage du composant
   useEffect(() => {
     if (user) {
       startSession();
     }
-  }, [user, startSession]);
+  }, [user?.id]); // 🔥 FIXED: Remove startSession from dependencies to prevent infinite loops
 
   // Mettre à jour l'activité toutes les 5 minutes
   useEffect(() => {
@@ -100,7 +100,7 @@ export const useAnalytics = () => {
 
     const interval = setInterval(updateActivity, 5 * 60 * 1000); // 5 minutes
     return () => clearInterval(interval);
-  }, [user, updateActivity]);
+  }, [user?.id]); // 🔥 FIXED: Remove updateActivity from dependencies to prevent infinite loops
 
   // Terminer la session à la fermeture de l'onglet
   useEffect(() => {
@@ -115,7 +115,7 @@ export const useAnalytics = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       endSession();
     };
-  }, [user, endSession]);
+  }, [user?.id]); // 🔥 FIXED: Remove endSession from dependencies to prevent infinite loops
 
   return {
     trackPageView,

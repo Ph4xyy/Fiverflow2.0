@@ -154,7 +154,7 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
 
   const refreshSubscription = useCallback(async () => {
     await fetchSubscription();
-  }, [fetchSubscription]);
+  }, []); // 🔥 FIXED: Remove fetchSubscription from dependencies to prevent infinite loops
 
   useEffect(() => {
     const currentUserId = user?.id || null;

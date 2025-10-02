@@ -175,7 +175,7 @@ export const usePlanLimits = (): UsePlanLimitsReturn => {
 
     console.log('✅ Client limit check passed');
     return true;
-  }, [restrictions, limits, fetchLimits, navigate]);
+  }, [restrictions, limits, navigate]); // 🔥 FIXED: Remove fetchLimits from dependencies to prevent infinite loops
 
   const checkOrderLimit = useCallback(async (): Promise<boolean> => {
     console.log('🔍 Checking order limit...');
@@ -196,17 +196,17 @@ export const usePlanLimits = (): UsePlanLimitsReturn => {
 
     console.log('✅ Order limit check passed');
     return true;
-  }, [restrictions, limits, fetchLimits, navigate]);
+  }, [restrictions, limits, navigate]); // 🔥 FIXED: Remove fetchLimits from dependencies to prevent infinite loops
 
   const refreshLimits = useCallback(async () => {
     await fetchLimits();
-  }, [fetchLimits]);
+  }, []); // 🔥 FIXED: Remove fetchLimits from dependencies to prevent infinite loops
 
   useEffect(() => {
     if (user && restrictions) {
       fetchLimits();
     }
-  }, [user, restrictions, fetchLimits]);
+  }, [user?.id, restrictions?.plan]); // 🔥 FIXED: Remove fetchLimits from dependencies to prevent infinite loops
 
   return {
     limits,

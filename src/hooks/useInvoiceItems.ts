@@ -211,7 +211,7 @@ export function useInvoiceItems(invoiceId?: string) {
       toast.error(errorMessage);
       throw err;
     }
-  }, [user, items, fetchItems]);
+  }, [user]); // 🔥 FIXED: Remove items and fetchItems from dependencies to prevent infinite loops
 
   const deleteItem = useCallback(async (id: string) => {
     if (!user) {
@@ -290,7 +290,7 @@ export function useInvoiceItems(invoiceId?: string) {
       toast.error(errorMessage);
       throw err;
     }
-  }, [user, items, fetchItems]);
+  }, [user]); // 🔥 FIXED: Remove items and fetchItems from dependencies to prevent infinite loops
 
   const getItem = useCallback(async (id: string) => {
     if (!user) {

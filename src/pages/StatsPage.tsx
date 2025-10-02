@@ -184,7 +184,7 @@ const StatsPage: React.FC = () => {
     fetchStatsData();
     const i = setInterval(fetchStatsData, 30000);
     return () => clearInterval(i);
-  }, [fetchStatsData, user, authLoading]);
+  }, [user, authLoading]); // 🔥 FIXED: Remove fetchStatsData from dependencies to prevent infinite loops
 
   useEffect(() => {
     if (!isSupabaseConfigured || !user) return;
