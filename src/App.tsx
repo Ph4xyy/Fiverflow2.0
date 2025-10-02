@@ -152,7 +152,8 @@ function App() {
             </LoadingProvider>
           </AnalyticsWrapper>
         </Router>
-        <EmergencyFallback />
+        {/* EmergencyFallback temporairement désactivé pour debugging */}
+        {/* <EmergencyFallback /> */}
       </AuthProvider>
     </AppErrorBoundary>
   );
