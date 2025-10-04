@@ -317,15 +317,21 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
     console.log("[InvoiceForm] Before processing:", { items, form });
     
-    const norm = normalizeItems(items);
-    console.log("[InvoiceForm] Normalized items:", norm);
+    // Check if user has actually added any items with content
+    const hasValidItems = items.some(item => 
+      item.description?.trim() && 
+      item.quantity > 0 && 
+      item.unit_price > 0
+    );
     
-    // Ensure we have at least one valid item
-    if (norm.length === 0) {
+    if (!hasValidItems) {
       toast.error("Ajoutez au moins un article valide avec description, quantité et prix");
       setCurrentStep(2); // Go back to items step
       return;
     }
+    
+    const norm = normalizeItems(items);
+    console.log("[InvoiceForm] Normalized items:", norm);
     
     const totals = computeInvoice({
       items: norm,
