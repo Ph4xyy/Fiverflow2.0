@@ -153,16 +153,16 @@ const TemplateStylePanel: React.FC<Props> = ({ value, onChange }) => {
           <div className="flex items-center gap-2">
             <input
               type="color"
-              value={s.tableStripeColor || "#f3f4f6"}
+              value={s.tableStripeColor || "#f8f9fa"}
               onChange={(e) => onChange({ ...value, style: { ...s, tableStripeColor: e.target.value } })}
               className="h-9 w-14 p-0 border border-gray-300 dark:border-slate-700 rounded"
             />
             <input
               type="text"
-              value={s.tableStripeColor || "#f3f4f6"}
+              value={s.tableStripeColor || "#f8f9fa"}
               onChange={(e) => onChange({ ...value, style: { ...s, tableStripeColor: e.target.value } })}
               className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
-              placeholder="#f3f4f6"
+              placeholder="#f8f9fa"
             />
           </div>
         </Field>
@@ -171,12 +171,12 @@ const TemplateStylePanel: React.FC<Props> = ({ value, onChange }) => {
           <input
             type="range"
             min="0"
-            max="100"
-            value={s.tableStripeOpacity || 10}
+            max="15"
+            value={s.tableStripeOpacity || 5}
             onChange={(e) => onChange({ ...value, style: { ...s, tableStripeOpacity: Number(e.target.value) } })}
             className="w-full"
           />
-          <div className="text-xs text-gray-500">{s.tableStripeOpacity || 10}%</div>
+          <div className="text-xs text-gray-500">{s.tableStripeOpacity || 5}% (max 15%)</div>
         </Field>
 
         <label className="flex items-center gap-2">

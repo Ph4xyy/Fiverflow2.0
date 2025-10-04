@@ -224,15 +224,15 @@ export async function renderInvoiceWithTemplateToPdf(
       const descLines = doc.splitTextToSize(it.description || "—", colQty - colDesc - 12);
       const lineTotal = it.line_total ?? it.quantity * it.unit_price;
       if (schema.style.tableStripe && i % 2 === 1) {
-        // Customizable stripe color and opacity
-        const stripeColor = schema.style.tableStripeColor || "#f3f4f6";
-        const opacity = (schema.style.tableStripeOpacity || 10) / 100;
+        // Light stripes with better default
+        const stripeColor = schema.style.tableStripeColor || "#f8f9fa";
+        const opacity = Math.min((schema.style.tableStripeOpacity || 5) / 100, 0.15);
         const rgb = hexToRgb(stripeColor);
         
         if (rgb) {
           doc.setFillColor(rgb.r, rgb.g, rgb.b, opacity);
         } else {
-          doc.setFillColor(245);
+          doc.setFillColor(250, 250, 250, 0.1);
         }
         doc.rect(margin - 4, y - 10, 548 - margin, 22, "F");
       }
