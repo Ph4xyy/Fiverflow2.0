@@ -5,7 +5,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useInvoiceTemplates } from "@/hooks/useInvoiceTemplates";
 import type { InvoiceTemplate, TemplateSchema } from "@/types/invoiceTemplate";
 import TemplateStylePanel from "@/components/invoices/templates/TemplateStylePanel";
-import TemplateCanvas from "@/components/invoices/templates/TemplateCanvas";
 import LogoUploader from "@/components/invoices/templates/LogoUploader";
 import { renderInvoiceWithTemplateToPdf } from "@/utils/invoiceTemplate";
 import { getFileUrl } from "@/lib/storage";
@@ -57,6 +56,8 @@ const InvoiceTemplateEditorPage: React.FC = () => {
         // best effort persist (no await in effect)
         update(tpl.id, { schema: next }).catch(() => {});
       }
+      // Auto-générer l'aperçu PDF au chargement
+      setTimeout(generateInlinePreview, 1000);
     }
   }, [tpl]);
 
@@ -143,6 +144,8 @@ const InvoiceTemplateEditorPage: React.FC = () => {
                   setSchema(next);
                   await update(tpl.id, { schema: next });
                   toast.success("Logo enregistré dans le template");
+                  // Auto-générer l'aperçu PDF après changement de logo
+                  setTimeout(generateInlinePreview, 500);
                 } catch (e: any) {
                   console.error("[TemplateEditor] save logo", e);
                   toast.error("Échec de la sauvegarde du logo");
@@ -150,31 +153,40 @@ const InvoiceTemplateEditorPage: React.FC = () => {
               }}
             />
           </div>
-          <TemplateStylePanel value={schema} onChange={setSchema} />
+          <TemplateStylePanel value={schema} onChange={(newSchema) => {
+            setSchema(newSchema);
+            // Auto-générer l'aperçu PDF après changement de style
+            setTimeout(generateInlinePreview, 500);
+          }} />
         </div>
 
-        <TemplateCanvas value={schema} />
-      </div>
-
-      <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
-        <div className="flex items-center justify-between">
-          <div className="text-sm font-medium" style={{ color: schema.style.secondaryColor || '#111827' }}>Aperçu PDF intégré</div>
-          <div className="flex gap-2">
-            <button onClick={generateInlinePreview} className="px-3 py-2 rounded-lg text-white" style={{ backgroundColor: schema.style.primaryColor || '#111827' }}>
-              Générer l’aperçu
-            </button>
-            <button onClick={previewPdf} className="px-3 py-2 rounded-lg" style={{ border: `1px solid ${schema.style.secondaryColor || '#111827'}`, color: schema.style.secondaryColor || '#111827' }}>
-              Télécharger le PDF
-            </button>
+        <div className="rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-sm font-medium" style={{ color: schema.style.secondaryColor || '#111827' }}>Aperçu PDF</div>
+            <div className="flex gap-2">
+              <button onClick={generateInlinePreview} className="px-3 py-2 rounded-lg text-white" style={{ backgroundColor: schema.style.primaryColor || '#111827' }}>
+                Actualiser
+              </button>
+              <button onClick={previewPdf} className="px-3 py-2 rounded-lg" style={{ border: `1px solid ${schema.style.secondaryColor || '#111827'}`, color: schema.style.secondaryColor || '#111827' }}>
+                Télécharger
+              </button>
+            </div>
           </div>
+          {pdfUrl ? (
+            <div className="w-full">
+              <iframe title="template-pdf-preview" src={pdfUrl} className="w-full h-[720px] rounded-lg border border-gray-200 dark:border-slate-700" />
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-[720px] text-sm text-gray-600 dark:text-gray-300">
+              <div className="text-center">
+                <div className="mb-2">Aperçu PDF</div>
+                <button onClick={generateInlinePreview} className="px-4 py-2 rounded-lg text-white" style={{ backgroundColor: schema.style.primaryColor || '#111827' }}>
+                  Générer l'aperçu
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-        {pdfUrl ? (
-          <div className="mt-4">
-            <iframe title="template-pdf-preview" src={pdfUrl} className="w-full h-[720px] rounded-lg border border-gray-200 dark:border-slate-700" />
-          </div>
-        ) : (
-          <div className="mt-4 text-sm text-gray-600 dark:text-gray-300">Cliquez sur "Générer l’aperçu" pour afficher le PDF ici.</div>
-        )}
       </div>
     </div>
   );
