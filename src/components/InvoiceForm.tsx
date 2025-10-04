@@ -419,7 +419,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
   const labelBase = "block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300";
 
-  // Étape 1 modifiée → ajout du template
+  // Étape 1 : Informations de base
   const Step1 = (
     <div className="space-y-4">
       <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
@@ -428,8 +428,25 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Numéro, Client, etc. ... */}
-        {/* ... */}
+        <div>
+          <label className={labelBase}>
+            Client <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={form.client_id}
+            onChange={(e) => setForm({ ...form, client_id: e.target.value })}
+            className={`${selectBase} ${errors.client_id ? 'border-red-500' : ''}`}
+          >
+            <option value="">Sélectionner un client</option>
+            {clients.map((client) => (
+              <option key={client.id} value={client.id}>
+                {client.name} {client.platform ? `(${client.platform})` : ''}
+              </option>
+            ))}
+          </select>
+          {errors.client_id && <p className="text-red-500 text-xs mt-1">{errors.client_id}</p>}
+        </div>
+
         <div>
           <label className={labelBase}>Modèle de facture</label>
           <select
@@ -446,6 +463,62 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
             {templates.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name} {t.is_default ? " (défaut)" : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className={labelBase}>
+            Date d'émission <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            value={form.issue_date}
+            onChange={(e) => setForm({ ...form, issue_date: e.target.value })}
+            className={`${inputBase} ${errors.issue_date ? 'border-red-500' : ''}`}
+          />
+          {errors.issue_date && <p className="text-red-500 text-xs mt-1">{errors.issue_date}</p>}
+        </div>
+
+        <div>
+          <label className={labelBase}>
+            Échéance <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            value={form.due_date}
+            onChange={(e) => setForm({ ...form, due_date: e.target.value })}
+            className={`${inputBase} ${errors.due_date ? 'border-red-500' : ''}`}
+          />
+          {errors.due_date && <p className="text-red-500 text-xs mt-1">{errors.due_date}</p>}
+        </div>
+
+        <div>
+          <label className={labelBase}>Devise</label>
+          <select
+            value={form.currency || userCurrency}
+            onChange={(e) => setForm({ ...form, currency: e.target.value })}
+            className={selectBase}
+          >
+            {CURRENCIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className={labelBase}>Statut</label>
+          <select
+            value={form.status}
+            onChange={(e) => setForm({ ...form, status: e.target.value as typeof STATUSES[number] })}
+            className={selectBase}
+          >
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {s.charAt(0).toUpperCase() + s.slice(1)}
               </option>
             ))}
           </select>
