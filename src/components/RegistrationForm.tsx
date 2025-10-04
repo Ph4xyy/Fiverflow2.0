@@ -8,13 +8,14 @@ import {
   User, 
   Globe, 
   Phone, 
-  Briefcase,
-  CheckCircle,
-  AlertCircle,
+  Briefcase, 
+  CheckCircle, 
+  AlertCircle, 
   Shield
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import LogoImage from '../assets/LogoFiverFlow.png';
 
 interface FormData {
   email: string;
@@ -336,36 +337,36 @@ const RegistrationForm: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <Shield className="mx-auto h-12 w-12 text-blue-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Informations de Compte</h3>
-              <p className="text-sm text-gray-600">Créez vos identifiants de connexion sécurisés</p>
+              <Shield className="mx-auto h-12 w-12 text-blue-400 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">Informations de Compte</h3>
+              <p className="text-sm text-slate-400">Créez vos identifiants de connexion sécurisés</p>
             </div>
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
                 Adresse Email *
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
                 <input
                   type="email"
                   id="email"
                   value={formData.email}
                   onChange={(e) => handleFieldChange('email', e.target.value)}
                   onBlur={() => handleFieldBlur('email')}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
+                    errors.email ? 'border-red-500/50 bg-red-900/20' : 'border-[#1C2230]'
                   }`}
                   placeholder="votre@email.com"
                   required
                 />
                 {errors.email && (
-                  <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500" size={20} />
+                  <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400" size={20} />
                 )}
               </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="mt-1 text-sm text-red-300 flex items-center">
                   <AlertCircle size={14} className="mr-1" />
                   {errors.email}
                 </p>
@@ -374,53 +375,53 @@ const RegistrationForm: React.FC = () => {
 
             {/* Username */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="username" className="block text-sm font-medium text-slate-300 mb-2">
                 Nom d'Utilisateur *
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
                 <input
                   type="text"
                   id="username"
                   value={formData.username}
                   onChange={(e) => handleFieldChange('username', e.target.value.toLowerCase())}
                   onBlur={() => handleFieldBlur('username')}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
+                    errors.username ? 'border-red-500/50 bg-red-900/20' : 'border-[#1C2230]'
                   }`}
                   placeholder="nom-utilisateur"
                   required
                 />
                 {errors.username && (
-                  <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500" size={20} />
+                  <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400" size={20} />
                 )}
               </div>
               {errors.username && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="mt-1 text-sm text-red-300 flex items-center">
                   <AlertCircle size={14} className="mr-1" />
                   {errors.username}
                 </p>
               )}
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-slate-500">
                 3-20 caractères, lettres, chiffres, tirets et underscores autorisés
               </p>
             </div>
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">
                 Mot de Passe *
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="password"
                   value={formData.password}
                   onChange={(e) => handleFieldChange('password', e.target.value)}
                   onBlur={() => handleFieldBlur('password')}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
+                    errors.password ? 'border-red-500/50 bg-red-900/20' : 'border-[#1C2230]'
                   }`}
                   placeholder="Créez un mot de passe sécurisé"
                   required
@@ -428,7 +429,7 @@ const RegistrationForm: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -438,16 +439,16 @@ const RegistrationForm: React.FC = () => {
               {formData.password && (
                 <div className="mt-2">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-gray-600">Force du mot de passe</span>
+                    <span className="text-xs text-slate-400">Force du mot de passe</span>
                     <span className={`text-xs font-medium ${
-                      passwordStrength.score <= 2 ? 'text-red-600' :
-                      passwordStrength.score <= 3 ? 'text-yellow-600' :
-                      passwordStrength.score <= 4 ? 'text-blue-600' : 'text-green-600'
+                      passwordStrength.score <= 2 ? 'text-red-400' :
+                      passwordStrength.score <= 3 ? 'text-yellow-400' :
+                      passwordStrength.score <= 4 ? 'text-blue-400' : 'text-green-400'
                     }`}>
                       {passwordStrength.label}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-[#1C2230] rounded-full h-2">
                     <div 
                       className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                       style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
@@ -457,7 +458,7 @@ const RegistrationForm: React.FC = () => {
               )}
               
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="mt-1 text-sm text-red-300 flex items-center">
                   <AlertCircle size={14} className="mr-1" />
                   {errors.password}
                 </p>
@@ -465,25 +466,25 @@ const RegistrationForm: React.FC = () => {
               
               {/* Password Requirements */}
               <div className="mt-2 space-y-1">
-                <p className="text-xs text-gray-600">Le mot de passe doit contenir :</p>
+                <p className="text-xs text-slate-400">Le mot de passe doit contenir :</p>
                 <div className="grid grid-cols-2 gap-1 text-xs">
-                  <div className={`flex items-center ${formData.password.length >= 8 ? 'text-green-600' : 'text-gray-400'}`}>
+                  <div className={`flex items-center ${formData.password.length >= 8 ? 'text-green-400' : 'text-slate-500'}`}>
                     <CheckCircle size={12} className="mr-1" />
                     8+ caractères
                   </div>
-                  <div className={`flex items-center ${/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}`}>
+                  <div className={`flex items-center ${/[A-Z]/.test(formData.password) ? 'text-green-400' : 'text-slate-500'}`}>
                     <CheckCircle size={12} className="mr-1" />
                     1 majuscule
                   </div>
-                  <div className={`flex items-center ${/[a-z]/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}`}>
+                  <div className={`flex items-center ${/[a-z]/.test(formData.password) ? 'text-green-400' : 'text-slate-500'}`}>
                     <CheckCircle size={12} className="mr-1" />
                     1 minuscule
                   </div>
-                  <div className={`flex items-center ${/\d/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}`}>
+                  <div className={`flex items-center ${/\d/.test(formData.password) ? 'text-green-400' : 'text-slate-500'}`}>
                     <CheckCircle size={12} className="mr-1" />
                     1 chiffre
                   </div>
-                  <div className={`flex items-center ${/[!@#$%^&*(),.?":{}|<>]/.test(formData.password) ? 'text-green-600' : 'text-gray-400'}`}>
+                  <div className={`flex items-center ${/[!@#$%^&*(),.?":{}|<>]/.test(formData.password) ? 'text-green-400' : 'text-slate-500'}`}>
                     <CheckCircle size={12} className="mr-1" />
                     1 caractère spécial
                   </div>
@@ -493,19 +494,19 @@ const RegistrationForm: React.FC = () => {
 
             {/* Confirm Password */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-300 mb-2">
                 Confirmer le Mot de Passe *
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   id="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={(e) => handleFieldChange('confirmPassword', e.target.value)}
                   onBlur={() => handleFieldBlur('confirmPassword')}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.confirmPassword ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
+                    errors.confirmPassword ? 'border-red-500/50 bg-red-900/20' : 'border-[#1C2230]'
                   }`}
                   placeholder="Confirmez votre mot de passe"
                   required
@@ -513,13 +514,13 @@ const RegistrationForm: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300"
                 >
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="mt-1 text-sm text-red-300 flex items-center">
                   <AlertCircle size={14} className="mr-1" />
                   {errors.confirmPassword}
                 </p>
@@ -532,25 +533,25 @@ const RegistrationForm: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <Globe className="mx-auto h-12 w-12 text-blue-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Informations Personnelles</h3>
-              <p className="text-sm text-gray-600">Dites-nous en plus sur vous</p>
+              <Globe className="mx-auto h-12 w-12 text-blue-400 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">Informations Personnelles</h3>
+              <p className="text-sm text-slate-400">Dites-nous en plus sur vous</p>
             </div>
 
             {/* Country */}
             <div>
-              <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="country" className="block text-sm font-medium text-slate-300 mb-2">
                 Pays d'Origine *
               </label>
               <div className="relative">
-                <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
                 <select
                   id="country"
                   value={formData.country}
                   onChange={(e) => handleFieldChange('country', e.target.value)}
                   onBlur={() => handleFieldBlur('country')}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.country ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#0E121A] text-white ${
+                    errors.country ? 'border-red-500/50 bg-red-900/20' : 'border-[#1C2230]'
                   }`}
                   required
                 >
@@ -560,11 +561,11 @@ const RegistrationForm: React.FC = () => {
                   ))}
                 </select>
                 {errors.country && (
-                  <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500" size={20} />
+                  <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400" size={20} />
                 )}
               </div>
               {errors.country && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="mt-1 text-sm text-red-300 flex items-center">
                   <AlertCircle size={14} className="mr-1" />
                   {errors.country}
                 </p>
@@ -573,33 +574,33 @@ const RegistrationForm: React.FC = () => {
 
             {/* Phone (Optional) */}
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Numéro de Téléphone <span className="text-gray-400">(optionnel)</span>
+              <label htmlFor="phone" className="block text-sm font-medium text-slate-300 mb-2">
+                Numéro de Téléphone <span className="text-slate-500">(optionnel)</span>
               </label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
                 <input
                   type="tel"
                   id="phone"
                   value={formData.phone}
                   onChange={(e) => handleFieldChange('phone', e.target.value)}
                   onBlur={() => handleFieldBlur('phone')}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.phone ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
+                    errors.phone ? 'border-red-500/50 bg-red-900/20' : 'border-[#1C2230]'
                   }`}
                   placeholder="+33 1 23 45 67 89"
                 />
                 {errors.phone && (
-                  <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-500" size={20} />
+                  <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400" size={20} />
                 )}
               </div>
               {errors.phone && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
+                <p className="mt-1 text-sm text-red-300 flex items-center">
                   <AlertCircle size={14} className="mr-1" />
                   {errors.phone}
                 </p>
               )}
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-slate-500">
                 Format international recommandé (ex: +33123456789)
               </p>
             </div>
@@ -610,23 +611,23 @@ const RegistrationForm: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <Briefcase className="mx-auto h-12 w-12 text-blue-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Services Freelance</h3>
-              <p className="text-sm text-gray-600">Quels services proposez-vous ? (1-5 services)</p>
+              <Briefcase className="mx-auto h-12 w-12 text-blue-400 mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">Services Freelance</h3>
+              <p className="text-sm text-slate-400">Quels services proposez-vous ? (1-5 services)</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-4">
+              <label className="block text-sm font-medium text-slate-300 mb-4">
                 Type de Services Proposés *
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto border border-gray-200 rounded-lg p-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto border border-[#1C2230] rounded-lg p-4 bg-[#0E121A]">
                 {freelanceServices.map((service) => (
                   <label
                     key={service.id}
                     className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${
                       formData.services.includes(service.id)
-                        ? 'border-blue-500 bg-blue-50 text-blue-900'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        ? 'border-blue-500 bg-blue-900/20 text-blue-300'
+                        : 'border-[#1C2230] hover:border-[#2A3347] hover:bg-[#121722] text-slate-300'
                     }`}
                     onClick={() => {
                       setTouchedFields(prev => new Set(prev).add('services'));
@@ -648,16 +649,16 @@ const RegistrationForm: React.FC = () => {
               </div>
               
               {errors.services && (
-                <p className="mt-2 text-sm text-red-600 flex items-center">
+                <p className="mt-2 text-sm text-red-300 flex items-center">
                   <AlertCircle size={14} className="mr-1" />
                   {errors.services}
                 </p>
               )}
               
-              <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+              <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
                 <span>Services sélectionnés : {formData.services.length}/5</span>
                 {formData.services.length > 0 && (
-                  <span className="text-green-600">✓ Au moins un service sélectionné</span>
+                  <span className="text-green-400">✓ Au moins un service sélectionné</span>
                 )}
               </div>
             </div>
@@ -670,21 +671,23 @@ const RegistrationForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-6 sm:p-8 mx-4">
+    <div className="min-h-screen bg-[#0B0E14] text-slate-100 flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-2xl rounded-2xl border border-[#1C2230] bg-[#11151D]/95 shadow-lg p-6 sm:p-8 mx-4">
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">FiverFlow</h1>
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Créer un Compte</h2>
-          <p className="text-sm sm:text-base text-gray-600">Rejoignez la communauté des freelancers professionnels</p>
+          <div className="flex items-center justify-center mb-4">
+            <img src={LogoImage} alt="FiverFlow" className="h-8 w-auto" />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Créer un Compte</h1>
+          <p className="text-sm sm:text-base text-slate-400">Rejoignez la communauté des freelancers professionnels</p>
         </div>
 
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-600">Étape {currentStep} sur 3</span>
-            <span className="text-sm font-medium text-gray-600">{Math.round((currentStep / 3) * 100)}%</span>
+            <span className="text-sm font-medium text-slate-400">Étape {currentStep} sur 3</span>
+            <span className="text-sm font-medium text-slate-400">{Math.round((currentStep / 3) * 100)}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-[#1C2230] rounded-full h-2">
             <div 
               className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300" 
               style={{ width: `${(currentStep / 3) * 100}%` }}
@@ -692,10 +695,10 @@ const RegistrationForm: React.FC = () => {
           </div>
           
           {/* Step Labels */}
-          <div className="flex justify-between mt-2 text-xs text-gray-500">
-            <span className={currentStep >= 1 ? 'text-blue-600 font-medium' : ''}>Compte</span>
-            <span className={currentStep >= 2 ? 'text-blue-600 font-medium' : ''}>Personnel</span>
-            <span className={currentStep >= 3 ? 'text-blue-600 font-medium' : ''}>Services</span>
+          <div className="flex justify-between mt-2 text-xs text-slate-500">
+            <span className={currentStep >= 1 ? 'text-blue-400 font-medium' : ''}>Compte</span>
+            <span className={currentStep >= 2 ? 'text-blue-400 font-medium' : ''}>Personnel</span>
+            <span className={currentStep >= 3 ? 'text-blue-400 font-medium' : ''}>Services</span>
           </div>
         </div>
 
@@ -708,7 +711,7 @@ const RegistrationForm: React.FC = () => {
               type="button"
               onClick={prevStep}
               disabled={currentStep === 1}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 border border-[#1C2230] text-slate-300 rounded-lg hover:bg-[#121722] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Précédent
             </button>
@@ -717,7 +720,7 @@ const RegistrationForm: React.FC = () => {
               <button
                 type="button"
                 onClick={nextStep}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 Suivant
               </button>
@@ -725,7 +728,7 @@ const RegistrationForm: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading || Object.values(errors).some(error => error !== undefined)}
-                className="px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                className="px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
                 {loading ? (
                   <>
@@ -744,11 +747,11 @@ const RegistrationForm: React.FC = () => {
         </form>
 
         {/* Security Notice */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+        <div className="mt-6 p-4 bg-[#0E121A] rounded-lg border border-[#1C2230]">
           <div className="flex items-start space-x-3">
-            <Shield className="text-gray-400 mt-0.5" size={16} />
-            <div className="text-xs text-gray-600">
-              <p className="font-medium mb-1">Sécurité et Confidentialité</p>
+            <Shield className="text-slate-400 mt-0.5" size={16} />
+            <div className="text-xs text-slate-400">
+              <p className="font-medium mb-1 text-slate-300">Sécurité et Confidentialité</p>
               <p>Vos données sont protégées par un chiffrement de niveau bancaire. Nous ne partageons jamais vos informations personnelles avec des tiers.</p>
             </div>
           </div>
@@ -756,9 +759,9 @@ const RegistrationForm: React.FC = () => {
 
         {/* Login Link */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-slate-400">
             Vous avez déjà un compte ?{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+            <Link to="/login" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
               Se connecter
             </Link>
           </p>
