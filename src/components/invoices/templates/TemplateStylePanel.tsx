@@ -104,11 +104,9 @@ const TemplateStylePanel: React.FC<Props> = ({ value, onChange }) => {
           onChange={(e) => onChange({ ...value, style: { ...s, fontFamily: e.target.value } })}
           className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900"
         >
-          <option value="helvetica">Helvetica</option>
-          <option value="times">Times New Roman</option>
-          <option value="courier">Courier</option>
-          <option value="symbol">Symbol</option>
-          <option value="zapfdingbats">Zapf Dingbats</option>
+          <option value="helvetica">Helvetica (Moderne)</option>
+          <option value="times">Times New Roman (Classique)</option>
+          <option value="courier">Courier (Monospace)</option>
         </select>
       </Field>
 

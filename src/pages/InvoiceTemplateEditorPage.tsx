@@ -48,10 +48,8 @@ const InvoiceTemplateEditorPage: React.FC = () => {
       const nextUrl = URL.createObjectURL(blob);
       if (pdfUrl) URL.revokeObjectURL(pdfUrl);
       setPdfUrl(nextUrl);
-      toast.success("Aperçu PDF généré");
     } catch (e: any) {
       console.error("[TemplateEditor] inline preview", e);
-      toast.error("Impossible de générer l'aperçu PDF");
     }
   };
 
@@ -144,12 +142,10 @@ const InvoiceTemplateEditorPage: React.FC = () => {
                   };
                   setSchema(next);
                   await update(tpl.id, { schema: next });
-                  toast.success("Logo enregistré dans le template");
                   // Auto-générer l'aperçu PDF après changement de logo
                   setTimeout(() => generateInlinePreview(), 500);
                 } catch (e: any) {
                   console.error("[TemplateEditor] save logo", e);
-                  toast.error("Échec de la sauvegarde du logo");
                 }
               }}
             />
