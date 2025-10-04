@@ -224,10 +224,13 @@ export async function renderInvoiceWithTemplateToPdf(
       const descLines = doc.splitTextToSize(it.description || "—", colQty - colDesc - 12);
       const lineTotal = it.line_total ?? it.quantity * it.unit_price;
       if (schema.style.tableStripe && i % 2 === 1) {
-        // simple stripe with theme color
-        const rgb = hexToRgb(schema.style.primaryColor || "#6b7280");
+        // Customizable stripe color and opacity
+        const stripeColor = schema.style.tableStripeColor || "#f3f4f6";
+        const opacity = (schema.style.tableStripeOpacity || 10) / 100;
+        const rgb = hexToRgb(stripeColor);
+        
         if (rgb) {
-          doc.setFillColor(rgb.r, rgb.g, rgb.b, 0.1);
+          doc.setFillColor(rgb.r, rgb.g, rgb.b, opacity);
         } else {
           doc.setFillColor(245);
         }

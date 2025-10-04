@@ -87,8 +87,10 @@ const TemplateStylePanel: React.FC<Props> = ({ value, onChange }) => {
           className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900"
         >
           <option value="helvetica">Helvetica</option>
-          <option value="times">Times</option>
+          <option value="times">Times New Roman</option>
           <option value="courier">Courier</option>
+          <option value="symbol">Symbol</option>
+          <option value="zapfdingbats">Zapf Dingbats</option>
         </select>
       </Field>
 
@@ -127,6 +129,41 @@ const TemplateStylePanel: React.FC<Props> = ({ value, onChange }) => {
           className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900"
         />
       </Field>
+
+      <div className="border-t border-gray-200 dark:border-slate-700 pt-4">
+        <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">Couleurs du tableau</div>
+        
+        <Field label="Couleur des rayures">
+          <input
+            type="color"
+            value={s.tableStripeColor || "#f3f4f6"}
+            onChange={(e) => onChange({ ...value, style: { ...s, tableStripeColor: e.target.value } })}
+            className="h-9 w-14 p-0 border border-gray-300 dark:border-slate-700 rounded"
+          />
+        </Field>
+
+        <Field label="Intensité des rayures">
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={s.tableStripeOpacity || 10}
+            onChange={(e) => onChange({ ...value, style: { ...s, tableStripeOpacity: Number(e.target.value) } })}
+            className="w-full"
+          />
+          <div className="text-xs text-gray-500">{s.tableStripeOpacity || 10}%</div>
+        </Field>
+
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={s.tableStripe ?? false}
+            onChange={(e) => onChange({ ...value, style: { ...s, tableStripe: e.target.checked } })}
+            className="rounded"
+          />
+          <span className="text-sm text-gray-700 dark:text-gray-300">Activer les rayures</span>
+        </label>
+      </div>
 
       <Field label="Largeur logo (px)">
         <input

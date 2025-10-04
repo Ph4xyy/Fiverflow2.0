@@ -17,6 +17,8 @@ export type TemplateStyle = {
   pageSize?: "A4" | "LETTER";
   margin?: number; // px
   tableStripe?: boolean;
+  tableStripeColor?: string; // hex color for table stripes
+  tableStripeOpacity?: number; // 0-100 opacity percentage
   // Typography controls
   titleSize?: number; // pt
   bodySize?: number; // pt
