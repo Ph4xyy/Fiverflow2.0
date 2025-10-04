@@ -49,6 +49,7 @@ const LogoDisplayPrivate: React.FC<Props> = ({ path, alt = "Logo", className, tt
     } catch (e) {
       console.warn("[LogoDisplayPrivate] createSignedUrl failed:", e);
       if (alive.current) setUrl(null);
+      // Don't show error to user for logo display failures
     }
   };
 

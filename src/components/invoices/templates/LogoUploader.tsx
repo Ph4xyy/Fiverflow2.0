@@ -121,6 +121,8 @@ const LogoUploader: React.FC<Props> = ({ path, onChange, maxSizeMB = 5 }) => {
           ? "Accès refusé par les règles RLS du bucket. Vérifie tes policies Storage."
           : err?.message || "Upload impossible";
       toast.error(msg);
+      // Reset preview on error
+      setPreviewUrl(null);
     } finally {
       setLoading(false);
       resetInput();

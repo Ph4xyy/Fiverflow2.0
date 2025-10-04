@@ -2,7 +2,7 @@ import type { TemplateSchema } from "@/types/invoiceTemplate";
 import type { InvoiceItem } from "@/types/invoice";
 import { jsPDF } from "jspdf";
 
-type RenderData = {
+export type RenderData = {
   company?: { name?: string; logoUrl?: string | null; address?: string };
   client?: { name?: string; email?: string; address?: string };
   invoice: {
@@ -62,16 +62,17 @@ export function defaultSchema(): TemplateSchema {
       "{{company.logoUrl}}",
       "{{client.name}}",
       "{{invoice.number}}",
-      "{{invoice.date}}",
+      "{{invoice.issue_date}}",
       "{{invoice.due_date}}",
-      "{{lineItems[i].description}}",
-      "{{totals.subtotal}}",
-      "{{totals.total}}",
+      "{{invoice.subtotal}}",
+      "{{invoice.tax_amount}}",
+      "{{invoice.total}}",
+      "{{invoice.notes}}",
     ],
   };
 }
 
-const fmt = (n?: number | null) =>
+export const fmt = (n?: number | null) =>
   n == null || Number.isNaN(Number(n)) ? "0.00" : Number(n).toFixed(2);
 
 export async function renderInvoiceWithTemplateToPdf(
