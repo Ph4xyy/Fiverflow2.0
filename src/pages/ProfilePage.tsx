@@ -1040,10 +1040,38 @@ const ProfilePage: React.FC = () => {
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
                   >
-                    <option value="USD">USD ($)</option>
-                    <option value="EUR">EUR (€)</option>
-                    <option value="GBP">GBP (£)</option>
-                    <option value="CAD">CAD ($)</option>
+                    <option value="USD">USD ($) - US Dollar</option>
+                    <option value="EUR">EUR (€) - Euro</option>
+                    <option value="GBP">GBP (£) - British Pound</option>
+                    <option value="CAD">CAD ($) - Canadian Dollar</option>
+                    <option value="AUD">AUD ($) - Australian Dollar</option>
+                    <option value="CHF">CHF (CHF) - Swiss Franc</option>
+                    <option value="JPY">JPY (¥) - Japanese Yen</option>
+                    <option value="CNY">CNY (¥) - Chinese Yuan</option>
+                    <option value="INR">INR (₹) - Indian Rupee</option>
+                    <option value="BRL">BRL (R$) - Brazilian Real</option>
+                    <option value="MXN">MXN ($) - Mexican Peso</option>
+                    <option value="ZAR">ZAR (R) - South African Rand</option>
+                    <option value="SEK">SEK (kr) - Swedish Krona</option>
+                    <option value="NOK">NOK (kr) - Norwegian Krone</option>
+                    <option value="DKK">DKK (kr) - Danish Krone</option>
+                    <option value="PLN">PLN (zł) - Polish Zloty</option>
+                    <option value="CZK">CZK (Kč) - Czech Koruna</option>
+                    <option value="HUF">HUF (Ft) - Hungarian Forint</option>
+                    <option value="RUB">RUB (₽) - Russian Ruble</option>
+                    <option value="TRY">TRY (₺) - Turkish Lira</option>
+                    <option value="KRW">KRW (₩) - South Korean Won</option>
+                    <option value="SGD">SGD ($) - Singapore Dollar</option>
+                    <option value="HKD">HKD ($) - Hong Kong Dollar</option>
+                    <option value="NZD">NZD ($) - New Zealand Dollar</option>
+                    <option value="AED">AED (د.إ) - UAE Dirham</option>
+                    <option value="SAR">SAR (﷼) - Saudi Riyal</option>
+                    <option value="ILS">ILS (₪) - Israeli Shekel</option>
+                    <option value="THB">THB (฿) - Thai Baht</option>
+                    <option value="MYR">MYR (RM) - Malaysian Ringgit</option>
+                    <option value="PHP">PHP (₱) - Philippine Peso</option>
+                    <option value="IDR">IDR (Rp) - Indonesian Rupiah</option>
+                    <option value="VND">VND (₫) - Vietnamese Dong</option>
                   </select>
                 </div>
               </div>

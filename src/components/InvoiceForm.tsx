@@ -55,7 +55,12 @@ interface InvoiceFormProps {
   } | null;
 }
 
-const CURRENCIES = ["USD", "EUR", "CAD", "GBP"];
+const CURRENCIES = [
+  "USD", "EUR", "GBP", "CAD", "AUD", "CHF", "JPY", "CNY", "INR", "BRL", 
+  "MXN", "ZAR", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "RUB", "TRY", 
+  "KRW", "SGD", "HKD", "NZD", "AED", "SAR", "ILS", "THB", "MYR", "PHP", 
+  "IDR", "VND"
+];
 const STATUSES = ["draft", "sent", "paid", "overdue", "canceled"] as const;
 
 const InvoiceForm: React.FC<InvoiceFormProps> = ({
