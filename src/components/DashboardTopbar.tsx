@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Moon, Sun, LogOut, Bell } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from "../contexts/AuthContext";
+import { useCurrency } from '../contexts/CurrencyContext';
 
 // Import des icônes drapeaux
 import FlagEN from '../assets/IconUS.svg';
@@ -26,11 +27,14 @@ const currencies = [
 const DashboardTopBar: React.FC = () => {
   const { toggleDarkMode, isDarkMode } = useTheme();
   const { signOut } = useAuth();
+  const { currency, setCurrency } = useCurrency();
 
   const [selectedLang, setSelectedLang] = useState(languages[0]);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 
-  const [selectedCurrency, setSelectedCurrency] = useState(currencies[0]);
+  const [selectedCurrency, setSelectedCurrency] = useState(
+    currencies.find(c => c.code === currency) || currencies[0]
+  );
   const [currencyDropdownOpen, setCurrencyDropdownOpen] = useState(false);
 
   // Ref pour gérer le click en dehors
@@ -51,6 +55,14 @@ const DashboardTopBar: React.FC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // Synchronize selected currency with context currency changes
+  useEffect(() => {
+    const newSelected = currencies.find(c => c.code === currency);
+    if (newSelected && newSelected !== selectedCurrency) {
+      setSelectedCurrency(newSelected);
+    }
+  }, [currency, selectedCurrency]);
 
   return (
     <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-sm border-b border-gray-200 dark:border-slate-700 fixed w-full top-0 z-50">
@@ -109,7 +121,11 @@ const DashboardTopBar: React.FC = () => {
                 {currencies.map(curr => (
                   <button
                     key={curr.code}
-                    onClick={() => { setSelectedCurrency(curr); setCurrencyDropdownOpen(false); }}
+                    onClick={() => { 
+                      setSelectedCurrency(curr); 
+                      setCurrency(curr.code);
+                      setCurrencyDropdownOpen(false); 
+                    }}
                     className="flex items-center gap-2 px-3 py-2 w-full hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md"
                   >
                     {curr.icon()}

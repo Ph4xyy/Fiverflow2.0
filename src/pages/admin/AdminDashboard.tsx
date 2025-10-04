@@ -72,7 +72,7 @@ interface AdminStats {
 const mockStats: AdminStats = {
   totals: { allTimeUsers: 1287, newUsersInRange: 42, adminsAllTime: 2, totalOrders: 0, totalInvoices: 0, totalClients: 0, totalViews: 0, activeUsers: 0 },
   plans: { free: 820, trial: 0, pro: 320, excellence: 112 },
-  revenue: { total: 4823.5, fromSubscriptions: 4410, fromInvoices: 270, fromOther: 143.5, currency: 'EUR' },
+  revenue: { total: 4823.5, fromSubscriptions: 4410, fromInvoices: 270, fromOther: 143.5, currency: 'USD' },
   recentUsers: [
     { id: '1', email: 'alice@example.com', name: 'Alice Martin', created_at: '2025-08-07T10:00:00Z', role: 'user', plan: 'pro' },
     { id: '2', email: 'bob@example.com', name: 'Bob Dupont', created_at: '2025-08-05T15:20:00Z', role: 'user', plan: 'free' },
@@ -269,7 +269,7 @@ const AdminDashboard: React.FC = () => {
       let fromSubscriptions = 0;
       let fromInvoices = 0;
       let fromOther = 0; // on ne la calcule plus ici (pas de table)
-      const currency = 'EUR'; // défaut
+      const currency = 'USD'; // défaut
 
       // 1) payments (amount, created_at)
       try {

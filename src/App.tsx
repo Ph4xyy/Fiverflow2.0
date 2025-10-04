@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { AuthProvider } from './contexts/AuthContext';
 import { UserDataProvider } from './contexts/UserDataContext';
 import { LoadingProvider } from './contexts/LoadingContext';
+import { CurrencyProvider } from './contexts/CurrencyContext';
 import InstantProtectedRoute from './components/InstantProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
@@ -72,8 +73,9 @@ function App() {
         <Router>
           <AnalyticsWrapper>
             <LoadingProvider>
-              <UserDataProvider>
-                <SessionManagerWrapper>
+              <CurrencyProvider>
+                <UserDataProvider>
+                  <SessionManagerWrapper>
                   <GlobalLoadingManager>
               <Suspense fallback={<div className="p-6"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-slate-500"></div></div>}>
               <Routes>
@@ -146,7 +148,8 @@ function App() {
                          <AuthDiagnostic />
                        </>
                      )}
-              </UserDataProvider>
+                </UserDataProvider>
+              </CurrencyProvider>
             </LoadingProvider>
           </AnalyticsWrapper>
         </Router>

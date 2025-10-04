@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
+import { useCurrency } from '../contexts/CurrencyContext';
 import { useStripeSubscription } from '../hooks/useStripeSubscription';
 import { useImageUpload } from '../hooks/useImageUpload';
 import ImageUpload from '../components/ImageUpload';
@@ -58,6 +59,7 @@ type SmtpSettings = {
 /* ---------- Composant ---------- */
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
+  const { currency, setCurrency } = useCurrency();
   const { subscription: stripeSubscription } = useStripeSubscription();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -1033,7 +1035,11 @@ const ProfilePage: React.FC = () => {
               <div className="space-y-4">
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
                   <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-2">Default Currency</h4>
-                  <select className={selectBase}>
+                  <select 
+                    className={selectBase}
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                  >
                     <option value="USD">USD ($)</option>
                     <option value="EUR">EUR (€)</option>
                     <option value="GBP">GBP (£)</option>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Layout, { cardClass, subtleBg } from '@/components/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useClients } from '@/hooks/useClients';
 import { useStripeSubscription } from '@/hooks/useStripeSubscription';
 import { usePlanRestrictions } from '@/hooks/usePlanRestrictions';
@@ -33,6 +34,7 @@ const DashboardPage = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { currency } = useCurrency();
   const { clients } = useClients();
   const { subscription: stripeSubscription } = useStripeSubscription();
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
@@ -140,7 +142,7 @@ const DashboardPage = () => {
     { label: 'Total Clients', value: clients.length, icon: Users, color: 'from-accent-blue to-accent-purple' },
     { label: 'Active Orders', value: orders.filter(o => o.status === 'In Progress').length, icon: ShoppingCart, color: 'from-amber-500 to-orange-600' },
     { label: 'Recent Orders', value: orders.length, icon: MessageSquare, color: 'from-fuchsia-500 to-pink-600' },
-    { label: 'Total Revenue', value: `$${orders.reduce((sum, o) => sum + (o.amount || 0), 0)}`, icon: DollarSign, color: 'from-emerald-500 to-teal-600' }
+    { label: 'Total Revenue', value: new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(orders.reduce((sum, o) => sum + (o.amount || 0), 0)), icon: DollarSign, color: 'from-emerald-500 to-teal-600' }
   ];
 
   const getOrderStatusBadge = (s: string) => {
@@ -202,7 +204,7 @@ const DashboardPage = () => {
         subtitle: s.provider || null,
         date: s.updated_at || s.created_at,
         amount: typeof s.amount === 'number' ? s.amount : null,
-        currency: s.currency || 'USD',
+          currency: s.currency || currency,
         color: s.color || '#8b5cf6',
       }));
 
@@ -408,9 +410,9 @@ const DashboardPage = () => {
                     barColor = it.color || '#8b5cf6';
                   }
                   const amountStr = isOrder && typeof it.amount === 'number'
-                    ? `$${it.amount.toLocaleString()}`
+                    ? new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(it.amount)
                     : isSub && typeof it.amount === 'number'
-                      ? new Intl.NumberFormat('en-US', { style: 'currency', currency: it.currency || 'USD' }).format(it.amount)
+                      ? new Intl.NumberFormat('en-US', { style: 'currency', currency: it.currency || currency }).format(it.amount)
                       : '—';
                   return (
                     <div
