@@ -75,6 +75,32 @@ export function defaultSchema(): TemplateSchema {
 export const fmt = (n?: number | null) =>
   n == null || Number.isNaN(Number(n)) ? "0.00" : Number(n).toFixed(2);
 
+// Helper function to convert hex color to RGB
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+}
+
+// Helper function to set text color from hex
+function setTextColorFromHex(doc: any, hex: string) {
+  const rgb = hexToRgb(hex);
+  if (rgb) {
+    doc.setTextColor(rgb.r, rgb.g, rgb.b);
+  }
+}
+
+// Helper function to set draw color from hex
+function setDrawColorFromHex(doc: any, hex: string) {
+  const rgb = hexToRgb(hex);
+  if (rgb) {
+    doc.setDrawColor(rgb.r, rgb.g, rgb.b);
+  }
+}
+
 export async function renderInvoiceWithTemplateToPdf(
   schema: TemplateSchema,
   data: RenderData
@@ -86,13 +112,15 @@ export async function renderInvoiceWithTemplateToPdf(
   });
   let y = margin;
 
+  // Set default colors based on theme
   doc.setFont(schema.style.fontFamily || "helvetica", "bold");
-  doc.setTextColor("#111827"); // Use standard color for text
-  doc.setDrawColor(200);
+  setTextColorFromHex(doc, schema.style.secondaryColor || "#111827");
+  setDrawColorFromHex(doc, schema.style.primaryColor || "#6b7280");
 
   // Header
   if (schema.sections.header?.visible !== false) {
     doc.setFontSize(schema.style.titleSize ?? 20);
+    setTextColorFromHex(doc, schema.style.primaryColor || "#6b7280");
     doc.text(schema.labels?.invoiceTitle || "INVOICE", margin, y);
     y += 26;
   }
@@ -101,6 +129,7 @@ export async function renderInvoiceWithTemplateToPdf(
   if (schema.sections.sellerInfo?.visible !== false) {
     doc.setFontSize(11);
     doc.setFont(schema.style.fontFamily || "helvetica", "normal");
+    setTextColorFromHex(doc, schema.style.secondaryColor || "#111827");
     if (schema.style.logoUrl) {
       try {
         const img = new Image();
@@ -129,6 +158,7 @@ export async function renderInvoiceWithTemplateToPdf(
   if (schema.sections.clientInfo?.visible !== false) {
     const rightX = 300;
     doc.setFont(schema.style.fontFamily || "helvetica", "bold");
+    setTextColorFromHex(doc, schema.style.secondaryColor || "#111827");
     doc.text(schema.labels?.billedTo || "Billed to:", rightX, y);
     doc.setFont(schema.style.fontFamily || "helvetica", "normal");
     y += 16;
@@ -139,6 +169,7 @@ export async function renderInvoiceWithTemplateToPdf(
   // Meta
   doc.setFont(schema.style.fontFamily || "helvetica", "normal");
   doc.setFontSize(schema.style.bodySize ?? 11);
+  setTextColorFromHex(doc, schema.style.secondaryColor || "#111827");
   doc.text(
     `${schema.labels?.invoiceNumber || "Invoice #"}: ${data.invoice.number || "—"}`,
     margin,
@@ -172,6 +203,8 @@ export async function renderInvoiceWithTemplateToPdf(
     const colUP = 400;
     const colTotal = 480;
     doc.setFontSize(schema.style.tableHeaderSize ?? 10);
+    doc.setFont(schema.style.fontFamily || "helvetica", "bold");
+    setTextColorFromHex(doc, schema.style.primaryColor || "#6b7280");
     doc.text("Description", colDesc, y);
     doc.text(schema.labels?.qty || "Qty", colQty, y);
     doc.text(schema.labels?.unitPrice || "Unit", colUP, y);
@@ -181,6 +214,7 @@ export async function renderInvoiceWithTemplateToPdf(
     y += 16;
     doc.setFont(schema.style.fontFamily || "helvetica", "normal");
     doc.setFontSize(schema.style.bodySize ?? 11);
+    setTextColorFromHex(doc, schema.style.secondaryColor || "#111827");
 
     (data.invoice.items || []).forEach((it, i) => {
       if (y > 720) {
@@ -190,8 +224,13 @@ export async function renderInvoiceWithTemplateToPdf(
       const descLines = doc.splitTextToSize(it.description || "—", colQty - colDesc - 12);
       const lineTotal = it.line_total ?? it.quantity * it.unit_price;
       if (schema.style.tableStripe && i % 2 === 1) {
-        // simple stripe
-        doc.setFillColor(245);
+        // simple stripe with theme color
+        const rgb = hexToRgb(schema.style.primaryColor || "#6b7280");
+        if (rgb) {
+          doc.setFillColor(rgb.r, rgb.g, rgb.b, 0.1);
+        } else {
+          doc.setFillColor(245);
+        }
         doc.rect(margin - 4, y - 10, 548 - margin, 22, "F");
       }
       doc.text(descLines, colDesc, y);
@@ -216,6 +255,8 @@ export async function renderInvoiceWithTemplateToPdf(
     const rightValueX = 548;
     const currency = data.invoice.currency || "USD";
     doc.setFontSize(schema.style.bodySize ?? 11);
+    doc.setFont(schema.style.fontFamily || "helvetica", "normal");
+    setTextColorFromHex(doc, schema.style.secondaryColor || "#111827");
     doc.text((schema.labels?.subtotal || "Subtotal") + ":", rightLabelX, y);
     doc.text(`${fmt(data.invoice.subtotal)} ${currency}`, rightValueX, y, { align: "right" });
     y += 16;
@@ -230,6 +271,7 @@ export async function renderInvoiceWithTemplateToPdf(
     doc.text(`${fmt(taxAmount)} ${currency}`, rightValueX, y, { align: "right" });
     y += 16;
     doc.setFont(schema.style.fontFamily || "helvetica", "bold");
+    setTextColorFromHex(doc, schema.style.primaryColor || "#6b7280");
     doc.text((schema.labels?.total || "TOTAL") + ":", rightLabelX, y);
     doc.text(`${fmt(data.invoice.total)} ${currency}`, rightValueX, y, { align: "right" });
   }
@@ -238,9 +280,11 @@ export async function renderInvoiceWithTemplateToPdf(
   if (schema.sections.notes?.visible !== false && data.invoice.notes) {
     y += 28;
     doc.setFont(schema.style.fontFamily || "helvetica", "bold");
+    setTextColorFromHex(doc, schema.style.primaryColor || "#6b7280");
     doc.text(schema.labels?.notes || "Notes", margin, y);
     y += 14;
     doc.setFont(schema.style.fontFamily || "helvetica", "normal");
+    setTextColorFromHex(doc, schema.style.secondaryColor || "#111827");
     const lines = doc.splitTextToSize(String(data.invoice.notes || ""), 548 - margin);
     doc.text(lines, margin, y);
   }
@@ -248,8 +292,8 @@ export async function renderInvoiceWithTemplateToPdf(
   if (schema.sections.footer?.visible !== false) {
     y += 32;
     doc.setFontSize(9);
-    doc.setTextColor(120);
     doc.setFont(schema.style.fontFamily || "helvetica", "normal");
+    setTextColorFromHex(doc, schema.style.secondaryColor || "#111827");
     doc.text(String(schema.labels?.footer || "Thank you for your business."), margin, y);
   }
 
