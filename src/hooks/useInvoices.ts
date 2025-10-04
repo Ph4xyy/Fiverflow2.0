@@ -132,7 +132,7 @@ export function useInvoices() {
         .order("created_at", { ascending: false });
 
       if (fetchError) throw fetchError;
-      setInvoices(data || []);
+      setInvoices((data || []) as Invoice[]);
     } catch (err: any) {
       console.error("[useInvoices] fetchInvoices error:", err);
       setError(err.message || "Failed to fetch invoices");
@@ -144,7 +144,7 @@ export function useInvoices() {
 
   useEffect(() => {
     fetchInvoices();
-  }, [user?.id]); // 🔥 FIXED: Remove fetchInvoices from dependencies to prevent infinite loops
+  }, [user?.id]);
 
   const createInvoice = useCallback(async (data: CreateInvoiceData) => {
     if (!user) {
@@ -236,9 +236,9 @@ export function useInvoices() {
 
       if (fetchError) throw fetchError;
 
-      setInvoices(prev => [result as Invoice, ...prev]);
+      setInvoices(prev => [result as unknown as Invoice, ...prev]);
       toast.success('Invoice created successfully');
-      return result as Invoice;
+      return result as unknown as Invoice;
     } catch (err: any) {
       console.error("[useInvoices] createInvoice error:", err);
       const errorMessage = err.message || "Failed to create invoice";

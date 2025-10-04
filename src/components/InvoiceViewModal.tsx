@@ -1,191 +1,292 @@
-import React, { useMemo, useState } from "react";
-import { X, Send } from "lucide-react";
-import toast from "react-hot-toast";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { generateInvoicePdfBase64 } from "@/utils/invoicePdf";
+import React, { useState } from "react";
+import { X, Download } from "lucide-react";
+import { useInvoicePayments } from "../hooks/useInvoicePayments";
+import { generateInvoicePdf } from "../utils/invoicePdf";
+import { formatMoney, formatDate } from "../utils/format";
 
-interface EmailInvoiceModalProps {
+interface InvoiceViewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  invoice: any; // doit contenir clients, number, total, currency, items...
+  invoice: any; // Type complet de facture avec client et items
 }
 
-const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, invoice }) => {
-  const [to, setTo] = useState<string>("");
-  const [subject, setSubject] = useState<string>("");
-  const [message, setMessage] = useState<string>("");
-  const [bccMe, setBccMe] = useState<boolean>(false);
-  const [sending, setSending] = useState(false);
+const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({ isOpen, onClose, invoice }) => {
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  
+  // Charger les paiements pour cette facture
+  const { 
+    payments, 
+    calculateTotalPaid, 
+    getPaymentStatus 
+  } = useInvoicePayments(invoice?.id);
 
-  useMemo(() => {
-    if (!isOpen || !invoice) return;
+  const invoiceTotal = invoice?.total || 0;
+  const totalPaid = calculateTotalPaid();
+  const paymentStatus = getPaymentStatus(invoiceTotal);
 
-    const defaultEmail =
-      invoice?.clients?.email_primary ||
-      invoice?.clients?.email ||
-      "";
+  if (!isOpen || !invoice) return null;
 
-    setTo(defaultEmail || "");
-    setSubject(`Facture ${invoice?.number || ""}`);
-    setMessage(
-      `Bonjour ${invoice?.clients?.name || ""},\n\n` +
-      `Veuillez trouver ci-joint votre facture ${invoice?.number || ""} ` +
-      `d’un montant de ${Number(invoice?.total || 0).toFixed(2)} ${invoice?.currency || "USD"}.\n\n` +
-      `Cordialement,\n` +
-      `Votre prestataire`
-    );
-  }, [isOpen, invoice]);
-
-  if (!isOpen) return null;
-
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!to || !subject) {
-      toast.error("Destinataire et sujet requis");
-      return;
-    }
-
+  const handleDownload = async () => {
+    if (!invoice) return;
+    
     try {
-      setSending(true);
-      const tId = toast.loading("Génération du PDF…");
-
-      // 1) Générer le PDF base64
-      const pdfBase64 = await generateInvoicePdfBase64(invoice);
-      const filename = `${invoice?.number || "invoice"}.pdf`;
-
-      toast.loading("Envoi de l'email…", { id: tId });
-
-      if (!isSupabaseConfigured || !supabase) {
-        // DEMO
-        await new Promise((r) => setTimeout(r, 800));
-        toast.success("Email envoyé (demo)", { id: tId });
-        onClose();
-        return;
-      }
-
-      // 2) Appel Edge Function (utilise le SMTP de l’utilisateur connecté)
-      const bccArray = bccMe && supabase?.auth?.getUser ? await (async () => {
-        const { data } = await supabase.auth.getUser();
-        const email = data?.user?.email;
-        return email ? [email] : undefined;
-      })() : undefined;
-
-      const { data, error } = await supabase.functions.invoke("send-invoice-email", {
-        body: {
-          to,
-          subject,
-          html: message.replace(/\n/g, "<br/>"),
-          text: message,
-          pdfBase64,
-          filename,
-          bcc: bccArray,
-          // replyTo / fromName / fromEmail -> si tu veux forcer depuis l’UI,
-          // sinon l’Edge Function utilisera l’identité par défaut de l’utilisateur
-        },
-      });
-
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
-
-      // 3) Marquer la facture comme "sent" si elle est encore en "draft"
-      try {
-        if (invoice?.id && invoice?.status === "draft") {
-          await supabase.from("invoices").update({ status: "sent" }).eq("id", invoice.id);
-        }
-      } catch {
-        /* non-bloquant */
-      }
-
-      toast.success("Email envoyé", { id: tId });
-      onClose();
-    } catch (e: any) {
-      console.error("[EmailInvoiceModal] send error:", e);
-      toast.error("Échec de l'envoi");
+      setDownloadLoading(true);
+      await generateInvoicePdf(invoice);
+    } catch (error) {
+      console.error("Error downloading invoice:", error);
     } finally {
-      setSending(false);
+      setDownloadLoading(false);
     }
   };
 
-  const inputBase =
-    "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent " +
-    "border-gray-300 text-gray-900 placeholder-gray-400 " +
-    "dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-400";
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "draft": return "bg-gray-100 text-gray-800";
+      case "sent": return "bg-blue-100 text-blue-800";
+      case "paid": return "bg-green-100 text-green-800";
+      case "overdue": return "bg-red-100 text-red-800";
+      case "canceled": return "bg-gray-100 text-gray-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
 
-  const labelBase = "block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300";
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "draft": return "Brouillon";
+      case "sent": return "Envoyée";
+      case "paid": return "Payée";
+      case "overdue": return "En retard";
+      case "canceled": return "Annulée";
+      default: return status;
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl w-full max-w-lg">
-        <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-slate-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Envoyer la facture par email</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-            <X size={22} />
-          </button>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Facture {invoice.number}
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {formatDate(invoice.issue_date)}
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(invoice.status)}`}>
+              {getStatusText(invoice.status)}
+            </span>
+            <button
+              onClick={handleDownload}
+              disabled={downloadLoading}
+              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              title="Télécharger PDF"
+            >
+              <Download className="w-5 h-5" />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        <form onSubmit={handleSend} className="p-5 space-y-4">
-          <div>
-            <label className={labelBase}>Destinataire *</label>
-            <input
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              type="email"
-              className={inputBase}
-              placeholder="client@email.com"
-              required
-            />
-          </div>
-          <div>
-            <label className={labelBase}>Sujet *</label>
-            <input value={subject} onChange={(e) => setSubject(e.target.value)} className={inputBase} required />
-          </div>
-          <div>
-            <label className={labelBase}>Message</label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              rows={6}
-              className={inputBase}
-              placeholder="Votre message au client…"
-            />
-            <div className="mt-2 flex items-center gap-2">
-              <input id="bccMe" type="checkbox" checked={bccMe} onChange={(e) => setBccMe(e.target.checked)} />
-              <label htmlFor="bccMe" className="text-sm text-gray-600 dark:text-gray-300">
-                Me mettre en CCI
-              </label>
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Invoice Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                Informations facture
+              </h3>
+              <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                <p><span className="font-medium">Numéro:</span> {invoice.number}</p>
+                <p><span className="font-medium">Date d'émission:</span> {formatDate(invoice.issue_date)}</p>
+                <p><span className="font-medium">Date d'échéance:</span> {formatDate(invoice.due_date)}</p>
+                <p><span className="font-medium">Statut:</span> {getStatusText(invoice.status)}</p>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                Client
+              </h3>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="font-medium">{invoice.clients?.name}</p>
+                {invoice.clients?.platform && (
+                  <p className="text-xs">Plateforme: {invoice.clients.platform}</p>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-slate-700">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              disabled={sending}
-              className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 inline-flex items-center"
-            >
-              {sending ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  Envoi…
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4 mr-2" />
-                  Envoyer
-                </>
-              )}
-            </button>
+          {/* Items */}
+          {invoice.items && invoice.items.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                Articles
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                      <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Description
+                      </th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Qté
+                      </th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Prix unitaire
+                      </th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Total
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {invoice.items.map((item: any, index: number) => (
+                      <tr key={index}>
+                        <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">
+                          {item.description}
+                        </td>
+                        <td className="px-3 py-2 text-sm text-gray-900 dark:text-white text-right">
+                          {item.quantity}
+                        </td>
+                        <td className="px-3 py-2 text-sm text-gray-900 dark:text-white text-right">
+                          {formatMoney(item.unit_price, invoice.currency || 'USD')}
+                        </td>
+                        <td className="px-3 py-2 text-sm text-gray-900 dark:text-white text-right">
+                          {formatMoney(item.line_total, invoice.currency || 'USD')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Totals */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div className="flex justify-end">
+              <div className="w-64 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Sous-total:</span>
+                  <span className="text-gray-900 dark:text-white">
+                    {formatMoney(invoice.subtotal || 0, invoice.currency || 'USD')}
+                  </span>
+                </div>
+                {invoice.discount && invoice.discount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Remise:</span>
+                    <span className="text-gray-900 dark:text-white">
+                      -{formatMoney(invoice.discount, invoice.currency || 'USD')}
+                    </span>
+                  </div>
+                )}
+                {invoice.tax_rate && invoice.tax_rate > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      TVA ({invoice.tax_rate}%):
+                    </span>
+                    <span className="text-gray-900 dark:text-white">
+                      {formatMoney((invoice.subtotal || 0) * (invoice.tax_rate / 100), invoice.currency || 'USD')}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between text-lg font-semibold border-t border-gray-200 dark:border-gray-700 pt-2">
+                  <span className="text-gray-900 dark:text-white">Total:</span>
+                  <span className="text-gray-900 dark:text-white">
+                    {formatMoney(invoice.total || 0, invoice.currency || 'USD')}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-        </form>
+
+          {/* Payment Status */}
+          {payments && payments.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                Paiements
+              </h3>
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400">Total facturé:</span>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {formatMoney(invoiceTotal, invoice.currency || 'USD')}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400">Total payé:</span>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {formatMoney(totalPaid, invoice.currency || 'USD')}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400">Solde restant:</span>
+                    <p className={`font-medium ${paymentStatus.remaining > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {formatMoney(paymentStatus.remaining, invoice.currency || 'USD')}
+                    </p>
+                  </div>
+                </div>
+                
+                {payments.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                      Historique des paiements:
+                    </h4>
+                    <div className="space-y-1">
+                      {payments.map((payment: any) => (
+                        <div key={payment.id} className="flex justify-between text-xs">
+                          <span className="text-gray-600 dark:text-gray-400">
+                            {formatDate(payment.paid_at)} - {payment.method || 'Non spécifié'}
+                          </span>
+                          <span className="text-gray-900 dark:text-white">
+                            {formatMoney(payment.amount, invoice.currency || 'USD')}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Notes */}
+          {invoice.notes && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                Notes
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
+                {invoice.notes}
+              </p>
+            </div>
+          )}
+
+          {/* Terms */}
+          {invoice.terms && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                Conditions
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
+                {invoice.terms}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default EmailInvoiceModal;
+export default InvoiceViewModal;

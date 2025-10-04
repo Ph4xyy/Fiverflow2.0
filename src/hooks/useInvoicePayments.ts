@@ -86,7 +86,7 @@ export function useInvoicePayments(invoiceId?: string) {
     if (invoiceId) {
       fetchPayments();
     }
-  }, [invoiceId]); // 🔥 FIXED: Remove fetchPayments from dependencies to prevent infinite loops
+  }, [invoiceId]);
 
   const createPayment = useCallback(async (data: CreateInvoicePaymentData) => {
     if (!user) {
@@ -171,7 +171,7 @@ export function useInvoicePayments(invoiceId?: string) {
       toast.error(errorMessage);
       throw err;
     }
-  }, [user]); // 🔥 FIXED: Remove fetchPayments from dependencies to prevent infinite loops
+  }, [user]);
 
   const deletePayment = useCallback(async (id: string) => {
     if (!user) {
