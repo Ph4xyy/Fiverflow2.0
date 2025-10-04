@@ -128,7 +128,7 @@ const InvoiceTemplateEditorPage: React.FC = () => {
           </div>
           <div className="p-4 border-b border-gray-200 dark:border-slate-700">
             <LogoUploader
-              value={schema.style.logoUrl || null}
+              path={schema.style.logoPath || null}
               onChange={async (path: string | null) => {
                 try {
                   const publicUrl = path ? await getFileUrl(path) : null;

@@ -3,6 +3,7 @@ import { X, Download } from "lucide-react";
 import { useInvoicePayments } from "../hooks/useInvoicePayments";
 import { generateInvoicePdf } from "../utils/invoicePdf";
 import { formatMoney, formatDate } from "../utils/format";
+import toast from "react-hot-toast";
 
 interface InvoiceViewModalProps {
   isOpen: boolean;
@@ -31,9 +32,12 @@ const InvoiceViewModal: React.FC<InvoiceViewModalProps> = ({ isOpen, onClose, in
     
     try {
       setDownloadLoading(true);
-      await generateInvoicePdf(invoice);
+      const doc = await generateInvoicePdf(invoice);
+      const filename = `facture-${invoice.number || 'invoice'}.pdf`;
+      doc.save(filename);
     } catch (error) {
       console.error("Error downloading invoice:", error);
+      toast.error("Erreur lors du téléchargement du PDF");
     } finally {
       setDownloadLoading(false);
     }

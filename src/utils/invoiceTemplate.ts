@@ -87,7 +87,7 @@ export async function renderInvoiceWithTemplateToPdf(
   let y = margin;
 
   doc.setFont(schema.style.fontFamily || "helvetica", "bold");
-  doc.setTextColor(schema.style.secondaryColor || "#111827");
+  doc.setTextColor("#111827"); // Use standard color for text
   doc.setDrawColor(200);
 
   // Header
@@ -106,9 +106,11 @@ export async function renderInvoiceWithTemplateToPdf(
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.src = String(schema.style.logoUrl);
-        await new Promise<void>((resolve) => {
+        await new Promise<void>((resolve, reject) => {
           img.onload = () => resolve();
-          img.onerror = () => resolve();
+          img.onerror = () => reject(new Error("Failed to load logo"));
+          // Timeout after 5 seconds
+          setTimeout(() => reject(new Error("Logo load timeout")), 5000);
         });
         const natW = (img as any).naturalWidth || img.width || 1;
         const natH = (img as any).naturalHeight || img.height || 1;
@@ -117,7 +119,10 @@ export async function renderInvoiceWithTemplateToPdf(
         const targetH = Math.max(16, Math.round(targetW * ratio));
         // @ts-ignore jsPDF can accept HTMLImageElement
         doc.addImage(img, 'PNG', margin, y - targetH + 4, targetW, targetH, undefined, 'FAST');
-      } catch {}
+      } catch (err) {
+        console.warn("[TemplatePDF] Logo loading failed:", err);
+        // Continue without logo
+      }
     }
     doc.text(String(data.company?.name || "Your Company"), margin, y);
   }
@@ -167,7 +172,7 @@ export async function renderInvoiceWithTemplateToPdf(
     const colUP = 400;
     const colTotal = 480;
     doc.setFontSize(schema.style.tableHeaderSize ?? 10);
-    doc.text(schema.labels?.items || "Description", colDesc, y);
+    doc.text("Description", colDesc, y);
     doc.text(schema.labels?.qty || "Qty", colQty, y);
     doc.text(schema.labels?.unitPrice || "Unit", colUP, y);
     doc.text(schema.labels?.lineTotal || "Total", colTotal, y);
