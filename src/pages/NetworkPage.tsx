@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import PlanRestrictedPage from '../components/PlanRestrictedPage';
 import { useAuth } from '../contexts/AuthContext';
+import { useCurrency } from '../contexts/CurrencyContext';
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { usePayouts } from '../hooks/usePayouts';
@@ -93,6 +94,7 @@ const mockReferralLogs: ReferralLog[] = [
 
 export default function NetworkPage() {
   const { user } = useAuth();
+  const { currency } = useCurrency();
 
   // 🔒 Plan access
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
@@ -284,7 +286,7 @@ export default function NetworkPage() {
   };
 
   const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
 
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });

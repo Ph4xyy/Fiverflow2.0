@@ -4,6 +4,7 @@ import Layout, { cardClass } from '@/components/Layout';
 import OrderForm from '@/components/OrderForm';
 import OrderDetailModal from '@/components/OrderDetailModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import {
@@ -29,6 +30,7 @@ const PAGE_SIZE = 20;
 
 const OrdersPage: React.FC = () => {
   const { user } = useAuth();
+  const { currency } = useCurrency();
   const { checkOrderLimit } = usePlanLimits();
 
   // Data
@@ -541,7 +543,7 @@ const OrdersPage: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                          {typeof o.amount === 'number' ? `$${o.amount.toLocaleString()}` : '—'}
+                          {typeof o.amount === 'number' ? new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(o.amount) : '—'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap relative" ref={openStatusFor === o.id ? statusMenuRef : undefined}>
                           <button

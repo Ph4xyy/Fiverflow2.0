@@ -4,6 +4,7 @@ import Layout, { cardClass } from '@/components/Layout';
 import PlanRestrictedPage from '@/components/PlanRestrictedPage';
 import { usePlanRestrictions } from '@/hooks/usePlanRestrictions';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 import {
@@ -80,6 +81,7 @@ const STATUS_COLOR: Record<string, string> = {
 // -------------------- COMPONENT --------------------
 const StatsPage: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
+  const { currency } = useCurrency();
   const { restrictions, loading: planLoading, checkAccess } = usePlanRestrictions();
 
   const [period, setPeriod] = useState<Period>('30d');
@@ -456,18 +458,18 @@ const StatsPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-400">Total Revenue</p>
-                <p className="text-2xl font-bold text-white">${totalRevenue.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(totalRevenue)}</p>
               </div>
               <DollarSign className="text-green-400" />
             </div>
-            <p className="mt-2 text-xs text-slate-400">Avg. order value: ${averageOrderValue.toFixed(2)}</p>
+            <p className="mt-2 text-xs text-slate-400">Avg. order value: {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(averageOrderValue)}</p>
           </div>
 
           <div className={`${cardClass} p-4`}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-400">Pending Revenue</p>
-                <p className="text-2xl font-bold text-white">${pendingRevenue.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(pendingRevenue)}</p>
               </div>
               <ShoppingCart className="text-amber-400" />
             </div>
