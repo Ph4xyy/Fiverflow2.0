@@ -342,47 +342,43 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             pt-16 lg:pt-0
           `}
         >
-          <nav className="h-full px-3 sm:px-4 py-5 flex flex-col">
-            <div className="flex-1 overflow-y-auto space-y-2">
-              <LocalErrorBoundary>
-                {/* -------- Section: Overview -------- */}
-                <div className="px-3 sm:px-4">
-                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Overview</span>
-                </div>
-                <div className="space-y-1">
-                  {overviewItems.map((item) => (
-                    <LinkRow key={item.path} item={item} />
-                  ))}
-                </div>
-
-                {/* -------- Section: AI -------- */}
-                <div className="px-3 sm:px-4 pt-4">
-                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">AI</span>
-                </div>
-                <div className="mx-3 sm:mx-4 mt-2">
-                  <div className="text-xs text-slate-400 px-3 py-2 rounded-xl bg-[#0E121A] ring-1 ring-inset ring-[#1C2230]">
-                    Coming soon!
-                  </div>
-                </div>
-
-                {/* -------- Section: Workspace -------- */}
-                <div className="px-3 sm:px-4 pt-4">
-                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Workspace</span>
-                </div>
-                <div className="space-y-1">
-                  {workspaceItems.map((item) => (
-                    <LinkRow key={item.path} item={item} />
-                  ))}
-                </div>
-              </LocalErrorBoundary>
-            </div>
-
-            {/* -------- Micro section: Account / Admin / Upgrade (toujours en bas) -------- */}
-            <div className="pt-4 mt-2 border-t border-[#1C2230] flex-shrink-0">
-              <div className="px-3 sm:px-4 mb-2">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">More</span>
+          <nav className="h-full px-3 sm:px-4 py-5 space-y-2 overflow-y-auto">
+            <LocalErrorBoundary>
+              {/* -------- Section: Overview -------- */}
+              <div className="px-3 sm:px-4">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Overview</span>
               </div>
-              <LocalErrorBoundary>
+              <div className="space-y-1">
+                {overviewItems.map((item) => (
+                  <LinkRow key={item.path} item={item} />
+                ))}
+              </div>
+
+              {/* -------- Section: AI -------- */}
+              <div className="px-3 sm:px-4 pt-4">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">AI</span>
+              </div>
+              <div className="mx-3 sm:mx-4 mt-2">
+                <div className="text-xs text-slate-400 px-3 py-2 rounded-xl bg-[#0E121A] ring-1 ring-inset ring-[#1C2230]">
+                  Coming soon!
+                </div>
+              </div>
+
+              {/* -------- Section: Workspace -------- */}
+              <div className="px-3 sm:px-4 pt-4">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Workspace</span>
+              </div>
+              <div className="space-y-1">
+                {workspaceItems.map((item) => (
+                  <LinkRow key={item.path} item={item} />
+                ))}
+              </div>
+
+              {/* -------- Section: More (collée avec les autres) -------- */}
+              <div className="pt-4 mt-2 border-t border-[#1C2230]">
+                <div className="px-3 sm:px-4 mb-2">
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">More</span>
+                </div>
                 <div className="space-y-1">
                   {bottomItems.map((item) => (
                     <LinkRow
@@ -398,8 +394,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
                     />
                   ))}
                 </div>
-              </LocalErrorBoundary>
-            </div>
+              </div>
+            </LocalErrorBoundary>
           </nav>
         </aside>
 
