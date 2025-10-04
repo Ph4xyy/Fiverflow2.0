@@ -455,30 +455,37 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
             template_id: form.template_id || null,
           });
           
+          const invoiceData = {
+            user_id: user.id,
+            number: invoiceNumber,
+            client_id: form.client_id,
+            issue_date: form.issue_date,
+            due_date: form.due_date,
+            currency: form.currency,
+            status: form.status,
+            subtotal: totals.subtotal,
+            tax_rate: Number(form.tax_rate || 0),
+            tax_amount: totals.tax_amount,
+            discount: Number(form.discount || 0),
+            total: totals.total,
+            notes: form.notes?.trim() || null,
+            terms: form.terms?.trim() || null,
+            tags: form.tags?.length ? form.tags : null,
+            template_id: form.template_id || null,
+          };
+          
+          console.log("[InvoiceForm] Insert invoice data:", invoiceData);
+          
           const { data: newInvoice, error: insertErr } = await supabase
             .from("invoices")
-            .insert({
-              user_id: user.id,
-              number: invoiceNumber,
-              client_id: form.client_id,
-              issue_date: form.issue_date,
-              due_date: form.due_date,
-              currency: form.currency,
-              status: form.status,
-              subtotal: totals.subtotal,
-              tax_rate: Number(form.tax_rate || 0),
-              tax_amount: totals.tax_amount,
-              discount: Number(form.discount || 0),
-              total: totals.total,
-              notes: form.notes?.trim() || null,
-              terms: form.terms?.trim() || null,
-              tags: form.tags?.length ? form.tags : null,
-              template_id: form.template_id || null,
-            })
+            .insert(invoiceData)
             .select("id")
             .single();
             
-          if (insertErr) throw insertErr;
+          if (insertErr) {
+            console.error("[InvoiceForm] Insert invoice error:", insertErr);
+            throw insertErr;
+          }
           invoiceId = newInvoice.id;
         }
 
@@ -516,7 +523,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
         norm: norm,
         totals: totals
       });
-      toast.error(`Erreur lors de l'enregistrement: ${err instanceof Error ? err.message : String(err)}`, { id: toastId });
+      const errorMessage = err instanceof Error ? err.message : 
+                           typeof err === 'object' && err !== null ? JSON.stringify(err) : 
+                           String(err);
+      toast.error(`Erreur lors de l'enregistrement: ${errorMessage}`, { id: toastId });
     } finally {
       setLoading(false);
     }
