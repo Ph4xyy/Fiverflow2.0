@@ -24,6 +24,9 @@ const translations = {
     'nav.stats': 'Stats',
     'nav.profile': 'Profile',
     'nav.support': 'Support',
+    'nav.todo': 'To-Do List',
+    'nav.admin': 'Admin',
+    'nav.upgrade': 'Upgrade',
     
     // Search
     'search.placeholder': 'Search...',
@@ -219,6 +222,12 @@ const translations = {
     'nav.stats': 'Statistiques',
     'nav.profile': 'Profil',
     'nav.support': 'Support',
+    'nav.todo': 'Aufgabenliste',
+    'nav.admin': 'Admin',
+    'nav.upgrade': 'Upgrade',
+    'nav.todo': 'Liste de tâches',
+    'nav.admin': 'Admin',
+    'nav.upgrade': 'Mettre à niveau',
     
     // Search
     'search.placeholder': 'Rechercher...',
@@ -414,6 +423,9 @@ const translations = {
     'nav.stats': 'Estadísticas',
     'nav.profile': 'Perfil',
     'nav.support': 'Soporte',
+    'nav.todo': 'Lista de tareas',
+    'nav.admin': 'Admin',
+    'nav.upgrade': 'Actualizar',
     
     // Search
     'search.placeholder': 'Buscar...',
@@ -609,6 +621,12 @@ const translations = {
     'nav.stats': 'Statistiken',
     'nav.profile': 'Profil',
     'nav.support': 'Support',
+    'nav.todo': 'Aufgabenliste',
+    'nav.admin': 'Admin',
+    'nav.upgrade': 'Upgrade',
+    'nav.todo': 'Liste de tâches',
+    'nav.admin': 'Admin',
+    'nav.upgrade': 'Mettre à niveau',
     
     // Search
     'search.placeholder': 'Suchen...',
@@ -804,6 +822,9 @@ const translations = {
     'nav.stats': '统计',
     'nav.profile': '个人资料',
     'nav.support': '支持',
+    'nav.todo': '待办事项',
+    'nav.admin': '管理员',
+    'nav.upgrade': '升级',
     
     // Search
     'search.placeholder': '搜索...',
@@ -945,6 +966,9 @@ const translations = {
     'nav.stats': 'Statistiche',
     'nav.profile': 'Profilo',
     'nav.support': 'Supporto',
+    'nav.todo': 'Lista delle cose da fare',
+    'nav.admin': 'Admin',
+    'nav.upgrade': 'Aggiorna',
     
     // Search
     'search.placeholder': 'Cerca...',
@@ -1086,6 +1110,9 @@ const translations = {
     'nav.stats': 'Estatísticas',
     'nav.profile': 'Perfil',
     'nav.support': 'Suporte',
+    'nav.todo': 'Lista de tarefas',
+    'nav.admin': 'Admin',
+    'nav.upgrade': 'Atualizar',
     
     // Search
     'search.placeholder': 'Pesquisar...',
@@ -1227,6 +1254,9 @@ const translations = {
     'nav.stats': 'Статистика',
     'nav.profile': 'Профиль',
     'nav.support': 'Поддержка',
+    'nav.todo': 'Список дел',
+    'nav.admin': 'Админ',
+    'nav.upgrade': 'Обновить',
     
     // Search
     'search.placeholder': 'Поиск...',
@@ -1368,6 +1398,9 @@ const translations = {
     'nav.stats': '統計',
     'nav.profile': 'プロフィール',
     'nav.support': 'サポート',
+    'nav.todo': 'To-Doリスト',
+    'nav.admin': '管理者',
+    'nav.upgrade': 'アップグレード',
     
     // Search
     'search.placeholder': '検索...',
@@ -1509,6 +1542,9 @@ const translations = {
     'nav.stats': '통계',
     'nav.profile': '프로필',
     'nav.support': '지원',
+    'nav.todo': '할 일 목록',
+    'nav.admin': '관리자',
+    'nav.upgrade': '업그레이드',
     
     // Search
     'search.placeholder': '검색...',
@@ -1648,6 +1684,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const savedLanguage = localStorage.getItem('language') as Language;
     if (savedLanguage && ['en', 'fr', 'es', 'de', 'zh', 'it', 'pt', 'ru', 'ja', 'ko'].includes(savedLanguage)) {
       setLanguage(savedLanguage);
+    } else {
+      // Par défaut, utiliser l'anglais
+      setLanguage('en');
+      localStorage.setItem('language', 'en');
     }
   }, []);
 
@@ -1657,9 +1697,19 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('language', lang);
   };
 
-  // Fonction de traduction
+  // Fonction de traduction avec fallback
   const t = (key: string): string => {
-    return translations[language][key as keyof typeof translations[typeof language]] || key;
+    const translation = translations[language]?.[key as keyof typeof translations[typeof language]];
+    if (translation) {
+      return translation;
+    }
+    // Fallback vers l'anglais si la traduction n'existe pas
+    const englishTranslation = translations.en?.[key as keyof typeof translations.en];
+    if (englishTranslation) {
+      return englishTranslation;
+    }
+    // Si aucune traduction n'existe, retourner la clé
+    return key;
   };
 
   return (
