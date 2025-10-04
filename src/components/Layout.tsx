@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-// import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 // Import logo
 import LogoImage from '../assets/LogoFiverFlow.png';
@@ -93,6 +93,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
   const { restrictions, checkAccess } = usePlanRestrictions();
+  const { t } = useLanguage();
 
   useEffect(() => {
     // Use cached role first, then fallback to user metadata
@@ -136,10 +137,10 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   /* ---------- NAV STRUCTURE EN 3 SECTIONS + MICRO SECTION BAS ---------- */
   // Section 1: Overview (principales)
   const overviewItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: Home, tone: 'from-accent-blue to-accent-purple' },
+    { path: '/dashboard', label: t('nav.dashboard'), icon: Home, tone: 'from-accent-blue to-accent-purple' },
     { 
       path: '/calendar', 
-      label: 'Calendar', 
+      label: t('nav.calendar'), 
       icon: CalendarIcon,
       restricted: !checkAccess('calendar') && !restrictions?.isAdmin,
       requiredPlan: 'Pro' as const,
@@ -168,11 +169,11 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
   // Section 3: Workspace
   const workspaceItems = [
-    { path: '/clients', label: 'Clients', icon: Users, tone: 'from-emerald-500 to-teal-600' },
-    { path: '/orders',  label: 'Orders',  icon: ShoppingCart, tone: 'from-amber-500 to-orange-600' },
+    { path: '/clients', label: t('nav.clients'), icon: Users, tone: 'from-emerald-500 to-teal-600' },
+    { path: '/orders',  label: t('nav.orders'),  icon: ShoppingCart, tone: 'from-amber-500 to-orange-600' },
     { 
       path: '/invoices',
-      label: 'Invoices',
+      label: t('nav.invoices'),
       icon: Receipt,
       restricted: !(restrictions?.isAdmin || checkAccess('invoices')),
       requiredPlan: 'Excellence' as const,
@@ -180,7 +181,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     },
     { 
       path: '/tasks', 
-      label: 'Tasks', 
+      label: t('nav.tasks'), 
       icon: CheckSquare,
       restricted: !checkAccess('tasks') && !restrictions?.isAdmin,
       requiredPlan: 'Pro' as const,
@@ -189,7 +190,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     // 👇 To-Do List (Pro & Plus/Excellence, pas Free)
     { 
       path: '/workspace/todo',
-      label: 'To-Do List',
+      label: t('nav.todo'),
       icon: ListChecks,
       restricted: !checkAccess('todo') && !restrictions?.isAdmin,
       requiredPlan: 'Pro' as const, // badge "Pro" si restreint
@@ -199,14 +200,14 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
   // Micro section (tout en bas)
   const bottomItems = [
-    { path: '/profile', label: 'Account', icon: User, tone: 'from-accent-blue to-accent-purple' },
+    { path: '/profile', label: t('nav.profile'), icon: User, tone: 'from-accent-blue to-accent-purple' },
     ...(isAdmin ? [{
       path: '/admin/dashboard',
-      label: 'Admin',
+      label: t('nav.admin'),
       icon: Shield,
       tone: 'from-lime-500 to-green-600'
     }] as const : []),
-    { path: '/upgrade', label: 'Upgrade', icon: Crown, tone: 'from-accent-orange to-accent-yellow', special: 'upgrade' as const },
+    { path: '/upgrade', label: t('nav.upgrade'), icon: Crown, tone: 'from-accent-orange to-accent-yellow', special: 'upgrade' as const },
   ];
 
   const handleSignOut = async () => {
