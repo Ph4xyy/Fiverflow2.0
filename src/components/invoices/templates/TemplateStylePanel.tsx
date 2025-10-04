@@ -36,21 +36,39 @@ const TemplateStylePanel: React.FC<Props> = ({ value, onChange }) => {
     <div className="p-4 space-y-4">
       <div className="text-sm font-medium text-gray-900 dark:text-white">Style</div>
       <Field label="Couleur primaire">
-        <input
-          type="color"
-          value={s.primaryColor}
-          onChange={(e) => onChange({ ...value, style: { ...s, primaryColor: e.target.value } })}
-          className="h-9 w-14 p-0 border border-gray-300 dark:border-slate-700 rounded"
-        />
+        <div className="flex items-center gap-2">
+          <input
+            type="color"
+            value={s.primaryColor}
+            onChange={(e) => onChange({ ...value, style: { ...s, primaryColor: e.target.value } })}
+            className="h-9 w-14 p-0 border border-gray-300 dark:border-slate-700 rounded"
+          />
+          <input
+            type="text"
+            value={s.primaryColor}
+            onChange={(e) => onChange({ ...value, style: { ...s, primaryColor: e.target.value } })}
+            className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
+            placeholder="#000000"
+          />
+        </div>
       </Field>
 
       <Field label="Couleur secondaire">
-        <input
-          type="color"
-          value={s.secondaryColor}
-          onChange={(e) => onChange({ ...value, style: { ...s, secondaryColor: e.target.value } })}
-          className="h-9 w-14 p-0 border border-gray-300 dark:border-slate-700 rounded"
-        />
+        <div className="flex items-center gap-2">
+          <input
+            type="color"
+            value={s.secondaryColor}
+            onChange={(e) => onChange({ ...value, style: { ...s, secondaryColor: e.target.value } })}
+            className="h-9 w-14 p-0 border border-gray-300 dark:border-slate-700 rounded"
+          />
+          <input
+            type="text"
+            value={s.secondaryColor}
+            onChange={(e) => onChange({ ...value, style: { ...s, secondaryColor: e.target.value } })}
+            className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
+            placeholder="#000000"
+          />
+        </div>
       </Field>
 
       <div className="rounded-md p-3 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
@@ -134,12 +152,21 @@ const TemplateStylePanel: React.FC<Props> = ({ value, onChange }) => {
         <div className="text-sm font-medium text-gray-900 dark:text-white mb-3">Couleurs du tableau</div>
         
         <Field label="Couleur des rayures">
-          <input
-            type="color"
-            value={s.tableStripeColor || "#f3f4f6"}
-            onChange={(e) => onChange({ ...value, style: { ...s, tableStripeColor: e.target.value } })}
-            className="h-9 w-14 p-0 border border-gray-300 dark:border-slate-700 rounded"
-          />
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={s.tableStripeColor || "#f3f4f6"}
+              onChange={(e) => onChange({ ...value, style: { ...s, tableStripeColor: e.target.value } })}
+              className="h-9 w-14 p-0 border border-gray-300 dark:border-slate-700 rounded"
+            />
+            <input
+              type="text"
+              value={s.tableStripeColor || "#f3f4f6"}
+              onChange={(e) => onChange({ ...value, style: { ...s, tableStripeColor: e.target.value } })}
+              className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
+              placeholder="#f3f4f6"
+            />
+          </div>
         </Field>
 
         <Field label="Intensité des rayures">

@@ -154,14 +154,19 @@ const InvoiceTemplateEditorPage: React.FC = () => {
               }}
             />
           </div>
-          <TemplateStylePanel value={schema} onChange={(newSchema: TemplateSchema) => {
+          <TemplateStylePanel value={schema} onChange={async (newSchema: TemplateSchema) => {
             setSchema(newSchema);
-            // Auto-générer l'aperçu PDF après changement de style
-            setTimeout(() => {
-              if (newSchema) {
-                generateInlinePreview();
-              }
-            }, 500);
+            try {
+              await update(tpl.id, { schema: newSchema });
+              // Auto-générer l'aperçu PDF après changement de style
+              setTimeout(() => {
+                if (newSchema) {
+                  generateInlinePreview();
+                }
+              }, 500);
+            } catch (e: any) {
+              console.error("[TemplateEditor] save style", e);
+            }
           }} />
         </div>
 
