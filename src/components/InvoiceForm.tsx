@@ -215,8 +215,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
       }
     }
     
-    setErrors(e);
     console.log(`Step ${step} validation:`, e);
+    setErrors(e);
     return Object.keys(e).length === 0;
   };
 
@@ -266,6 +266,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
     // Validate each step and collect all errors
     let hasErrors = false;
     let firstErrorStep = 1;
+    let allErrors: Record<string, string> = {};
     
     for (let step = 1; step <= 3; step++) {
       const isValid = validateStep(step);
@@ -280,6 +281,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
     
     if (hasErrors) {
       setCurrentStep(firstErrorStep);
+      console.log("Final errors to show:", errors);
       toast.error("Veuillez corriger les erreurs");
       return;
     }
