@@ -370,22 +370,75 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
 
         toast.success("Facture mise à jour", { id: toastId });
       } else {
-        // Create via RPC to auto-generate invoice number
-        const { data: createdId, error: invErr } = await supabase.rpc(
-          'create_invoice_with_number',
-          {
-            p_user_id: user.id,
-            p_client_id: form.client_id,
-            p_issue_date: form.issue_date as any,
-            p_due_date: form.due_date as any,
-            p_currency: form.currency,
-            p_notes: form.notes?.trim() || null,
-            p_terms: form.terms?.trim() || null,
-            p_template_id: form.template_id || null,
+        // Try RPC first, fallback to direct insert
+        let invoiceId: string;
+        
+        try {
+          const { data: createdId, error: invErr } = await supabase.rpc(
+            'create_invoice_with_number',
+            {
+              p_user_id: user.id,
+              p_client_id: form.client_id,
+              p_issue_date: form.issue_date as any,
+              p_due_date: form.due_date as any,
+              p_currency: form.currency,
+              p_notes: form.notes?.trim() || null,
+              p_terms: form.terms?.trim() || null,
+              p_template_id: form.template_id || null,
+            }
+          );
+          if (invErr) throw invErr;
+          invoiceId = createdId as unknown as string;
+        } catch (rpcError) {
+          console.warn("[InvoiceForm] RPC failed, using direct insert:", rpcError);
+          
+          // Generate invoice number manually
+          const { data: existingInvoices } = await supabase
+            .from("invoices")
+            .select("number")
+            .eq("user_id", user.id)
+            .like("number", "INV-%")
+            .order("created_at", { ascending: false })
+            .limit(1);
+          
+          let nextNumber = 1;
+          if (existingInvoices && existingInvoices.length > 0) {
+            const lastNumber = existingInvoices[0].number;
+            const match = lastNumber.match(/INV-(\d+)$/);
+            if (match) {
+              nextNumber = parseInt(match[1]) + 1;
+            }
           }
-        );
-        if (invErr) throw invErr;
-        const invoiceId = createdId as unknown as string;
+          
+          const invoiceNumber = `INV-${nextNumber.toString().padStart(4, '0')}`;
+          
+          // Create invoice directly
+          const { data: newInvoice, error: insertErr } = await supabase
+            .from("invoices")
+            .insert({
+              user_id: user.id,
+              number: invoiceNumber,
+              client_id: form.client_id,
+              issue_date: form.issue_date,
+              due_date: form.due_date,
+              currency: form.currency,
+              status: form.status,
+              subtotal: totals.subtotal,
+              tax_rate: Number(form.tax_rate || 0),
+              tax_amount: totals.tax_amount,
+              discount: Number(form.discount || 0),
+              total: totals.total,
+              notes: form.notes?.trim() || null,
+              terms: form.terms?.trim() || null,
+              tags: form.tags?.length ? form.tags : null,
+              template_id: form.template_id || null,
+            })
+            .select("id")
+            .single();
+            
+          if (insertErr) throw insertErr;
+          invoiceId = newInvoice.id;
+        }
 
         if (norm.length) {
           const payload = norm.map((l: InvoiceLine, i: number) => ({

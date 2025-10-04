@@ -169,6 +169,27 @@ VALUES
   )
 ON CONFLICT DO NOTHING;
 
+-- Create function to generate invoice numbers
+CREATE OR REPLACE FUNCTION generate_invoice_number(user_id UUID)
+RETURNS TEXT AS $$
+DECLARE
+  next_number INTEGER;
+  invoice_number TEXT;
+BEGIN
+  -- Get the next sequential number for this user
+  SELECT COALESCE(MAX(CAST(SUBSTRING(number FROM 'INV-(\d+)$') AS INTEGER)), 0) + 1
+  INTO next_number
+  FROM invoices
+  WHERE invoices.user_id = generate_invoice_number.user_id
+    AND number ~ '^INV-\d+$';
+
+  -- Format as INV-XXXX
+  invoice_number := 'INV-' || LPAD(next_number::TEXT, 4, '0');
+
+  RETURN invoice_number;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Create function to get default template for a user
 CREATE OR REPLACE FUNCTION get_default_invoice_template(user_id UUID)
 RETURNS UUID AS $$
@@ -478,6 +499,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Grant execute permissions on functions
+GRANT EXECUTE ON FUNCTION generate_invoice_number(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_default_invoice_template(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION create_invoice_with_number(UUID, UUID, DATE, DATE, TEXT, TEXT, TEXT, UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION add_invoice_item(UUID, TEXT, DECIMAL, DECIMAL, INTEGER) TO authenticated;
