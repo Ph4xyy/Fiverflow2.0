@@ -8,6 +8,15 @@ export const formatMoney = (amount?: number | null, currency: string = 'USD') =>
   }
 };
 
+/**
+ * Format money using user's default currency preference
+ * This function should be used inside React components where useCurrency is available
+ */
+export const formatMoneyDefault = (amount?: number | null, userCurrency?: string) => {
+  const currency = userCurrency || 'USD';
+  return formatMoney(amount, currency);
+};
+
 export const formatDate = (iso?: string | null) => {
   if (!iso) return '—';
   const d = new Date(iso);

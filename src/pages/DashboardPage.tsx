@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Layout, { cardClass, subtleBg } from '@/components/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import { useClients } from '@/hooks/useClients';
 import { useStripeSubscription } from '@/hooks/useStripeSubscription';
 import { usePlanRestrictions } from '@/hooks/usePlanRestrictions';
@@ -33,6 +34,7 @@ const DashboardPage = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { currency } = useCurrency();
   const { clients } = useClients();
   const { subscription: stripeSubscription } = useStripeSubscription();
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
@@ -202,7 +204,7 @@ const DashboardPage = () => {
         subtitle: s.provider || null,
         date: s.updated_at || s.created_at,
         amount: typeof s.amount === 'number' ? s.amount : null,
-        currency: s.currency || 'USD',
+          currency: s.currency || currency,
         color: s.color || '#8b5cf6',
       }));
 
@@ -410,7 +412,7 @@ const DashboardPage = () => {
                   const amountStr = isOrder && typeof it.amount === 'number'
                     ? `$${it.amount.toLocaleString()}`
                     : isSub && typeof it.amount === 'number'
-                      ? new Intl.NumberFormat('en-US', { style: 'currency', currency: it.currency || 'USD' }).format(it.amount)
+                      ? new Intl.NumberFormat('en-US', { style: 'currency', currency: it.currency || currency }).format(it.amount)
                       : '—';
                   return (
                     <div

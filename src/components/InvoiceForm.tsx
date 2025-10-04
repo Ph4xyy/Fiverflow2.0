@@ -14,10 +14,11 @@ import {
   Tag,
   Layers,
 } from "lucide-react";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { useAuth } from "@/contexts/AuthContext";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import { useAuth } from "../contexts/AuthContext";
+import { useCurrency } from "../contexts/CurrencyContext";
 import toast from "react-hot-toast";
-import { computeInvoice, normalizeItems, InvoiceLine } from "@/utils/invoice";
+import { computeInvoice, normalizeItems, InvoiceLine } from "../utils/invoice";
 
 interface ClientOpt {
   id: string;
@@ -64,6 +65,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
   invoice,
 }) => {
   const { user } = useAuth();
+  const { currency: userCurrency } = useCurrency();
 
   // UI
   const [loading, setLoading] = useState(false);
@@ -80,7 +82,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
   const [form, setForm] = useState({
     number: invoice?.number || "",
     client_id: invoice?.client_id || "",
-    currency: invoice?.currency || "USD",
+    currency: invoice?.currency || userCurrency,
     issue_date: invoice?.issue_date || "",
     due_date: invoice?.due_date || "",
     status: (invoice?.status || "draft") as typeof STATUSES[number],
