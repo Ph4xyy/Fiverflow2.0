@@ -465,7 +465,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
             status: form.status,
             subtotal: totals.subtotal,
             tax_rate: Number(form.tax_rate || 0),
-            tax_amount: totals.tax_amount,
             discount: Number(form.discount || 0),
             total: totals.total,
             notes: form.notes?.trim() || null,
