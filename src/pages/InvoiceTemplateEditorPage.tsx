@@ -1,13 +1,13 @@
 // src/pages/InvoiceTemplateEditorPage.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { useInvoiceTemplates } from "@/hooks/useInvoiceTemplates";
-import type { InvoiceTemplate, TemplateSchema } from "@/types/invoiceTemplate";
-import TemplateStylePanel from "@/components/invoices/templates/TemplateStylePanel";
-import LogoUploader from "@/components/invoices/templates/LogoUploader";
-import { renderInvoiceWithTemplateToPdf } from "@/utils/invoiceTemplate";
-import { getFileUrl } from "@/lib/storage";
+import { useAuth } from "../contexts/AuthContext";
+import { useInvoiceTemplates } from "../hooks/useInvoiceTemplates";
+import type { InvoiceTemplate, TemplateSchema } from "../types/invoiceTemplate";
+import TemplateStylePanel from "../components/invoices/templates/TemplateStylePanel";
+import LogoUploader from "../components/invoices/templates/LogoUploader";
+import { renderInvoiceWithTemplateToPdf } from "../utils/invoiceTemplate";
+import { getFileUrl } from "../lib/storage";
 import toast from "react-hot-toast";
 
 const sampleData = {
@@ -153,7 +153,7 @@ const InvoiceTemplateEditorPage: React.FC = () => {
               }}
             />
           </div>
-          <TemplateStylePanel value={schema} onChange={(newSchema) => {
+          <TemplateStylePanel value={schema} onChange={(newSchema: TemplateSchema) => {
             setSchema(newSchema);
             // Auto-générer l'aperçu PDF après changement de style
             setTimeout(generateInlinePreview, 500);
