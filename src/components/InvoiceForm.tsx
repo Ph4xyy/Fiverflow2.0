@@ -315,12 +315,25 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
       return;
     }
 
+    console.log("[InvoiceForm] Before processing:", { items, form });
+    
     const norm = normalizeItems(items);
+    console.log("[InvoiceForm] Normalized items:", norm);
+    
+    // Ensure we have at least one valid item
+    if (norm.length === 0) {
+      toast.error("Ajoutez au moins un article valide avec description, quantité et prix");
+      setCurrentStep(2); // Go back to items step
+      return;
+    }
+    
     const totals = computeInvoice({
       items: norm,
       tax_rate: Number(form.tax_rate || 0),
       discount: Number(form.discount || 0),
     });
+    
+    console.log("[InvoiceForm] Calculated totals:", totals);
 
     if (!isSupabaseConfigured || !supabase || !user) {
       toast.success("Simulé (demo): facture enregistrée");
@@ -391,6 +404,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
           invoiceId = createdId as unknown as string;
         } catch (rpcError) {
           console.warn("[InvoiceForm] RPC failed, using direct insert:", rpcError);
+          console.error("[InvoiceForm] RPC error details:", {
+            message: rpcError instanceof Error ? rpcError.message : String(rpcError),
+            stack: rpcError instanceof Error ? rpcError.stack : undefined,
+          });
           
           // Generate invoice number manually
           const { data: existingInvoices } = await supabase
@@ -413,6 +430,25 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
           const invoiceNumber = `INV-${nextNumber.toString().padStart(4, '0')}`;
           
           // Create invoice directly
+          console.log("[InvoiceForm] Creating invoice with data:", {
+            user_id: user.id,
+            number: invoiceNumber,
+            client_id: form.client_id,
+            issue_date: form.issue_date,
+            due_date: form.due_date,
+            currency: form.currency,
+            status: form.status,
+            subtotal: totals.subtotal,
+            tax_rate: Number(form.tax_rate || 0),
+            tax_amount: totals.tax_amount,
+            discount: Number(form.discount || 0),
+            total: totals.total,
+            notes: form.notes?.trim() || null,
+            terms: form.terms?.trim() || null,
+            tags: form.tags?.length ? form.tags : null,
+            template_id: form.template_id || null,
+          });
+          
           const { data: newInvoice, error: insertErr } = await supabase
             .from("invoices")
             .insert({
@@ -449,7 +485,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
             line_total: l.line_total!,
             position: i + 1,
           }));
-          await supabase.from("invoice_items").insert(payload);
+          console.log("[InvoiceForm] Inserting invoice items:", payload);
+          const { error: itemsErr } = await supabase.from("invoice_items").insert(payload);
+          if (itemsErr) {
+            console.error("[InvoiceForm] Error inserting items:", itemsErr);
+            throw itemsErr;
+          }
         }
 
         toast.success("Facture créée", { id: toastId });
@@ -461,7 +502,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
       setErrors({});
     } catch (err) {
       console.error("[InvoiceForm] error:", err);
-      toast.error("Erreur lors de l’enregistrement", { id: toastId });
+      console.error("[InvoiceForm] error details:", {
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+        form: form,
+        items: items,
+        norm: norm,
+        totals: totals
+      });
+      toast.error(`Erreur lors de l'enregistrement: ${err instanceof Error ? err.message : String(err)}`, { id: toastId });
     } finally {
       setLoading(false);
     }
