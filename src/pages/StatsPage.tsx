@@ -643,7 +643,7 @@ const StatsPage: React.FC = () => {
                   className="flex items-center justify-between rounded-lg bg-[#0E121A] ring-1 ring-inset ring-[#1C2230] px-3 py-2"
                 >
                   <span className="text-sm text-slate-300">{c.name}</span>
-                  <span className="text-sm text-white">${c.revenue.toFixed(2)}</span>
+                  <span className="text-sm text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(c.revenue)}</span>
                 </div>
               ))}
             </div>

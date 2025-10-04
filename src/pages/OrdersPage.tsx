@@ -395,7 +395,7 @@ const OrdersPage: React.FC = () => {
               <div className="min-w-0">
                 <div className="text-[11px] uppercase tracking-wider text-slate-400">Total Revenue</div>
                 <div className="text-2xl font-semibold text-white truncate">
-                  ${kpis.totalRevenue.toLocaleString()}
+                  {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(kpis.totalRevenue)}
                 </div>
               </div>
             </div>
@@ -408,7 +408,7 @@ const OrdersPage: React.FC = () => {
               <div className="min-w-0">
                 <div className="text-[11px] uppercase tracking-wider text-slate-400">Pending Revenue</div>
                 <div className="text-2xl font-semibold text-white truncate">
-                  ${kpis.pendingRevenue.toLocaleString()}
+                  {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(kpis.pendingRevenue)}
                 </div>
               </div>
             </div>
