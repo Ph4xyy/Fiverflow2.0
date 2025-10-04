@@ -216,13 +216,22 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
     }
     
     if (step === 2) {
-      const validLines = normalizeItems(items.filter(item => 
-        item.description?.trim() && 
-        item.quantity > 0 && 
-        item.unit_price > 0
-      ));
-      if (validLines.length === 0) {
-        e.items = "Ajoutez au moins une ligne valide avec description, quantité et prix";
+      // Allow navigation to step 2 even if no valid items yet
+      // Items validation will be done at step 3 or on submit
+      // Only validate if user has actually started adding items
+      const hasStartedAddingItems = items.some(item => 
+        item.description?.trim() || item.quantity > 1 || item.unit_price > 0
+      );
+      
+      if (hasStartedAddingItems) {
+        const validLines = normalizeItems(items.filter(item => 
+          item.description?.trim() && 
+          item.quantity > 0 && 
+          item.unit_price > 0
+        ));
+        if (validLines.length === 0) {
+          e.items = "Ajoutez au moins une ligne valide avec description, quantité et prix";
+        }
       }
     }
     
