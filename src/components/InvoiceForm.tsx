@@ -667,20 +667,175 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
           {currentStep === 1 && Step1}
           {currentStep === 2 && (
             <div className="space-y-4">
-              <ListChecks className="mr-2" size={20} />
-              {/* lignes ... */}
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                <ListChecks className="mr-2" size={20} />
+                Articles de la facture
+              </h3>
+              {errors.items && <p className="text-red-500 text-xs mt-1">{errors.items}</p>}
+              {items.map((item, idx) => (
+                <div key={idx} className="flex flex-col sm:flex-row gap-2 items-end p-2 border border-gray-200 dark:border-slate-700 rounded-lg">
+                  <div className="flex-1 w-full">
+                    <label htmlFor={`description-${idx}`} className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                    <input
+                      type="text"
+                      id={`description-${idx}`}
+                      value={item.description}
+                      onChange={(e) => updateItem(idx, { description: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
+                      placeholder="Description de l'article"
+                    />
+                  </div>
+                  <div className="w-full sm:w-24">
+                    <label htmlFor={`quantity-${idx}`} className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Quantité</label>
+                    <input
+                      type="number"
+                      id={`quantity-${idx}`}
+                      value={item.quantity}
+                      onChange={(e) => updateItem(idx, { quantity: Number(e.target.value) })}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
+                      min="0"
+                    />
+                  </div>
+                  <div className="w-full sm:w-28">
+                    <label htmlFor={`unit_price-${idx}`} className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Prix unitaire</label>
+                    <input
+                      type="number"
+                      id={`unit_price-${idx}`}
+                      value={item.unit_price}
+                      onChange={(e) => updateItem(idx, { unit_price: Number(e.target.value) })}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
+                      step="0.01"
+                      min="0"
+                    />
+                  </div>
+                  <div className="w-full sm:w-24 text-right">
+                    <span className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Total</span>
+                    <p className="px-3 py-2 text-sm text-gray-900 dark:text-white">
+                      {(item.quantity * item.unit_price).toFixed(2)} {form.currency}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeItem(idx)}
+                    className="p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addItem}
+                className="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm"
+              >
+                <Plus className="w-4 h-4 mr-2" /> Ajouter un article
+              </button>
             </div>
           )}
           {currentStep === 3 && (
-            <div>
-              <DollarSign className="mr-2" size={20} />
-              {/* totaux ... */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                <DollarSign className="mr-2" size={20} />
+                Totaux et notes
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="tax_rate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Taux de taxe (%)
+                  </label>
+                  <input
+                    type="number"
+                    id="tax_rate"
+                    value={form.tax_rate ?? 0}
+                    onChange={(e) => setForm({ ...form, tax_rate: Number(e.target.value) })}
+                    className={`${inputBase} ${errors.tax_rate ? 'border-red-500' : ''}`}
+                    min="0"
+                    step="0.01"
+                  />
+                  {errors.tax_rate && <p className="text-red-500 text-xs mt-1">{errors.tax_rate}</p>}
+                </div>
+                <div>
+                  <label htmlFor="discount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Remise ({form.currency})
+                  </label>
+                  <input
+                    type="number"
+                    id="discount"
+                    value={form.discount ?? 0}
+                    onChange={(e) => setForm({ ...form, discount: Number(e.target.value) })}
+                    className={`${inputBase} ${errors.discount ? 'border-red-500' : ''}`}
+                    min="0"
+                    step="0.01"
+                  />
+                  {errors.discount && <p className="text-red-500 text-xs mt-1">{errors.discount}</p>}
+                </div>
+              </div>
+
+              <div className="text-right text-gray-700 dark:text-gray-300 space-y-1">
+                <p>Sous-total: {calc.subtotal.toFixed(2)} {form.currency}</p>
+                <p>Taxe ({form.tax_rate}%): {calc.tax_amount.toFixed(2)} {form.currency}</p>
+                <p>Remise: {form.discount.toFixed(2)} {form.currency}</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">Total: {calc.total.toFixed(2)} {form.currency}</p>
+              </div>
+
+              <div>
+                <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Notes
+                </label>
+                <textarea
+                  id="notes"
+                  value={form.notes}
+                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  rows={3}
+                  className={inputBase}
+                  placeholder="Notes internes ou informations supplémentaires"
+                ></textarea>
+              </div>
+
+              <div>
+                <label htmlFor="terms" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Conditions générales
+                </label>
+                <textarea
+                  id="terms"
+                  value={form.terms}
+                  onChange={(e) => setForm({ ...form, terms: e.target.value })}
+                  rows={3}
+                  className={inputBase}
+                  placeholder="Conditions de paiement, garanties, etc."
+                ></textarea>
+              </div>
             </div>
           )}
           {currentStep === 4 && (
-            <div>
-              <Tag className="mr-2" size={20} />
-              {/* notes & tags ... */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                <Tag className="mr-2" size={20} />
+                Finalisation
+              </h3>
+              <div>
+                <label htmlFor="tags" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Tags (séparés par des virgules)
+                </label>
+                <input
+                  type="text"
+                  id="tags"
+                  value={form.tags.join(", ")}
+                  onChange={(e) => setForm({ ...form, tags: e.target.value.split(",").map(tag => tag.trim()).filter(tag => tag.length > 0) })}
+                  className={inputBase}
+                  placeholder="Ex: urgent, projet-X, client-premium"
+                />
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                <h4 className="font-medium text-gray-900 dark:text-white mb-2">Récapitulatif</h4>
+                <div className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                  <p><strong>Client:</strong> {clients.find(c => c.id === form.client_id)?.name || 'Non sélectionné'}</p>
+                  <p><strong>Date d'émission:</strong> {form.issue_date}</p>
+                  <p><strong>Échéance:</strong> {form.due_date}</p>
+                  <p><strong>Articles:</strong> {items.filter(item => item.description?.trim() && item.quantity > 0 && item.unit_price > 0).length}</p>
+                  <p><strong>Total:</strong> {calc.total.toFixed(2)} {form.currency}</p>
+                </div>
+              </div>
             </div>
           )}
 
