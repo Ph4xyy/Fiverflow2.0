@@ -41,6 +41,20 @@ const InvoiceTemplateEditorPage: React.FC = () => {
   const [schema, setSchema] = useState<TemplateSchema | undefined>(tpl?.schema);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
+  const generateInlinePreview = async () => {
+    try {
+      const doc = await renderInvoiceWithTemplateToPdf(schema!, sampleData as any);
+      const blob = doc.output("blob");
+      const nextUrl = URL.createObjectURL(blob);
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+      setPdfUrl(nextUrl);
+      toast.success("Aperçu PDF généré");
+    } catch (e: any) {
+      console.error("[TemplateEditor] inline preview", e);
+      toast.error("Impossible de générer l'aperçu PDF");
+    }
+  };
+
   useEffect(() => {
     if (tpl) {
       setName(tpl.name);
@@ -57,7 +71,7 @@ const InvoiceTemplateEditorPage: React.FC = () => {
         update(tpl.id, { schema: next }).catch(() => {});
       }
       // Auto-générer l'aperçu PDF au chargement
-      setTimeout(generateInlinePreview, 1000);
+      setTimeout(() => generateInlinePreview(), 1000);
     }
   }, [tpl]);
 
@@ -79,19 +93,6 @@ const InvoiceTemplateEditorPage: React.FC = () => {
     doc.save(`${name || "template"}.pdf`);
   };
 
-  const generateInlinePreview = async () => {
-    try {
-      const doc = await renderInvoiceWithTemplateToPdf(schema, sampleData as any);
-      const blob = doc.output("blob");
-      const nextUrl = URL.createObjectURL(blob);
-      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-      setPdfUrl(nextUrl);
-      toast.success("Aperçu PDF généré");
-    } catch (e: any) {
-      console.error("[TemplateEditor] inline preview", e);
-      toast.error("Impossible de générer l’aperçu PDF");
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -145,7 +146,7 @@ const InvoiceTemplateEditorPage: React.FC = () => {
                   await update(tpl.id, { schema: next });
                   toast.success("Logo enregistré dans le template");
                   // Auto-générer l'aperçu PDF après changement de logo
-                  setTimeout(generateInlinePreview, 500);
+                  setTimeout(() => generateInlinePreview(), 500);
                 } catch (e: any) {
                   console.error("[TemplateEditor] save logo", e);
                   toast.error("Échec de la sauvegarde du logo");
@@ -156,7 +157,11 @@ const InvoiceTemplateEditorPage: React.FC = () => {
           <TemplateStylePanel value={schema} onChange={(newSchema: TemplateSchema) => {
             setSchema(newSchema);
             // Auto-générer l'aperçu PDF après changement de style
-            setTimeout(generateInlinePreview, 500);
+            setTimeout(() => {
+              if (newSchema) {
+                generateInlinePreview();
+              }
+            }, 500);
           }} />
         </div>
 
