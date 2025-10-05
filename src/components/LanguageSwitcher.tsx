@@ -57,7 +57,7 @@ const LanguageSwitcher: React.FC = () => {
                         rounded-xl shadow-xl z-50 min-w-[200px] max-h-[400px] overflow-y-auto">
           <div className="p-2">
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              {t('common.language')}
+              {t('common.language') || 'Language'}
             </div>
             <div className="grid grid-cols-1 gap-1">
               {languages.map((lang) => (
