@@ -139,10 +139,10 @@ const DashboardPage = () => {
   }, [user]);
 
   const stats = [
-    { label: 'Total Clients', value: clients.length, icon: Users, color: 'from-accent-blue to-accent-purple' },
-    { label: 'Active Orders', value: orders.filter(o => o.status === 'In Progress').length, icon: ShoppingCart, color: 'from-amber-500 to-orange-600' },
-    { label: 'Recent Orders', value: orders.length, icon: MessageSquare, color: 'from-fuchsia-500 to-pink-600' },
-    { label: 'Total Revenue', value: new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(orders.reduce((sum, o) => sum + (o.amount || 0), 0)), icon: DollarSign, color: 'from-emerald-500 to-teal-600' }
+    { label: t('dashboard.stats.total_clients'), value: clients.length, icon: Users, color: 'from-accent-blue to-accent-purple' },
+    { label: t('dashboard.stats.active_orders'), value: orders.filter(o => o.status === 'In Progress').length, icon: ShoppingCart, color: 'from-amber-500 to-orange-600' },
+    { label: t('dashboard.stats.recent_orders'), value: orders.length, icon: MessageSquare, color: 'from-fuchsia-500 to-pink-600' },
+    { label: t('dashboard.stats.total_revenue'), value: new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(orders.reduce((sum, o) => sum + (o.amount || 0), 0)), icon: DollarSign, color: 'from-emerald-500 to-teal-600' }
   ];
 
   const getOrderStatusBadge = (s: string) => {
@@ -387,9 +387,9 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className={`${cardClass} p-5`}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Recent Activities</h2>
+              <h2 className="text-lg font-semibold text-white">{t('dashboard.recent_activities')}</h2>
               <div className="text-xs px-2 py-1 rounded-full bg-[#141922] text-slate-200">
-                last 7 days
+                {t('dashboard.last_7_days')}
               </div>
             </div>
             {loadingOrders ? (
@@ -440,7 +440,7 @@ const DashboardPage = () => {
                 })}
               </div>
             ) : (
-              <p className="text-slate-400">No recent orders.</p>
+              <p className="text-slate-400">{t('dashboard.no_recent_orders')}</p>
             )}
           </div>
 
@@ -484,7 +484,7 @@ const DashboardPage = () => {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center mr-2 shadow-glow-purple">
                 <CalendarIcon size={18} className="text-white" />
               </div>
-              <h2 className="text-lg font-semibold text-white">Calendar (Mini)</h2>
+              <h2 className="text-lg font-semibold text-white">{t('dashboard.calendar_mini')}</h2>
             </div>
 
             {restrictionsLoading ? (
@@ -519,10 +519,10 @@ const DashboardPage = () => {
                       <Lock className="text-slate-200" size={22} />
                     </div>
                     <p className="text-sm font-medium text-white">
-                      Mini Calendar is available on <span className="text-purple-400">Pro</span> & <span className="text-purple-400">Excellence</span> plans.
+                      {t('dashboard.pro_feature')}
                     </p>
                     <p className="text-xs text-slate-400 mt-1">
-                      Upgrade to unlock scheduling on your dashboard.
+                      {t('dashboard.upgrade_unlock')}
                     </p>
                     <div className="mt-4">
                       <Link
@@ -543,13 +543,13 @@ const DashboardPage = () => {
               <div className={`w-10 h-10 rounded-xl ${subtleBg} flex items-center justify-center mr-2`}>
                 <Clock size={18} className="text-white/90" />
               </div>
-              <h2 className="text-lg font-semibold text-white">Upcoming Events</h2>
+              <h2 className="text-lg font-semibold text-white">{t('dashboard.upcoming_events')}</h2>
             </div>
 
             {loadingOrders || loadingTasks ? (
               <p className="text-slate-400">Loading...</p>
             ) : upcoming.length === 0 ? (
-              <p className="text-slate-400">No upcoming deadlines.</p>
+              <p className="text-slate-400">{t('dashboard.no_upcoming_deadlines')}</p>
             ) : (
               <div className="space-y-2">
                 {upcoming.map((u) => {
@@ -575,15 +575,15 @@ const DashboardPage = () => {
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="text-sm font-medium text-white truncate">
-                            {u.kind === 'task' && <span className="inline-flex items-center gap-1 mr-1"><ListChecks size={14} /> Task:</span>}
-                            {u.kind === 'subscription' && <span className="inline-flex items-center gap-1 mr-1"><CreditCard size={14} /> Subscription:</span>}
+                            {u.kind === 'task' && <span className="inline-flex items-center gap-1 mr-1"><ListChecks size={14} /> {t('dashboard.task_label')}</span>}
+                            {u.kind === 'subscription' && <span className="inline-flex items-center gap-1 mr-1"><CreditCard size={14} /> {t('dashboard.subscription_label')}</span>}
                             {data.title}
                           </div>
                           {subtitle && <div className="text-xs text-slate-400 truncate">{subtitle}</div>}
                           {isSubscription && typeof data.amount === 'number' && data.currency && data.billing_cycle && (
                             <div className="text-xs text-slate-500">
                               {new Intl.NumberFormat('en-US', { style: 'currency', currency: data.currency }).format(data.amount)}
-                              {` - ${data.billing_cycle === 'monthly' ? 'Monthly' : data.billing_cycle === 'yearly' ? 'Yearly' : data.billing_cycle}`}
+                              {` - ${data.billing_cycle === 'monthly' ? t('dashboard.monthly') : data.billing_cycle === 'yearly' ? t('dashboard.yearly') : data.billing_cycle}`}
                             </div>
                           )}
                         </div>

@@ -770,7 +770,15 @@ const ProfilePage: React.FC = () => {
                     className={selectBase}
                   >
                     <option value="English">English</option>
-                    <option value="French">French</option>
+                    <option value="French">Français</option>
+                    <option value="Spanish">Español</option>
+                    <option value="German">Deutsch</option>
+                    <option value="Chinese">中文</option>
+                    <option value="Italian">Italiano</option>
+                    <option value="Portuguese">Português</option>
+                    <option value="Russian">Русский</option>
+                    <option value="Japanese">日本語</option>
+                    <option value="Korean">한국어</option>
                   </select>
                 </div>
               </div>

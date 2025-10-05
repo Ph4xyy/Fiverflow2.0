@@ -347,7 +347,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             <LocalErrorBoundary>
               {/* -------- Section: Overview -------- */}
               <div className="px-3 sm:px-4">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Overview</span>
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('layout.overview')}</span>
               </div>
               <div className="space-y-1">
                 {overviewItems.map((item) => (
@@ -357,17 +357,17 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
               {/* -------- Section: AI -------- */}
               <div className="px-3 sm:px-4 pt-4">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">AI</span>
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('layout.ai')}</span>
               </div>
               <div className="mx-3 sm:mx-4 mt-2">
                 <div className="text-xs text-slate-400 px-3 py-2 rounded-xl bg-[#0E121A] ring-1 ring-inset ring-[#1C2230]">
-                  Coming soon!
+                  {t('layout.coming_soon')}
                 </div>
               </div>
 
               {/* -------- Section: Workspace -------- */}
               <div className="px-3 sm:px-4 pt-4">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Workspace</span>
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('layout.workspace')}</span>
               </div>
               <div className="space-y-1">
                 {workspaceItems.map((item) => (
@@ -378,7 +378,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               {/* -------- Section: More (collée avec les autres) -------- */}
               <div className="pt-4 mt-2 border-t border-[#1C2230]">
                 <div className="px-3 sm:px-4 mb-2">
-                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">More</span>
+                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('layout.more')}</span>
                 </div>
                 <div className="space-y-1">
                   {bottomItems.map((item) => (
@@ -450,10 +450,10 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
                 </div>
                 <div>
                   <h3 id="upgrade-modal-title" className="text-xl font-semibold text-white">
-                    Upgrade required
+                    {t('layout.upgrade_required')}
                   </h3>
                   <p className="mt-0.5 text-sm text-slate-300">
-                    Unlock this feature on the <span className="font-medium">{requiredPlan}</span> plan.
+                    {t('layout.unlock_feature')} {requiredPlan}.
                   </p>
                 </div>
               </div>
