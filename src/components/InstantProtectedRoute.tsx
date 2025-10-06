@@ -18,6 +18,17 @@ const InstantProtectedRoute: React.FC<InstantProtectedRouteProps> = ({ children,
   const location = useLocation();
   const [loadingTimeout, setLoadingTimeout] = React.useState(false);
 
+  // 🔥 Debug logging pour identifier le problème
+  console.log('⚡ InstantProtectedRoute:', {
+    user: user?.id,
+    loading,
+    roleLoading,
+    isReady,
+    role,
+    loadingTimeout,
+    requireAdmin
+  });
+
   // 🔥 Timeout ultra-court pour une authentification fluide
   React.useEffect(() => {
     const timeout = setTimeout(() => {

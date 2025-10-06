@@ -53,6 +53,18 @@ export const useInstantAuth = (): InstantAuthState => {
     }
   }, [authLoading, roleLoading]);
 
+  // 🔥 Debug logging pour identifier le problème
+  console.log('⚡ useInstantAuth:', {
+    user: user?.id,
+    authLoading,
+    roleLoading,
+    isReady,
+    effectiveRole,
+    roleFromSessionCache,
+    roleFromMeta,
+    roleFromContext
+  });
+
   return {
     user,
     loading: authLoading && !isReady, // Ne montrer loading que si pas encore prêt
