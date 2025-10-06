@@ -13,7 +13,7 @@ interface UserDataContextType {
 const UserDataContext = createContext<UserDataContextType | undefined>(undefined);
 
 export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [role, setRole] = useState<'admin' | 'user'>('user');
   const [loading, setLoading] = useState(true);
 
@@ -49,9 +49,16 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []); // Pas de dépendances pour éviter les loops
 
   useEffect(() => {
-    console.log('🔄 UserDataContext useEffect triggered for user:', user?.id);
+    console.log('🔄 UserDataContext useEffect triggered for user:', user?.id, 'authLoading:', authLoading);
+    
+    // 🔥 Attendre que l'auth soit complètement chargé avant de traiter
+    if (authLoading) {
+      console.log('⏳ UserDataContext: Waiting for auth to finish loading...');
+      return;
+    }
     
     if (!user) {
+      console.log('❌ UserDataContext: No user, setting default role');
       setRole('user');
       setLoading(false);
       return;
@@ -73,7 +80,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }, 50); // Debounce minimal
 
     return () => clearTimeout(timeoutId);
-  }, [user?.id]); // Seulement dépendre de user?.id
+  }, [user?.id, authLoading]); // Dépendre aussi de authLoading
 
   const refreshUserRole = useCallback(() => {
     if (user?.id) {

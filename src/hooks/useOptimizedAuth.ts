@@ -24,6 +24,7 @@ export const useOptimizedAuth = (): OptimizedAuthState => {
   const roleFromContext = userData?.role;
   
   const effectiveRole = roleFromContext || roleFromMeta || roleFromSessionCache || null;
+  
   const roleLoading = Boolean(userData?.loading);
   
   return {
