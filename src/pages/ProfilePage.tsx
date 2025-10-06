@@ -9,6 +9,7 @@ import ImageUpload from '../components/ImageUpload';
 import ImageUploadDiagnostic from '../components/ImageUploadDiagnostic';
 import StorageDiagnostic from '../components/StorageDiagnostic';
 import StoragePolicyFixer from '../components/StoragePolicyFixer';
+import ManualStorageSetup from '../components/ManualStorageSetup';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import {
   User,
@@ -1265,6 +1266,11 @@ const ProfilePage: React.FC = () => {
             {/* Correction automatique des politiques */}
             <div className="mb-6">
               <StoragePolicyFixer />
+            </div>
+
+            {/* Configuration manuelle requise */}
+            <div className="mb-6">
+              <ManualStorageSetup />
             </div>
 
             <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${soft} p-3 sm:p-4 rounded-lg`}>

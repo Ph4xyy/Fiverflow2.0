@@ -16,93 +16,37 @@ const StoragePolicyFixer: React.FC = () => {
     setApplying(true);
 
     try {
-      // SQL pour créer les politiques de storage
-      const policiesSQL = `
-        -- Activer RLS sur le bucket invoice-assets
-        ALTER TABLE storage.buckets ENABLE ROW LEVEL SECURITY;
+      // Essayer de créer le bucket via l'API Supabase
+      const { error: bucketError } = await supabase.storage.createBucket('invoice-assets', {
+        public: true,
+        allowedMimeTypes: ['image/*'],
+        fileSizeLimit: 5242880 // 5MB
+      });
 
-        -- Créer une politique pour permettre aux utilisateurs authentifiés d'uploader des fichiers
-        CREATE POLICY IF NOT EXISTS "Users can upload their own files" ON storage.objects
-        FOR INSERT 
-        TO authenticated
-        WITH CHECK (
-          bucket_id = 'invoice-assets' 
-          AND auth.uid()::text = (storage.foldername(name))[1]
-        );
-
-        -- Créer une politique pour permettre aux utilisateurs de voir leurs propres fichiers
-        CREATE POLICY IF NOT EXISTS "Users can view their own files" ON storage.objects
-        FOR SELECT 
-        TO authenticated
-        USING (
-          bucket_id = 'invoice-assets' 
-          AND auth.uid()::text = (storage.foldername(name))[1]
-        );
-
-        -- Créer une politique pour permettre aux utilisateurs de mettre à jour leurs propres fichiers
-        CREATE POLICY IF NOT EXISTS "Users can update their own files" ON storage.objects
-        FOR UPDATE 
-        TO authenticated
-        USING (
-          bucket_id = 'invoice-assets' 
-          AND auth.uid()::text = (storage.foldername(name))[1]
-        )
-        WITH CHECK (
-          bucket_id = 'invoice-assets' 
-          AND auth.uid()::text = (storage.foldername(name))[1]
-        );
-
-        -- Créer une politique pour permettre aux utilisateurs de supprimer leurs propres fichiers
-        CREATE POLICY IF NOT EXISTS "Users can delete their own files" ON storage.objects
-        FOR DELETE 
-        TO authenticated
-        USING (
-          bucket_id = 'invoice-assets' 
-          AND auth.uid()::text = (storage.foldername(name))[1]
-        );
-
-        -- Créer une politique pour permettre l'accès public en lecture
-        CREATE POLICY IF NOT EXISTS "Public can view files" ON storage.objects
-        FOR SELECT 
-        TO public
-        USING (bucket_id = 'invoice-assets');
-
-        -- S'assurer que le bucket invoice-assets existe et est public
-        INSERT INTO storage.buckets (id, name, public)
-        VALUES ('invoice-assets', 'invoice-assets', true)
-        ON CONFLICT (id) DO UPDATE SET public = true;
-
-        -- Activer RLS sur les objets de storage
-        ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
-      `;
-
-      // Exécuter le SQL via une fonction Supabase
-      const { error } = await supabase.rpc('exec_sql', { sql_query: policiesSQL });
-
-      if (error) {
-        // Si la fonction exec_sql n'existe pas, essayer une approche alternative
-        console.warn('Fonction exec_sql non disponible, tentative alternative...');
-        
-        // Créer le bucket s'il n'existe pas
-        const { error: bucketError } = await supabase.storage.createBucket('invoice-assets', {
-          public: true,
-          allowedMimeTypes: ['image/*'],
-          fileSizeLimit: 5242880 // 5MB
-        });
-
-        if (bucketError && !bucketError.message.includes('already exists')) {
+      if (bucketError) {
+        if (bucketError.message.includes('already exists')) {
+          toast.success('Bucket existe déjà');
+        } else if (bucketError.message.includes('permission denied') || bucketError.message.includes('must be owner')) {
+          toast.error('Permissions insuffisantes. Utilisez la configuration manuelle ci-dessous.');
+          setApplied(false);
+          return;
+        } else {
           throw bucketError;
         }
-
-        toast.success('Bucket créé/configuré avec succès');
       } else {
-        toast.success('Politiques de storage appliquées avec succès');
+        toast.success('Bucket créé avec succès');
       }
 
+      // Note: Les politiques RLS doivent être créées manuellement via le dashboard
+      toast.info('Bucket créé. Les politiques RLS doivent être configurées manuellement.');
       setApplied(true);
     } catch (error: any) {
       console.error('Erreur application politiques:', error);
-      toast.error(`Erreur: ${error.message}`);
+      if (error.message.includes('permission denied') || error.message.includes('must be owner')) {
+        toast.error('Permissions insuffisantes. Utilisez la configuration manuelle ci-dessous.');
+      } else {
+        toast.error(`Erreur: ${error.message}`);
+      }
     } finally {
       setApplying(false);
     }
