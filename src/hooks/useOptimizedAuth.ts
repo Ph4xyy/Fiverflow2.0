@@ -27,6 +27,15 @@ export const useOptimizedAuth = (): OptimizedAuthState => {
   
   const roleLoading = Boolean(userData?.loading);
   
+  // 🔥 Debug logging pour identifier le problème
+  console.log('🔍 useOptimizedAuth:', {
+    user: user?.id,
+    authLoading,
+    roleLoading,
+    effectiveRole,
+    userDataLoading: userData?.loading
+  });
+  
   return {
     user,
     loading: authLoading,

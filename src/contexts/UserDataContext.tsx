@@ -54,6 +54,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // 🔥 Attendre que l'auth soit complètement chargé avant de traiter
     if (authLoading) {
       console.log('⏳ UserDataContext: Waiting for auth to finish loading...');
+      setLoading(true); // 🔥 S'assurer que loading est true pendant l'attente
       return;
     }
     
@@ -75,6 +76,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     // 🔥 Debounce minimal pour éviter les loading loops
     const timeoutId = setTimeout(() => {
+      console.log('🔄 UserDataContext: Starting role fetch...');
       setLoading(true);
       fetchUserRole(user.id);
     }, 50); // Debounce minimal
