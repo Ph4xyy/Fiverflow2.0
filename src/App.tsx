@@ -15,6 +15,7 @@ import DiagnosticPanel from './components/DiagnosticPanel';
 import EnvironmentDiagnostic from './components/EnvironmentDiagnostic';
 import SessionTest from './components/SessionTest';
 import AuthDiagnostic from './components/AuthDiagnostic';
+import SessionDiagnostic from './components/SessionDiagnostic';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
 import { useSessionManager } from './hooks/useSessionManager';
 
@@ -146,6 +147,7 @@ function App() {
                          <EnvironmentDiagnostic />
                          <SessionTest />
                          <AuthDiagnostic />
+                         <SessionDiagnostic />
                        </>
                      )}
                 </UserDataProvider>

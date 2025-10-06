@@ -59,6 +59,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // 🔥 Fonction pour nettoyer et vérifier le storage
+  const cleanupAndValidateStorage = () => {
+    try {
+      if (typeof window === 'undefined') return;
+      
+      // Vérifier si localStorage est accessible
+      const testKey = 'ff-storage-test';
+      localStorage.setItem(testKey, 'test');
+      const canAccess = localStorage.getItem(testKey) === 'test';
+      localStorage.removeItem(testKey);
+      
+      if (!canAccess) {
+        console.warn('⚠️ AuthContext: localStorage not accessible, session persistence may fail');
+        return false;
+      }
+      
+      // Nettoyer les anciennes clés potentiellement corrompues
+      const keysToCheck = ['sb-auth-token', 'sb-auth-token-code-verifier'];
+      keysToCheck.forEach(key => {
+        try {
+          const value = localStorage.getItem(key);
+          if (value && value.length === 0) {
+            localStorage.removeItem(key);
+            console.log('🧹 AuthContext: Removed empty storage key:', key);
+          }
+        } catch (e) {
+          console.warn('Failed to check storage key:', key, e);
+        }
+      });
+      
+      return true;
+    } catch (e) {
+      console.warn('Storage validation failed:', e);
+      return false;
+    }
+  };
+
   useEffect(() => {
     mountedRef.current = true;
 
@@ -67,6 +104,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const init = async () => {
       console.log('🔐 AuthContext: Initializing...');
+      
+      // 🔥 Nettoyer et valider le storage en premier
+      const storageValid = cleanupAndValidateStorage();
+      if (!storageValid) {
+        console.warn('⚠️ AuthContext: Storage validation failed, continuing anyway...');
+      }
       
       if (!isSupabaseConfigured || !supabase) {
         console.log('❌ AuthContext: Supabase not configured');
@@ -79,8 +122,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('🔍 AuthContext: Getting session...');
         console.log('🔍 AuthContext: localStorage check:', {
           hasLocalStorage: typeof window !== 'undefined' && window.localStorage,
-          authToken: typeof window !== 'undefined' ? localStorage.getItem('sb-auth-token') : 'N/A'
+          authToken: typeof window !== 'undefined' ? localStorage.getItem('sb-auth-token') : 'N/A',
+          allKeys: typeof window !== 'undefined' ? Object.keys(localStorage).filter(k => k.includes('sb-')) : []
         });
+        
+        // 🔥 Essayer d'abord de récupérer la session persistée
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -96,10 +142,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 await deriveAndCacheRole(refreshData.session);
                 setLoadingSafe(false);
                 return;
+              } else {
+                console.log('❌ AuthContext: Token refresh failed:', refreshError?.message);
               }
             } catch (refreshErr) {
               console.error('❌ AuthContext: Token refresh failed:', refreshErr);
             }
+          }
+          // 🔥 Nettoyer le storage en cas d'erreur persistante
+          try {
+            localStorage.removeItem('sb-auth-token');
+            sessionStorage.removeItem('role');
+          } catch (cleanupErr) {
+            console.warn('Failed to cleanup storage:', cleanupErr);
           }
           setUserSafe(null);
           setLoadingSafe(false);
@@ -110,8 +165,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           hasSession: !!session,
           hasUser: !!session?.user,
           userId: session?.user?.id,
-          expiresAt: session?.expires_at
+          expiresAt: session?.expires_at,
+          isExpired: session ? new Date(session.expires_at * 1000) < new Date() : false
         });
+
+        // 🔥 Vérifier si la session est expirée
+        if (session && new Date(session.expires_at * 1000) < new Date()) {
+          console.log('⚠️ AuthContext: Session expired, attempting refresh...');
+          try {
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+            if (!refreshError && refreshData.session) {
+              console.log('✅ AuthContext: Expired session refreshed successfully');
+              setUserSafe(refreshData.session.user);
+              await deriveAndCacheRole(refreshData.session);
+              setLoadingSafe(false);
+              return;
+            }
+          } catch (refreshErr) {
+            console.error('❌ AuthContext: Failed to refresh expired session:', refreshErr);
+          }
+        }
 
         setUserSafe(session?.user ?? null);
         await deriveAndCacheRole(session);
@@ -163,7 +236,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initTimeout = window.setTimeout(() => {
       console.warn('🚨 AuthContext: Initialization timeout, forcing completion');
       setLoadingSafe(false);
-    }, 5000); // Augmenté à 5s pour laisser le temps à la session de se charger
+    }, 8000); // Augmenté à 8s pour laisser plus de temps à la session de se charger
 
     init().finally(() => {
       if (initTimeout) {
