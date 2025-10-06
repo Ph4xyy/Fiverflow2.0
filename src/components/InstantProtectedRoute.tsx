@@ -40,14 +40,18 @@ const InstantProtectedRoute: React.FC<InstantProtectedRouteProps> = ({ children,
 
   // 🔥 Si on a un cache, on peut rediriger immédiatement
   if (isReady && !loading && !roleLoading) {
+    console.log('⚡ InstantProtectedRoute: Ready to check user');
     if (!user) {
+      console.log('❌ InstantProtectedRoute: No user when ready, redirecting to login');
       return <Navigate to="/login" replace state={{ from: location }} />;
     }
 
     if (requireAdmin && role !== 'admin') {
+      console.log('❌ InstantProtectedRoute: User not admin, redirecting to not-authorized');
       return <Navigate to="/not-authorized" replace />;
     }
 
+    console.log('✅ InstantProtectedRoute: User authenticated, rendering children');
     return <>{children}</>;
   }
 

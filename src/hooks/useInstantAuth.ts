@@ -33,8 +33,8 @@ export const useInstantAuth = (): InstantAuthState => {
     if (!hasInitializedRef.current) {
       hasInitializedRef.current = true;
       
-      // Si on a déjà un rôle en cache, on est prêt immédiatement
-      if (roleFromSessionCache || roleFromMeta) {
+      // Si on a déjà un rôle en cache ET un utilisateur, on est prêt immédiatement
+      if ((roleFromSessionCache || roleFromMeta) && user) {
         setIsReady(true);
         return;
       }
@@ -44,14 +44,14 @@ export const useInstantAuth = (): InstantAuthState => {
         setIsReady(true);
       }
     }
-  }, [authLoading, user]); // 🔥 FIXED: Remove roleFromSessionCache and roleFromMeta from dependencies to prevent infinite loops
+  }, [authLoading, user, roleFromSessionCache, roleFromMeta]);
 
-  // 🔥 Marquer comme prêt dès que l'auth est terminée
+  // 🔥 Marquer comme prêt dès que l'auth est terminée ET qu'on a un utilisateur
   useEffect(() => {
-    if (!authLoading && !roleLoading) {
+    if (!authLoading && !roleLoading && user) {
       setIsReady(true);
     }
-  }, [authLoading, roleLoading]);
+  }, [authLoading, roleLoading, user]);
 
   // 🔥 Debug logging pour identifier le problème
   console.log('⚡ useInstantAuth:', {
