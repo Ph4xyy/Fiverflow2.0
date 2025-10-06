@@ -9,7 +9,6 @@ import ImageUpload from '../components/ImageUpload';
 import ImageUploadDiagnostic from '../components/ImageUploadDiagnostic';
 import StorageDiagnostic from '../components/StorageDiagnostic';
 import StoragePolicyFixer from '../components/StoragePolicyFixer';
-import ManualStorageSetup from '../components/ManualStorageSetup';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import {
   User,
@@ -24,6 +23,9 @@ import {
   Mail,
   Server,
   X,
+  AlertCircle,
+  ExternalLink,
+  Copy,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -1269,8 +1271,202 @@ const ProfilePage: React.FC = () => {
             </div>
 
             {/* Configuration manuelle requise */}
-            <div className="mb-6">
-              <ManualStorageSetup />
+            <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-amber-600" />
+                Configuration manuelle requise
+              </h3>
+              
+              <div className="mb-4">
+                <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                  L'erreur de permissions indique que tu dois configurer manuellement les politiques RLS 
+                  dans ton dashboard Supabase. Voici comment procéder :
+                </p>
+                
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">
+                      1
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Va dans ton dashboard Supabase</p>
+                      <a 
+                        href="https://supabase.com/dashboard" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                      >
+                        Ouvrir Supabase Dashboard <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">
+                      2
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Va dans "SQL Editor"</p>
+                      <p className="text-xs text-gray-500">Dans le menu de gauche de ton projet</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">
+                      3
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Crée le bucket "invoice-assets"</p>
+                      <p className="text-xs text-gray-500">Va dans Storage → Buckets → New bucket</p>
+                      <ul className="text-xs text-gray-500 mt-1 ml-4">
+                        <li>• Nom: invoice-assets</li>
+                        <li>• Public: Oui</li>
+                        <li>• File size limit: 5MB</li>
+                        <li>• Allowed MIME types: image/*</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">
+                      4
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">Exécute le code SQL ci-dessous</p>
+                      <p className="text-xs text-gray-500">Cela configurera les politiques RLS</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Code SQL à exécuter :
+                  </label>
+                  <button
+                    onClick={async () => {
+                      const sqlCode = `-- Politiques RLS pour l'upload d'images
+-- À exécuter dans le SQL Editor de Supabase
+
+-- 1. Créer une politique pour permettre aux utilisateurs authentifiés d'uploader des fichiers
+CREATE POLICY "Users can upload their own files" ON storage.objects
+FOR INSERT 
+TO authenticated
+WITH CHECK (
+  bucket_id = 'invoice-assets' 
+  AND auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- 2. Créer une politique pour permettre aux utilisateurs de voir leurs propres fichiers
+CREATE POLICY "Users can view their own files" ON storage.objects
+FOR SELECT 
+TO authenticated
+USING (
+  bucket_id = 'invoice-assets' 
+  AND auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- 3. Créer une politique pour permettre aux utilisateurs de mettre à jour leurs propres fichiers
+CREATE POLICY "Users can update their own files" ON storage.objects
+FOR UPDATE 
+TO authenticated
+USING (
+  bucket_id = 'invoice-assets' 
+  AND auth.uid()::text = (storage.foldername(name))[1]
+)
+WITH CHECK (
+  bucket_id = 'invoice-assets' 
+  AND auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- 4. Créer une politique pour permettre aux utilisateurs de supprimer leurs propres fichiers
+CREATE POLICY "Users can delete their own files" ON storage.objects
+FOR DELETE 
+TO authenticated
+USING (
+  bucket_id = 'invoice-assets' 
+  AND auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- 5. Créer une politique pour permettre l'accès public en lecture
+CREATE POLICY "Public can view files" ON storage.objects
+FOR SELECT 
+TO public
+USING (bucket_id = 'invoice-assets');`;
+                      
+                      try {
+                        await navigator.clipboard.writeText(sqlCode);
+                        toast.success('Code SQL copié dans le presse-papiers');
+                      } catch (error) {
+                        toast.error('Erreur lors de la copie');
+                      }
+                    }}
+                    className="flex items-center gap-1 px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                  >
+                    <Copy className="w-3 h-3" />
+                    Copier le code SQL
+                  </button>
+                </div>
+                
+                <pre className="bg-gray-900 text-gray-100 p-3 rounded-lg text-xs overflow-x-auto">
+                  <code>{`-- Politiques RLS pour l'upload d'images
+-- À exécuter dans le SQL Editor de Supabase
+
+-- 1. Créer une politique pour permettre aux utilisateurs authentifiés d'uploader des fichiers
+CREATE POLICY "Users can upload their own files" ON storage.objects
+FOR INSERT 
+TO authenticated
+WITH CHECK (
+  bucket_id = 'invoice-assets' 
+  AND auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- 2. Créer une politique pour permettre aux utilisateurs de voir leurs propres fichiers
+CREATE POLICY "Users can view their own files" ON storage.objects
+FOR SELECT 
+TO authenticated
+USING (
+  bucket_id = 'invoice-assets' 
+  AND auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- 3. Créer une politique pour permettre aux utilisateurs de mettre à jour leurs propres fichiers
+CREATE POLICY "Users can update their own files" ON storage.objects
+FOR UPDATE 
+TO authenticated
+USING (
+  bucket_id = 'invoice-assets' 
+  AND auth.uid()::text = (storage.foldername(name))[1]
+)
+WITH CHECK (
+  bucket_id = 'invoice-assets' 
+  AND auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- 4. Créer une politique pour permettre aux utilisateurs de supprimer leurs propres fichiers
+CREATE POLICY "Users can delete their own files" ON storage.objects
+FOR DELETE 
+TO authenticated
+USING (
+  bucket_id = 'invoice-assets' 
+  AND auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- 5. Créer une politique pour permettre l'accès public en lecture
+CREATE POLICY "Public can view files" ON storage.objects
+FOR SELECT 
+TO public
+USING (bucket_id = 'invoice-assets');`}</code>
+                </pre>
+              </div>
+
+              <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                <p className="text-green-700 dark:text-green-300 text-sm">
+                  <strong>✅ Après avoir exécuté ces étapes :</strong> L'upload d'images devrait fonctionner 
+                  sans erreur RLS. Tu peux utiliser le diagnostic pour vérifier que tout est correct.
+                </p>
+              </div>
             </div>
 
             <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${soft} p-3 sm:p-4 rounded-lg`}>
