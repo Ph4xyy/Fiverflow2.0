@@ -9,6 +9,7 @@ import ImageUpload from '../components/ImageUpload';
 import ImageUploadDiagnostic from '../components/ImageUploadDiagnostic';
 import StorageDiagnostic from '../components/StorageDiagnostic';
 import StoragePolicyFixer from '../components/StoragePolicyFixer';
+import BucketDiagnostic from '../components/BucketDiagnostic';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import {
   User,
@@ -1258,6 +1259,11 @@ const ProfilePage: React.FC = () => {
             {/* Diagnostic d'upload d'images */}
             <div className="mb-6">
               <ImageUploadDiagnostic />
+            </div>
+
+            {/* Diagnostic bucket invoice-assets */}
+            <div className="mb-6">
+              <BucketDiagnostic />
             </div>
 
             {/* Diagnostic storage Supabase */}
