@@ -34,15 +34,31 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   };
 
   const handleFileSelect = (file: File) => {
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setPreview(result);
-        onImageChange(file);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Vérifier le type de fichier
+    if (!file.type.startsWith('image/')) {
+      alert('Veuillez sélectionner un fichier image valide (PNG, JPG, GIF, etc.)');
+      return;
     }
+
+    // Vérifier la taille (5MB max)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      alert('Le fichier est trop volumineux. Taille maximale: 5MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      setPreview(result);
+      onImageChange(file);
+    };
+    reader.onerror = () => {
+      alert('Erreur lors de la lecture du fichier');
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleDrop = (e: React.DragEvent) => {

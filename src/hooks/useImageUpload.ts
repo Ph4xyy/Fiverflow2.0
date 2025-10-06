@@ -19,9 +19,18 @@ export const useImageUpload = ({ bucketName, folder = 'uploads' }: UseImageUploa
     try {
       setUploading(true);
 
-      // Générer un nom de fichier unique
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}-${Date.now()}.${fileExt}`;
+      // Vérifier la session utilisateur
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData.session) {
+        toast.error('Vous devez être connecté pour uploader une image');
+        return null;
+      }
+
+      // Générer un nom de fichier unique avec extension sécurisée
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'png';
+      const safeExt = fileExt.replace(/[^a-z0-9]/g, '') || 'png';
+      const uniqueId = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const fileName = `${userId}/${uniqueId}.${safeExt}`;
       const filePath = `${folder}/${fileName}`;
 
       // Upload du fichier
@@ -29,12 +38,13 @@ export const useImageUpload = ({ bucketName, folder = 'uploads' }: UseImageUploa
         .from(bucketName)
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: file.type || `image/${safeExt}`
         });
 
       if (uploadError) {
         console.error('Erreur upload:', uploadError);
-        toast.error('Erreur lors de l\'upload de l\'image');
+        toast.error(`Erreur lors de l'upload de l'image: ${uploadError.message}`);
         return null;
       }
 
@@ -46,9 +56,10 @@ export const useImageUpload = ({ bucketName, folder = 'uploads' }: UseImageUploa
       toast.success('Image uploadée avec succès');
       return data.publicUrl;
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur upload image:', error);
-      toast.error('Erreur lors de l\'upload de l\'image');
+      const errorMessage = error?.message || 'Erreur inconnue lors de l\'upload';
+      toast.error(`Erreur lors de l'upload de l'image: ${errorMessage}`);
       return null;
     } finally {
       setUploading(false);

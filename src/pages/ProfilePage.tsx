@@ -6,6 +6,7 @@ import { useCurrency } from '../contexts/CurrencyContext';
 import { useStripeSubscription } from '../hooks/useStripeSubscription';
 import { useImageUpload } from '../hooks/useImageUpload';
 import ImageUpload from '../components/ImageUpload';
+import ImageUploadDiagnostic from '../components/ImageUploadDiagnostic';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import {
   User,
@@ -129,15 +130,15 @@ const ProfilePage: React.FC = () => {
 
   // Hooks pour l'upload d'images
   const { uploadImage: uploadBanner, uploading: uploadingBanner } = useImageUpload({ 
-    bucketName: 'user-assets', 
+    bucketName: 'invoice-assets', 
     folder: 'banners' 
   });
   const { uploadImage: uploadLogo, uploading: uploadingLogo } = useImageUpload({ 
-    bucketName: 'user-assets', 
+    bucketName: 'invoice-assets', 
     folder: 'logos' 
   });
   const { uploadImage: uploadAvatar, uploading: uploadingAvatar } = useImageUpload({ 
-    bucketName: 'user-assets', 
+    bucketName: 'invoice-assets', 
     folder: 'avatars' 
   });
 
@@ -531,6 +532,62 @@ const ProfilePage: React.FC = () => {
     } catch (error) {
       console.error('Erreur suppression logo:', error);
       toast.error('Erreur lors de la suppression du logo');
+    }
+  };
+
+  const saveAvatar = async () => {
+    if (!user || !isSupabaseConfigured || !supabase) {
+      toast.error('Supabase non configuré');
+      return;
+    }
+
+    if (!avatarFile) {
+      toast.error('Aucun fichier sélectionné');
+      return;
+    }
+
+    try {
+      setSavingImages(true);
+
+      // Upload avatar
+      const uploadedAvatarUrl = await uploadAvatar(avatarFile, user.id);
+      if (!uploadedAvatarUrl) {
+        toast.error('Erreur lors de l\'upload de l\'avatar');
+        return;
+      }
+
+      // Mettre à jour le profil avec la nouvelle URL
+      const { error } = await supabase
+        .from('users')
+        .update({
+          avatar_url: uploadedAvatarUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Erreur mise à jour avatar:', error);
+        toast.error('Erreur lors de la sauvegarde de l\'avatar');
+        return;
+      }
+
+      // Mettre à jour l'état local
+      setProfile(prev => prev ? {
+        ...prev,
+        avatar_url: uploadedAvatarUrl
+      } : null);
+
+      // Réinitialiser le fichier et fermer la modal
+      setAvatarFile(null);
+      setShowAvatarUpload(false);
+
+      toast.success('Avatar sauvegardé avec succès');
+
+    } catch (error) {
+      console.error('Erreur sauvegarde avatar:', error);
+      toast.error('Erreur lors de la sauvegarde de l\'avatar');
+    } finally {
+      setSavingImages(false);
     }
   };
 
@@ -1138,13 +1195,13 @@ const ProfilePage: React.FC = () => {
               <div className="flex items-center gap-3 mt-4">
                 <button
                   onClick={saveImages}
-                  disabled={isUploading || (!bannerFile && !logoFile)}
+                  disabled={isUploading || (!bannerFile && !logoFile && !avatarFile)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isUploading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      {uploadingBanner ? 'Upload bannière...' : uploadingLogo ? 'Upload logo...' : 'Sauvegarde...'}
+                      {uploadingBanner ? 'Upload bannière...' : uploadingLogo ? 'Upload logo...' : uploadingAvatar ? 'Upload avatar...' : 'Sauvegarde...'}
                     </>
                   ) : (
                     <>
@@ -1154,11 +1211,12 @@ const ProfilePage: React.FC = () => {
                   )}
                 </button>
 
-                {(bannerFile || logoFile) && (
+                {(bannerFile || logoFile || avatarFile) && (
                   <button
                     onClick={() => {
                       setBannerFile(null);
                       setLogoFile(null);
+                      setAvatarFile(null);
                     }}
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
@@ -1168,7 +1226,7 @@ const ProfilePage: React.FC = () => {
               </div>
 
               {/* Aperçu des images actuelles */}
-              {(profile?.banner_url || profile?.logo_url) && (
+              {(profile?.banner_url || profile?.logo_url || profile?.avatar_url) && (
                 <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Images actuelles :</h5>
                   <div className="flex items-center gap-4">
@@ -1182,9 +1240,19 @@ const ProfilePage: React.FC = () => {
                         Logo: <span className="font-mono break-all">{profile.logo_url}</span>
                       </div>
                     )}
+                    {profile?.avatar_url && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        Avatar: <span className="font-mono break-all">{profile.avatar_url}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Diagnostic d'upload d'images */}
+            <div className="mb-6">
+              <ImageUploadDiagnostic />
             </div>
 
             <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${soft} p-3 sm:p-4 rounded-lg`}>
@@ -1543,11 +1611,7 @@ const ProfilePage: React.FC = () => {
 
             <div className="flex items-center gap-3">
               <button
-                onClick={async () => {
-                  if (avatarFile) {
-                    await saveImages();
-                  }
-                }}
+                onClick={saveAvatar}
                 disabled={!avatarFile || isUploading}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
