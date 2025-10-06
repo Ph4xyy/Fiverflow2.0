@@ -7,6 +7,8 @@ import { useStripeSubscription } from '../hooks/useStripeSubscription';
 import { useImageUpload } from '../hooks/useImageUpload';
 import ImageUpload from '../components/ImageUpload';
 import ImageUploadDiagnostic from '../components/ImageUploadDiagnostic';
+import StorageDiagnostic from '../components/StorageDiagnostic';
+import StoragePolicyFixer from '../components/StoragePolicyFixer';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import {
   User,
@@ -1253,6 +1255,16 @@ const ProfilePage: React.FC = () => {
             {/* Diagnostic d'upload d'images */}
             <div className="mb-6">
               <ImageUploadDiagnostic />
+            </div>
+
+            {/* Diagnostic storage Supabase */}
+            <div className="mb-6">
+              <StorageDiagnostic />
+            </div>
+
+            {/* Correction automatique des politiques */}
+            <div className="mb-6">
+              <StoragePolicyFixer />
             </div>
 
             <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${soft} p-3 sm:p-4 rounded-lg`}>

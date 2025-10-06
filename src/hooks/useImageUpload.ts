@@ -44,7 +44,15 @@ export const useImageUpload = ({ bucketName, folder = 'uploads' }: UseImageUploa
 
       if (uploadError) {
         console.error('Erreur upload:', uploadError);
-        toast.error(`Erreur lors de l'upload de l'image: ${uploadError.message}`);
+        
+        // Gestion spécifique des erreurs RLS
+        if (uploadError.message.includes('row-level security policy')) {
+          toast.error('Erreur de permissions: Les politiques RLS ne sont pas configurées. Utilisez le diagnostic pour corriger cela.');
+        } else if (uploadError.message.includes('bucket not found')) {
+          toast.error('Erreur: Le bucket n\'existe pas. Utilisez le diagnostic pour le créer.');
+        } else {
+          toast.error(`Erreur lors de l'upload de l'image: ${uploadError.message}`);
+        }
         return null;
       }
 
