@@ -223,6 +223,27 @@ const OrdersPage: React.FC = () => {
     fetchOrders();
   };
 
+  const getStatusLabel = (s: string) => {
+    switch (s) {
+      case 'Completed':
+        return t('dashboard.status.completed');
+      case 'In Progress':
+        return t('dashboard.status.in.progress');
+      case 'Pending':
+        return t('dashboard.status.pending');
+      case 'On Hold':
+        return t('dashboard.status.on.hold');
+      case 'Cancelled':
+        return t('dashboard.status.cancelled');
+      case 'Awaiting Payment':
+        return t('dashboard.status.awaiting.payment');
+      case 'In Review':
+        return t('dashboard.status.in.review');
+      default:
+        return s;
+    }
+  };
+
   const getStatusBadge = (s: string) => {
     switch (s) {
       case 'Completed':
@@ -554,7 +575,7 @@ const OrdersPage: React.FC = () => {
                             className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${getStatusBadge(o.status)} hover:opacity-90 transition`}
                             title="Change status"
                           >
-                            {o.status}
+                            {getStatusLabel(o.status)}
                           </button>
                           {openStatusFor === o.id && (
                             <div
@@ -569,7 +590,7 @@ const OrdersPage: React.FC = () => {
                                       onClick={(e) => selectStatus(e, o, st)}
                                     >
                                       <span className={`inline-block w-2 h-2 rounded-full mr-2 align-middle ${getStatusBadge(st).includes('green') ? 'bg-green-500' : getStatusBadge(st).includes('blue') ? 'bg-blue-500' : getStatusBadge(st).includes('yellow') ? 'bg-yellow-500' : getStatusBadge(st).includes('red') ? 'bg-red-500' : getStatusBadge(st).includes('orange') ? 'bg-orange-500' : getStatusBadge(st).includes('indigo') ? 'bg-indigo-500' : getStatusBadge(st).includes('amber') ? 'bg-amber-500' : 'bg-slate-500'}`}></span>
-                                      {st}
+                                      {getStatusLabel(st)}
                                     </button>
                                   </li>
                                 ))}
@@ -585,7 +606,7 @@ const OrdersPage: React.FC = () => {
                             onClick={(e) => { e.stopPropagation(); editOrder(o); }}
                             className="text-blue-400 hover:text-blue-300 text-sm font-medium"
                           >
-                            Modifier
+                            {t('orders.edit')}
                           </button>
                         </td>
                       </tr>

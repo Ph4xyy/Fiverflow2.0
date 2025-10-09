@@ -769,6 +769,15 @@ const translations = {
     'dashboard.tasks.pro.feature': 'Tasks are a Pro feature',
     'dashboard.upgrade.to.create': 'Upgrade to create and manage tasks.',
     'dashboard.task.saved': 'Task saved',
+    'dashboard.see.plans': 'See plans',
+    'dashboard.not.now': 'Not now',
+    'dashboard.status.completed': 'Completed',
+    'dashboard.status.in.progress': 'In Progress',
+    'dashboard.status.pending': 'Pending',
+    'dashboard.status.cancelled': 'Cancelled',
+    'dashboard.status.on.hold': 'On Hold',
+    'dashboard.status.awaiting.payment': 'Awaiting Payment',
+    'dashboard.status.in.review': 'In Review',
     
     // Navigation
     'nav.statistics': 'Statistics',
@@ -792,6 +801,9 @@ const translations = {
     'orders.get.started': 'Get started by creating your first order.',
     'orders.failed.load': 'Failed to load orders',
     'orders.error.load': 'Error fetching orders',
+    'orders.edit': 'Edit',
+    'orders.delete': 'Delete',
+    'orders.cancel': 'Cancel',
     
     // ClientsPage
     'clients.title': 'Clients',
@@ -1685,6 +1697,15 @@ const translations = {
     'dashboard.tasks.pro.feature': 'Les tâches sont une fonctionnalité Pro',
     'dashboard.upgrade.to.create': 'Passez à la version Pro pour créer et gérer des tâches.',
     'dashboard.task.saved': 'Tâche sauvegardée',
+    'dashboard.see.plans': 'Voir les plans',
+    'dashboard.not.now': 'Pas maintenant',
+    'dashboard.status.completed': 'Terminé',
+    'dashboard.status.in.progress': 'En Cours',
+    'dashboard.status.pending': 'En Attente',
+    'dashboard.status.cancelled': 'Annulé',
+    'dashboard.status.on.hold': 'En Attente',
+    'dashboard.status.awaiting.payment': 'En Attente de Paiement',
+    'dashboard.status.in.review': 'En Révision',
     
     // Navigation
     'nav.statistics': 'Statistiques',
@@ -1708,6 +1729,9 @@ const translations = {
     'orders.get.started': 'Commencez par créer votre première commande.',
     'orders.failed.load': 'Échec du chargement des commandes',
     'orders.error.load': 'Erreur lors du chargement des commandes',
+    'orders.edit': 'Modifier',
+    'orders.delete': 'Supprimer',
+    'orders.cancel': 'Annuler',
     
     // ClientsPage
     'clients.title': 'Clients',

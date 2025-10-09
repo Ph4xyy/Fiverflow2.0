@@ -145,6 +145,21 @@ const DashboardPage = () => {
     { label: t('dashboard.total.revenue'), value: new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(orders.reduce((sum, o) => sum + (o.amount || 0), 0)), icon: DollarSign, color: 'from-emerald-500 to-teal-600' }
   ];
 
+  const getOrderStatusLabel = (s: string) => {
+    switch (s) {
+      case 'Completed':
+        return t('dashboard.status.completed');
+      case 'In Progress':
+        return t('dashboard.status.in.progress');
+      case 'Pending':
+        return t('dashboard.status.pending');
+      case 'Cancelled':
+        return t('dashboard.status.cancelled');
+      default:
+        return s;
+    }
+  };
+
   const getOrderStatusBadge = (s: string) => {
     switch (s) {
       case 'Completed':
@@ -230,13 +245,13 @@ const DashboardPage = () => {
               }}
               className="px-3 py-1.5 text-sm rounded bg-blue-600 text-white"
             >
-              See plans
+              {t('dashboard.see.plans')}
             </button>
             <button
               onClick={() => toast.dismiss(t.id)}
               className="px-3 py-1.5 text-sm rounded border"
             >
-              Not now
+              {t('dashboard.not.now')}
             </button>
           </div>
         </div>
@@ -424,7 +439,7 @@ const DashboardPage = () => {
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
                             <p className="truncate text-sm font-medium text-white">{it.title}</p>
-                            {isOrder && <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getOrderStatusBadge(it.status)}`}>{it.status}</span>}
+                            {isOrder && <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getOrderStatusBadge(it.status)}`}>{getOrderStatusLabel(it.status)}</span>}
                             {it.kind === 'task' && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-slate-200">{t('dashboard.task')}</span>}
                             {isSub && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-slate-200">{t('dashboard.subscription')}</span>}
                           </div>
