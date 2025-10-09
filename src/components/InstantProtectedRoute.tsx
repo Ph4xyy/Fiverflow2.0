@@ -29,11 +29,11 @@ const InstantProtectedRoute: React.FC<InstantProtectedRouteProps> = ({ children,
     requireAdmin
   });
 
-  // 🔥 Timeout ultra-court pour une authentification fluide
+  // 🔥 Timeout plus long pour permettre à la session de se charger après login
   React.useEffect(() => {
     const timeout = setTimeout(() => {
       setLoadingTimeout(true);
-    }, 1500); // Réduit à 1.5s
+    }, 3000); // Augmenté à 3s pour laisser le temps à la session de se charger
 
     return () => clearTimeout(timeout);
   }, []);
@@ -57,6 +57,7 @@ const InstantProtectedRoute: React.FC<InstantProtectedRouteProps> = ({ children,
 
   // 🔥 Show loading screen seulement si vraiment nécessaire
   if ((loading || roleLoading) && !loadingTimeout) {
+    console.log('⏳ InstantProtectedRoute: Showing loading screen');
     return (
       <OptimizedLoadingScreen 
         message="Checking session..." 

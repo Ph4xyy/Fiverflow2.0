@@ -7,15 +7,25 @@ import LogoImage from '../assets/LogoFiverFlow.png';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, user, loading: authLoading } = useAuth();
   const { t, language, setLanguage } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [justSignedIn, setJustSignedIn] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+
+  // 🔥 FIXED: Rediriger automatiquement si l'utilisateur est déjà connecté OU vient de se connecter
+  React.useEffect(() => {
+    // Rediriger si user existe ET (on vient de se connecter OU authLoading est terminé)
+    if (user && (justSignedIn || !authLoading)) {
+      console.log('🔄 LoginPage: User detected, redirecting to dashboard', { justSignedIn, authLoading });
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, justSignedIn, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,18 +48,19 @@ const LoginPage: React.FC = () => {
       if (error) {
         console.error('Authentication error:', error);
         setError(error.message);
+        setLoading(false);
+        setJustSignedIn(false);
       } else {
-        console.log('Authentication successful, redirecting...');
-        // Small delay to show success before redirect
-        await new Promise(resolve => setTimeout(resolve, 500));
-        navigate('/dashboard');
+        console.log('Authentication successful, waiting for user context to update...');
+        // 🔥 FIXED: Marquer qu'on vient de se connecter, le useEffect s'occupera de la redirection
+        setJustSignedIn(true);
+        // Le loading reste true pour montrer que la connexion est en cours
       }
     } catch (err) {
       console.error('Login error:', err);
       setError(t('auth.login.error.unexpected'));
-    } finally {
-      console.log('Authentication process completed');
       setLoading(false);
+      setJustSignedIn(false);
     }
   };
     
