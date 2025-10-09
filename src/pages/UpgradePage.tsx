@@ -296,7 +296,7 @@ const UpgradePage: React.FC = () => {
 
               {plan.limitations && (
                 <div className="mb-6 sm:mb-8">
-                  <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-slate-400 mb-2">Limitations:</p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-slate-400 mb-2">{t('upgrade.limitations')}</p>
                   <ul className="space-y-2">
                     {plan.limitations.map((limitation: string, limitIndex: number) => (
                       <li key={limitIndex} className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 break-words">
@@ -327,12 +327,12 @@ const UpgradePage: React.FC = () => {
                 {processingPriceId === plan.priceId ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                    Processing...
+                    {t('upgrade.trial.processing')}
                   </div>
                 ) : plan.hasFreeTrial ? (
                   <>
                     <Star size={16} className="mr-2" />
-                    Start 7‑Day Free Trial
+                    {t('upgrade.trial.start')}
                   </>
                 ) : (
                   plan.buttonText
@@ -344,22 +344,22 @@ const UpgradePage: React.FC = () => {
                   <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-4">
                     <div className="flex items-center space-x-2 mb-2">
                       <Star className="text-blue-600 dark:text-blue-400" size={16} />
-                      <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-200">Free Trial Details</h4>
+                      <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-200">{t('upgrade.trial.details')}</h4>
                     </div>
                     <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                      <li>• 7 days of full Pro access</li>
-                      <li>• Credit card required (no charge during trial)</li>
-                      <li>• Cancel anytime before trial ends</li>
-                      <li>• Billing starts after trial</li>
+                      <li>• {t('upgrade.trial.access')}</li>
+                      <li>• {t('upgrade.trial.card')}</li>
+                      <li>• {t('upgrade.trial.cancel')}</li>
+                      <li>• {t('upgrade.trial.billing.after')}</li>
                     </ul>
                   </div>
                   <p className="text-center text-xs text-gray-500 dark:text-slate-400 mt-3">
-                    Credit card required • Cancel anytime during trial
+                    {t('upgrade.trial.card.cancel')}
                   </p>
                 </>
               ) : plan.name !== 'Free' && !plan.disabled ? (
                 <p className="text-center text-xs text-gray-500 dark:text-slate-400 mt-3">
-                  Immediate billing • Cancel anytime
+                  {t('upgrade.payment.immediate')}
                 </p>
               ) : null}
             </div>
@@ -369,31 +369,31 @@ const UpgradePage: React.FC = () => {
         {/* FAQ */}
         <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 sm:p-6 lg:p-8 mt-12 border border-gray-200 dark:border-slate-700">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 text-center">
-            Frequently Asked Questions
+            {t('upgrade.faq.title')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">Can I change plans anytime?</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">{t('upgrade.faq.change.plans')}</h3>
               <p className="text-gray-600 dark:text-slate-300 text-xs sm:text-sm break-words">
-                Yes—upgrade or downgrade whenever you want. Changes apply to your next billing cycle.
+                {t('upgrade.faq.change.answer')}
               </p>
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">Is there a free trial?</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">{t('upgrade.faq.trial.question')}</h3>
               <p className="text-gray-600 dark:text-slate-300 text-xs sm:text-sm break-words">
-                Pro includes a 7‑day free trial. A credit card is required to start, but you won’t be charged during the trial.
+                {t('upgrade.faq.trial.answer')}
               </p>
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">What payment methods are accepted?</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">{t('upgrade.faq.payment.methods')}</h3>
               <p className="text-gray-600 dark:text-slate-300 text-xs sm:text-sm break-words">
-                We accept all major credit cards. Bank transfer is available for annual invoices on request.
+                {t('upgrade.faq.payment.answer')}
               </p>
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">Can I cancel anytime?</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">{t('upgrade.faq.cancel.question')}</h3>
               <p className="text-gray-600 dark:text-slate-300 text-xs sm:text-sm break-words">
-                Yes. You’ll retain access until the end of your current billing period.
+                {t('upgrade.faq.cancel.answer')}
               </p>
             </div>
           </div>

@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Layout, { cardClass } from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import {
@@ -109,19 +110,7 @@ const COLOR_SWATCHES = [
   '#14B8A6', '#22C55E', '#A855F7', '#F97316', '#06B6D4', '#EAB308',
 ];
 
-const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
-  { value: 'todo',         label: 'To do' },
-  { value: 'in_progress',  label: 'In progress' },
-  { value: 'blocked',      label: 'Blocked' },
-  { value: 'done',         label: 'Done' },
-];
 
-const PRIORITY_OPTIONS: { value: TaskPriority; label: string; color: string; bgColor: string }[] = [
-  { value: 'urgent', label: 'P1 Urgent', color: '#EF4444', bgColor: '#FEE2E2' },
-  { value: 'high',   label: 'P2 High',   color: '#F59E0B', bgColor: '#FEF3C7' },
-  { value: 'medium', label: 'P3 Medium', color: '#10B981', bgColor: '#D1FAE5' },
-  { value: 'low',    label: 'P4 Low',    color: '#6B7280', bgColor: '#F3F4F6' },
-];
 
 const byPositionThenCreated = (a: TaskRow, b: TaskRow) => {
   const pa = a.position ?? 0;
@@ -186,6 +175,7 @@ const usePopover = () => {
    =========================== */
 const TodoListPage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<ClientLite[]>([]);
@@ -203,6 +193,20 @@ const TodoListPage: React.FC = () => {
 
   // devient false si la DB n'a pas les colonnes avancées (color/labels/position/collapsed/comments_count)
   const colorPersistSupportedRef = useRef<boolean>(true);
+  
+  const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
+    { value: 'todo',         label: t('todo.status.todo') },
+    { value: 'in_progress',  label: t('todo.status.in.progress') },
+    { value: 'blocked',      label: t('todo.status.blocked') },
+    { value: 'done',         label: t('todo.status.done') },
+  ];
+  
+  const PRIORITY_OPTIONS: { value: TaskPriority; label: string; color: string; bgColor: string }[] = [
+    { value: 'urgent', label: t('todo.priority.urgent'), color: '#EF4444', bgColor: '#FEE2E2' },
+    { value: 'high',   label: t('todo.priority.high'),   color: '#F59E0B', bgColor: '#FEF3C7' },
+    { value: 'medium', label: t('todo.priority.medium'), color: '#10B981', bgColor: '#D1FAE5' },
+    { value: 'low',    label: t('todo.priority.low'),    color: '#6B7280', bgColor: '#F3F4F6' },
+  ];
 
   const tree = useMemo(() => buildTree(rows), [rows]);
 
@@ -404,7 +408,7 @@ const TodoListPage: React.FC = () => {
 
     const optimistic: TaskRow = {
       id: `tmp_${Math.random().toString(36).slice(2)}`,
-      title: 'New task',
+      title: t('todo.new.task'),
       status: 'todo',
       priority: 'medium',
       user_id: user.id,
@@ -453,13 +457,13 @@ const TodoListPage: React.FC = () => {
         // sync calendrier si due_date déjà définie (peu probable à la création)
         if (data?.due_date) await upsertCalendar({ ...optimistic, id: data.id, due_date: data.due_date });
       }
-      toast.success('Tâche créée');
+      toast.success(t('toast.task.created') || 'Tâche créée');
     } catch (e: any) {
       console.error('[insertTask] catch:', e);
-      toast.error(`Création impossible: ${e?.message || 'erreur inconnue'}`);
+      toast.error(t('toast.task.failed') || `Création impossible: ${e?.message || 'erreur inconnue'}`);
       setRows(prev => prev.filter(r => r.id !== optimistic.id));
     }
-  }, [user, rows, upsertCalendar]);
+  }, [user, rows, upsertCalendar, t]);
 
   const removeTask = useCallback(async (task: TaskRow) => {
     setRows(prev => prev.filter(r => r.id !== task.id && r.parent_id !== task.id));
@@ -467,12 +471,12 @@ const TodoListPage: React.FC = () => {
     try {
       const { error } = await supabase.from('tasks').delete().eq('id', task.id);
       if (error) throw error;
-      toast('Tâche supprimée', { icon: '🗑️' });
+      toast(t('toast.task.deleted') || 'Tâche supprimée', { icon: '🗑️' });
     } catch (e: any) {
       console.error('[removeTask]', e);
-      toast.error(`Suppression impossible: ${e?.message || 'erreur inconnue'}`);
+      toast.error(t('toast.task.delete.failed') || `Suppression impossible: ${e?.message || 'erreur inconnue'}`);
     }
-  }, []);
+  }, [t]);
 
   /* ----------- UI helpers ----------- */
   const toggleCollapse = (id: string) => {
@@ -518,30 +522,30 @@ const TodoListPage: React.FC = () => {
   };
 
   /* ----------- Cells (modernisées) ----------- */
-  const TitleCell: React.FC<{ t: TaskRow }> = ({ t }) => {
+  const TitleCell: React.FC<{ t: TaskRow }> = ({ t: task }) => {
     const [editing, setEditing] = useState(false);
-    const [val, setVal] = useState(t.title);
-    useEffect(() => setVal(t.title), [t.title]);
+    const [val, setVal] = useState(task.title);
+    useEffect(() => setVal(task.title), [task.title]);
 
     const onSave = async () => {
       setEditing(false);
-      if (val.trim() && val !== t.title) {
-        await updateTask(t.id, { title: val.trim() });
+      if (val.trim() && val !== task.title) {
+        await updateTask(task.id, { title: val.trim() });
       } else {
-        setVal(t.title);
+        setVal(task.title);
       }
     };
 
     return (
       <div className="flex items-start gap-3">
-        <div className="flex items-center" style={{ paddingLeft: `${(t._depth || 0) * 18}px` }}>
-          {t._children && t._children.length > 0 ? (
+        <div className="flex items-center" style={{ paddingLeft: `${(task._depth || 0) * 18}px` }}>
+          {task._children && task._children.length > 0 ? (
             <button
-              onClick={() => toggleCollapse(t.id)}
+              onClick={() => toggleCollapse(task.id)}
               className="p-1.5 rounded-xl hover:bg-white/10"
-              title={collapsed.has(t.id) ? 'Expand' : 'Collapse'}
+              title={collapsed.has(task.id) ? t('todo.expand') : t('todo.collapse')}
             >
-              {collapsed.has(t.id) ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
+              {collapsed.has(task.id) ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
             </button>
           ) : (
             <span className="w-7" />
@@ -549,7 +553,7 @@ const TodoListPage: React.FC = () => {
         </div>
 
         <div className="mt-1.5">
-          <div className="w-2 h-5 rounded-sm" style={{ background: t.color || '#3f3f46' }} />
+          <div className="w-2 h-5 rounded-sm" style={{ background: task.color || '#3f3f46' }} />
         </div>
 
         <div className="flex-1">
@@ -559,13 +563,13 @@ const TodoListPage: React.FC = () => {
                 autoFocus
                 value={val}
                 onChange={(e) => setVal(e.target.value)}
-                onKeyDown={(e) => (e.key === 'Enter' ? onSave() : e.key === 'Escape' ? (setEditing(false), setVal(t.title)) : null)}
+                onKeyDown={(e) => (e.key === 'Enter' ? onSave() : e.key === 'Escape' ? (setEditing(false), setVal(task.title)) : null)}
                 className="bg-[#0F141C] border border-[#1C2230] rounded-2xl px-3.5 py-2.5 w-full outline-none focus:ring-2 focus:ring-[#2A3347] text-[15px]"
               />
               <button onClick={onSave} className="p-2 rounded-xl bg-white/10 hover:bg-white/20">
                 <Check size={16} />
               </button>
-              <button onClick={() => { setEditing(false); setVal(t.title); }} className="p-2 rounded-xl hover:bg-white/10">
+              <button onClick={() => { setEditing(false); setVal(task.title); }} className="p-2 rounded-xl hover:bg-white/10">
                 <X size={16} />
               </button>
             </div>
@@ -573,9 +577,9 @@ const TodoListPage: React.FC = () => {
             <button
               onClick={() => setEditing(true)}
               className="group text-left w-full inline-flex items-start gap-2 hover:bg-white/5 rounded-xl px-1.5 py-1"
-              title="Edit title"
+              title={t('todo.edit.title')}
             >
-              <span className="text-[15px] text-slate-100">{t.title || 'Untitled'}</span>
+              <span className="text-[15px] text-slate-100">{task.title || t('todo.untitled')}</span>
               <Pencil size={16} className="opacity-0 group-hover:opacity-60 transition" />
             </button>
           )}
@@ -584,17 +588,17 @@ const TodoListPage: React.FC = () => {
           <div className="mt-2.5 flex items-center justify-between">
             {/* Choix rapide des couleurs */}
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">Color:</span>
+              <span className="text-xs text-slate-400">{t('todo.color')}</span>
               <div className="flex items-center gap-1.5">
                 {/* Aperçu de la couleur actuelle */}
                 <button
-                  onClick={() => openAdvancedColorPicker(t)}
+                  onClick={() => openAdvancedColorPicker(task)}
                   className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#1C2230] hover:bg-[#2A3347] transition-colors"
-                  title="Advanced color picker"
+                  title={t('todo.color.advanced')}
                 >
                   <div 
                     className="w-4 h-4 rounded ring-1 ring-white/20" 
-                    style={{ background: t.color || '#3f3f46' }}
+                    style={{ background: task.color || '#3f3f46' }}
                   />
                   <Palette size={12} className="text-slate-400" />
                 </button>
@@ -604,7 +608,7 @@ const TodoListPage: React.FC = () => {
                   <button
                     key={c}
                     onClick={() => {
-                      setTaskColor(t, c);
+                      setTaskColor(task, c);
                       addToRecentColors(c);
                     }}
                     className="w-4 h-4 rounded ring-1 ring-white/20 hover:scale-110 transition-transform"
@@ -613,22 +617,22 @@ const TodoListPage: React.FC = () => {
                   />
                 ))}
                 <button
-                  onClick={() => setTaskColor(t, null)}
+                  onClick={() => setTaskColor(task, null)}
                   className="px-1.5 text-[11px] rounded bg-white/5 hover:bg-white/10 text-slate-400"
                 >
-                  Clear
+                  {t('todo.color.clear')}
                 </button>
               </div>
             </div>
 
             {/* Bouton d'ajout de sous-tâche */}
             <button
-              onClick={() => insertTask(t)}
+              onClick={() => insertTask(task)}
               className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 hover:text-emerald-300 transition-colors text-xs"
-              title="Add subtask"
+              title={t('todo.add.subtask')}
             >
               <PlusCircle size={12} />
-              <span>Add Subtask</span>
+              <span>{t('todo.add.subtask')}</span>
             </button>
           </div>
         </div>
@@ -636,11 +640,11 @@ const TodoListPage: React.FC = () => {
     );
   };
 
-  const StatusCell: React.FC<{ t: TaskRow }> = ({ t }) => (
+  const StatusCell: React.FC<{ t: TaskRow }> = ({ t: task }) => (
     <div className={SELECT_WRAPPER}>
       <select
-        value={t.status}
-        onChange={(e) => updateTask(t.id, { status: e.target.value as TaskStatus })}
+        value={task.status}
+        onChange={(e) => updateTask(task.id, { status: e.target.value as TaskStatus })}
         className={SELECT_BASE}
       >
         {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
@@ -649,14 +653,14 @@ const TodoListPage: React.FC = () => {
     </div>
   );
 
-  const PriorityCell: React.FC<{ t: TaskRow }> = ({ t }) => {
-    const currentPriority = PRIORITY_OPTIONS.find(p => p.value === t.priority);
+  const PriorityCell: React.FC<{ t: TaskRow }> = ({ t: task }) => {
+    const currentPriority = PRIORITY_OPTIONS.find(p => p.value === task.priority);
     
     return (
       <div className={SELECT_WRAPPER}>
         <select
-          value={t.priority}
-          onChange={(e) => updateTask(t.id, { priority: e.target.value as TaskPriority })}
+          value={task.priority}
+          onChange={(e) => updateTask(task.id, { priority: e.target.value as TaskPriority })}
           className={`${SELECT_BASE} font-medium`}
           style={{
             color: currentPriority?.color || '#6B7280',
@@ -675,15 +679,15 @@ const TodoListPage: React.FC = () => {
     );
   };
 
-  const ClientCell: React.FC<{ t: TaskRow }> = ({ t }) => (
+  const ClientCell: React.FC<{ t: TaskRow }> = ({ t: task }) => (
     <div className="flex items-center gap-2">
       <div className="shrink-0 p-2 rounded-2xl bg-[#111722] ring-1 ring-inset ring-[#20293C]">
         <Building2 size={16} className="text-slate-300" />
       </div>
       <div className={SELECT_WRAPPER}>
         <select
-          value={t.client_id || ''}
-          onChange={(e) => updateTask(t.id, { client_id: e.target.value || null })}
+          value={task.client_id || ''}
+          onChange={(e) => updateTask(task.id, { client_id: e.target.value || null })}
           className={SELECT_BASE}
         >
           <option value="">—</option>
@@ -694,15 +698,15 @@ const TodoListPage: React.FC = () => {
     </div>
   );
 
-  const OrderCell: React.FC<{ t: TaskRow }> = ({ t }) => (
+  const OrderCell: React.FC<{ t: TaskRow }> = ({ t: task }) => (
     <div className="flex items-center gap-2">
       <div className="shrink-0 p-2 rounded-2xl bg-[#111722] ring-1 ring-inset ring-[#20293C]">
         <Package2 size={16} className="text-slate-300" />
       </div>
       <div className={SELECT_WRAPPER}>
         <select
-          value={t.order_id || ''}
-          onChange={(e) => updateTask(t.id, { order_id: e.target.value || null })}
+          value={task.order_id || ''}
+          onChange={(e) => updateTask(task.id, { order_id: e.target.value || null })}
           className={SELECT_BASE}
         >
           <option value="">—</option>
@@ -713,7 +717,7 @@ const TodoListPage: React.FC = () => {
     </div>
   );
 
-  const DueCell: React.FC<{ t: TaskRow }> = ({ t }) => {
+  const DueCell: React.FC<{ t: TaskRow }> = ({ t: task }) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const dateInputRef = useRef<HTMLInputElement>(null);
 
@@ -727,7 +731,7 @@ const TodoListPage: React.FC = () => {
     };
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      updateTask(t.id, { due_date: e.target.value || null });
+      updateTask(task.id, { due_date: e.target.value || null });
       setShowDatePicker(false);
     };
 
@@ -737,18 +741,18 @@ const TodoListPage: React.FC = () => {
 
     return (
       <div className="flex items-center gap-2">
-        <button
-          onClick={handleIconClick}
-          className="shrink-0 p-2 rounded-2xl bg-[#111722] ring-1 ring-inset ring-[#20293C] hover:bg-[#1A2332] hover:ring-[#2A3347] transition-colors"
-          title="Set due date"
-        >
-          <CalendarIcon size={16} className="text-slate-300" />
-        </button>
+          <button
+            onClick={handleIconClick}
+            className="shrink-0 p-2 rounded-2xl bg-[#111722] ring-1 ring-inset ring-[#20293C] hover:bg-[#1A2332] hover:ring-[#2A3347] transition-colors"
+            title={t('todo.due.date')}
+          >
+            <CalendarIcon size={16} className="text-slate-300" />
+          </button>
         {showDatePicker ? (
           <input
             ref={dateInputRef}
             type="date"
-            value={t.due_date || ''}
+            value={task.due_date || ''}
             onChange={handleDateChange}
             onBlur={handleBlur}
             className="px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[15px]"
@@ -756,28 +760,28 @@ const TodoListPage: React.FC = () => {
           />
         ) : (
           <div className="px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] text-[15px] min-h-[44px] flex items-center">
-            {t.due_date ? new Date(t.due_date).toLocaleDateString() : 'No due date'}
+            {task.due_date ? new Date(task.due_date).toLocaleDateString() : t('todo.no.due.date')}
           </div>
         )}
       </div>
     );
   };
 
-  const TagsCell: React.FC<{ t: TaskRow }> = ({ t }) => {
+  const TagsCell: React.FC<{ t: TaskRow }> = ({ t: task }) => {
     const [input, setInput] = useState('');
-    const labels = t.labels || [];
+    const labels = task.labels || [];
     const onAdd = async () => {
       const nv = input.trim();
       if (!nv) return;
       const next = Array.from(new Set([...(labels || []), nv]));
       setInput('');
-      setRows(prev => prev.map(r => r.id === t.id ? { ...r, labels: next } : r));
-      await updateTask(t.id, { labels: next as any });
+      setRows(prev => prev.map(r => r.id === task.id ? { ...r, labels: next } : r));
+      await updateTask(task.id, { labels: next as any });
     };
     const onRemove = async (label: string) => {
       const next = (labels || []).filter(l => l !== label);
-      setRows(prev => prev.map(r => r.id === t.id ? { ...r, labels: next } : r));
-      await updateTask(t.id, { labels: next as any });
+      setRows(prev => prev.map(r => r.id === task.id ? { ...r, labels: next } : r));
+      await updateTask(task.id, { labels: next as any });
     };
     return (
       <div>
@@ -794,18 +798,18 @@ const TodoListPage: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' ? onAdd() : null}
-            placeholder="Add tag..."
+            placeholder={t('todo.add.tag')}
             className="flex-1 px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[13px]"
           />
           <button onClick={onAdd} className={BTN_SOFT + ' text-[13px] py-2 px-3'}>
-            Add
+            {t('todo.tag.add')}
           </button>
         </div>
       </div>
     );
   };
 
-  const CommentsCell: React.FC<{ t: TaskRow }> = ({ t }) => {
+  const CommentsCell: React.FC<{ t: TaskRow }> = ({ t: task }) => {
     const [open, setOpen] = useState(false);
     const [txt, setTxt] = useState('');
     return (
@@ -813,10 +817,10 @@ const TodoListPage: React.FC = () => {
         <button
           onClick={() => setOpen(v => !v)}
           className={`${BTN_SOFT} px-3 py-2 rounded-2xl text-[13px]`}
-          title="Comments"
+          title={t('todo.comments')}
         >
           <MessageSquare size={16} />
-          <span>{t.comments_count ?? 0}</span>
+          <span>{task.comments_count ?? 0}</span>
         </button>
         {open && (
           <div className="p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230]">
@@ -825,16 +829,16 @@ const TodoListPage: React.FC = () => {
               value={txt}
               onChange={(e) => setTxt(e.target.value)}
               className="w-full bg-[#0F141C] border border-[#1C2230] rounded-2xl px-3.5 py-2.5 text-[15px] outline-none focus:ring-2 focus:ring-[#2A3347]"
-              placeholder="Add a comment..."
+              placeholder={t('todo.comment.add')}
             />
             <div className="mt-3 flex justify-end gap-2">
-              <button onClick={() => setOpen(false)} className={`${BTN_SOFT} px-3 py-2 text-[13px]`}>Close</button>
+              <button onClick={() => setOpen(false)} className={`${BTN_SOFT} px-3 py-2 text-[13px]`}>{t('todo.comment.close')}</button>
               <button
-                onClick={async () => { if (txt.trim()) { await addComment(t, txt); setTxt(''); } }}
+                onClick={async () => { if (txt.trim()) { await addComment(task, txt); setTxt(''); } }}
                 className={`${BTN_PRIMARY} px-3 py-2 text-[13px]`}
               >
                 <Save size={16} />
-                Save
+                {t('todo.comment.save')}
               </button>
             </div>
           </div>
@@ -873,9 +877,9 @@ const TodoListPage: React.FC = () => {
     };
 
     const statusLabel = useMemo(() => {
-      if (filterStatus === 'all') return 'All status';
-      return STATUS_OPTIONS.find(s => s.value === filterStatus)?.label || 'Status';
-    }, [filterStatus]);
+      if (filterStatus === 'all') return t('todo.all.status');
+      return STATUS_OPTIONS.find(s => s.value === filterStatus)?.label || t('todo.status');
+    }, [filterStatus, STATUS_OPTIONS]);
 
     return (
       <div className={`${HEADER_CARD} px-4 sm:px-6 py-4`}>
@@ -885,7 +889,7 @@ const TodoListPage: React.FC = () => {
               onClick={() => insertTask()}
               className={BTN_PRIMARY}
             >
-              <Plus size={18} /> New task
+              <Plus size={18} /> {t('todo.new.task')}
             </button>
 
             {/* Columns */}
@@ -893,9 +897,9 @@ const TodoListPage: React.FC = () => {
               <button
                 onClick={() => colsPop.setOpen(v => !v)}
                 className={BTN_SOFT}
-                title="Columns"
+                title={t('todo.columns')}
               >
-                <SlidersHorizontal size={18} /> Columns
+                <SlidersHorizontal size={18} /> {t('todo.columns')}
               </button>
               {colsPop.open && (
                 <div className="absolute z-20 mt-2 w-64 p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230] shadow-xl">
@@ -919,7 +923,7 @@ const TodoListPage: React.FC = () => {
               <button
                 onClick={() => statusPop.setOpen(v => !v)}
                 className={BTN_SOFT + ' min-w-[160px] justify-between'}
-                title="Filter by status"
+                title={t('todo.filter')}
               >
                 <span className="inline-flex items-center gap-2">
                   <Filter size={18} />
@@ -934,7 +938,7 @@ const TodoListPage: React.FC = () => {
                     onClick={() => { setFilterStatus('all'); statusPop.setOpen(false); }}
                     className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 text-slate-200 text-[14px]"
                   >
-                    All status
+                    {t('todo.all.status')}
                   </button>
                   <div className="my-1 h-px bg-white/5" />
                   {STATUS_OPTIONS.map(s => (
@@ -955,9 +959,9 @@ const TodoListPage: React.FC = () => {
               <button
                 onClick={() => colorsPop.setOpen(v => !v)}
                 className={BTN_SOFT}
-                title="Color palette"
+                title={t('todo.colors')}
               >
-                <Palette size={18} /> Colors
+                <Palette size={18} /> {t('todo.colors')}
               </button>
               {colorsPop.open && (
                 <div className="absolute z-20 mt-2 p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230] shadow-xl min-w-[260px]">
@@ -970,7 +974,7 @@ const TodoListPage: React.FC = () => {
                     ))}
                   </div>
                   <div className="mt-2 text-xs text-slate-400">
-                    Apply per task from the <span className="text-slate-300">Task</span> column.
+                    {t('todo.color')} <span className="text-slate-300">{t('todo.task')}</span>
                   </div>
                 </div>
               )}
@@ -983,17 +987,17 @@ const TodoListPage: React.FC = () => {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search tasks, tags, descriptions…"
+                placeholder={t('todo.search.placeholder')}
                 className="w-full pl-10 pr-3 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[15px]"
               />
               <SearchIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             </div>
 
             <div className="hidden sm:flex items-center gap-2">
-              {pill(`Total: ${rows.length}`)}
-              {pill(`Visible: ${visibleRows.length}`)}
+              {pill(`${t('todo.total')} ${rows.length}`)}
+              {pill(`${t('todo.visible')} ${visibleRows.length}`)}
               <span className={`${CHIP_SOFT} gap-1.5`}>
-                <Clock size={12} /> Autosave
+                <Clock size={12} /> {t('todo.autosave')}
               </span>
             </div>
           </div>
@@ -1015,9 +1019,9 @@ const TodoListPage: React.FC = () => {
                   <ListChecks size={22} />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 leading-tight">To-Do List</h1>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 leading-tight">{t('todo.title')}</h1>
                   <p className="text-[13px] text-slate-400 mt-1">
-                    Planifie, organise et exécute — subtasks illimitées, sélecteur de couleurs avancé & colonnes personnalisables.
+                    {t('todo.subtitle')}
                   </p>
                 </div>
               </div>
@@ -1036,41 +1040,41 @@ const TodoListPage: React.FC = () => {
               <table className="min-w-full border-collapse">
                 <thead>
                   <tr className={TABLE_HEAD}>
-                    {visibleCols.includes('task') && <th className="px-4 py-3 w-[38%]">Task</th>}
-                    {visibleCols.includes('status') && <th className="px-4 py-3 w-[12%]">Status</th>}
-                    {visibleCols.includes('priority') && <th className="px-4 py-3 w-[12%]">Priority</th>}
-                    {visibleCols.includes('client') && <th className="px-4 py-3 w-[14%]">Client</th>}
-                    {visibleCols.includes('order') && <th className="px-4 py-3 w-[14%]">Order</th>}
-                    {visibleCols.includes('due') && <th className="px-4 py-3 w-[12%]">Due</th>}
-                    {visibleCols.includes('comments') && <th className="px-4 py-3 w-[8%]">Comments</th>}
-                    {visibleCols.includes('tags') && <th className="px-4 py-3 w-[20%]">Tags</th>}
+                    {visibleCols.includes('task') && <th className="px-4 py-3 w-[38%]">{t('todo.task')}</th>}
+                    {visibleCols.includes('status') && <th className="px-4 py-3 w-[12%]">{t('todo.status')}</th>}
+                    {visibleCols.includes('priority') && <th className="px-4 py-3 w-[12%]">{t('todo.priority')}</th>}
+                    {visibleCols.includes('client') && <th className="px-4 py-3 w-[14%]">{t('todo.client')}</th>}
+                    {visibleCols.includes('order') && <th className="px-4 py-3 w-[14%]">{t('todo.order')}</th>}
+                    {visibleCols.includes('due') && <th className="px-4 py-3 w-[12%]">{t('todo.due')}</th>}
+                    {visibleCols.includes('comments') && <th className="px-4 py-3 w-[8%]">{t('todo.comments')}</th>}
+                    {visibleCols.includes('tags') && <th className="px-4 py-3 w-[20%]">{t('todo.tags')}</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={8} className="px-4 py-10 text-center text-slate-400 text-[15px]">Loading…</td></tr>
+                    <tr><td colSpan={8} className="px-4 py-10 text-center text-slate-400 text-[15px]">{t('todo.loading')}</td></tr>
                   ) : visibleRows.length === 0 ? (
                     <tr><td colSpan={8} className="px-4 py-10 text-center text-slate-300 text-[15px]">
-                      Aucune tâche.{' '}
+                      {t('todo.no.tasks')}{' '}
                       <button onClick={() => insertTask()} className="underline decoration-slate-400 hover:decoration-slate-200">
-                        Créer une première tâche
+                        {t('todo.create.first')}
                       </button>.
                     </td></tr>
                   ) : (
-                    visibleRows.map((t) => (
-                      <tr key={t.id} className="hover:bg-white/3">
+                    visibleRows.map((taskRow) => (
+                      <tr key={taskRow.id} className="hover:bg-white/3">
                         {visibleCols.includes('task') && (
                           <td className={`${CELL_BASE}`}>
-                            <TitleCell t={t} />
+                            <TitleCell t={taskRow} />
                           </td>
                         )}
-                        {visibleCols.includes('status') && <td className={`${CELL_BASE}`}><StatusCell t={t} /></td>}
-                        {visibleCols.includes('priority') && <td className={`${CELL_BASE}`}><PriorityCell t={t} /></td>}
-                        {visibleCols.includes('client') && <td className={`${CELL_BASE}`}><ClientCell t={t} /></td>}
-                        {visibleCols.includes('order') && <td className={`${CELL_BASE}`}><OrderCell t={t} /></td>}
-                        {visibleCols.includes('due') && <td className={`${CELL_BASE}`}><DueCell t={t} /></td>}
-                        {visibleCols.includes('comments') && <td className={`${CELL_BASE}`}><CommentsCell t={t} /></td>}
-                        {visibleCols.includes('tags') && <td className={`${CELL_BASE}`}><TagsCell t={t} /></td>}
+                        {visibleCols.includes('status') && <td className={`${CELL_BASE}`}><StatusCell t={taskRow} /></td>}
+                        {visibleCols.includes('priority') && <td className={`${CELL_BASE}`}><PriorityCell t={taskRow} /></td>}
+                        {visibleCols.includes('client') && <td className={`${CELL_BASE}`}><ClientCell t={taskRow} /></td>}
+                        {visibleCols.includes('order') && <td className={`${CELL_BASE}`}><OrderCell t={taskRow} /></td>}
+                        {visibleCols.includes('due') && <td className={`${CELL_BASE}`}><DueCell t={taskRow} /></td>}
+                        {visibleCols.includes('comments') && <td className={`${CELL_BASE}`}><CommentsCell t={taskRow} /></td>}
+                        {visibleCols.includes('tags') && <td className={`${CELL_BASE}`}><TagsCell t={taskRow} /></td>}
                       </tr>
                     ))
                   )}

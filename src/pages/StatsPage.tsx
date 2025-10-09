@@ -1,11 +1,12 @@
 // src/pages/StatsPage.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import Layout, { cardClass } from '@/components/Layout';
-import PlanRestrictedPage from '@/components/PlanRestrictedPage';
-import { usePlanRestrictions } from '@/hooks/usePlanRestrictions';
-import { useAuth } from '@/contexts/AuthContext';
-import { useCurrency } from '@/contexts/CurrencyContext';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import Layout, { cardClass } from '../components/Layout';
+import PlanRestrictedPage from '../components/PlanRestrictedPage';
+import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
+import { useAuth } from '../contexts/AuthContext';
+import { useCurrency } from '../contexts/CurrencyContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 import {
   RefreshCw,
@@ -40,12 +41,6 @@ import {
 } from 'recharts';
 
 type Period = '7d' | '30d' | '90d' | 'custom';
-const periodOptions: { label: string; value: Period }[] = [
-  { label: 'Last 7 Days', value: '7d' },
-  { label: 'Last 30 Days', value: '30d' },
-  { label: 'Last 90 Days', value: '90d' },
-  { label: 'Custom…', value: 'custom' },
-];
 
 const parseNum = (v: any) => (typeof v === 'number' ? v : parseFloat(v) || 0);
 const toDate = (v: any) => (v ? new Date(v) : null);
@@ -82,6 +77,7 @@ const STATUS_COLOR: Record<string, string> = {
 const StatsPage: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const { currency } = useCurrency();
+  const { t } = useLanguage();
   const { restrictions, loading: planLoading, checkAccess } = usePlanRestrictions();
 
   const [period, setPeriod] = useState<Period>('30d');
@@ -353,13 +349,20 @@ const StatsPage: React.FC = () => {
     });
   }, [daysArray, byDayStatus, allStatuses]);
 
+  const periodOptions: { label: string; value: Period }[] = [
+    { label: t('stats.last.7days'), value: '7d' },
+    { label: t('stats.last.30days'), value: '30d' },
+    { label: t('stats.last.90days'), value: '90d' },
+    { label: t('stats.custom'), value: 'custom' },
+  ];
+
   // -------------------- ACCESS --------------------
   if (planLoading) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-          <p className="ml-3 text-gray-400">Loading...</p>
+          <p className="ml-3 text-gray-400">{t('stats.loading')}</p>
         </div>
       </Layout>
     );
@@ -386,16 +389,16 @@ const StatsPage: React.FC = () => {
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2">
               <TrendingUp className="text-sky-400" size={22} />
-              Analytics & Insights
+              {t('stats.analytics')}
             </h1>
             <p className="text-sm text-slate-400">
-              Real-time stats powered by Supabase. Choose your period and dive in.
+              {t('stats.realtime')}
             </p>
           </div>
           <div className="flex items-center gap-2">
             {offline && (
               <span className="text-[11px] px-2 py-1 rounded bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/20">
-                Offline preview
+                {t('stats.offline.preview')}
               </span>
             )}
             <div className="flex items-center gap-2">
@@ -418,7 +421,7 @@ const StatsPage: React.FC = () => {
                     onChange={(e) => setCustomStart(e.target.value)}
                     className="px-3 py-2 text-sm rounded-lg bg-[#0E121A] text-slate-100 ring-1 ring-inset ring-[#1C2230] focus:outline-none"
                   />
-                  <span className="text-slate-400">to</span>
+                  <span className="text-slate-400">{t('stats.to')}</span>
                   <input
                     type="date"
                     value={customEnd}
@@ -437,7 +440,7 @@ const StatsPage: React.FC = () => {
                     }}
                     className="inline-flex items-center px-3 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition"
                   >
-                    Apply
+                    {t('stats.apply')}
                   </button>
                 </div>
               )}
@@ -447,7 +450,7 @@ const StatsPage: React.FC = () => {
               className="inline-flex items-center px-3 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition"
             >
               <RefreshCw className={`mr-2 ${refreshing ? 'animate-spin' : ''}`} size={16} />
-              Refresh
+              {t('stats.refresh')}
             </button>
           </div>
         </div>
@@ -457,45 +460,45 @@ const StatsPage: React.FC = () => {
           <div className={`${cardClass} p-4`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-400">Total Revenue</p>
+                <p className="text-xs uppercase tracking-wide text-slate-400">{t('stats.total.revenue')}</p>
                 <p className="text-2xl font-bold text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(totalRevenue)}</p>
               </div>
               <DollarSign className="text-green-400" />
             </div>
-            <p className="mt-2 text-xs text-slate-400">Avg. order value: {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(averageOrderValue)}</p>
+            <p className="mt-2 text-xs text-slate-400">{t('stats.avg.order.value')} {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(averageOrderValue)}</p>
           </div>
 
           <div className={`${cardClass} p-4`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-400">Pending Revenue</p>
+                <p className="text-xs uppercase tracking-wide text-slate-400">{t('stats.pending.revenue')}</p>
                 <p className="text-2xl font-bold text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(pendingRevenue)}</p>
               </div>
               <ShoppingCart className="text-amber-400" />
             </div>
-            <p className="mt-2 text-xs text-slate-400">Open orders: {pendingOrders.length}</p>
+            <p className="mt-2 text-xs text-slate-400">{t('stats.open.orders')} {pendingOrders.length}</p>
           </div>
 
           <div className={`${cardClass} p-4`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-400">Avg. Delivery Time</p>
-                <p className="text-2xl font-bold text-white">{averageDeliveryTime.toFixed(1)} days</p>
+                <p className="text-xs uppercase tracking-wide text-slate-400">{t('stats.avg.delivery')}</p>
+                <p className="text-2xl font-bold text-white">{averageDeliveryTime.toFixed(1)} {t('stats.days')}</p>
               </div>
               <Clock className="text-sky-400" />
             </div>
-            <p className="mt-2 text-xs text-slate-400">Based on completed orders</p>
+            <p className="mt-2 text-xs text-slate-400">{t('stats.based.completed')}</p>
           </div>
 
           <div className={`${cardClass} p-4`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-wide text-slate-400">Completion Rate</p>
+                <p className="text-xs uppercase tracking-wide text-slate-400">{t('stats.completion.rate')}</p>
                 <p className="text-2xl font-bold text-white">{completionRate}%</p>
               </div>
               <Target className="text-purple-400" />
             </div>
-            <p className="mt-2 text-xs text-slate-400">Total orders: {orderVolume}</p>
+            <p className="mt-2 text-xs text-slate-400">{t('stats.total.orders')} {orderVolume}</p>
           </div>
         </div>
 
@@ -504,7 +507,7 @@ const StatsPage: React.FC = () => {
           <div className={`${cardClass} p-4`}>
             <div className="flex items-center gap-2 mb-3">
               <BarChart3 className="text-sky-400" size={18} />
-              <h2 className="text-lg font-semibold text-white">Daily Revenue</h2>
+              <h2 className="text-lg font-semibold text-white">{t('stats.daily.revenue')}</h2>
             </div>
             <div className="h-[260px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -525,7 +528,7 @@ const StatsPage: React.FC = () => {
           <div className={`${cardClass} p-4`}>
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp className="text-green-400" size={18} />
-              <h2 className="text-lg font-semibold text-white">Cumulative Revenue</h2>
+              <h2 className="text-lg font-semibold text-white">{t('stats.cumulative.revenue')}</h2>
             </div>
             <div className="h-[260px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -549,7 +552,7 @@ const StatsPage: React.FC = () => {
           <div className={`${cardClass} p-4`}>
             <div className="flex items-center gap-2 mb-3">
               <PieIcon className="text-amber-400" size={18} />
-              <h2 className="text-lg font-semibold text-white">Earnings by Platform</h2>
+              <h2 className="text-lg font-semibold text-white">{t('stats.earnings.platform')}</h2>
             </div>
             <div className="h-[260px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -580,7 +583,7 @@ const StatsPage: React.FC = () => {
           <div className={`${cardClass} p-4`}>
             <div className="flex items-center gap-2 mb-3">
               <BarChart3 className="text-purple-400" size={18} />
-              <h2 className="text-lg font-semibold text-white">Orders by Status (Daily)</h2>
+              <h2 className="text-lg font-semibold text-white">{t('stats.orders.status')}</h2>
             </div>
             <div className="h-[260px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -608,7 +611,7 @@ const StatsPage: React.FC = () => {
         <div className="grid grid-cols-1 2xl:grid-cols-3 gap-4">
           {/* Gauge */}
           <div className={`${cardClass} p-4`}>
-            <h2 className="text-lg font-semibold text-white mb-3">Completion Gauge</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">{t('stats.completion.gauge')}</h2>
             <div className="h-[240px]">
               <ResponsiveContainer width="100%" height="100%">
                 <RadialBarChart
@@ -623,7 +626,7 @@ const StatsPage: React.FC = () => {
                     content={() => (
                       <div className="text-center mt-2 text-slate-300">
                         <span className="text-3xl font-bold text-white">{completionRate}%</span>
-                        <div className="text-xs text-slate-400">Orders completed</div>
+                        <div className="text-xs text-slate-400">{t('stats.orders.completed')}</div>
                       </div>
                     )}
                   />
@@ -634,9 +637,9 @@ const StatsPage: React.FC = () => {
 
           {/* Top Clients */}
           <div className={`${cardClass} p-4`}>
-            <h2 className="text-lg font-semibold text-white mb-3">Top Clients</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">{t('stats.top.clients')}</h2>
             <div className="space-y-2">
-              {topClients.length === 0 && <p className="text-sm text-slate-400">No data.</p>}
+              {topClients.length === 0 && <p className="text-sm text-slate-400">{t('stats.no.data')}</p>}
               {topClients.map((c, idx) => (
                 <div
                   key={idx}
@@ -651,9 +654,9 @@ const StatsPage: React.FC = () => {
 
           {/* Recent Activity */}
           <div className={`${cardClass} p-4`}>
-            <h2 className="text-lg font-semibold text-white mb-3">Recent Activity</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">{t('stats.recent.activity')}</h2>
             <div className="space-y-2">
-              {recentActivities.length === 0 && <p className="text-sm text-slate-400">No recent orders.</p>}
+              {recentActivities.length === 0 && <p className="text-sm text-slate-400">{t('stats.no.recent')}</p>}
               {recentActivities.map((a, idx) => (
                 <div
                   key={idx}

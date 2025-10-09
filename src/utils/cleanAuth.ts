@@ -38,3 +38,4 @@ if (typeof window !== 'undefined') {
   (window as any).cleanAuthCache = cleanAuthCache;
   console.log('💡 Tip: En cas de problème d\'auth, tapez cleanAuthCache() dans la console puis rechargez la page');
 }
+
