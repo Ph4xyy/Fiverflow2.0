@@ -5,6 +5,7 @@ import { cardClass } from "@/components/Layout";
 import InvoiceForm from "@/components/InvoiceForm";
 import InvoiceViewModal from "@/components/InvoiceViewModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { usePlanRestrictions } from "@/hooks/usePlanRestrictions";
 import { useInvoices } from "@/hooks/useInvoices";
 import toast from "react-hot-toast";
@@ -18,6 +19,7 @@ const STATUSES = ["draft", "sent", "paid", "overdue", "canceled"] as const;
 const InvoicesPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const { user } = useAuth();
   const { restrictions, checkAccess } = usePlanRestrictions();
   const { 
@@ -128,7 +130,7 @@ const InvoicesPage: React.FC = () => {
       }
     } catch (e) {
       console.error("[Invoices] view error:", e);
-      toast.error("Impossible de charger la facture");
+      toast.error(t('invoices.unable.load'));
       setIsViewOpen(false);
     } finally {
       setViewLoading(false);
@@ -153,11 +155,11 @@ const InvoicesPage: React.FC = () => {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "draft": return "Brouillon";
-      case "sent": return "Envoyée";
-      case "paid": return "Payée";
-      case "overdue": return "En retard";
-      case "canceled": return "Annulée";
+      case "draft": return t('invoices.status.draft');
+      case "sent": return t('invoices.status.sent');
+      case "paid": return t('invoices.status.paid');
+      case "overdue": return t('invoices.status.overdue');
+      case "canceled": return t('invoices.status.canceled');
       default: return status;
     }
   };
@@ -167,10 +169,10 @@ const InvoicesPage: React.FC = () => {
       <div className="p-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Accès restreint
+            {t('invoices.access.restricted')}
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Vous n'avez pas accès à cette fonctionnalité.
+            {t('invoices.no.access')}
           </p>
         </div>
       </div>
@@ -183,10 +185,10 @@ const InvoicesPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Factures
+            {t('invoices.title')}
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Gérez vos factures et suivez les paiements
+            {t('invoices.subtitle')}
           </p>
         </div>
         <button
@@ -197,7 +199,7 @@ const InvoicesPage: React.FC = () => {
           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Nouvelle facture
+          {t('invoices.new.invoice')}
         </button>
       </div>
 

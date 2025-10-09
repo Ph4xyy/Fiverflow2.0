@@ -819,6 +819,22 @@ const translations = {
     'clients.retry': 'Retry',
     'clients.no.clients.found': 'No clients found.',
     'clients.adjust.filters': 'Adjust your filters or create a new client.',
+    
+    // InvoicesPage
+    'invoices.title': 'Invoices',
+    'invoices.subtitle': 'Manage your invoices and track payments',
+    'invoices.new.invoice': 'New Invoice',
+    'invoices.status.draft': 'Draft',
+    'invoices.status.sent': 'Sent',
+    'invoices.status.paid': 'Paid',
+    'invoices.status.overdue': 'Overdue',
+    'invoices.status.canceled': 'Canceled',
+    'invoices.unable.load': 'Unable to load invoice',
+    'invoices.access.restricted': 'Access restricted',
+    'invoices.no.access': 'You don\'t have access to this feature.',
+    'invoices.loading': 'Loading…',
+    'invoices.no.invoices': 'No invoices found',
+    'invoices.create.first': 'Create your first invoice to get started.',
   },
   fr: {
     // Navigation
@@ -1627,6 +1643,22 @@ const translations = {
     'clients.retry': 'Réessayer',
     'clients.no.clients.found': 'Aucun client trouvé.',
     'clients.adjust.filters': 'Ajustez vos filtres ou créez un nouveau client.',
+    
+    // InvoicesPage
+    'invoices.title': 'Factures',
+    'invoices.subtitle': 'Gérez vos factures et suivez les paiements',
+    'invoices.new.invoice': 'Nouvelle Facture',
+    'invoices.status.draft': 'Brouillon',
+    'invoices.status.sent': 'Envoyée',
+    'invoices.status.paid': 'Payée',
+    'invoices.status.overdue': 'En retard',
+    'invoices.status.canceled': 'Annulée',
+    'invoices.unable.load': 'Impossible de charger la facture',
+    'invoices.access.restricted': 'Accès restreint',
+    'invoices.no.access': 'Vous n\'avez pas accès à cette fonctionnalité.',
+    'invoices.loading': 'Chargement…',
+    'invoices.no.invoices': 'Aucune facture trouvée',
+    'invoices.create.first': 'Créez votre première facture pour commencer.',
   },
   es: {
     // Navigation
