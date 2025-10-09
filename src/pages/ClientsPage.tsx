@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Layout, { cardClass } from '@/components/Layout';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import ClientForm from '@/components/ClientForm';
 import ClientViewModal, { FullClient } from '@/components/ClientViewModal';
@@ -22,6 +23,7 @@ type ClientRow = {
 const PAGE_SIZE = 20;
 
 const ClientsPage: React.FC = () => {
+  const { t } = useLanguage();
   const { user } = useAuth();
 
   // Data
@@ -177,8 +179,8 @@ const ClientsPage: React.FC = () => {
       setTotal(count || 0);
     } catch (e: any) {
       console.error('[Clients] fetch error:', e);
-      setError(e?.message || 'Failed to load clients');
-      toast.error('Unable to load clients');
+      setError(e?.message || t('clients.failed.load'));
+      toast.error(t('clients.unable.load'));
     } finally {
       setLoading(false);
     }
@@ -274,7 +276,7 @@ const ClientsPage: React.FC = () => {
       setViewClient((data || null) as FullClient | null);
     } catch (e) {
       console.error('[Clients] view fetch error:', e);
-      toast.error('Impossible de charger le client');
+      toast.error(t('clients.unable.load.client'));
       setIsViewOpen(false);
     } finally {
       setViewLoading(false);
@@ -325,8 +327,8 @@ const ClientsPage: React.FC = () => {
               <Users size={18} />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold text-white">Clients</h1>
-              <p className="text-sm text-slate-400">Search, filter and manage your clients.</p>
+              <h1 className="text-3xl font-extrabold text-white">{t('clients.title')}</h1>
+              <p className="text-sm text-slate-400">{t('clients.subtitle')}</p>
             </div>
           </div>
 
@@ -337,7 +339,7 @@ const ClientsPage: React.FC = () => {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search (name, email, company, platform)…"
+                placeholder={t('clients.search.placeholder')}
                 className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-[#1C2230]
                            bg-[#11151D]/95 text-slate-100 placeholder-slate-400
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -348,7 +350,7 @@ const ClientsPage: React.FC = () => {
                   type="button"
                   onClick={() => setSearch('')}
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-[#141922]"
-                  aria-label="Effacer la recherche"
+                  aria-label={t('clients.clear.search')}
                 >
                   <X className="h-4 w-4 text-slate-400" />
                 </button>
@@ -360,7 +362,7 @@ const ClientsPage: React.FC = () => {
               className="inline-flex items-center px-4 py-2.5 rounded-xl btn-primary"
             >
               <Plus className="h-4 w-4 mr-2" />
-              New client
+{t('clients.new.client')}
             </button>
           </div>
         </div>
@@ -369,7 +371,7 @@ const ClientsPage: React.FC = () => {
         <div className={`${cardClass} p-3 sm:p-4`}>
           <div className="flex items-center gap-2 mb-3 text-slate-200">
             <Filter className="h-4 w-4" />
-            <span className="text-sm font-medium">Filtres</span>
+            <span className="text-sm font-medium">{t('clients.filters')}</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <select
@@ -377,11 +379,11 @@ const ClientsPage: React.FC = () => {
               onChange={(e) => setStatus(e.target.value)}
               className="px-3 py-2.5 rounded-xl border border-[#1C2230] bg-[#11151D]/95 text-slate-100 focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Status (all)</option>
-              <option value="prospect">Prospect</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="completed">Project completed</option>
+              <option value="">{t('clients.status.all')}</option>
+              <option value="prospect">{t('clients.status.prospect')}</option>
+              <option value="active">{t('clients.status.active')}</option>
+              <option value="inactive">{t('clients.status.inactive')}</option>
+              <option value="completed">{t('clients.status.completed')}</option>
             </select>
 
             <select
@@ -389,7 +391,7 @@ const ClientsPage: React.FC = () => {
               onChange={(e) => setPlatform(e.target.value)}
               className="px-3 py-2.5 rounded-xl border border-[#1C2230] bg-[#11151D]/95 text-slate-100 focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Platform (all)</option>
+              <option value="">{t('clients.platform.all')}</option>
               {platformOptions.map((p) => (
                 <option key={p} value={p}>{p}</option>
               ))}
@@ -400,7 +402,7 @@ const ClientsPage: React.FC = () => {
               onChange={(e) => setCountry(e.target.value)}
               className="px-3 py-2.5 rounded-xl border border-[#1C2230] bg-[#11151D]/95 text-slate-100 focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Pays (tous)</option>
+              <option value="">{t('clients.country.all')}</option>
               {countryOptions.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
@@ -410,7 +412,7 @@ const ClientsPage: React.FC = () => {
               onClick={clearAll}
               className="px-3 py-2.5 rounded-xl border border-[#1C2230] hover:bg-[#141922] text-slate-200"
             >
-              Réinitialiser
+{t('clients.reset')}
             </button>
           </div>
         </div>
@@ -420,24 +422,24 @@ const ClientsPage: React.FC = () => {
           {loading ? (
             <div className="p-10 flex items-center justify-center">
               <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600" />
-              <span className="ml-3 text-slate-400">Chargement…</span>
+              <span className="ml-3 text-slate-400">{t('clients.loading')}</span>
             </div>
           ) : error ? (
             <div className="p-6 text-center">
-              <p className="text-red-400 font-semibold">Impossible de charger les clients</p>
+              <p className="text-red-400 font-semibold">{t('clients.unable.load.title')}</p>
               <p className="text-sm text-slate-400 mt-1">{error}</p>
               <button
                 onClick={fetchClients}
                 className="mt-4 px-4 py-2 rounded-xl btn-primary"
               >
-                Réessayer
+                {t('clients.retry')}
               </button>
             </div>
           ) : clients.length === 0 ? (
             <div className="p-10 text-center">
-              <p className="text-slate-300">No clients found.</p>
+              <p className="text-slate-300">{t('clients.no.clients.found')}</p>
               <p className="text-sm text-slate-400 mt-1">
-                Adjust your filters or create a new client.
+                {t('clients.adjust.filters')}
               </p>
             </div>
           ) : (
