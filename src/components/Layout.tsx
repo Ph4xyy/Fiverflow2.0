@@ -49,12 +49,29 @@ const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
     user?.user_metadata?.role ||
     null;
 
-  const roleFromCache = (typeof window !== 'undefined'
+  // 🔥 Vérifier les deux caches (sessionStorage et localStorage)
+  const roleFromSessionCache = (typeof window !== 'undefined'
     ? sessionStorage.getItem('role')
     : null) as string | null;
+    
+  const roleFromLocalCache = (typeof window !== 'undefined'
+    ? localStorage.getItem('userRole')
+    : null) as string | null;
 
-  const effectiveRole = roleFromMeta || userRole || roleFromCache;
-  return effectiveRole === 'admin';
+  const effectiveRole = roleFromMeta || userRole || roleFromSessionCache || roleFromLocalCache;
+  const isAdmin = effectiveRole === 'admin';
+  
+  // 🔥 Debug pour voir si le rôle admin est détecté
+  if (isAdmin && import.meta.env.DEV) {
+    console.log('👑 Layout: Admin role detected from:', 
+      roleFromMeta ? 'metadata' : 
+      userRole ? 'userRole prop' : 
+      roleFromSessionCache ? 'sessionStorage' : 
+      roleFromLocalCache ? 'localStorage' : 'unknown'
+    );
+  }
+  
+  return isAdmin;
 };
 
 class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error?: any }> {
