@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const sessionUser = session?.user ?? null;
       if (!sessionUser) {
         sessionStorage.removeItem('role');
+        localStorage.removeItem('userRole'); // 🔥 Aussi nettoyer localStorage
         return;
       }
 
@@ -39,23 +40,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         (sessionUser.user_metadata as any)?.role;
 
       if (metaRole) {
+        console.log('✅ deriveAndCacheRole: Found role in metadata:', metaRole);
         sessionStorage.setItem('role', String(metaRole));
+        localStorage.setItem('userRole', String(metaRole)); // 🔥 Persister dans localStorage aussi
         return;
       }
 
       if (isSupabaseConfigured && supabase) {
-        const { data: profile } = await supabase
+        console.log('🔍 deriveAndCacheRole: Fetching role from database...');
+        const { data: profile, error } = await supabase
           .from('users')
           .select('role')
           .eq('id', sessionUser.id)
           .maybeSingle();
 
-        if (profile?.role) {
+        if (error) {
+          console.error('❌ deriveAndCacheRole: DB error:', error.message);
+        } else if (profile?.role) {
+          console.log('✅ deriveAndCacheRole: Found role in DB:', profile.role);
           sessionStorage.setItem('role', String(profile.role));
+          localStorage.setItem('userRole', String(profile.role)); // 🔥 Persister dans localStorage aussi
+        } else {
+          console.log('⚠️ deriveAndCacheRole: No role found, defaulting to user');
+          sessionStorage.setItem('role', 'user');
+          localStorage.setItem('userRole', 'user');
         }
       }
-    } catch {
-      // no-op
+    } catch (err) {
+      console.error('💥 deriveAndCacheRole: Error:', err);
     }
   };
 
@@ -285,29 +297,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { user: null, error: null as unknown as AuthError };
     }
     try {
+      console.log('🔐 signIn: Attempting to sign in...');
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
-      if (!error && data.user) {
-        // 🔥 FIXED: Mettre à jour l'état seulement si pas d'erreur et user existe
+      if (error) {
+        console.error('❌ signIn: Error:', error.message);
+        return { user: null, error };
+      }
+      
+      if (data.user && data.session) {
+        console.log('✅ signIn: Success, updating user and caching role');
+        // 🔥 FIXED: Mettre à jour l'état et attendre que le cache soit prêt
         setUserSafe(data.user);
-        await deriveAndCacheRole(data.session ?? null);
+        await deriveAndCacheRole(data.session);
+        
+        // 🔥 Forcer le rafraîchissement de la session pour s'assurer qu'elle est persistée
+        try {
+          await supabase.auth.getSession();
+          console.log('✅ signIn: Session persistence verified');
+        } catch (persistErr) {
+          console.warn('⚠️ signIn: Session persistence check failed:', persistErr);
+        }
       }
       
       return { user: data.user, error };
     } catch (error) {
+      console.error('💥 signIn: Unexpected error:', error);
       return { user: null, error: error as AuthError };
     }
   };
 
   const signOut = async () => {
+    console.log('🚪 signOut: Starting sign out process...');
     if (!isSupabaseConfigured || !supabase) {
       setUserSafe(null);
       sessionStorage.removeItem('role');
+      localStorage.removeItem('userRole');
       return;
     }
-    await supabase.auth.signOut();
-    sessionStorage.removeItem('role');
-    setUserSafe(null);
+    try {
+      await supabase.auth.signOut();
+      setUserSafe(null);
+      // 🔥 Nettoyer TOUS les caches
+      sessionStorage.removeItem('role');
+      localStorage.removeItem('userRole');
+      sessionStorage.clear(); // Nettoyer tout le sessionStorage
+      console.log('✅ signOut: Signed out and caches cleared');
+    } catch (error) {
+      console.error('❌ signOut: Error:', error);
+    }
   };
 
   const updateProfile = async (updates: any): Promise<{ error: PostgrestError | null }> => {

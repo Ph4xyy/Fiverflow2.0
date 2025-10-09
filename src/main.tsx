@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { LanguageProvider } from './contexts/LanguageContext';
 import App from './App.tsx';
 import './index.css';
+import './utils/cleanAuth'; // Importer l'utilitaire de nettoyage
 
 /** Force le mode sombre dès le chargement */
 try {

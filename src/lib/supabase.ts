@@ -11,7 +11,10 @@ const customStorage = {
     if (typeof window === 'undefined') return null;
     try {
       const item = window.localStorage.getItem(key);
-      console.log('🔍 Storage getItem:', { key, hasValue: !!item });
+      // Logs moins verbeux en production
+      if (import.meta.env.DEV) {
+        console.log('🔍 Storage getItem:', { key, hasValue: !!item });
+      }
       return item;
     } catch (e) {
       console.warn('localStorage getItem failed:', e);
@@ -22,7 +25,10 @@ const customStorage = {
     if (typeof window === 'undefined') return;
     try {
       window.localStorage.setItem(key, value);
-      console.log('💾 Storage setItem:', { key, valueLength: value.length });
+      // Logs moins verbeux en production
+      if (import.meta.env.DEV) {
+        console.log('💾 Storage setItem:', { key, valueLength: value.length });
+      }
     } catch (e) {
       console.warn('localStorage setItem failed:', e);
     }
@@ -31,7 +37,10 @@ const customStorage = {
     if (typeof window === 'undefined') return;
     try {
       window.localStorage.removeItem(key);
-      console.log('🗑️ Storage removeItem:', { key });
+      // Logs moins verbeux en production
+      if (import.meta.env.DEV) {
+        console.log('🗑️ Storage removeItem:', { key });
+      }
     } catch (e) {
       console.warn('localStorage removeItem failed:', e);
     }

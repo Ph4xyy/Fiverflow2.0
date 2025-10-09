@@ -34,10 +34,15 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!result.success) {
         console.error('❌ Error fetching user role:', result.error);
         setRole('user');
+        sessionStorage.setItem('role', 'user');
+        localStorage.setItem('userRole', 'user');
       } else {
         const role = result.data?.role === 'admin' ? 'admin' : 'user';
-        console.log('✅ Role fetched:', role);
+        console.log('✅ Role fetched from DB:', role);
         setRole(role);
+        // 🔥 Persister dans les deux caches
+        sessionStorage.setItem('role', role);
+        localStorage.setItem('userRole', role);
       }
     } catch (err) {
       console.error('💥 Unexpected error while fetching role:', err);
@@ -65,11 +70,29 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
 
-    // 🔥 Check cache first to avoid unnecessary loading
-    const cachedRole = sessionStorage.getItem('role');
+    // 🔥 Check metadata first (most reliable)
+    const metaRole = user.app_metadata?.role || user.user_metadata?.role;
+    if (metaRole) {
+      console.log('🔄 UserDataContext: Using metadata role:', metaRole);
+      setRole(metaRole === 'admin' ? 'admin' : 'user');
+      sessionStorage.setItem('role', String(metaRole));
+      localStorage.setItem('userRole', String(metaRole)); // 🔥 Persister aussi
+      setLoading(false);
+      return;
+    }
+    
+    // 🔥 Check cache (sessionStorage first, then localStorage)
+    const sessionRole = sessionStorage.getItem('role');
+    const localRole = localStorage.getItem('userRole');
+    const cachedRole = sessionRole || localRole;
+    
     if (cachedRole) {
-      console.log('🔄 UserDataContext: Using cached role:', cachedRole);
-      setRole(cachedRole === 'admin' ? 'admin' : 'user');
+      console.log('🔄 UserDataContext: Using cached role:', cachedRole, '(from', sessionRole ? 'sessionStorage' : 'localStorage', ')');
+      const resolvedRole = cachedRole === 'admin' ? 'admin' : 'user';
+      setRole(resolvedRole);
+      // Sync les deux caches
+      sessionStorage.setItem('role', resolvedRole);
+      localStorage.setItem('userRole', resolvedRole);
       setLoading(false);
       return;
     }

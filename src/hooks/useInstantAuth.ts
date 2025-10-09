@@ -20,12 +20,13 @@ export const useInstantAuth = (): InstantAuthState => {
   const [isReady, setIsReady] = useState(false);
   const hasInitializedRef = useRef(false);
 
-  // 🔥 Cache agressif pour éviter les rechargements
+  // 🔥 Cache agressif pour éviter les rechargements (checker les deux storages)
   const roleFromSessionCache = sessionStorage.getItem('role');
+  const roleFromLocalCache = typeof window !== 'undefined' ? localStorage.getItem('userRole') : null;
   const roleFromMeta = user?.app_metadata?.role || user?.user_metadata?.role;
   const roleFromContext = userData?.role;
   
-  const effectiveRole = roleFromContext || roleFromMeta || roleFromSessionCache || null;
+  const effectiveRole = roleFromContext || roleFromMeta || roleFromSessionCache || roleFromLocalCache || null;
   const roleLoading = Boolean(userData?.loading);
 
   // 🔥 Initialisation instantanée
