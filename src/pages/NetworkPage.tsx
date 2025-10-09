@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import PlanRestrictedPage from '../components/PlanRestrictedPage';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
@@ -94,6 +95,7 @@ const mockReferralLogs: ReferralLog[] = [
 
 export default function NetworkPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { currency } = useCurrency();
 
   // 🔒 Plan access
@@ -338,13 +340,13 @@ export default function NetworkPage() {
           </p>
           <div className="space-y-2 text-sm text-zinc-400 mb-6 text-left">
             <p><strong>Referral Error:</strong> {pageError}</p>
-            <p><strong>Payout Error:</strong> {payoutError}</p>
+            <p><strong>{t('network.error.payout')}</strong> {payoutError}</p>
           </div>
           <button
             onClick={handleRetry}
             className="w-full bg-blue-600 text-zinc-100 py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
           >
-            Try Again
+            {t('network.error.try.again')}
           </button>
         </div>
       </div>
@@ -359,16 +361,15 @@ export default function NetworkPage() {
             <div className="flex items-start space-x-3">
               <AlertCircle className="text-blue-400 mt-0.5 flex-shrink-0" size={20} />
               <div>
-                <h3 className="text-blue-300 font-medium">Demo Mode Active</h3>
+                <h3 className="text-blue-300 font-medium">{t('network.error.demo')}</h3>
                 <p className="text-blue-400 text-sm mt-1">
-                  We're showing demo data because we couldn't connect to the database.
-                  Your actual referral data will appear once the connection is restored.
+                  {t('network.error.demo.desc')}
                 </p>
                 <button
                   onClick={handleRetry}
                   className="mt-2 text-blue-300 hover:underline text-sm font-medium"
                 >
-                  Try to reconnect
+                  {t('network.error.retry')}
                 </button>
               </div>
             </div>

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useStripeSubscription } from '../hooks/useStripeSubscription';
 import { getMonthlyProducts, getYearlyProducts } from '../stripe-config';
 import toast from 'react-hot-toast';
@@ -11,6 +12,7 @@ type Billing = 'monthly' | 'yearly';
 
 const UpgradePage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { subscription, loading: subscriptionLoading, createCheckoutSession } = useStripeSubscription();
   const [billingCycle, setBillingCycle] = useState<Billing>('monthly');
   const [processingPriceId, setProcessingPriceId] = useState<string | null>(null);
@@ -56,7 +58,7 @@ const UpgradePage: React.FC = () => {
 
   const handleUpgrade = async (priceId: string) => {
     if (!user) {
-      toast.error('Please sign in to upgrade.');
+      toast.error(t('toast.upgrade.signin'));
       return;
     }
 
@@ -77,28 +79,28 @@ const UpgradePage: React.FC = () => {
 
   // ----- Plans Feature Sets (accurate for your gating rules)
   const freePlan = {
-    name: 'Free',
+    name: t('upgrade.plan.free'),
     price: '$0',
     period: 'forever',
-    description: 'Perfect to explore FiverFlow basics',
-    // Matches: can’t access calendar/tasks/referrals/stats/invoices
+    description: t('upgrade.plan.free.desc'),
+    // Matches: can't access calendar/tasks/referrals/stats/invoices
     features: [
-      'Up to 5 clients',
-      'Up to 10 orders / month',
-      '3 message templates',
-      'Dashboard widgets (Recent Orders, Quick Actions)',
-      'Dark & Light themes',
-      'Email support'
+      t('upgrade.features.clients.limit').replace('{count}', '5'),
+      t('upgrade.features.orders.limit').replace('{count}', '10'),
+      t('upgrade.features.templates.limit').replace('{count}', '3'),
+      t('upgrade.features.dashboard'),
+      t('upgrade.features.themes'),
+      t('upgrade.features.support.email')
     ],
     limitations: [
-      'No Tasks',
-      'No Calendar',
-      'No Referrals',
-      'No Statistics',
-      'No Invoices'
+      t('upgrade.features.no.tasks'),
+      t('upgrade.features.no.calendar'),
+      t('upgrade.features.no.referrals'),
+      t('upgrade.features.no.stats'),
+      t('upgrade.features.no.invoices')
     ],
     current: currentPlan === 'free',
-    buttonText: 'Current Plan',
+    buttonText: t('upgrade.plan.current'),
     buttonStyle: 'bg-gray-300 text-gray-700 dark:bg-slate-700 dark:text-slate-300 cursor-not-allowed',
     disabled: true
   };
@@ -113,35 +115,35 @@ const UpgradePage: React.FC = () => {
     // Plan features aligned to your app rules
     const features = isPro
       ? [
-          'Unlimited clients',
-          'Unlimited orders',
-          'Unlimited message templates',
-          'Tasks module',
-          'Calendar access (mini + full page)',
-          'Referrals program',
-          'Basic integrations',
-          'Standard support'
+          t('upgrade.features.clients.unlimited'),
+          t('upgrade.features.orders.unlimited'),
+          t('upgrade.features.templates.unlimited'),
+          t('upgrade.features.tasks'),
+          t('upgrade.features.calendar'),
+          t('upgrade.features.referrals'),
+          t('upgrade.features.integrations.basic'),
+          t('upgrade.features.support.standard')
         ]
       : [
-          'All Pro features',
-          'Statistics (advanced metrics & reports)',
-          'Invoices module',
-          'Advanced integrations (e.g., Google Calendar sync)',
-          'Priority support',
-          'Team-ready dashboards & VIP badge'
+          t('upgrade.features.all.pro'),
+          t('upgrade.features.stats'),
+          t('upgrade.features.invoices'),
+          t('upgrade.features.integrations.advanced'),
+          t('upgrade.features.support.priority'),
+          t('upgrade.features.team')
         ];
 
     return {
-      name: isPro ? 'Pro' : 'Excellence',
+      name: isPro ? t('upgrade.plan.pro') : t('upgrade.plan.excellence'),
       price: product.price,
       period: isYear ? 'per year' : 'per month',
       description: isPro
-        ? 'Level up your workflow with tasks, calendar and referrals'
-        : 'Everything you need for pro-grade analytics and billing',
+        ? t('upgrade.plan.pro.desc')
+        : t('upgrade.plan.excellence.desc'),
       features,
-      popular: isPro && !isYear, // highlight Pro monthly as “Most Popular”
+      popular: isPro && !isYear, // highlight Pro monthly as "Most Popular"
       hasFreeTrial: isPro,       // Pro has 7‑day trial
-      buttonText: isActive ? 'Current Plan' : `Upgrade to ${isPro ? 'Pro' : 'Excellence'}`,
+      buttonText: isActive ? t('upgrade.plan.current') : `${t('upgrade.plan.upgrade')} ${isPro ? t('upgrade.plan.pro') : t('upgrade.plan.excellence')}`,
       buttonStyle: isActive
         ? 'bg-gray-300 text-gray-700 dark:bg-slate-700 dark:text-slate-300 cursor-not-allowed'
         : isPro
@@ -158,18 +160,18 @@ const UpgradePage: React.FC = () => {
   const benefits = [
     {
       icon: Crown,
-      title: 'Premium Features',
-      description: 'Access powerful modules that scale with your business'
+      title: t('upgrade.benefits.premium.title'),
+      description: t('upgrade.benefits.premium.desc')
     },
     {
       icon: Zap,
-      title: 'Faster Workflow',
-      description: 'Automated steps and shortcuts where they matter'
+      title: t('upgrade.benefits.workflow.title'),
+      description: t('upgrade.benefits.workflow.desc')
     },
     {
       icon: Star,
-      title: 'Priority Support',
-      description: 'Get help quickly when you need it most'
+      title: t('upgrade.benefits.support.title'),
+      description: t('upgrade.benefits.support.desc')
     }
   ];
 
@@ -179,7 +181,7 @@ const UpgradePage: React.FC = () => {
         <div className="space-y-6 sm:space-y-8 p-4 sm:p-0">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-            <p className="ml-4 text-gray-600 dark:text-slate-300">Loading subscription...</p>
+            <p className="ml-4 text-gray-600 dark:text-slate-300">{t('upgrade.loading')}</p>
           </div>
         </div>
       </Layout>
@@ -192,10 +194,10 @@ const UpgradePage: React.FC = () => {
         {/* Header */}
         <div className="text-center">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Choose Your Plan
+            {t('upgrade.title')}
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-slate-300 max-w-2xl mx-auto">
-            Unlock the modules you need as you grow—tasks, calendar, referrals, statistics and invoices.
+            {t('upgrade.subtitle')}
           </p>
 
           {/* Billing Toggle */}
@@ -208,7 +210,7 @@ const UpgradePage: React.FC = () => {
                   : 'text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
-              Monthly
+              {t('upgrade.billing.monthly')}
             </button>
             <button
               onClick={() => setBillingCycle('yearly')}
@@ -218,9 +220,9 @@ const UpgradePage: React.FC = () => {
                   : 'text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
-              Yearly
+              {t('upgrade.billing.yearly')}
               <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
-                Save {Math.max(calculateSavings('pro'), calculateSavings('excellence'))}%
+                {t('upgrade.billing.save')} {Math.max(calculateSavings('pro'), calculateSavings('excellence'))}%
               </span>
             </button>
           </div>
@@ -261,7 +263,7 @@ const UpgradePage: React.FC = () => {
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                   <span className="bg-blue-600 dark:bg-blue-500 text-white px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
-                    Most Popular
+                    {t('upgrade.plan.popular')}
                   </span>
                 </div>
               )}
@@ -269,7 +271,7 @@ const UpgradePage: React.FC = () => {
               {plan.savings ? (
                 <div className="absolute -top-4 right-4">
                   <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
-                    Save {plan.savings}%
+                    {t('upgrade.billing.save')} {plan.savings}%
                   </span>
                 </div>
               ) : null}

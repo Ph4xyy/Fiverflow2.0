@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Briefcase, Globe, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { supabase } from '../lib/supabase';
 
 const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
@@ -17,22 +19,33 @@ const OnboardingPage: React.FC = () => {
   });
 
   const activities = [
-    'Web Development',
-    'Graphic Design',
-    'Content Writing',
-    'Digital Marketing',
-    'Video Editing',
-    'Translation',
-    'Data Entry',
-    'Virtual Assistant',
-    'Photography',
-    'Other'
+    { value: 'Web Development', label: t('activity.web.development') },
+    { value: 'Graphic Design', label: t('activity.graphic.design') },
+    { value: 'Content Writing', label: t('activity.content.writing') },
+    { value: 'Digital Marketing', label: t('activity.digital.marketing') },
+    { value: 'Video Editing', label: t('activity.video.editing') },
+    { value: 'Translation', label: t('activity.translation') },
+    { value: 'Data Entry', label: t('activity.data.entry') },
+    { value: 'Virtual Assistant', label: t('activity.virtual.assistant') },
+    { value: 'Photography', label: t('activity.photography') },
+    { value: 'Other', label: t('activity.other') }
   ];
 
   const countries = [
-    'France', 'United States', 'Canada', 'United Kingdom', 'Germany',
-    'Spain', 'Italy', 'Netherlands', 'Belgium', 'Switzerland',
-    'Australia', 'Brazil', 'India', 'Other'
+    { value: 'France', label: t('country.france') },
+    { value: 'United States', label: t('country.united.states') },
+    { value: 'Canada', label: t('country.canada') },
+    { value: 'United Kingdom', label: t('country.united.kingdom') },
+    { value: 'Germany', label: t('country.germany') },
+    { value: 'Spain', label: t('country.spain') },
+    { value: 'Italy', label: t('country.italy') },
+    { value: 'Netherlands', label: t('country.netherlands') },
+    { value: 'Belgium', label: t('country.belgium') },
+    { value: 'Switzerland', label: t('country.switzerland') },
+    { value: 'Australia', label: t('country.australia') },
+    { value: 'Brazil', label: t('country.brazil') },
+    { value: 'India', label: t('country.india') },
+    { value: 'Other', label: t('country.other') }
   ];
 
   useEffect(() => {
@@ -59,7 +72,7 @@ const OnboardingPage: React.FC = () => {
     e.preventDefault();
     
     if (!formData.name || !formData.activity || !formData.country) {
-      setError('Veuillez remplir tous les champs');
+      setError(t('onboarding.complete.all'));
       return;
     }
 
@@ -84,7 +97,7 @@ const OnboardingPage: React.FC = () => {
       navigate('/dashboard');
     } catch (err) {
       console.error('Erreur lors de la sauvegarde:', err);
-      setError('Une erreur est survenue. Veuillez réessayer.');
+      setError(t('onboarding.error.save'));
     } finally {
       setLoading(false);
     }
@@ -92,11 +105,11 @@ const OnboardingPage: React.FC = () => {
 
   const nextStep = () => {
     if (currentStep === 1 && !formData.name) {
-      setError('Veuillez saisir votre nom');
+      setError(t('onboarding.error.name'));
       return;
     }
     if (currentStep === 2 && !formData.activity) {
-      setError('Veuillez sélectionner votre activité');
+      setError(t('onboarding.error.activity'));
       return;
     }
     setError('');
@@ -114,14 +127,14 @@ const OnboardingPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">FiverFlow</h1>
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">Bienvenue !</h2>
-          <p className="text-sm sm:text-base text-gray-600">Configurons votre profil en quelques étapes</p>
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-2">{t('onboarding.welcome')}</h2>
+          <p className="text-sm sm:text-base text-gray-600">{t('onboarding.setup')}</p>
         </div>
 
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-medium text-gray-600">Étape {currentStep} sur 3</span>
+            <span className="text-xs sm:text-sm font-medium text-gray-600">{t('onboarding.step')} {currentStep} {t('onboarding.of')} 3</span>
             <span className="text-xs sm:text-sm font-medium text-gray-600">{Math.round((currentStep / 3) * 100)}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -144,13 +157,13 @@ const OnboardingPage: React.FC = () => {
             <div className="space-y-6">
               <div className="text-center">
                 <User className="mx-auto h-12 w-12 text-blue-600 mb-4" />
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Comment vous appelez-vous ?</h3>
-                <p className="text-sm text-gray-600">Votre nom sera affiché dans votre profil</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{t('onboarding.name.title')}</h3>
+                <p className="text-sm text-gray-600">{t('onboarding.name.subtitle')}</p>
               </div>
               
               <div>
                 <label htmlFor="name" className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                  Nom complet
+                  {t('onboarding.name.label')}
                 </label>
                 <input
                   type="text"
@@ -158,7 +171,7 @@ const OnboardingPage: React.FC = () => {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Votre nom complet"
+                  placeholder={t('onboarding.name.placeholder')}
                   required
                 />
               </div>
@@ -168,7 +181,7 @@ const OnboardingPage: React.FC = () => {
                 onClick={nextStep}
                 className="w-full bg-blue-600 text-white py-3 px-4 text-sm sm:text-base rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
               >
-                Continuer
+                {t('onboarding.continue')}
                 <ArrowRight size={16} className="ml-2" />
               </button>
             </div>
@@ -179,13 +192,13 @@ const OnboardingPage: React.FC = () => {
             <div className="space-y-6">
               <div className="text-center">
                 <Briefcase className="mx-auto h-12 w-12 text-blue-600 mb-4" />
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">Quelle est votre activité ?</h3>
-                <p className="text-sm text-gray-600">Cela nous aide à personnaliser votre expérience</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{t('onboarding.activity.title')}</h3>
+                <p className="text-sm text-gray-600">{t('onboarding.activity.subtitle')}</p>
               </div>
               
               <div>
                 <label htmlFor="activity" className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                  Domaine d'activité
+                  {t('onboarding.activity.label')}
                 </label>
                 <select
                   id="activity"
@@ -194,9 +207,9 @@ const OnboardingPage: React.FC = () => {
                   className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
-                  <option value="">Sélectionnez votre activité</option>
+                  <option value="">{t('onboarding.activity.placeholder')}</option>
                   {activities.map((activity) => (
-                    <option key={activity} value={activity}>{activity}</option>
+                    <option key={activity.value} value={activity.value}>{activity.label}</option>
                   ))}
                 </select>
               </div>
@@ -207,14 +220,14 @@ const OnboardingPage: React.FC = () => {
                   onClick={prevStep}
                   className="flex-1 bg-gray-200 text-gray-700 py-3 px-4 text-sm sm:text-base rounded-lg font-medium hover:bg-gray-300 transition-colors"
                 >
-                  Retour
+                  {t('onboarding.back')}
                 </button>
                 <button
                   type="button"
                   onClick={nextStep}
                   className="flex-1 bg-blue-600 text-white py-3 px-4 text-sm sm:text-base rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
                 >
-                  Continuer
+                  {t('onboarding.continue')}
                   <ArrowRight size={16} className="ml-2" />
                 </button>
               </div>
@@ -226,13 +239,13 @@ const OnboardingPage: React.FC = () => {
             <div className="space-y-6">
               <div className="text-center">
                 <Globe className="mx-auto h-12 w-12 text-blue-600 mb-4" />
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">D'où venez-vous ?</h3>
-                <p className="text-sm text-gray-600">Dernière étape avant de commencer !</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">{t('onboarding.country.title')}</h3>
+                <p className="text-sm text-gray-600">{t('onboarding.country.subtitle')}</p>
               </div>
               
               <div>
                 <label htmlFor="country" className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                  Pays
+                  {t('onboarding.country.label')}
                 </label>
                 <select
                   id="country"
@@ -241,9 +254,9 @@ const OnboardingPage: React.FC = () => {
                   className="w-full px-4 py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
-                  <option value="">Sélectionnez votre pays</option>
+                  <option value="">{t('onboarding.country.placeholder')}</option>
                   {countries.map((country) => (
-                    <option key={country} value={country}>{country}</option>
+                    <option key={country.value} value={country.value}>{country.label}</option>
                   ))}
                 </select>
               </div>
@@ -254,7 +267,7 @@ const OnboardingPage: React.FC = () => {
                   onClick={prevStep}
                   className="flex-1 bg-gray-200 text-gray-700 py-3 px-4 text-sm sm:text-base rounded-lg font-medium hover:bg-gray-300 transition-colors"
                 >
-                  Retour
+                  {t('onboarding.back')}
                 </button>
                 <button
                   type="submit"
@@ -266,7 +279,7 @@ const OnboardingPage: React.FC = () => {
                   ) : (
                     <>
                       <CheckCircle size={16} className="mr-2" />
-                      Commencer à utiliser FiverFlow
+                      {t('onboarding.start')}
                     </>
                   )}
                 </button>
@@ -281,7 +294,7 @@ const OnboardingPage: React.FC = () => {
             onClick={() => navigate('/dashboard')}
             className="text-sm text-gray-500 hover:text-gray-700 underline"
           >
-            Passer cette étape
+            {t('onboarding.skip')}
           </button>
         </div>
       </div>
