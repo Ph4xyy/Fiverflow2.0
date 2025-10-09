@@ -1467,7 +1467,7 @@ const ProfilePage: React.FC = () => {
                   <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="text-white text-center">
                       <User size={16} className="mx-auto mb-1" />
-                      <span className="text-xs">Changer</span>
+                      <span className="text-xs">{t('profile.change')}</span>
                     </div>
                   </div>
                 </div>

@@ -78,7 +78,7 @@ placeholder={t('templates.search.placeholder')}
               />
             </div>
             <select className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option>All Categories</option>
+              <option>{t('templates.all.categories')}</option>
               {categories.map(category => (
                 <option key={category}>{category}</option>
               ))}
@@ -120,8 +120,8 @@ placeholder={t('templates.search.placeholder')}
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm text-gray-500 pt-4 border-t border-gray-100 gap-1 sm:gap-0">
-                <span>Used {template.usageCount} times</span>
-                <span>Last used: {new Date(template.lastUsed).toLocaleDateString()}</span>
+                <span>{t('templates.used.times').replace('{count}', template.usageCount.toString())}</span>
+                <span>{t('templates.last.used')}: {new Date(template.lastUsed).toLocaleDateString()}</span>
               </div>
             </div>
           ))}
@@ -129,32 +129,32 @@ placeholder={t('templates.search.placeholder')}
 
         {/* Template Variables Help */}
         <div className="bg-blue-50 rounded-lg p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3">Template Variables</h3>
-          <p className="text-sm sm:text-base text-blue-800 mb-4">Use these variables in your templates to automatically insert client-specific information:</p>
+          <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3">{t('templates.variables.title')}</h3>
+          <p className="text-sm sm:text-base text-blue-800 mb-4">{t('templates.variables.description')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <div className="bg-white rounded-lg p-2 sm:p-3 min-w-0">
               <code className="text-blue-600 font-mono text-xs sm:text-sm break-all">[CLIENT_NAME]</code>
-              <p className="text-gray-600 text-xs mt-1">Client's name</p>
+              <p className="text-gray-600 text-xs mt-1">{t('templates.variables.client.name')}</p>
             </div>
             <div className="bg-white rounded-lg p-2 sm:p-3 min-w-0">
               <code className="text-blue-600 font-mono text-xs sm:text-sm break-all">[PROJECT_TYPE]</code>
-              <p className="text-gray-600 text-xs mt-1">Type of project</p>
+              <p className="text-gray-600 text-xs mt-1">{t('templates.variables.project.type')}</p>
             </div>
             <div className="bg-white rounded-lg p-2 sm:p-3 min-w-0">
               <code className="text-blue-600 font-mono text-xs sm:text-sm break-all">[DEADLINE]</code>
-              <p className="text-gray-600 text-xs mt-1">Project deadline</p>
+              <p className="text-gray-600 text-xs mt-1">{t('templates.variables.deadline')}</p>
             </div>
             <div className="bg-white rounded-lg p-2 sm:p-3 min-w-0">
               <code className="text-blue-600 font-mono text-xs sm:text-sm break-all">[DUE_DATE]</code>
-              <p className="text-gray-600 text-xs mt-1">Payment due date</p>
+              <p className="text-gray-600 text-xs mt-1">{t('templates.variables.due.date')}</p>
             </div>
             <div className="bg-white rounded-lg p-2 sm:p-3 min-w-0">
               <code className="text-blue-600 font-mono text-xs sm:text-sm break-all">[AMOUNT]</code>
-              <p className="text-gray-600 text-xs mt-1">Project amount</p>
+              <p className="text-gray-600 text-xs mt-1">{t('templates.variables.amount')}</p>
             </div>
             <div className="bg-white rounded-lg p-2 sm:p-3 min-w-0">
               <code className="text-blue-600 font-mono text-xs sm:text-sm break-all">[PLATFORM]</code>
-              <p className="text-gray-600 text-xs mt-1">Client's platform</p>
+              <p className="text-gray-600 text-xs mt-1">{t('templates.variables.platform')}</p>
             </div>
           </div>
         </div>
