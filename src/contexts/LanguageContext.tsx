@@ -835,6 +835,11 @@ const translations = {
     'invoices.loading': 'Loading…',
     'invoices.no.invoices': 'No invoices found',
     'invoices.create.first': 'Create your first invoice to get started.',
+    
+    // TasksPage
+    'tasks.title': 'Tasks & Time Tracking',
+    'tasks.subtitle': 'Manage your project tasks and track time spent on each activity.',
+    'tasks.loading': 'Loading...',
   },
   fr: {
     // Navigation
@@ -1659,6 +1664,11 @@ const translations = {
     'invoices.loading': 'Chargement…',
     'invoices.no.invoices': 'Aucune facture trouvée',
     'invoices.create.first': 'Créez votre première facture pour commencer.',
+    
+    // TasksPage
+    'tasks.title': 'Tâches et Suivi du Temps',
+    'tasks.subtitle': 'Gérez vos tâches de projet et suivez le temps passé sur chaque activité.',
+    'tasks.loading': 'Chargement...',
   },
   es: {
     // Navigation
