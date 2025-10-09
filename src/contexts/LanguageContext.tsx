@@ -401,11 +401,11 @@ const translations = {
     'upgrade.faq.change.plans': 'Can I change plans anytime?',
     'upgrade.faq.change.answer': 'Yes—upgrade or downgrade whenever you want. Changes apply to your next billing cycle.',
     'upgrade.faq.trial.question': 'Is there a free trial?',
-    'upgrade.faq.trial.answer': 'Pro includes a 7-day free trial. A credit card is required to start, but you won't be charged during the trial.',
+    'upgrade.faq.trial.answer': 'Pro includes a 7-day free trial. A credit card is required to start, but you won\'t be charged during the trial.',
     'upgrade.faq.payment.methods': 'What payment methods are accepted?',
     'upgrade.faq.payment.answer': 'We accept all major credit cards. Bank transfer is available for annual invoices on request.',
     'upgrade.faq.cancel.question': 'Can I cancel anytime?',
-    'upgrade.faq.cancel.answer': 'Yes. You'll retain access until the end of your current billing period.',
+    'upgrade.faq.cancel.answer': 'Yes. You\'ll retain access until the end of your current billing period.',
     
     // Todo Page
     'todo.title': 'To-Do List',
