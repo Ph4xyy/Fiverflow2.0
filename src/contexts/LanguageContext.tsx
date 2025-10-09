@@ -804,6 +804,10 @@ const translations = {
     'orders.edit': 'Edit',
     'orders.delete': 'Delete',
     'orders.cancel': 'Cancel',
+    'orders.platform.fiverr': 'Fiverr',
+    'orders.platform.upwork': 'Upwork',
+    'orders.platform.direct': 'Direct',
+    'orders.platform.other': 'Other',
     
     // ClientsPage
     'clients.title': 'Clients',
@@ -1732,6 +1736,10 @@ const translations = {
     'orders.edit': 'Modifier',
     'orders.delete': 'Supprimer',
     'orders.cancel': 'Annuler',
+    'orders.platform.fiverr': 'Fiverr',
+    'orders.platform.upwork': 'Upwork',
+    'orders.platform.direct': 'Direct',
+    'orders.platform.other': 'Autre',
     
     // ClientsPage
     'clients.title': 'Clients',
