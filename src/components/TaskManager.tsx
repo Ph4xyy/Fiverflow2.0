@@ -1,6 +1,7 @@
 // src/components/TaskManager.tsx
 import React, { useState } from 'react';
 import { useTasks, Task } from '../hooks/useTasks';
+import { useLanguage } from '../contexts/LanguageContext';
 import TaskForm from './TaskForm';
 import TimeEntryForm from './TimeEntryForm';
 import {
@@ -28,6 +29,7 @@ interface TaskManagerProps {
 }
 
 const TaskManager: React.FC<TaskManagerProps> = ({ orderId, orderTitle, clientName }) => {
+  const { t } = useLanguage();
   const {
     tasks,
     timeEntries,
@@ -131,9 +133,9 @@ const TaskManager: React.FC<TaskManagerProps> = ({ orderId, orderTitle, clientNa
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-white">
-                {orderId ? `Tasks — ${orderTitle}` : 'All Tasks'}
+                {orderId ? t('taskmanager.tasks.for.order').replace('{orderTitle}', orderTitle) : t('taskmanager.all.tasks')}
               </h2>
-              {clientName && <p className="text-sm text-slate-400">Client: {clientName}</p>}
+              {clientName && <p className="text-sm text-slate-400">{t('taskmanager.client').replace('{clientName}', clientName)}</p>}
             </div>
           </div>
 
@@ -143,14 +145,14 @@ const TaskManager: React.FC<TaskManagerProps> = ({ orderId, orderTitle, clientNa
               className="inline-flex items-center px-3 py-2.5 rounded-xl text-white bg-gradient-to-br from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 transition"
             >
               <Clock size={16} className="mr-2" />
-              Add Time
+              {t('taskmanager.add.time')}
             </button>
             <button
               onClick={() => setIsTaskFormOpen(true)}
               className="inline-flex items-center px-4 py-2.5 rounded-xl text-white bg-gradient-to-br from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 transition"
             >
               <Plus size={16} className="mr-2" />
-              New Task
+              {t('taskmanager.new.task')}
             </button>
           </div>
         </div>

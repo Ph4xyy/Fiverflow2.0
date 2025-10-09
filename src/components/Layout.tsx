@@ -165,7 +165,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     },
     { 
       path: '/stats', 
-      label: 'Statistics', 
+      label: t('nav.statistics'), 
       icon: BarChart3,
       restricted: !checkAccess('stats') && !restrictions?.isAdmin,
       requiredPlan: 'Excellence' as const,
@@ -173,7 +173,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     },
     { 
       path: '/network', 
-      label: 'Referrals', 
+      label: t('nav.referrals'), 
       icon: Share2,
       restricted: !checkAccess('referrals') && !restrictions?.isAdmin,
       requiredPlan: 'Pro' as const,
@@ -534,7 +534,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
                     </li>
                     <li className="flex items-start gap-2 text-sm text-slate-200">
                       <CheckCircle2 className="mt-0.5 flex-none text-green-500" size={16} />
-                      Invoices + Advanced Statistics
+                      {t('feature.invoices.advanced.stats')}
                     </li>
                     <li className="flex items-start gap-2 text-sm text-slate-200">
                       <CheckCircle2 className="mt-0.5 flex-none text-green-500" size={16} />

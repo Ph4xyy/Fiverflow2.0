@@ -5,6 +5,7 @@ import OrderForm from '@/components/OrderForm';
 import OrderDetailModal from '@/components/OrderDetailModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { usePlanLimits } from '@/hooks/usePlanLimits';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import {
@@ -29,6 +30,7 @@ type OrderRow = {
 const PAGE_SIZE = 20;
 
 const OrdersPage: React.FC = () => {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const { currency } = useCurrency();
   const { checkOrderLimit } = usePlanLimits();
@@ -175,11 +177,11 @@ const OrdersPage: React.FC = () => {
       setOrders(transformed);
       setTotal(count || 0);
     } catch (e: any) {
-      console.error('Error fetching orders:', e);
-      toast.error('Failed to load orders');
+      console.error(t('orders.error.load'), e);
+      toast.error(t('orders.failed.load'));
       setOrders([]);
       setTotal(0);
-      setError(e?.message || 'Failed to load orders');
+      setError(e?.message || t('orders.failed.load'));
     } finally {
       setLoading(false);
     }
@@ -356,7 +358,7 @@ const OrdersPage: React.FC = () => {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search (title, client, platform)…"
+                placeholder={t('orders.search.placeholder')}
                 className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-[#1C2230]
                            bg-[#11151D]/95 text-slate-100 placeholder-slate-400
                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -367,7 +369,7 @@ const OrdersPage: React.FC = () => {
                   type="button"
                   onClick={() => setSearch('')}
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-[#141922]"
-                  aria-label="Effacer la recherche"
+                  aria-label={t('orders.clear.search')}
                 >
                   <X className="h-4 w-4 text-slate-400" />
                 </button>
@@ -432,7 +434,7 @@ const OrdersPage: React.FC = () => {
         <div className={`${cardClass} p-3 sm:p-4`}>
           <div className="flex items-center gap-2 mb-3 text-slate-200">
             <Filter className="h-4 w-4" />
-            <span className="text-sm font-medium">Filtres</span>
+            <span className="text-sm font-medium">{t('orders.filters')}</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <select
@@ -489,8 +491,8 @@ const OrdersPage: React.FC = () => {
               <div className="w-12 h-12 rounded-xl grid place-items-center mx-auto bg-[#151A22] ring-1 ring-inset ring-[#1C2230] mb-3">
                 <ShoppingCart className="h-6 w-6 text-slate-300" />
               </div>
-              <h3 className="text-sm font-semibold text-white">No orders</h3>
-              <p className="mt-1 text-sm text-slate-400">Get started by creating your first order.</p>
+              <h3 className="text-sm font-semibold text-white">{t('orders.no.orders')}</h3>
+              <p className="mt-1 text-sm text-slate-400">{t('orders.get.started')}</p>
             </div>
           ) : (
             <>

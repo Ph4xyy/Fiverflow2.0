@@ -743,6 +743,53 @@ const translations = {
     'pricing.cta.dashboard': 'Go to Dashboard',
     'pricing.cta.trial': 'Start Your Free Trial',
     'pricing.cta.details': '7-day free trial • No credit card required • Cancel anytime',
+    
+    // Dashboard Page
+    'dashboard.total.clients': 'Total Clients',
+    'dashboard.active.orders': 'Active Orders',
+    'dashboard.recent.orders': 'Recent Orders',
+    'dashboard.total.revenue': 'Total Revenue',
+    'dashboard.recent.activities': 'Recent Activities',
+    'dashboard.last.7days': 'last 7 days',
+    'dashboard.no.recent.orders': 'No recent orders.',
+    'dashboard.quick.actions': 'Quick Actions',
+    'dashboard.add.client': 'Add Client',
+    'dashboard.add.order': 'Add Order',
+    'dashboard.add.task': 'Add Task',
+    'dashboard.add.invoice': 'Add Invoice',
+    'dashboard.add.todo': 'Add Task List',
+    'dashboard.calendar.mini': 'Calendar (Mini)',
+    'dashboard.upcoming.events': 'Upcoming Events',
+    'dashboard.no.upcoming.deadlines': 'No upcoming deadlines.',
+    'dashboard.loading': 'Loading...',
+    'dashboard.task': 'Task',
+    'dashboard.subscription': 'Subscription',
+    'dashboard.tasks.pro.feature': 'Tasks are a Pro feature',
+    'dashboard.upgrade.to.create': 'Upgrade to create and manage tasks.',
+    'dashboard.task.saved': 'Task saved',
+    
+    // Navigation
+    'nav.statistics': 'Statistics',
+    'nav.referrals': 'Referrals',
+    
+    // Features
+    'feature.invoices.advanced.stats': 'Invoices + Advanced Statistics',
+    
+    // TaskManager
+    'taskmanager.tasks.for.order': 'Tasks — {orderTitle}',
+    'taskmanager.all.tasks': 'All Tasks',
+    'taskmanager.client': 'Client: {clientName}',
+    'taskmanager.add.time': 'Add Time',
+    'taskmanager.new.task': 'New Task',
+    
+    // OrdersPage
+    'orders.search.placeholder': 'Search (title, client, platform)…',
+    'orders.clear.search': 'Clear search',
+    'orders.filters': 'Filters',
+    'orders.no.orders': 'No orders',
+    'orders.get.started': 'Get started by creating your first order.',
+    'orders.failed.load': 'Failed to load orders',
+    'orders.error.load': 'Error fetching orders',
   },
   fr: {
     // Navigation
@@ -1475,6 +1522,53 @@ const translations = {
     'pricing.cta.dashboard': 'Aller au tableau de bord',
     'pricing.cta.trial': 'Démarrer votre essai gratuit',
     'pricing.cta.details': 'Essai gratuit de 7 jours • Aucune carte de crédit requise • Annulation à tout moment',
+    
+    // Dashboard Page
+    'dashboard.total.clients': 'Total Clients',
+    'dashboard.active.orders': 'Commandes Actives',
+    'dashboard.recent.orders': 'Commandes Récentes',
+    'dashboard.total.revenue': 'Revenus Totaux',
+    'dashboard.recent.activities': 'Activités Récentes',
+    'dashboard.last.7days': '7 derniers jours',
+    'dashboard.no.recent.orders': 'Aucune commande récente.',
+    'dashboard.quick.actions': 'Actions Rapides',
+    'dashboard.add.client': 'Ajouter Client',
+    'dashboard.add.order': 'Ajouter Commande',
+    'dashboard.add.task': 'Ajouter Tâche',
+    'dashboard.add.invoice': 'Ajouter Facture',
+    'dashboard.add.todo': 'Ajouter Liste de Tâches',
+    'dashboard.calendar.mini': 'Calendrier (Mini)',
+    'dashboard.upcoming.events': 'Événements à Venir',
+    'dashboard.no.upcoming.deadlines': 'Aucune échéance à venir.',
+    'dashboard.loading': 'Chargement...',
+    'dashboard.task': 'Tâche',
+    'dashboard.subscription': 'Abonnement',
+    'dashboard.tasks.pro.feature': 'Les tâches sont une fonctionnalité Pro',
+    'dashboard.upgrade.to.create': 'Passez à la version Pro pour créer et gérer des tâches.',
+    'dashboard.task.saved': 'Tâche sauvegardée',
+    
+    // Navigation
+    'nav.statistics': 'Statistiques',
+    'nav.referrals': 'Parrainages',
+    
+    // Features
+    'feature.invoices.advanced.stats': 'Factures + Statistiques Avancées',
+    
+    // TaskManager
+    'taskmanager.tasks.for.order': 'Tâches — {orderTitle}',
+    'taskmanager.all.tasks': 'Toutes les Tâches',
+    'taskmanager.client': 'Client : {clientName}',
+    'taskmanager.add.time': 'Ajouter Temps',
+    'taskmanager.new.task': 'Nouvelle Tâche',
+    
+    // OrdersPage
+    'orders.search.placeholder': 'Rechercher (titre, client, plateforme)…',
+    'orders.clear.search': 'Effacer la recherche',
+    'orders.filters': 'Filtres',
+    'orders.no.orders': 'Aucune commande',
+    'orders.get.started': 'Commencez par créer votre première commande.',
+    'orders.failed.load': 'Échec du chargement des commandes',
+    'orders.error.load': 'Erreur lors du chargement des commandes',
   },
   es: {
     // Navigation

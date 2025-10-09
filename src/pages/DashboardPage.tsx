@@ -139,10 +139,10 @@ const DashboardPage = () => {
   }, [user]);
 
   const stats = [
-    { label: 'Total Clients', value: clients.length, icon: Users, color: 'from-accent-blue to-accent-purple' },
-    { label: 'Active Orders', value: orders.filter(o => o.status === 'In Progress').length, icon: ShoppingCart, color: 'from-amber-500 to-orange-600' },
-    { label: 'Recent Orders', value: orders.length, icon: MessageSquare, color: 'from-fuchsia-500 to-pink-600' },
-    { label: 'Total Revenue', value: new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(orders.reduce((sum, o) => sum + (o.amount || 0), 0)), icon: DollarSign, color: 'from-emerald-500 to-teal-600' }
+    { label: t('dashboard.total.clients'), value: clients.length, icon: Users, color: 'from-accent-blue to-accent-purple' },
+    { label: t('dashboard.active.orders'), value: orders.filter(o => o.status === 'In Progress').length, icon: ShoppingCart, color: 'from-amber-500 to-orange-600' },
+    { label: t('dashboard.recent.orders'), value: orders.length, icon: MessageSquare, color: 'from-fuchsia-500 to-pink-600' },
+    { label: t('dashboard.total.revenue'), value: new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(orders.reduce((sum, o) => sum + (o.amount || 0), 0)), icon: DollarSign, color: 'from-emerald-500 to-teal-600' }
   ];
 
   const getOrderStatusBadge = (s: string) => {
@@ -220,8 +220,8 @@ const DashboardPage = () => {
     if (!checkAccess('tasks')) {
       toast((t) => (
         <div>
-          <div className="font-medium">Tasks are a Pro feature</div>
-          <div className="text-sm opacity-80">Upgrade to create and manage tasks.</div>
+          <div className="font-medium">{t('dashboard.tasks.pro.feature')}</div>
+          <div className="text-sm opacity-80">{t('dashboard.upgrade.to.create')}</div>
           <div className="mt-2 flex gap-2">
             <button
               onClick={() => {
@@ -387,13 +387,13 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className={`${cardClass} p-5`}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">Recent Activities</h2>
+              <h2 className="text-lg font-semibold text-white">{t('dashboard.recent.activities')}</h2>
               <div className="text-xs px-2 py-1 rounded-full bg-[#141922] text-slate-200">
-                last 7 days
+                {t('dashboard.last.7days')}
               </div>
             </div>
             {loadingOrders ? (
-              <p className="text-slate-400">Loading...</p>
+              <p className="text-slate-400">{t('dashboard.loading')}</p>
             ) : recentActivities.length > 0 ? (
               <div className="space-y-2">
                 {recentActivities.slice(0, 5).map((it: any) => {
@@ -425,8 +425,8 @@ const DashboardPage = () => {
                           <div className="flex items-center gap-2">
                             <p className="truncate text-sm font-medium text-white">{it.title}</p>
                             {isOrder && <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getOrderStatusBadge(it.status)}`}>{it.status}</span>}
-                            {it.kind === 'task' && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-slate-200">Task</span>}
-                            {isSub && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-slate-200">Subscription</span>}
+                            {it.kind === 'task' && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-slate-200">{t('dashboard.task')}</span>}
+                            {isSub && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-slate-200">{t('dashboard.subscription')}</span>}
                           </div>
                           <div className="text-xs text-slate-400 truncate">{it.subtitle || '—'}</div>
                         </div>
@@ -440,7 +440,7 @@ const DashboardPage = () => {
                 })}
               </div>
             ) : (
-              <p className="text-slate-400">No recent orders.</p>
+              <p className="text-slate-400">{t('dashboard.no.recent.orders')}</p>
             )}
           </div>
 
@@ -484,11 +484,11 @@ const DashboardPage = () => {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center mr-2 shadow-glow-purple">
                 <CalendarIcon size={18} className="text-white" />
               </div>
-              <h2 className="text-lg font-semibold text-white">Calendar (Mini)</h2>
+              <h2 className="text-lg font-semibold text-white">{t('dashboard.calendar.mini')}</h2>
             </div>
 
             {restrictionsLoading ? (
-              <p className="text-slate-400">Loading...</p>
+              <p className="text-slate-400">{t('dashboard.loading')}</p>
             ) : checkAccess('calendar') ? (
               <div className="rounded-xl overflow-hidden ring-1 ring-[#1C2230]">
                 <FullCalendar
@@ -543,13 +543,13 @@ const DashboardPage = () => {
               <div className={`w-10 h-10 rounded-xl ${subtleBg} flex items-center justify-center mr-2`}>
                 <Clock size={18} className="text-white/90" />
               </div>
-              <h2 className="text-lg font-semibold text-white">Upcoming Events</h2>
+              <h2 className="text-lg font-semibold text-white">{t('dashboard.upcoming.events')}</h2>
             </div>
 
             {loadingOrders || loadingTasks ? (
-              <p className="text-slate-400">Loading...</p>
+              <p className="text-slate-400">{t('dashboard.loading')}</p>
             ) : upcoming.length === 0 ? (
-              <p className="text-slate-400">No upcoming deadlines.</p>
+              <p className="text-slate-400">{t('dashboard.no.upcoming.deadlines')}</p>
             ) : (
               <div className="space-y-2">
                 {upcoming.map((u) => {
@@ -616,7 +616,7 @@ const DashboardPage = () => {
           isOpen={isTaskFormOpen}
           onClose={() => setIsTaskFormOpen(false)}
           onSuccess={() => {
-            toast.success('Task saved');
+            toast.success(t('dashboard.task.saved'));
           }}
           task={null}
         />
