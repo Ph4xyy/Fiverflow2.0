@@ -323,10 +323,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             <CentralizedSearchBar />
           </div>
           
-          {/* Right section - Language switcher, notifications, logout */}
+          {/* Right section - Notifications, logout */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <LanguageSwitcher />
-            
             <LocalErrorBoundary>
               <div className="size-10 rounded-xl grid place-items-center text-slate-300 hover:text-white bg-[#121722] hover:bg-[#141A26] ring-1 ring-inset ring-[#202839] hover:ring-[#2A3347] transition-all duration-200">
                 <NotificationsDropdown />
