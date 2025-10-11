@@ -278,7 +278,7 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ client, isOpen, o
                         {client.collaboration_frequency === 'one-time' ? 'Ponctuel' :
                          client.collaboration_frequency === 'occasional' ? 'Occasionnel' :
                          client.collaboration_frequency === 'regular' ? 'Régulier' :
-                         client.collaboration_frequency === 'ongoing' ? 'Continu' : client.collaboration_frequency}
+                         client.collaboration_frequency === 'ongoing' ? 'Continut(' : client.collaboration_frequency}
                       </p>
                     </div>
                   )}

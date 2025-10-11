@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
+
 import Footer from "../components/footer";
 import { stripeProducts, getMonthlyProducts, getYearlyProducts } from '../stripe-config';
 import { 
@@ -27,7 +27,6 @@ import {
 
 const PricingPage: React.FC = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -62,19 +61,19 @@ const PricingPage: React.FC = () => {
 
   const plans = [
     {
-      name: t('pricing.plan.free'),
-      description: t('pricing.plan.free.desc'),
+      name: 'Free',
+      description: 'Perfect for getting started with freelancing',
       price: '$0',
       period: 'forever',
       popular: false,
       features: {
-        clients: t('pricing.features.clients.5'),
-        orders: t('pricing.features.orders.10'),
-        templates: t('pricing.features.templates.3'),
-        analytics: t('pricing.features.analytics.basic'),
-        support: t('pricing.features.support.email'),
-        storage: t('pricing.features.storage.1gb'),
-        integrations: t('pricing.features.integrations.basic'),
+        clients: 'Up to 5 clients',
+        orders: 'Up to 10 orders per month',
+        templates: '3 message templates',
+        analytics: 'Basic statistics',
+        support: 'Email support',
+        storage: '1 GB storage',
+        integrations: 'Basic integrations',
         calendar: false,
         referrals: false,
         advanced_stats: false,
@@ -83,13 +82,13 @@ const PricingPage: React.FC = () => {
         free_trial: false
       },
       limitations: [
-        t('pricing.limitations.templates'),
-        t('pricing.limitations.reports'),
-        t('pricing.limitations.no.calendar'),
-        t('pricing.limitations.no.referral'),
-        t('pricing.limitations.no.stats')
+        'Limited templates',
+        'Basic reports only',
+        'No calendar access',
+        'No referral program',
+        'No advanced statistics'
       ],
-      cta: t('pricing.plan.free.cta'),
+      cta: 'Get Started Free',
       ctaStyle: 'bg-gray-600 hover:bg-gray-700 text-white'
     }
   ];
@@ -102,7 +101,7 @@ const PricingPage: React.FC = () => {
     const hasFreeTrial = isPro; // Only Pro packages have free trial
     
     return {
-      name: isPro ? t('pricing.plan.pro') : t('pricing.plan.excellence'),
+      name: isPro ? 'Pro' : 'Excellence',
       description: product.description,
       price: product.price,
       period: isYearly ? 'per year' : 'per month',
@@ -110,13 +109,13 @@ const PricingPage: React.FC = () => {
       bestValue: !isPro && isYearly,
       hasFreeTrial,
       features: {
-        clients: t('pricing.features.clients.unlimited'),
-        orders: t('pricing.features.orders.unlimited'),
-        templates: t('pricing.features.templates.unlimited'),
-        analytics: isPro ? t('pricing.features.analytics.advanced') : t('pricing.features.analytics.reports'),
-        support: isPro ? t('pricing.features.support.priority') : t('pricing.features.support.247'),
-        storage: isPro ? t('pricing.features.storage.50gb') : t('pricing.features.storage.500gb'),
-        integrations: isPro ? t('pricing.features.integrations.all') : t('pricing.features.integrations.custom'),
+        clients: 'Unlimited clients',
+        orders: 'Unlimited orders',
+        templates: 'Unlimited message templates',
+        analytics: isPro ? 'Advanced analytics' : 'Advanced analytics & custom reports',
+        support: isPro ? 'Priority email support' : '24/7 phone & email support',
+        storage: isPro ? '50 GB storage' : '500 GB storage',
+        integrations: isPro ? 'All integrations' : 'All integrations + custom ones',
         calendar: true,
         referrals: true,
         advanced_stats: !isPro,
@@ -124,7 +123,7 @@ const PricingPage: React.FC = () => {
         vip_badge: !isPro,
         free_trial: true
       },
-      cta: isPro ? t('pricing.plan.start.trial') : t('pricing.plan.upgrade'),
+      cta: isPro ? 'Start 7-Day Free Trial' : 'Upgrade to Excellence',
       ctaStyle: isPro 
         ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'
         : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white',
@@ -136,53 +135,53 @@ const PricingPage: React.FC = () => {
   const allPlans = [plans[0], ...dynamicPlans];
 
   const allFeatures = [
-    { key: 'clients', label: t('pricing.features.clients'), icon: Users },
-    { key: 'orders', label: t('pricing.features.orders'), icon: ShoppingCart },
-    { key: 'templates', label: t('pricing.features.templates'), icon: MessageSquare },
-    { key: 'analytics', label: t('pricing.features.analytics'), icon: BarChart3 },
-    { key: 'calendar', label: t('pricing.features.calendar'), icon: Calendar },
-    { key: 'referrals', label: t('pricing.features.referrals'), icon: Share2 },
-    { key: 'advanced_stats', label: t('pricing.features.stats'), icon: BarChart3 },
-    { key: 'google_calendar', label: t('pricing.features.gcal'), icon: Globe },
-    { key: 'vip_badge', label: t('pricing.features.vip'), icon: Crown },
-    { key: 'support', label: t('pricing.features.support'), icon: HelpCircle },
-    { key: 'storage', label: t('pricing.features.storage'), icon: Shield },
-    { key: 'integrations', label: t('pricing.features.integrations'), icon: Globe },
-    { key: 'free_trial', label: t('pricing.features.trial'), icon: Star }
+    { key: 'clients', label: 'Client Management', icon: Users },
+    { key: 'orders', label: 'Order Tracking', icon: ShoppingCart },
+    { key: 'templates', label: 'Message Templates', icon: MessageSquare },
+    { key: 'analytics', label: 'Analytics & Reporting', icon: BarChart3 },
+    { key: 'calendar', label: 'Calendar Access', icon: Calendar },
+    { key: 'referrals', label: 'Referral Program', icon: Share2 },
+    { key: 'advanced_stats', label: 'Advanced Statistics', icon: BarChart3 },
+    { key: 'google_calendar', label: 'Google Calendar Integration', icon: Globe },
+    { key: 'vip_badge', label: 'VIP Dashboard Badge', icon: Crown },
+    { key: 'support', label: 'Customer Support', icon: HelpCircle },
+    { key: 'storage', label: 'File Storage', icon: Shield },
+    { key: 'integrations', label: 'Platform Integrations', icon: Globe },
+    { key: 'free_trial', label: '7-Day Free Trial', icon: Star }
   ];
 
   const faqs = [
     {
-      question: t('pricing.faq.change'),
-      answer: t('pricing.faq.change.answer')
+      question: 'Can I change plans anytime?',
+      answer: 'Yes, you can upgrade or downgrade your plan at any time. Changes will be reflected in your next billing cycle. If you upgrade mid-cycle, you\'ll be charged a prorated amount.'
     },
     {
-      question: t('pricing.faq.trial'),
-      answer: t('pricing.faq.trial.answer')
+      question: 'Is there a free trial?',
+      answer: 'We offer a 7-day free trial for all paid plans. No credit card required to start. You can explore all features and decide which plan works best for you.'
     },
     {
-      question: t('pricing.faq.payment'),
-      answer: t('pricing.faq.payment.answer')
+      question: 'What payment methods do you accept?',
+      answer: 'We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and bank transfers for annual plans. All payments are processed securely through Stripe.'
     },
     {
-      question: t('pricing.faq.cancel'),
-      answer: t('pricing.faq.cancel.answer')
+      question: 'Can I cancel anytime?',
+      answer: 'Yes, you can cancel your subscription at any time. You\'ll continue to have access to your plan features until the end of your current billing period. No cancellation fees.'
     },
     {
-      question: t('pricing.faq.refund'),
-      answer: t('pricing.faq.refund.answer')
+      question: 'Do you offer refunds?',
+      answer: 'We offer a 30-day money-back guarantee for all paid plans. If you\'re not satisfied within the first 30 days, we\'ll provide a full refund, no questions asked.'
     },
     {
-      question: t('pricing.faq.security'),
-      answer: t('pricing.faq.security.answer')
+      question: 'Is my data secure?',
+      answer: 'Absolutely. We use enterprise-grade security with 256-bit SSL encryption, regular security audits, and comply with GDPR and SOC 2 standards. Your data is backed up daily and stored securely.'
     },
     {
-      question: t('pricing.faq.import'),
-      answer: t('pricing.faq.import.answer')
+      question: 'Can I import my existing data?',
+      answer: 'Yes, we provide free data migration assistance for all paid plans. Our team will help you import your clients, orders, and other data from spreadsheets or other platforms.'
     },
     {
-      question: t('pricing.faq.team'),
-      answer: t('pricing.faq.team.answer')
+      question: 'Do you offer team accounts?',
+      answer: 'Yes, our Professional and Enterprise plans support team collaboration. You can invite team members, set permissions, and manage multiple users under one account.'
     }
   ];
 
@@ -202,9 +201,9 @@ const PricingPage: React.FC = () => {
             </Link>
             
             <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/#features" className="text-gray-600 hover:text-gray-900 transition-colors">{t('pricing.header.features')}</Link>
-              <span className="text-blue-600 font-medium">{t('pricing.header.pricing')}</span>
-              <Link to="/support" className="text-gray-600 hover:text-gray-900 transition-colors">{t('pricing.header.support')}</Link>
+              <Link to="/#features" className="text-gray-600 hover:text-gray-900 transition-colors">{'Features'}</Link>
+              <span className="text-blue-600 font-medium">{'Pricing'}</span>
+              <Link to="/support" className="text-gray-600 hover:text-gray-900 transition-colors">{'Support'}</Link>
             </nav>
             
             <div className="flex items-center space-x-4">
@@ -213,7 +212,7 @@ const PricingPage: React.FC = () => {
                   to="/dashboard"
                   className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
-                  {t('pricing.header.dashboard')}
+                  {'Dashboard'}
                   <ArrowRight size={16} className="ml-2" />
                 </Link>
               ) : (
@@ -222,13 +221,13 @@ const PricingPage: React.FC = () => {
                     to="/login"
                     className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
                   >
-                    {t('pricing.header.signin')}
+                    {'Sign In'}
                   </Link>
                   <Link
                     to="/register"
                     className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-medium rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                   >
-                    {t('pricing.header.getstarted')}
+                    {'Get Started'}
                   </Link>
                 </>
               )}
@@ -241,10 +240,10 @@ const PricingPage: React.FC = () => {
       <section className="pt-24 pb-16 bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-            {t('pricing.hero.title')}
+            {'Simple, transparent pricing'}
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            {t('pricing.hero.subtitle')}
+            {'Choose the perfect plan for your freelance business. Start free, upgrade when you\'re ready to scale.'}
           </p>
           
           {/* Billing Toggle */}
@@ -257,7 +256,7 @@ const PricingPage: React.FC = () => {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              {t('pricing.billing.monthly')}
+              {'Monthly'}
             </button>
             <button
               onClick={() => setBillingCycle('yearly')}
@@ -267,9 +266,9 @@ const PricingPage: React.FC = () => {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              {t('pricing.billing.yearly')}
+              {'Yearly'}
               <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
-                {t('pricing.billing.save')}
+                {'Save up to 17%'}
               </span>
             </button>
           </div>
@@ -295,7 +294,7 @@ const PricingPage: React.FC = () => {
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-full text-sm font-medium flex items-center shadow-lg">
                       <Star size={14} className="mr-2" />
-                      {t('pricing.plan.most.popular')}
+                      {'Most Popular'}
                     </span>
                   </div>
                 )}
@@ -304,7 +303,7 @@ const PricingPage: React.FC = () => {
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <span className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-full text-sm font-medium flex items-center shadow-lg">
                       <Crown size={14} className="mr-2" />
-                      {t('pricing.plan.best.value')}
+                      {'Best Value'}
                     </span>
                   </div>
                 )}
@@ -312,7 +311,7 @@ const PricingPage: React.FC = () => {
                 {(plan as any).savings && (
                   <div className="absolute -top-4 right-4">
                     <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                      {t('pricing.billing.save').replace('17%', `${(plan as any).savings}%`)}
+                      {'Save up to 17%'.replace('17%', `${(plan as any).savings}%`)}
                     </span>
                   </div>
                 )}
@@ -323,7 +322,7 @@ const PricingPage: React.FC = () => {
                   {(plan as any).hasFreeTrial && (
                     <div className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium mb-3">
                       <Star size={14} className="mr-1" />
-                      {t('pricing.plan.trial')}
+                      {'7-Day Free Trial'}
                     </div>
                   )}
                   
@@ -333,14 +332,14 @@ const PricingPage: React.FC = () => {
                     <span className="text-5xl font-bold text-gray-900">{plan.price}</span>
                     {plan.name !== 'Free' && (
                       <span className="text-gray-600 ml-2">
-                        /{plan.period?.split(' ')[1] || 'month'}
+                          /{plan.period?.split(' ')[1] || 'month'}
                       </span>
                     )}
                   </div>
                   
                   {(plan as any).savings && (
                     <div className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                      {t('pricing.billing.save').replace('17%', `${(plan as any).savings}%`)}
+                      {'Save up to 17%'.replace('17%', `${(plan as any).savings}%`)}
                     </div>
                   )}
                 </div>
@@ -349,13 +348,13 @@ const PricingPage: React.FC = () => {
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                     <div className="flex items-center space-x-2 mb-2">
                       <Clock className="text-blue-600" size={16} />
-                      <h4 className="text-sm font-semibold text-blue-900">{t('pricing.trial.details')}</h4>
+                      <h4 className="text-sm font-semibold text-blue-900">{'Free Trial Details'}</h4>
                     </div>
                     <ul className="text-sm text-blue-800 space-y-1">
-                      <li>• {t('pricing.trial.access')}</li>
-                      <li>• {t('pricing.trial.card')}</li>
-                      <li>• {t('pricing.trial.cancel')}</li>
-                      <li>• {t('pricing.trial.billing')}</li>
+                      <li>• {'7 days of full Pro access'}</li>
+                      <li>• {'Credit card required (not charged during trial)'}</li>
+                      <li>• {'Cancel anytime before trial ends'}</li>
+                      <li>• {'Automatic billing starts after trial'}</li>
                     </ul>
                   </div>
                 )}
@@ -389,49 +388,49 @@ const PricingPage: React.FC = () => {
                   {(plan.features as any).calendar && (
                     <li className="flex items-start">
                       <Check className="text-green-500 mr-3 mt-0.5 flex-shrink-0" size={16} />
-                      <span className="text-gray-700">{t('pricing.features.calendar.yes')}</span>
+                      <span className="text-gray-700">{'Calendar access'}</span>
                     </li>
                   )}
                   
                   {(plan.features as any).referrals && (
                     <li className="flex items-start">
                       <Check className="text-green-500 mr-3 mt-0.5 flex-shrink-0" size={16} />
-                      <span className="text-gray-700">{t('pricing.features.referral.yes')}</span>
+                      <span className="text-gray-700">{'Referral program'}</span>
                     </li>
                   )}
                   
                   {(plan.features as any).advanced_stats && (
                     <li className="flex items-start">
                       <Check className="text-green-500 mr-3 mt-0.5 flex-shrink-0" size={16} />
-                      <span className="text-gray-700">{t('pricing.features.stats.yes')}</span>
+                      <span className="text-gray-700">{'Advanced statistics'}</span>
                     </li>
                   )}
                   
                   {(plan.features as any).google_calendar && (
                     <li className="flex items-start">
                       <Check className="text-green-500 mr-3 mt-0.5 flex-shrink-0" size={16} />
-                      <span className="text-gray-700">{t('pricing.features.gcal.yes')}</span>
+                      <span className="text-gray-700">{'Google Calendar integration'}</span>
                     </li>
                   )}
                   
                   {(plan.features as any).vip_badge && (
                     <li className="flex items-start">
                       <Check className="text-green-500 mr-3 mt-0.5 flex-shrink-0" size={16} />
-                      <span className="text-gray-700">{t('pricing.features.vip.yes')}</span>
+                      <span className="text-gray-700">{'VIP badge in dashboard'}</span>
                     </li>
                   )}
                   
                   {(plan.features as any).free_trial && (
                     <li className="flex items-start">
                       <Check className="text-green-500 mr-3 mt-0.5 flex-shrink-0" size={16} />
-                      <span className="text-gray-700">{t('pricing.features.trial.yes')}</span>
+                      <span className="text-gray-700">{'7-day free trial'}</span>
                     </li>
                   )}
                 </ul>
 
                 {plan.limitations && (
                   <div className="mb-8 p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm font-medium text-gray-700 mb-2">{t('pricing.limitations.title')}</p>
+                    <p className="text-sm font-medium text-gray-700 mb-2">{'Limitations:'}</p>
                     <ul className="space-y-1">
                       {plan.limitations.map((limitation, limitIndex) => (
                         <li key={limitIndex} className="text-sm text-gray-600 flex items-start">
@@ -468,11 +467,11 @@ const PricingPage: React.FC = () => {
                 
                 {(plan as any).hasFreeTrial ? (
                   <p className="text-center text-sm text-gray-500 mt-4">
-                    {t('pricing.trial.card.cancel')}
+                    {'Credit card required • Cancel anytime during trial'}
                   </p>
-                ) : plan.name !== t('pricing.plan.free') && (
+                ) : plan.name !== 'Free' && (
                   <p className="text-center text-sm text-gray-500 mt-4">
-                    {t('pricing.payment.immediate')}
+                    {'Immediate billing • Cancel anytime'}
                   </p>
                 )}
               </div>
@@ -486,10 +485,10 @@ const PricingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {t('pricing.comparison.title')}
+              {'Compare all features'}
             </h2>
             <p className="text-xl text-gray-600">
-              {t('pricing.comparison.subtitle')}
+              {'See exactly what\'s included in each plan'}
             </p>
           </div>
 
@@ -498,12 +497,12 @@ const PricingPage: React.FC = () => {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">{t('pricing.comparison.features')}</th>
+                    <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">{'Features'}</th>
                     {allPlans.map((plan, index) => (
                       <th key={index} className="px-6 py-4 text-center text-sm font-medium text-gray-900">
                         {plan.name}
                         {plan.popular && (
-                          <span className="block text-xs text-blue-600 font-normal mt-1">{t('pricing.plan.most.popular')}</span>
+                          <span className="block text-xs text-blue-600 font-normal mt-1">{'Most Popular'}</span>
                         )}
                       </th>
                     ))}
@@ -550,10 +549,10 @@ const PricingPage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {t('pricing.faq.title')}
+              {'Frequently asked questions'}
             </h2>
             <p className="text-xl text-gray-600">
-              {t('pricing.faq.subtitle')}
+              {'Everything you need to know about our pricing and plans'}
             </p>
           </div>
 
@@ -589,23 +588,23 @@ const PricingPage: React.FC = () => {
             <Shield className="text-green-600" size={32} />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            {t('pricing.guarantee.title')}
+            {'30-Day Money-Back Guarantee'}
           </h2>
           <p className="text-lg text-gray-600 mb-8">
-            {t('pricing.guarantee.subtitle')}
+            {'Try FiverFlow risk-free. If you\'re not completely satisfied within 30 days, we\'ll refund your money, no questions asked.'}
           </p>
           <div className="flex items-center justify-center space-x-8 text-sm text-gray-600">
             <div className="flex items-center">
               <Check className="text-green-500 mr-2" size={16} />
-              {t('pricing.guarantee.no.setup')}
+              {'No setup fees'}
             </div>
             <div className="flex items-center">
               <Check className="text-green-500 mr-2" size={16} />
-              {t('pricing.guarantee.cancel')}
+              {'Cancel anytime'}
             </div>
             <div className="flex items-center">
               <Check className="text-green-500 mr-2" size={16} />
-              {t('pricing.guarantee.no.contract')}
+              {'No long-term contracts'}
             </div>
           </div>
         </div>
@@ -615,22 +614,22 @@ const PricingPage: React.FC = () => {
       <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-white mb-6">
-            {t('pricing.cta.title')}
+            {'Ready to grow your freelance business?'}
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            {t('pricing.cta.subtitle')}
+            {'Join thousands of successful freelancers who trust FiverFlow to manage their business.'}
           </p>
           
           <Link
             to={user ? "/dashboard" : "/register"}
             className="inline-flex items-center px-8 py-4 bg-white text-blue-600 text-lg font-semibold rounded-full hover:bg-gray-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
-            {user ? t('pricing.cta.dashboard') : t('pricing.cta.trial')}
+            {user ? 'Go to Dashboard' : 'Start Your Free Trial'}
             <ArrowRight size={20} className="ml-2" />
           </Link>
           
           <p className="text-blue-100 text-sm mt-4">
-            {t('pricing.cta.details')}
+            {'7-day free trial • No credit card required • Cancel anytime'}
           </p>
         </div>
       </section>

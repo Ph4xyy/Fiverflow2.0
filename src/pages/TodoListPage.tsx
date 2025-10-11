@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Layout, { cardClass } from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
+
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import {
@@ -175,8 +175,6 @@ const usePopover = () => {
    =========================== */
 const TodoListPage: React.FC = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
-
   const [loading, setLoading] = useState(true);
   const [clients, setClients] = useState<ClientLite[]>([]);
   const [orders, setOrders] = useState<OrderLite[]>([]);
@@ -195,17 +193,17 @@ const TodoListPage: React.FC = () => {
   const colorPersistSupportedRef = useRef<boolean>(true);
   
   const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
-    { value: 'todo',         label: t('todo.status.todo') },
-    { value: 'in_progress',  label: t('todo.status.in.progress') },
-    { value: 'blocked',      label: t('todo.status.blocked') },
-    { value: 'done',         label: t('todo.status.done') },
+    { value: 'todo',         label: 'To do' },
+    { value: 'in_progress',  label: 'In progress' },
+    { value: 'blocked',      label: 'Blocked' },
+    { value: 'done',         label: 'Done' },
   ];
   
   const PRIORITY_OPTIONS: { value: TaskPriority; label: string; color: string; bgColor: string }[] = [
-    { value: 'urgent', label: t('todo.priority.urgent'), color: '#EF4444', bgColor: '#FEE2E2' },
-    { value: 'high',   label: t('todo.priority.high'),   color: '#F59E0B', bgColor: '#FEF3C7' },
-    { value: 'medium', label: t('todo.priority.medium'), color: '#10B981', bgColor: '#D1FAE5' },
-    { value: 'low',    label: t('todo.priority.low'),    color: '#6B7280', bgColor: '#F3F4F6' },
+    { value: 'urgent', label: 'P1 Urgent', color: '#EF4444', bgColor: '#FEE2E2' },
+    { value: 'high',   label: 'P2 High',   color: '#F59E0B', bgColor: '#FEF3C7' },
+    { value: 'medium', label: 'P3 Medium', color: '#10B981', bgColor: '#D1FAE5' },
+    { value: 'low',    label: 'P4 Low',    color: '#6B7280', bgColor: '#F3F4F6' },
   ];
 
   const tree = useMemo(() => buildTree(rows), [rows]);
@@ -238,14 +236,14 @@ const TodoListPage: React.FC = () => {
       const cPromise = supabase
         .from('clients')
         .select('id,name')
-        .eq('user_id', user.id)
+          .eq('user_id', user.id)
         .order('name', { ascending: true });
 
       // Orders → tente user_id, fallback sans si absent
       let oRes = await supabase
         .from('orders')
         .select('id,title')
-        .eq('user_id', user.id)
+          .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       if (oRes.error && String(oRes.error.code) === '42703') {
         oRes = await supabase
@@ -408,7 +406,7 @@ const TodoListPage: React.FC = () => {
 
     const optimistic: TaskRow = {
       id: `tmp_${Math.random().toString(36).slice(2)}`,
-      title: t('todo.new.task'),
+      title: 'New task',
       status: 'todo',
       priority: 'medium',
       user_id: user.id,
@@ -445,7 +443,7 @@ const TodoListPage: React.FC = () => {
         .from('tasks')
         .insert(payload)
         .select('id, title, due_date')
-        .single();
+          .single();
 
       if (error) {
         console.error('[insertTask] error:', error);
@@ -457,10 +455,10 @@ const TodoListPage: React.FC = () => {
         // sync calendrier si due_date déjà définie (peu probable à la création)
         if (data?.due_date) await upsertCalendar({ ...optimistic, id: data.id, due_date: data.due_date });
       }
-      toast.success(t('toast.task.created') || 'Tâche créée');
+      toast.success('Task created' || 'Tâche créée');
     } catch (e: any) {
       console.error('[insertTask] catch:', e);
-      toast.error(t('toast.task.failed') || `Création impossible: ${e?.message || 'erreur inconnue'}`);
+      toast.error('Task creation failed' || `Création impossible: ${e?.message || 'erreur inconnue'}`);
       setRows(prev => prev.filter(r => r.id !== optimistic.id));
     }
   }, [user, rows, upsertCalendar, t]);
@@ -471,10 +469,10 @@ const TodoListPage: React.FC = () => {
     try {
       const { error } = await supabase.from('tasks').delete().eq('id', task.id);
       if (error) throw error;
-      toast(t('toast.task.deleted') || 'Tâche supprimée', { icon: '🗑️' });
+      toast('Task deleted' || 'Tâche supprimée', { icon: '🗑️' });
     } catch (e: any) {
       console.error('[removeTask]', e);
-      toast.error(t('toast.task.delete.failed') || `Suppression impossible: ${e?.message || 'erreur inconnue'}`);
+      toast.error('Task deletion failed' || `Suppression impossible: ${e?.message || 'erreur inconnue'}`);
     }
   }, [t]);
 
@@ -543,7 +541,7 @@ const TodoListPage: React.FC = () => {
             <button
               onClick={() => toggleCollapse(task.id)}
               className="p-1.5 rounded-xl hover:bg-white/10"
-              title={collapsed.has(task.id) ? t('todo.expand') : t('todo.collapse')}
+              title={collapsed.has(task.id) ? 'Expand' : 'Collapse'}
             >
               {collapsed.has(task.id) ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
             </button>
@@ -577,9 +575,9 @@ const TodoListPage: React.FC = () => {
             <button
               onClick={() => setEditing(true)}
               className="group text-left w-full inline-flex items-start gap-2 hover:bg-white/5 rounded-xl px-1.5 py-1"
-              title={t('todo.edit.title')}
+              title={'Edit title'}
             >
-              <span className="text-[15px] text-slate-100">{task.title || t('todo.untitled')}</span>
+              <span className="text-[15px] text-slate-100">{task.title || 'Untitled'}</span>
               <Pencil size={16} className="opacity-0 group-hover:opacity-60 transition" />
             </button>
           )}
@@ -588,13 +586,13 @@ const TodoListPage: React.FC = () => {
           <div className="mt-2.5 flex items-center justify-between">
             {/* Choix rapide des couleurs */}
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">{t('todo.color')}</span>
+              <span className="text-xs text-slate-400">{'Color:'}</span>
               <div className="flex items-center gap-1.5">
                 {/* Aperçu de la couleur actuelle */}
                 <button
                   onClick={() => openAdvancedColorPicker(task)}
                   className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#1C2230] hover:bg-[#2A3347] transition-colors"
-                  title={t('todo.color.advanced')}
+                  title={'Advanced color picker'}
                 >
                   <div 
                     className="w-4 h-4 rounded ring-1 ring-white/20" 
@@ -620,7 +618,7 @@ const TodoListPage: React.FC = () => {
                   onClick={() => setTaskColor(task, null)}
                   className="px-1.5 text-[11px] rounded bg-white/5 hover:bg-white/10 text-slate-400"
                 >
-                  {t('todo.color.clear')}
+                  {'Clear'}
                 </button>
               </div>
             </div>
@@ -629,10 +627,10 @@ const TodoListPage: React.FC = () => {
             <button
               onClick={() => insertTask(task)}
               className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 hover:text-emerald-300 transition-colors text-xs"
-              title={t('todo.add.subtask')}
+              title={'Add Subtask'}
             >
               <PlusCircle size={12} />
-              <span>{t('todo.add.subtask')}</span>
+              <span>{'Add Subtask'}</span>
             </button>
           </div>
         </div>
@@ -723,7 +721,7 @@ const TodoListPage: React.FC = () => {
 
     const handleIconClick = () => {
       setShowDatePicker(true);
-      // Focus sur l'input après un petit délai pour s'assurer qu'il est rendu
+      // Focus sur l'input après un petit délai pour s'assurer qut('il est rendu
       setTimeout(() => {
         dateInputRef.current?.focus();
         dateInputRef.current?.showPicker?.();
@@ -744,7 +742,7 @@ const TodoListPage: React.FC = () => {
           <button
             onClick={handleIconClick}
             className="shrink-0 p-2 rounded-2xl bg-[#111722] ring-1 ring-inset ring-[#20293C] hover:bg-[#1A2332] hover:ring-[#2A3347] transition-colors"
-            title={t('todo.due.date')}
+            title={'Set due date'}
           >
             <CalendarIcon size={16} className="text-slate-300" />
           </button>
@@ -760,7 +758,7 @@ const TodoListPage: React.FC = () => {
           />
         ) : (
           <div className="px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] text-[15px] min-h-[44px] flex items-center">
-            {task.due_date ? new Date(task.due_date).toLocaleDateString() : t('todo.no.due.date')}
+            {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date'}
           </div>
         )}
       </div>
@@ -798,11 +796,11 @@ const TodoListPage: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' ? onAdd() : null}
-            placeholder={t('todo.add.tag')}
+            placeholder={'Add tag...'}
             className="flex-1 px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[13px]"
           />
           <button onClick={onAdd} className={BTN_SOFT + ' text-[13px] py-2 px-3'}>
-            {t('todo.tag.add')}
+            {'Add'}
           </button>
         </div>
       </div>
@@ -817,7 +815,7 @@ const TodoListPage: React.FC = () => {
         <button
           onClick={() => setOpen(v => !v)}
           className={`${BTN_SOFT} px-3 py-2 rounded-2xl text-[13px]`}
-          title={t('todo.comments')}
+          title={'Comments'}
         >
           <MessageSquare size={16} />
           <span>{task.comments_count ?? 0}</span>
@@ -829,16 +827,16 @@ const TodoListPage: React.FC = () => {
               value={txt}
               onChange={(e) => setTxt(e.target.value)}
               className="w-full bg-[#0F141C] border border-[#1C2230] rounded-2xl px-3.5 py-2.5 text-[15px] outline-none focus:ring-2 focus:ring-[#2A3347]"
-              placeholder={t('todo.comment.add')}
+              placeholder={'Add a comment...'}
             />
             <div className="mt-3 flex justify-end gap-2">
-              <button onClick={() => setOpen(false)} className={`${BTN_SOFT} px-3 py-2 text-[13px]`}>{t('todo.comment.close')}</button>
+              <button onClick={() => setOpen(false)} className={`${BTN_SOFT} px-3 py-2 text-[13px]`}>{'Close'}</button>
               <button
                 onClick={async () => { if (txt.trim()) { await addComment(task, txt); setTxt(''); } }}
                 className={`${BTN_PRIMARY} px-3 py-2 text-[13px]`}
               >
                 <Save size={16} />
-                {t('todo.comment.save')}
+                {'Save'}
               </button>
             </div>
           </div>
@@ -877,8 +875,8 @@ const TodoListPage: React.FC = () => {
     };
 
     const statusLabel = useMemo(() => {
-      if (filterStatus === 'all') return t('todo.all.status');
-      return STATUS_OPTIONS.find(s => s.value === filterStatus)?.label || t('todo.status');
+      if (filterStatus === 'all') return 'All status';
+      return STATUS_OPTIONS.find(s => s.value === filterStatus)?.label || 'Status';
     }, [filterStatus, STATUS_OPTIONS]);
 
     return (
@@ -889,7 +887,7 @@ const TodoListPage: React.FC = () => {
               onClick={() => insertTask()}
               className={BTN_PRIMARY}
             >
-              <Plus size={18} /> {t('todo.new.task')}
+              <Plus size={18} /> {'New task'}
             </button>
 
             {/* Columns */}
@@ -897,9 +895,9 @@ const TodoListPage: React.FC = () => {
               <button
                 onClick={() => colsPop.setOpen(v => !v)}
                 className={BTN_SOFT}
-                title={t('todo.columns')}
+                title={'Columns'}
               >
-                <SlidersHorizontal size={18} /> {t('todo.columns')}
+                <SlidersHorizontal size={18} /> {'Columns'}
               </button>
               {colsPop.open && (
                 <div className="absolute z-20 mt-2 w-64 p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230] shadow-xl">
@@ -923,7 +921,7 @@ const TodoListPage: React.FC = () => {
               <button
                 onClick={() => statusPop.setOpen(v => !v)}
                 className={BTN_SOFT + ' min-w-[160px] justify-between'}
-                title={t('todo.filter')}
+                title={'Filter by status'}
               >
                 <span className="inline-flex items-center gap-2">
                   <Filter size={18} />
@@ -938,7 +936,7 @@ const TodoListPage: React.FC = () => {
                     onClick={() => { setFilterStatus('all'); statusPop.setOpen(false); }}
                     className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/5 text-slate-200 text-[14px]"
                   >
-                    {t('todo.all.status')}
+                    {'All status'}
                   </button>
                   <div className="my-1 h-px bg-white/5" />
                   {STATUS_OPTIONS.map(s => (
@@ -959,9 +957,9 @@ const TodoListPage: React.FC = () => {
               <button
                 onClick={() => colorsPop.setOpen(v => !v)}
                 className={BTN_SOFT}
-                title={t('todo.colors')}
+                title={'Colors'}
               >
-                <Palette size={18} /> {t('todo.colors')}
+                <Palette size={18} /> {'Colors'}
               </button>
               {colorsPop.open && (
                 <div className="absolute z-20 mt-2 p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230] shadow-xl min-w-[260px]">
@@ -974,7 +972,7 @@ const TodoListPage: React.FC = () => {
                     ))}
                   </div>
                   <div className="mt-2 text-xs text-slate-400">
-                    {t('todo.color')} <span className="text-slate-300">{t('todo.task')}</span>
+                    {'Color:'} <span className="text-slate-300">{'Task'}</span>
                   </div>
                 </div>
               )}
@@ -987,17 +985,17 @@ const TodoListPage: React.FC = () => {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={t('todo.search.placeholder')}
+                placeholder={'Search tasks, tags, descriptions…'}
                 className="w-full pl-10 pr-3 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[15px]"
               />
               <SearchIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             </div>
 
             <div className="hidden sm:flex items-center gap-2">
-              {pill(`${t('todo.total')} ${rows.length}`)}
-              {pill(`${t('todo.visible')} ${visibleRows.length}`)}
+              {pill(`${'Total:'} ${rows.length}`)}
+              {pill(`${'Visible:'} ${visibleRows.length}`)}
               <span className={`${CHIP_SOFT} gap-1.5`}>
-                <Clock size={12} /> {t('todo.autosave')}
+                <Clock size={12} /> {'Autosave'}
               </span>
             </div>
           </div>
@@ -1019,9 +1017,9 @@ const TodoListPage: React.FC = () => {
                   <ListChecks size={22} />
                 </div>
                 <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 leading-tight">{t('todo.title')}</h1>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 leading-tight">{'To-Do List'}</h1>
                   <p className="text-[13px] text-slate-400 mt-1">
-                    {t('todo.subtitle')}
+                    {'Plan, organize and execute — unlimited subtasks, advanced color picker & customizable columns.'}
                   </p>
                 </div>
               </div>
@@ -1040,24 +1038,24 @@ const TodoListPage: React.FC = () => {
               <table className="min-w-full border-collapse">
                 <thead>
                   <tr className={TABLE_HEAD}>
-                    {visibleCols.includes('task') && <th className="px-4 py-3 w-[38%]">{t('todo.task')}</th>}
-                    {visibleCols.includes('status') && <th className="px-4 py-3 w-[12%]">{t('todo.status')}</th>}
-                    {visibleCols.includes('priority') && <th className="px-4 py-3 w-[12%]">{t('todo.priority')}</th>}
-                    {visibleCols.includes('client') && <th className="px-4 py-3 w-[14%]">{t('todo.client')}</th>}
-                    {visibleCols.includes('order') && <th className="px-4 py-3 w-[14%]">{t('todo.order')}</th>}
-                    {visibleCols.includes('due') && <th className="px-4 py-3 w-[12%]">{t('todo.due')}</th>}
-                    {visibleCols.includes('comments') && <th className="px-4 py-3 w-[8%]">{t('todo.comments')}</th>}
-                    {visibleCols.includes('tags') && <th className="px-4 py-3 w-[20%]">{t('todo.tags')}</th>}
+                    {visibleCols.includes('task') && <th className="px-4 py-3 w-[38%]">{'Task'}</th>}
+                    {visibleCols.includes('status') && <th className="px-4 py-3 w-[12%]">{'Status'}</th>}
+                    {visibleCols.includes('priority') && <th className="px-4 py-3 w-[12%]">{'Priority'}</th>}
+                    {visibleCols.includes('client') && <th className="px-4 py-3 w-[14%]">{'Client'}</th>}
+                    {visibleCols.includes('order') && <th className="px-4 py-3 w-[14%]">{'Order'}</th>}
+                    {visibleCols.includes('due') && <th className="px-4 py-3 w-[12%]">{'Due'}</th>}
+                    {visibleCols.includes('comments') && <th className="px-4 py-3 w-[8%]">{'Comments'}</th>}
+                    {visibleCols.includes('tags') && <th className="px-4 py-3 w-[20%]">{'Tags'}</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={8} className="px-4 py-10 text-center text-slate-400 text-[15px]">{t('todo.loading')}</td></tr>
+                    <tr><td colSpan={8} className="px-4 py-10 text-center text-slate-400 text-[15px]">{'Loading…'}</td></tr>
                   ) : visibleRows.length === 0 ? (
                     <tr><td colSpan={8} className="px-4 py-10 text-center text-slate-300 text-[15px]">
-                      {t('todo.no.tasks')}{' '}
+                      {'No tasks.'}{' '}
                       <button onClick={() => insertTask()} className="underline decoration-slate-400 hover:decoration-slate-200">
-                        {t('todo.create.first')}
+                        {'Create your first task'}
                       </button>.
                     </td></tr>
                   ) : (

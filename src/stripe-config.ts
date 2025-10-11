@@ -42,7 +42,7 @@ export const stripeProducts: StripeProduct[] = [
   },
   {
     id: 'prod_Sk1QhNRnzlZqjC',
-    priceId: 'price_1RoXNwENcVsHr4WI3SP8AYYu',
+    priceId: 'price_1RoXNwENcVsHr4WI3SP8AYYut(',
     name: '1y Excellence Package',
     description: 'get access to all the features from the Excellence package but for 1 year !',
     mode: 'subscription',

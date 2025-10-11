@@ -1,5 +1,4 @@
 // src/App.tsx
-import "./i18n"; 
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';

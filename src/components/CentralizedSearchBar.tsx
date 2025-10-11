@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronDown, X } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
+
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
@@ -16,7 +16,6 @@ interface SearchResult {
 }
 
 const CentralizedSearchBar: React.FC = () => {
-  const { t } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -29,13 +28,13 @@ const CentralizedSearchBar: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const categories = [
-    { value: 'all' as SearchCategory, label: t('search.all'), icon: '🔍' },
-    { value: 'clients' as SearchCategory, label: t('search.clients'), icon: '👥' },
-    { value: 'orders' as SearchCategory, label: t('search.orders'), icon: '📦' },
-    { value: 'tasks' as SearchCategory, label: t('search.tasks'), icon: '✅' },
-    { value: 'invoices' as SearchCategory, label: t('search.invoices'), icon: '📄' },
-    { value: 'calendar' as SearchCategory, label: t('search.calendar'), icon: '📅' },
-    { value: 'network' as SearchCategory, label: t('search.network'), icon: '🌐' },
+    { value: 'all' as SearchCategory, label: 'All', icon: '🔍' },
+    { value: 'clients' as SearchCategory, label: 'Clients', icon: '👥' },
+    { value: 'orders' as SearchCategory, label: 'Orders', icon: '📦' },
+    { value: 'tasks' as SearchCategory, label: 'Tasks', icon: '✅' },
+    { value: 'invoices' as SearchCategory, label: 'Invoices', icon: '📄' },
+    { value: 'calendar' as SearchCategory, label: 'Calendar', icon: '📅' },
+    { value: 'network' as SearchCategory, label: 'Network', icon: '🌐' },
   ];
 
   // Fonction pour rechercher dans la base de données
@@ -217,7 +216,7 @@ const CentralizedSearchBar: React.FC = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder={t('search.placeholder')}
+          placeholder={'Search...'}
           className="w-full pl-10 pr-20 py-2.5 rounded-xl border border-[#1C2230] 
                      bg-[#11151D]/95 text-slate-100 placeholder-slate-400
                      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
@@ -255,7 +254,7 @@ const CentralizedSearchBar: React.FC = () => {
           {/* Liste des catégories */}
           <div className="p-2 border-b border-[#1C2230]">
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              {t('common.filter')}
+              {'Filter'}
             </div>
             <div className="grid grid-cols-2 gap-1">
               {categories.map((category) => (
@@ -284,12 +283,12 @@ const CentralizedSearchBar: React.FC = () => {
               {isLoading ? (
                 <div className="p-4 text-center text-slate-400">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                  {t('common.loading')}...
+                  {'Loading...'}...
                 </div>
               ) : results.length > 0 ? (
                 <div className="p-2">
                   <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                    {t('common.search')} Results
+                    {'Search'} Results
                   </div>
                   {results.map((result) => (
                     <button
@@ -317,8 +316,8 @@ const CentralizedSearchBar: React.FC = () => {
               ) : (
                 <div className="p-4 text-center text-slate-400">
                   <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <div className="text-sm">{t('common.no.results') || 'No results found'}</div>
-                  <div className="text-xs">{t('common.try.different.search') || 'Try a different search term'}</div>
+                  <div className="text-sm">{'No results found' || 'No results found'}</div>
+                  <div className="text-xs">{'Try a different search term' || 'Try a different search term'}</div>
                 </div>
               )}
             </div>

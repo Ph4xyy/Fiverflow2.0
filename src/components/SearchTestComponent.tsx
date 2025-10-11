@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { useLanguage } from '../contexts/LanguageContext';
+
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
 const SearchTestComponent: React.FC = () => {
-  const { t } = useLanguage();
   const { user } = useAuth();
   const [testResults, setTestResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +19,7 @@ const SearchTestComponent: React.FC = () => {
           const { data: clients, error: clientsError } = await supabase
             .from('clients')
             .select('*')
-            .eq('user_id', user.id)
+          .eq('user_id', user.id)
             .limit(5);
           data = clients;
           break;
@@ -28,7 +27,7 @@ const SearchTestComponent: React.FC = () => {
           const { data: orders, error: ordersError } = await supabase
             .from('orders')
             .select('*')
-            .eq('user_id', user.id)
+          .eq('user_id', user.id)
             .limit(5);
           data = orders;
           break;
@@ -36,7 +35,7 @@ const SearchTestComponent: React.FC = () => {
           const { data: tasks, error: tasksError } = await supabase
             .from('tasks')
             .select('*')
-            .eq('user_id', user.id)
+          .eq('user_id', user.id)
             .limit(5);
           data = tasks;
           break;
@@ -44,7 +43,7 @@ const SearchTestComponent: React.FC = () => {
           const { data: invoices, error: invoicesError } = await supabase
             .from('invoices')
             .select('*')
-            .eq('user_id', user.id)
+          .eq('user_id', user.id)
             .limit(5);
           data = invoices;
           break;
@@ -69,7 +68,7 @@ const SearchTestComponent: React.FC = () => {
   return (
     <div className="p-6 bg-[#11151D] rounded-xl border border-[#1C2230]">
       <h2 className="text-xl font-bold text-white mb-4">
-        Test de recherche - {t('common.language')}
+        Test de recherche - {'Language'}
       </h2>
       
       <div className="mb-4">
@@ -111,7 +110,7 @@ const SearchTestComponent: React.FC = () => {
       {isLoading && (
         <div className="text-center py-4">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
-          <p className="text-slate-400">{t('common.loading')}</p>
+          <p className="text-slate-400">{'Loading...'}</p>
         </div>
       )}
 
@@ -134,7 +133,7 @@ const SearchTestComponent: React.FC = () => {
 
       {testResults.length === 0 && !isLoading && (
         <div className="text-center py-4 text-slate-400">
-          <p>{t('common.no.results')}</p>
+          <p>{'No results found'}</p>
           <p className="text-sm">Cliquez sur un bouton pour tester la recherche</p>
         </div>
       )}

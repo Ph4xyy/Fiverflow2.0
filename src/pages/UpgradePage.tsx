@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
+
 import { useStripeSubscription } from '../hooks/useStripeSubscription';
 import { getMonthlyProducts, getYearlyProducts } from '../stripe-config';
 import toast from 'react-hot-toast';
@@ -12,7 +12,6 @@ type Billing = 'monthly' | 'yearly';
 
 const UpgradePage: React.FC = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
   const { subscription, loading: subscriptionLoading, createCheckoutSession } = useStripeSubscription();
   const [billingCycle, setBillingCycle] = useState<Billing>('monthly');
   const [processingPriceId, setProcessingPriceId] = useState<string | null>(null);
@@ -30,7 +29,7 @@ const UpgradePage: React.FC = () => {
         return 'pro';
       // EXCELLENCE (monthly / yearly)  <-- fixed monthly id
       case 'price_1RoRMdENcVsHr4WIVRYCy8JL':
-      case 'price_1RoXNwENcVsHr4WI3SP8AYYu':
+      case 'price_1RoXNwENcVsHr4WI3SP8AYYut(':
         return 'excellence';
       default:
         return 'free';
@@ -58,7 +57,7 @@ const UpgradePage: React.FC = () => {
 
   const handleUpgrade = async (priceId: string) => {
     if (!user) {
-      toast.error(t('toast.upgrade.signin'));
+      toast.error('Please sign in to upgrade.');
       return;
     }
 
@@ -79,28 +78,28 @@ const UpgradePage: React.FC = () => {
 
   // ----- Plans Feature Sets (accurate for your gating rules)
   const freePlan = {
-    name: t('upgrade.plan.free'),
+    name: 'Free',
     price: '$0',
     period: 'forever',
-    description: t('upgrade.plan.free.desc'),
+    description: 'Perfect to explore FiverFlow basics',
     // Matches: can't access calendar/tasks/referrals/stats/invoices
     features: [
-      t('upgrade.features.clients.limit').replace('{count}', '5'),
-      t('upgrade.features.orders.limit').replace('{count}', '10'),
-      t('upgrade.features.templates.limit').replace('{count}', '3'),
-      t('upgrade.features.dashboard'),
-      t('upgrade.features.themes'),
-      t('upgrade.features.support.email')
+      'Up to {count} clients'.replace('{count}', '5'),
+      'Up to {count} orders / month'.replace('{count}', '10'),
+      '{count} message templates'.replace('{count}', '3'),
+      'Dashboard widgets (Recent Orders, Quick Actions)',
+      'Dark & Light themes',
+      'Email support'
     ],
     limitations: [
-      t('upgrade.features.no.tasks'),
-      t('upgrade.features.no.calendar'),
-      t('upgrade.features.no.referrals'),
-      t('upgrade.features.no.stats'),
-      t('upgrade.features.no.invoices')
+      'No Tasks',
+      'No Calendar',
+      'No Referrals',
+      'No Statistics',
+      'No Invoices'
     ],
     current: currentPlan === 'free',
-    buttonText: t('upgrade.plan.current'),
+    buttonText: 'Current Plan',
     buttonStyle: 'bg-slate-700 text-slate-300 cursor-not-allowed',
     disabled: true
   };
@@ -115,35 +114,35 @@ const UpgradePage: React.FC = () => {
     // Plan features aligned to your app rules
     const features = isPro
       ? [
-          t('upgrade.features.clients.unlimited'),
-          t('upgrade.features.orders.unlimited'),
-          t('upgrade.features.templates.unlimited'),
-          t('upgrade.features.tasks'),
-          t('upgrade.features.calendar'),
-          t('upgrade.features.referrals'),
-          t('upgrade.features.integrations.basic'),
-          t('upgrade.features.support.standard')
+          'Unlimited clients',
+          'Unlimited orders',
+          'Unlimited message templates',
+          'Tasks module',
+          'Calendar access (mini + full page)',
+          'Referrals program',
+          'Basic integrations',
+          'Standard support'
         ]
       : [
-          t('upgrade.features.all.pro'),
-          t('upgrade.features.stats'),
-          t('upgrade.features.invoices'),
-          t('upgrade.features.integrations.advanced'),
-          t('upgrade.features.support.priority'),
-          t('upgrade.features.team')
+          'All Pro features',
+          'Statistics (advanced metrics & reports)',
+          'Invoices module',
+          'Advanced integrations (e.g., Google Calendar sync)',
+          'Priority support',
+          'Team-ready dashboards & VIP badge'
         ];
 
     return {
-      name: isPro ? t('upgrade.plan.pro') : t('upgrade.plan.excellence'),
+      name: isPro ? 'Pro' : 'Excellence',
       price: product.price,
       period: isYear ? 'per year' : 'per month',
       description: isPro
-        ? t('upgrade.plan.pro.desc')
-        : t('upgrade.plan.excellence.desc'),
+        ? 'Level up your workflow with tasks, calendar and referrals'
+        : 'Everything you need for pro-grade analytics and billing',
       features,
       popular: isPro && !isYear, // highlight Pro monthly as "Most Popular"
       hasFreeTrial: isPro,       // Pro has 7‑day trial
-      buttonText: isActive ? t('upgrade.plan.current') : `${t('upgrade.plan.upgrade')} ${isPro ? t('upgrade.plan.pro') : t('upgrade.plan.excellence')}`,
+      buttonText: isActive ? 'Current Plan' : `${'Upgrade to'} ${isPro ? 'Pro' : 'Excellence'}`,
       buttonStyle: isActive
         ? 'bg-slate-700 text-slate-300 cursor-not-allowed'
         : isPro
@@ -160,18 +159,18 @@ const UpgradePage: React.FC = () => {
   const benefits = [
     {
       icon: Crown,
-      title: t('upgrade.benefits.premium.title'),
-      description: t('upgrade.benefits.premium.desc')
+      title: 'Premium Features',
+      description: 'Access powerful modules that scale with your business'
     },
     {
       icon: Zap,
-      title: t('upgrade.benefits.workflow.title'),
-      description: t('upgrade.benefits.workflow.desc')
+      title: 'Faster Workflow',
+      description: 'Automated steps and shortcuts where they matter'
     },
     {
       icon: Star,
-      title: t('upgrade.benefits.support.title'),
-      description: t('upgrade.benefits.support.desc')
+      title: 'Priority Support',
+      description: 'Get help quickly when you need it most'
     }
   ];
 
@@ -181,7 +180,7 @@ const UpgradePage: React.FC = () => {
         <div className="space-y-6 sm:space-y-8 p-4 sm:p-0">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500" />
-            <p className="ml-4 text-slate-400">{t('upgrade.loading')}</p>
+            <p className="ml-4 text-slate-400">{'Loading subscription...'}</p>
           </div>
         </div>
       </Layout>
@@ -194,10 +193,10 @@ const UpgradePage: React.FC = () => {
         {/* Header */}
         <div className="text-center">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
-            {t('upgrade.title')}
+            {'Choose Your Plan'}
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-slate-400 max-w-2xl mx-auto">
-            {t('upgrade.subtitle')}
+            {'Unlock the modules you need as you grow—tasks, calendar, referrals, statistics and invoices.'}
           </p>
 
           {/* Billing Toggle */}
@@ -210,7 +209,7 @@ const UpgradePage: React.FC = () => {
                   : 'text-slate-300 hover:text-white'
               }`}
             >
-              {t('upgrade.billing.monthly')}
+              {'Monthly'}
             </button>
             <button
               onClick={() => setBillingCycle('yearly')}
@@ -220,9 +219,9 @@ const UpgradePage: React.FC = () => {
                   : 'text-slate-300 hover:text-white'
               }`}
             >
-              {t('upgrade.billing.yearly')}
+              {'Yearly'}
               <span className="absolute -top-2 -right-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs px-2 py-0.5 rounded-full shadow-lg">
-                {t('upgrade.billing.save')} {Math.max(calculateSavings('pro'), calculateSavings('excellence'))}%
+                {'Save up to'} {Math.max(calculateSavings('pro'), calculateSavings('excellence'))}%
               </span>
             </button>
           </div>
@@ -263,7 +262,7 @@ const UpgradePage: React.FC = () => {
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                   <span className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap shadow-lg">
-                    {t('upgrade.plan.popular')}
+                    {'Most Popular'}
                   </span>
                 </div>
               )}
@@ -271,7 +270,7 @@ const UpgradePage: React.FC = () => {
               {plan.savings ? (
                 <div className="absolute -top-4 right-4">
                   <span className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap shadow-lg">
-                    {t('upgrade.billing.save')} {plan.savings}%
+                    {'Save up to'} {plan.savings}%
                   </span>
                 </div>
               ) : null}
@@ -296,7 +295,7 @@ const UpgradePage: React.FC = () => {
 
               {plan.limitations && (
                 <div className="mb-6 sm:mb-8">
-                  <p className="text-xs sm:text-sm font-medium text-slate-400 mb-2">{t('upgrade.limitations')}</p>
+                  <p className="text-xs sm:text-sm font-medium text-slate-400 mb-2">{'Limitations:'}</p>
                   <ul className="space-y-2">
                     {plan.limitations.map((limitation: string, limitIndex: number) => (
                       <li key={limitIndex} className="text-xs sm:text-sm text-slate-500 break-words">
@@ -327,12 +326,12 @@ const UpgradePage: React.FC = () => {
                 {processingPriceId === plan.priceId ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                    {t('upgrade.trial.processing')}
+                    {'Processing...'}
                   </div>
                 ) : plan.hasFreeTrial ? (
                   <>
                     <Star size={16} className="mr-2" />
-                    {t('upgrade.trial.start')}
+                    {'Start 7-Day Free Trial'}
                   </>
                 ) : (
                   plan.buttonText
@@ -344,22 +343,22 @@ const UpgradePage: React.FC = () => {
                   <div className="bg-gradient-to-r from-purple-500/10 to-pink-600/10 border border-purple-500/30 rounded-lg p-4 mt-4 ring-1 ring-purple-500/20">
                     <div className="flex items-center space-x-2 mb-2">
                       <Star className="text-purple-400" size={16} />
-                      <h4 className="text-sm font-semibold text-purple-300">{t('upgrade.trial.details')}</h4>
+                      <h4 className="text-sm font-semibold text-purple-300">{'Free Trial Details'}</h4>
                     </div>
                     <ul className="text-sm text-slate-300 space-y-1">
-                      <li>• {t('upgrade.trial.access')}</li>
-                      <li>• {t('upgrade.trial.card')}</li>
-                      <li>• {t('upgrade.trial.cancel')}</li>
-                      <li>• {t('upgrade.trial.billing.after')}</li>
+                      <li>• {'7 days of full Pro access'}</li>
+                      <li>• {'Credit card required (not charged during trial)'}</li>
+                      <li>• {'Cancel anytime before trial ends'}</li>
+                      <li>• {'Automatic billing starts after trial'}</li>
                     </ul>
                   </div>
                   <p className="text-center text-xs text-slate-400 mt-3">
-                    {t('upgrade.trial.card.cancel')}
+                    {'Credit card required • Cancel anytime during trial'}
                   </p>
                 </>
               ) : plan.name !== 'Free' && !plan.disabled ? (
                 <p className="text-center text-xs text-slate-400 mt-3">
-                  {t('upgrade.payment.immediate')}
+                  {'Immediate billing • Cancel anytime'}
                 </p>
               ) : null}
             </div>
@@ -369,31 +368,31 @@ const UpgradePage: React.FC = () => {
         {/* FAQ */}
         <div className="bg-[#0E121A] rounded-xl p-4 sm:p-6 lg:p-8 mt-12 border border-[#1C2230] ring-1 ring-[#1C2230]">
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 text-center">
-            {t('upgrade.faq.title')}
+            {'Frequently Asked Questions'}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-semibold text-white mb-2">{t('upgrade.faq.change.plans')}</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-white mb-2">{'Can I change plans anytime?'}</h3>
               <p className="text-slate-400 text-xs sm:text-sm break-words">
-                {t('upgrade.faq.change.answer')}
+                {'Yes—upgrade or downgrade whenever you want. Changes apply to your next billing cycle.'}
               </p>
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-semibold text-white mb-2">{t('upgrade.faq.trial.question')}</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-white mb-2">{'Is there a free trial?'}</h3>
               <p className="text-slate-400 text-xs sm:text-sm break-words">
-                {t('upgrade.faq.trial.answer')}
+                {'Pro includes a 7-day free trial. A credit card is required to start, but you won\'t be charged during the trial.'}
               </p>
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-semibold text-white mb-2">{t('upgrade.faq.payment.methods')}</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-white mb-2">{'What payment methods are accepted?'}</h3>
               <p className="text-slate-400 text-xs sm:text-sm break-words">
-                {t('upgrade.faq.payment.answer')}
+                {'We accept all major credit cards. Bank transfer is available for annual invoices on request.'}
               </p>
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-semibold text-white mb-2">{t('upgrade.faq.cancel.question')}</h3>
+              <h3 className="text-sm sm:text-base font-semibold text-white mb-2">{'Can I cancel anytime?'}</h3>
               <p className="text-slate-400 text-xs sm:text-sm break-words">
-                {t('upgrade.faq.cancel.answer')}
+                {'Yes. You\'ll retain access until the end of your current billing period.'}
               </p>
             </div>
           </div>

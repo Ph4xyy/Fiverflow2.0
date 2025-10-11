@@ -147,7 +147,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               {placeholder}
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-500">
-              PNG, JPG, GIF jusqu'à 5MB
+              PNG, JPG, GIF jusqut('à 5MB
             </p>
           </div>
         )}

@@ -2,13 +2,12 @@
 import React from 'react';
 import Layout, { cardClass } from '../components/Layout';
 import PlanRestrictedPage from '../components/PlanRestrictedPage';
-import { useLanguage } from '../contexts/LanguageContext';
+
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import TaskManager from '../components/TaskManager';
 import { CheckSquare } from 'lucide-react';
 
 const TasksPage: React.FC = () => {
-  const { t } = useLanguage();
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
 
   if (restrictionsLoading) {
@@ -17,7 +16,7 @@ const TasksPage: React.FC = () => {
         <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-            <p className="ml-4 text-slate-400">{t('tasks.loading')}</p>
+            <p className="ml-4 text-slate-400">{'Loading...'}</p>
           </div>
         </div>
       </Layout>
@@ -44,9 +43,9 @@ const TasksPage: React.FC = () => {
             <CheckSquare size={18} />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">{t('tasks.title')}</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">{'Tasks & Time Tracking'}</h1>
             <p className="text-sm sm:text-base text-slate-400">
-              {t('tasks.subtitle')}
+              {'Manage your project tasks and track time spent on each activity.'}
             </p>
           </div>
         </div>

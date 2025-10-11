@@ -5,7 +5,6 @@ import { Toaster } from 'react-hot-toast';
 // Contexts
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { UserDataProvider } from './contexts/UserDataContext';
-import { LanguageProvider } from './contexts/LanguageContext';
 
 // Components
 import AppErrorBoundary from './components/AppErrorBoundary';
@@ -44,8 +43,7 @@ const SimpleRootRedirect: React.FC = () => {
 function AppSimple() {
   return (
     <AppErrorBoundary>
-      <LanguageProvider>
-        <AuthProvider>
+      <AuthProvider>
           <UserDataProvider>
             <Router>
               <div className="min-h-screen bg-slate-900">
@@ -110,7 +108,6 @@ function AppSimple() {
             </Router>
           </UserDataProvider>
         </AuthProvider>
-      </LanguageProvider>
     </AppErrorBoundary>
   );
 }

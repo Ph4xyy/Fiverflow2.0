@@ -159,7 +159,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
     { value: 'one-time', label: 'Ponctuel' },
     { value: 'occasional', label: 'Occasionnel' },
     { value: 'regular', label: 'Régulier' },
-    { value: 'ongoing', label: 'Continu' }
+    { value: 'ongoing', label: 'Continut(' }
   ];
 
   const acquisitionSources = [

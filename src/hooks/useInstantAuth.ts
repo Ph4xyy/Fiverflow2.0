@@ -46,7 +46,7 @@ export const useInstantAuth = (): InstantAuthState => {
     }
   }, [authLoading, user, roleFromSessionCache, roleFromMeta]);
 
-  // 🔥 Marquer comme prêt dès que l'auth est terminée ET qu'on a un utilisateur
+  // 🔥 Marquer comme prêt dès que l'auth est terminée ET qut('on a un utilisateur
   useEffect(() => {
     if (!authLoading && !roleLoading && user) {
       setIsReady(true);

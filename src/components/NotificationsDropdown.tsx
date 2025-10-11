@@ -326,7 +326,7 @@ const NotificationsDropdown: React.FC = () => {
                 <Bell className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500" />
                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">No new notifications</p>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  You're all caught up!
+                  Yout('re all caught up!
                 </p>
               </div>
             )}

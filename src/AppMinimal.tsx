@@ -4,7 +4,6 @@ import { Toaster } from 'react-hot-toast';
 
 // Contexts
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { LanguageProvider } from './contexts/LanguageContext';
 
 // Components
 import AppErrorBoundary from './components/AppErrorBoundary';
@@ -43,8 +42,7 @@ const MinimalRootRedirect: React.FC = () => {
 function AppMinimal() {
   return (
     <AppErrorBoundary>
-      <LanguageProvider>
-        <AuthProvider>
+      <AuthProvider>
           <Router>
             <div className="min-h-screen bg-slate-900">
               <Suspense fallback={
@@ -93,7 +91,6 @@ function AppMinimal() {
             </div>
           </Router>
         </AuthProvider>
-      </LanguageProvider>
     </AppErrorBoundary>
   );
 }

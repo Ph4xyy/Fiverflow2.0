@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
+
 import { useCurrency } from '../contexts/CurrencyContext';
 import { useStripeSubscription } from '../hooks/useStripeSubscription';
 import { useImageUpload } from '../hooks/useImageUpload';
@@ -60,7 +60,6 @@ type SmtpSettings = {
 /* ---------- Composant ---------- */
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
   const { currency, setCurrency } = useCurrency();
   const { subscription: stripeSubscription } = useStripeSubscription();
 
@@ -147,12 +146,12 @@ const ProfilePage: React.FC = () => {
   const isUploading = uploadingBanner || uploadingLogo || uploadingAvatar || savingImages;
 
   const tabs = [
-    { id: 'profile', label: t('profile.tabs.profile'), icon: User },
-    { id: 'notifications', label: t('profile.tabs.notifications'), icon: Bell },
-    { id: 'security', label: t('profile.tabs.security'), icon: Shield },
-    { id: 'billing', label: t('profile.tabs.billing'), icon: CreditCard },
-    { id: 'preferences', label: t('profile.tabs.preferences'), icon: Palette },
-    { id: 'branding', label: t('profile.tabs.branding'), icon: Mail }, // <— nouvel onglet
+    { id: 'profile', label: 'Profile', icon: User },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'security', label: 'Security', icon: Shield },
+    { id: 'billing', label: 'Billing', icon: CreditCard },
+    { id: 'preferences', label: 'Preferences', icon: Palette },
+    { id: 'branding', label: 'Branding & Email', icon: Mail }, // <— nouvel onglet
   ] as const;
 
   useEffect(() => {
@@ -201,7 +200,7 @@ const ProfilePage: React.FC = () => {
       const { data, error } = await supabase
         .from('users')
         .select('*')
-        .eq('id', user.id)
+          .eq('id', user.id)
         .maybeSingle();
 
       if (error) {
@@ -270,7 +269,7 @@ const ProfilePage: React.FC = () => {
       const { data, error } = await supabase
         .from('user_preferences')
         .select('*')
-        .eq('user_id', user.id)
+          .eq('user_id', user.id)
         .maybeSingle();
 
       if (error) {
@@ -291,7 +290,7 @@ const ProfilePage: React.FC = () => {
 
   const savePreferences = async (newPreferences: typeof preferences) => {
     if (!isSupabaseConfigured || !supabase || !user) {
-      toast.error(t('toast.database.not.configured'));
+      toast.error('Database not configured');
       return;
     }
 
@@ -311,21 +310,21 @@ const ProfilePage: React.FC = () => {
       if (error) throw error;
 
       setPreferences(newPreferences);
-      toast.success(t('toast.preferences.updated'));
+      toast.success('Notification preferences updated!');
     } catch {
-      toast.error(t('toast.preferences.failed'));
+      toast.error('Failed to save preferences');
     }
   };
 
   /* ---------- Save profil (d'origine) ---------- */
   const handleSaveProfile = async () => {
     if (!isSupabaseConfigured || !supabase || !user) {
-      toast.error(t('toast.database.not.configured'));
+      toast.error('Database not configured');
       return;
     }
 
     setSaving(true);
-    const toastId = toast.loading(t('profile.saving'));
+    const toastId = toast.loading('Saving profile...');
 
     try {
       const { error } = await supabase
@@ -339,10 +338,10 @@ const ProfilePage: React.FC = () => {
 
       if (error) throw error;
 
-      toast.success(t('toast.profile.updated'), { id: toastId });
+      toast.success('Profile updated successfully!', { id: toastId });
       fetchProfile();
     } catch {
-      toast.error(t('toast.profile.failed'), { id: toastId });
+      toast.error('Failed to update profile', { id: toastId });
     } finally {
       setSaving(false);
     }
@@ -351,40 +350,40 @@ const ProfilePage: React.FC = () => {
   /* ---------- Password (d'origine) ---------- */
   const handleChangePassword = async () => {
     if (!isSupabaseConfigured || !supabase) {
-      toast.error(t('toast.database.not.configured'));
+      toast.error('Database not configured');
       return;
     }
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error(t('toast.password.mismatch'));
+      toast.error('New passwords do not match');
       return;
     }
     if (passwordData.newPassword.length < 6) {
-      toast.error(t('toast.password.short'));
+      toast.error('Password must be at least 6 characters');
       return;
     }
 
     setSaving(true);
-    const toastId = toast.loading(t('toast.updating.password'));
+    const toastId = toast.loading('Updating password...');
 
     try {
       const { error } = await supabase.auth.updateUser({ password: passwordData.newPassword });
       if (error) throw error;
 
-      toast.success(t('toast.password.updated'), { id: toastId });
+      toast.success('Password updated successfully!', { id: toastId });
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch {
-      toast.error(t('toast.password.failed'), { id: toastId });
+      toast.error('Failed to update password', { id: toastId });
     } finally {
       setSaving(false);
     }
   };
 
   /* ---------- Helpers UI d’origine ---------- */
-  const getInitials = (name: string | null, email: string) =>
-    name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : email.slice(0, 2).toUpperCase();
+    const getInitials = (name: string | null, email: string) =>
+      name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : email.slice(0, 2).toUpperCase();
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return t('profile.account.not.available');
+    if (!dateString) return 'Not available';
     return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
@@ -406,7 +405,7 @@ const ProfilePage: React.FC = () => {
   /* ---------- Fonctions Images ---------- */
   const saveImages = async () => {
     if (!user || !isSupabaseConfigured || !supabase) {
-      toast.error(t('toast.supabase.not.configured'));
+      toast.error('Supabase not configured');
       return;
     }
 
@@ -453,7 +452,7 @@ const ProfilePage: React.FC = () => {
 
       if (error) {
         console.error('Erreur mise à jour images:', error);
-        toast.error(t('toast.images.failed'));
+        toast.error('Error saving images');
         return;
       }
 
@@ -471,11 +470,11 @@ const ProfilePage: React.FC = () => {
       setAvatarFile(null);
       setShowAvatarUpload(false);
 
-      toast.success(t('toast.images.saved'));
+      toast.success('Images saved successfully');
 
     } catch (error) {
       console.error('Erreur sauvegarde images:', error);
-      toast.error(t('toast.images.failed'));
+      toast.error('Error saving images');
     } finally {
       setSavingImages(false);
     }
@@ -495,16 +494,16 @@ const ProfilePage: React.FC = () => {
 
       if (error) {
         console.error('Erreur suppression bannière:', error);
-        toast.error(t('toast.banner.failed'));
+        toast.error('Error removing banner');
         return;
       }
 
       setProfile(prev => prev ? { ...prev, banner_url: null } : null);
-      toast.success(t('toast.banner.removed'));
+      toast.success('Banner removed');
 
     } catch (error) {
       console.error('Erreur suppression bannière:', error);
-      toast.error(t('toast.banner.failed'));
+      toast.error('Error removing banner');
     }
   };
 
@@ -522,27 +521,27 @@ const ProfilePage: React.FC = () => {
 
       if (error) {
         console.error('Erreur suppression logo:', error);
-        toast.error(t('toast.logo.failed'));
+        toast.error('Error removing logo');
         return;
       }
 
       setProfile(prev => prev ? { ...prev, logo_url: null } : null);
-      toast.success(t('toast.logo.removed'));
+      toast.success('Logo removed');
 
     } catch (error) {
       console.error('Erreur suppression logo:', error);
-      toast.error(t('toast.logo.failed'));
+      toast.error('Error removing logo');
     }
   };
 
   const saveAvatar = async () => {
     if (!user || !isSupabaseConfigured || !supabase) {
-      toast.error(t('toast.supabase.not.configured'));
+      toast.error('Supabase not configured');
       return;
     }
 
     if (!avatarFile) {
-      toast.error(t('toast.no.file'));
+      toast.error('No file selected');
       return;
     }
 
@@ -552,7 +551,7 @@ const ProfilePage: React.FC = () => {
       // Upload avatar
       const uploadedAvatarUrl = await uploadAvatar(avatarFile, user.id);
       if (!uploadedAvatarUrl) {
-        toast.error(t('toast.avatar.failed'));
+        toast.error('Error saving avatar');
         return;
       }
 
@@ -567,7 +566,7 @@ const ProfilePage: React.FC = () => {
 
       if (error) {
         console.error('Erreur mise à jour avatar:', error);
-        toast.error(t('toast.avatar.failed'));
+        toast.error('Error saving avatar');
         return;
       }
 
@@ -581,11 +580,11 @@ const ProfilePage: React.FC = () => {
       setAvatarFile(null);
       setShowAvatarUpload(false);
 
-      toast.success(t('toast.avatar.saved'));
+      toast.success('Avatar saved successfully');
 
     } catch (error) {
       console.error('Erreur sauvegarde avatar:', error);
-      toast.error(t('toast.avatar.failed'));
+      toast.error('Error saving avatar');
     } finally {
       setSavingImages(false);
     }
@@ -605,16 +604,16 @@ const ProfilePage: React.FC = () => {
 
       if (error) {
         console.error('Erreur suppression avatar:', error);
-        toast.error(t('toast.avatar.failed.remove'));
+        toast.error('Error removing avatar');
         return;
       }
 
       setProfile(prev => prev ? { ...prev, avatar_url: null } : null);
-      toast.success(t('toast.avatar.removed'));
+      toast.success('Avatar removed');
 
     } catch (error) {
       console.error('Erreur suppression avatar:', error);
-      toast.error(t('toast.avatar.failed.remove'));
+      toast.error('Error removing avatar');
     }
   };
 
@@ -644,7 +643,7 @@ const ProfilePage: React.FC = () => {
       const { data, error } = await supabase
         .from('user_smtp_settings')
         .select('*')
-        .eq('user_id', user.id)
+          .eq('user_id', user.id)
         .maybeSingle();
 
       if (error) {
@@ -688,17 +687,17 @@ const ProfilePage: React.FC = () => {
     // validations simples
     if (smtp.enabled) {
       if (!smtp.host || !smtp.port || !smtp.username || !smtp.password) {
-        toast.error(t('profile.complete.fields'));
+        toast.error('Please complete host, port, username and password.');
         return;
       }
       if (!smtp.from_email) {
-        toast.error(t('profile.complete.fields'));
+        toast.error('Please complete host, port, username and password.');
         return;
       }
     }
 
     setSmtpSaving(true);
-    const tId = toast.loading(t('profile.branding.smtp.saving'));
+    const tId = toast.loading('Saving…');
 
     try {
       const payload = {
@@ -720,15 +719,15 @@ const ProfilePage: React.FC = () => {
         .from('user_smtp_settings')
         .upsert(payload, { onConflict: 'user_id' })
         .select('id')
-        .maybeSingle();
+          .maybeSingle();
 
       if (error) throw error;
 
-      toast.success(t('toast.branding.saved'), { id: tId });
+      toast.success('Branding & Email saved!', { id: tId });
       fetchSmtpSettings();
     } catch (e: any) {
       console.error('[Profile] saveSmtpSettings error:', e?.message || e);
-      toast.error(t('toast.branding.failed'), { id: tId });
+      toast.error('Failed to save Branding & Email', { id: tId });
     } finally {
       setSmtpSaving(false);
     }
@@ -741,10 +740,10 @@ const ProfilePage: React.FC = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className={h3}>{t('profile.info.title')}</h3>
+              <h3 className={h3}>{'Profile Information'}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <label className={labelBase}>{t('profile.info.username')}</label>
+                  <label className={labelBase}>{'Username'}</label>
                   <input
                     type="text"
                     value={profileData.name}
@@ -753,7 +752,7 @@ const ProfilePage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className={labelBase}>{t('profile.info.email')}</label>
+                  <label className={labelBase}>{'Email Address'}</label>
                   <input
                     type="email"
                     value={profileData.email}
@@ -763,51 +762,51 @@ const ProfilePage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className={labelBase}>{t('profile.info.activity')}</label>
+                  <label className={labelBase}>{'Activity'}</label>
                   <select
                     value={profileData.activity}
                     onChange={(e) => setProfileData({ ...profileData, activity: e.target.value })}
                     className={selectBase}
                   >
-                    <option value="">{t('profile.info.select.activity')}</option>
-                    <option value="Web Development">{t('activity.web.development')}</option>
-                    <option value="Graphic Design">{t('activity.graphic.design')}</option>
-                    <option value="Content Writing">{t('activity.content.writing')}</option>
-                    <option value="Digital Marketing">{t('activity.digital.marketing')}</option>
-                    <option value="Video Editing">{t('activity.video.editing')}</option>
-                    <option value="Translation">{t('activity.translation')}</option>
-                    <option value="Data Entry">{t('activity.data.entry')}</option>
-                    <option value="Virtual Assistant">{t('activity.virtual.assistant')}</option>
-                    <option value="Photography">{t('activity.photography')}</option>
-                    <option value="Other">{t('activity.other')}</option>
+                    <option value="">{'Select your activity'}</option>
+                    <option value="Web Development">{'Web Development'}</option>
+                    <option value="Graphic Design">{'Graphic Design'}</option>
+                    <option value="Content Writing">{'Content Writing'}</option>
+                    <option value="Digital Marketing">{'Digital Marketing'}</option>
+                    <option value="Video Editing">{'Video Editing'}</option>
+                    <option value="Translation">{'Translation'}</option>
+                    <option value="Data Entry">{'Data Entry'}</option>
+                    <option value="Virtual Assistant">{'Virtual Assistant'}</option>
+                    <option value="Photography">{'Photography'}</option>
+                    <option value="Other">{'Other'}</option>
                   </select>
                 </div>
                 <div>
-                  <label className={labelBase}>{t('profile.info.country')}</label>
+                  <label className={labelBase}>{'Country'}</label>
                   <select
                     value={profileData.country}
                     onChange={(e) => setProfileData({ ...profileData, country: e.target.value })}
                     className={selectBase}
                   >
-                    <option value="">{t('profile.info.select.country')}</option>
-                    <option value="France">{t('country.france')}</option>
-                    <option value="United States">{t('country.united.states')}</option>
-                    <option value="Canada">{t('country.canada')}</option>
-                    <option value="United Kingdom">{t('country.united.kingdom')}</option>
-                    <option value="Germany">{t('country.germany')}</option>
-                    <option value="Spain">{t('country.spain')}</option>
-                    <option value="Italy">{t('country.italy')}</option>
-                    <option value="Netherlands">{t('country.netherlands')}</option>
-                    <option value="Belgium">{t('country.belgium')}</option>
-                    <option value="Switzerland">{t('country.switzerland')}</option>
-                    <option value="Australia">{t('country.australia')}</option>
-                    <option value="Brazil">{t('country.brazil')}</option>
-                    <option value="India">{t('country.india')}</option>
-                    <option value="Other">{t('country.other')}</option>
+                    <option value="">{'Select your country'}</option>
+                    <option value="France">{'France'}</option>
+                    <option value="United States">{'United States'}</option>
+                    <option value="Canada">{'Canada'}</option>
+                    <option value="United Kingdom">{'United Kingdom'}</option>
+                    <option value="Germany">{'Germany'}</option>
+                    <option value="Spain">{'Spain'}</option>
+                    <option value="Italy">{'Italy'}</option>
+                    <option value="Netherlands">{'Netherlands'}</option>
+                    <option value="Belgium">{'Belgium'}</option>
+                    <option value="Switzerland">{'Switzerland'}</option>
+                    <option value="Australia">{'Australia'}</option>
+                    <option value="Brazil">{'Brazil'}</option>
+                    <option value="India">{'India'}</option>
+                    <option value="Other">{'Other'}</option>
                   </select>
                 </div>
                 <div>
-                  <label className={labelBase}>{t('profile.info.timezone')}</label>
+                  <label className={labelBase}>{'Timezone'}</label>
                   <select
                     value={profileData.timezone}
                     onChange={(e) => setProfileData({ ...profileData, timezone: e.target.value })}
@@ -820,7 +819,7 @@ const ProfilePage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className={labelBase}>{t('profile.info.language')}</label>
+                  <label className={labelBase}>{'Language'}</label>
                   <select
                     value={profileData.language}
                     onChange={(e) => setProfileData({ ...profileData, language: e.target.value })}
@@ -839,22 +838,22 @@ const ProfilePage: React.FC = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className={h3}>{t('profile.notifications.title')}</h3>
+              <h3 className={h3}>{'Notification Preferences'}</h3>
               <div className="space-y-4">
                 {[
                   {
-                    title: t('profile.notifications.tasks'),
-                    desc: t('profile.notifications.tasks.desc'),
+                    title: 'Task Due Notifications',
+                    desc: 'Get notified when tasks are overdue or due soon',
                     key: 'notify_tasks' as const,
                   },
                   {
-                    title: t('profile.notifications.invoices'),
-                    desc: t('profile.notifications.invoices.desc'),
+                    title: 'Invoice Notifications',
+                    desc: 'Get notified about unpaid invoices and payment reminders',
                     key: 'notify_invoices' as const,
                   },
                   {
-                    title: t('profile.notifications.email'),
-                    desc: t('profile.notifications.email.desc'),
+                    title: 'Email Notifications',
+                    desc: 'Receive notifications via email in addition to in-app notifications',
                     key: 'notify_email' as const,
                   },
                 ].map((row) => (
@@ -881,12 +880,12 @@ const ProfilePage: React.FC = () => {
             </div>
 
             <div>
-              <h3 className={h3}>{t('profile.notifications.general')}</h3>
+              <h3 className={h3}>{'General Notifications'}</h3>
               <div className="space-y-4">
                 <div className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg space-y-2 sm:space-y-0 ${soft}`}>
                   <div>
-                    <h4 className="text-sm sm:text-base font-medium text-white">{t('profile.notifications.orders')}</h4>
-                    <p className="text-xs sm:text-sm text-slate-400">{t('profile.notifications.orders.desc')}</p>
+                    <h4 className="text-sm sm:text-base font-medium text-white">{'Order Updates'}</h4>
+                    <p className="text-xs sm:text-sm text-slate-400">{'Get notified when orders are created or updated'}</p>
                   </div>
                   <div className="flex space-x-3 sm:space-x-4">
                     <label className="flex items-center text-sm text-slate-200">
@@ -912,8 +911,8 @@ const ProfilePage: React.FC = () => {
 
                 <div className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg space-y-2 sm:space-y-0 ${soft}`}>
                   <div>
-                    <h4 className="text-sm sm:text-base font-medium text-white">{t('profile.notifications.clients')}</h4>
-                    <p className="text-xs sm:text-sm text-slate-400">{t('profile.notifications.clients.desc')}</p>
+                    <h4 className="text-sm sm:text-base font-medium text-white">{'New Clients'}</h4>
+                    <p className="text-xs sm:text-sm text-slate-400">{'Get notified when new clients are added'}</p>
                   </div>
                   <div className="flex space-x-3 sm:space-x-4">
                     <label className="flex items-center text-sm text-slate-200">
@@ -930,8 +929,8 @@ const ProfilePage: React.FC = () => {
 
                 <div className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg space-y-2 sm:space-y-0 ${soft}`}>
                   <div>
-                    <h4 className="text-sm sm:text-base font-medium text-white">{t('profile.notifications.payments')}</h4>
-                    <p className="text-xs sm:text-sm text-slate-400">{t('profile.notifications.payments.desc')}</p>
+                    <h4 className="text-sm sm:text-base font-medium text-white">{'Payment Notifications'}</h4>
+                    <p className="text-xs sm:text-sm text-slate-400">{'Get notified about payment updates'}</p>
                   </div>
                   <div className="flex space-x-3 sm:space-x-4">
                     <label className="flex items-center text-sm text-slate-200">
@@ -954,16 +953,16 @@ const ProfilePage: React.FC = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className={h3}>{t('profile.security.title')}</h3>
+              <h3 className={h3}>{'Security Settings'}</h3>
               <div className="space-y-4">
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
-                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{t('profile.security.password')}</h4>
+                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{'Change Password'}</h4>
                   <div className="space-y-3">
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                       <input
                         type={showPassword ? 'text' : 'password'}
-                        placeholder={t('profile.security.password.current')}
+                        placeholder={'Current password'}
                         value={passwordData.currentPassword}
                         onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                         className={`${inputBase} pl-10 pr-12`}
@@ -978,7 +977,7 @@ const ProfilePage: React.FC = () => {
                     </div>
                     <input
                       type="password"
-                      placeholder={t('profile.security.password.new')}
+                      placeholder={'New password'}
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                       className={inputBase}
@@ -986,7 +985,7 @@ const ProfilePage: React.FC = () => {
                     <div className="relative">
                       <input
                         type={showConfirmPassword ? 'text' : 'password'}
-                        placeholder={t('profile.security.password.confirm')}
+                        placeholder={'Confirm new password'}
                         value={passwordData.confirmPassword}
                         onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
                         className={`${inputBase} pr-12`}
@@ -1004,16 +1003,16 @@ const ProfilePage: React.FC = () => {
                       disabled={saving}
                       className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 transition-all duration-200 shadow-lg"
                     >
-                      {saving ? t('profile.security.password.updating') : t('profile.security.password.update')}
+                      {saving ? 'Updating...' : 'Update Password'}
                     </button>
                   </div>
                 </div>
 
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
-                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{t('profile.security.2fa')}</h4>
-                  <p className="text-xs sm:text-sm text-slate-400 mb-3">{t('profile.security.2fa.desc')}</p>
+                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{'Two-Factor Authentication'}</h4>
+                  <p className="text-xs sm:text-sm text-slate-400 mb-3">{'Add an extra layer of security to your account'}</p>
                   <button className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg">
-                    {t('profile.security.2fa.enable')}
+                    {'Enable 2FA'}
                   </button>
                 </div>
               </div>
@@ -1025,16 +1024,16 @@ const ProfilePage: React.FC = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className={h3}>{t('profile.billing.title')}</h3>
+              <h3 className={h3}>{'Billing Information'}</h3>
               <div className="space-y-4">
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
-                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{t('profile.billing.plan')}</h4>
+                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{'Current Plan'}</h4>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs sm:text-sm text-slate-400">
                         {stripeSubscription?.product_name
                           ? `${stripeSubscription.product_name} - ${stripeSubscription.product_description}`
-                          : t('profile.billing.plan.free')}
+                          : 'Free Plan - Limited features'}
                       </p>
                       {stripeSubscription?.subscription_status && (
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 ${
@@ -1047,20 +1046,20 @@ const ProfilePage: React.FC = () => {
                       )}
                       {profile?.role === 'admin' && (
                         <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-300 ring-1 ring-red-500/30">
-                          {t('profile.billing.plan.admin')}
+                          {'Administrator'}
                         </span>
                       )}
                     </div>
                     {!stripeSubscription && (
                       <button className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-lg">
-                        {t('profile.billing.plan.upgrade')}
+                        {'Upgrade to Pro'}
                       </button>
                     )}
                   </div>
                 </div>
 
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
-                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{t('profile.billing.payment')}</h4>
+                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{'Payment Method'}</h4>
                   {stripeSubscription?.payment_method_brand && stripeSubscription?.payment_method_last4 ? (
                     <div>
                       <p className="text-xs sm:text-sm text-white font-medium">
@@ -1068,15 +1067,15 @@ const ProfilePage: React.FC = () => {
                       </p>
                       <p className="text-xs text-slate-400 mt-1">
                         {stripeSubscription.current_period_end && (
-                          `${t('profile.billing.payment.next')} ${new Date(stripeSubscription.current_period_end * 1000).toLocaleDateString()}`
+                          `${'Next billing:'} ${new Date(stripeSubscription.current_period_end * 1000).toLocaleDateString()}`
                         )}
                       </p>
                     </div>
                   ) : (
-                    <p className="text-xs sm:text-sm text-slate-400">{t('profile.billing.payment.none')}</p>
+                    <p className="text-xs sm:text-sm text-slate-400">{'No payment method on file'}</p>
                   )}
                   <button className="mt-2 px-3 sm:px-4 py-2 text-sm sm:text-base border border-[#1C2230] text-slate-200 rounded-lg hover:bg-[#141922] transition-colors">
-                    {stripeSubscription?.payment_method_brand ? t('profile.billing.payment.update') : t('profile.billing.payment.add')}
+                    {stripeSubscription?.payment_method_brand ? 'Update Payment Method' : 'Add Payment Method'}
                   </button>
                 </div>
               </div>
@@ -1088,10 +1087,10 @@ const ProfilePage: React.FC = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className={h3}>{t('profile.preferences.title')}</h3>
+              <h3 className={h3}>{'App Preferences'}</h3>
               <div className="space-y-4">
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
-                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{t('profile.preferences.currency')}</h4>
+                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{'Default Currency'}</h4>
                   <select 
                     className={selectBase}
                     value={currency}
@@ -1141,7 +1140,7 @@ const ProfilePage: React.FC = () => {
           <div className="space-y-6">
             <div className="flex items-center gap-2">
               <Mail size={18} />
-              <h3 className={h3}>{t('profile.branding.title')}</h3>
+              <h3 className={h3}>{'Branding & Email'}</h3>
             </div>
 
             {!isSupabaseConfigured && (
@@ -1154,21 +1153,21 @@ const ProfilePage: React.FC = () => {
             <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
               <div className="flex items-center gap-2 mb-4">
                 <Palette size={18} className="text-purple-400" />
-                <h4 className="text-sm sm:text-base font-medium text-white">{t('profile.branding.images')}</h4>
+                <h4 className="text-sm sm:text-base font-medium text-white">{'Profile images'}</h4>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Bannière */}
                 <div>
-                  <label className={labelBase}>{t('profile.branding.banner')}</label>
+                  <label className={labelBase}>{'Profile banner'}</label>
                   <p className="text-xs text-slate-400 mb-2">
-                    {t('profile.branding.banner.desc')}
+                    {'Header image for your profile (recommended: 1200x400px)'}
                   </p>
                   <ImageUpload
                     currentImage={profile?.banner_url}
                     onImageChange={setBannerFile}
                     onImageRemove={removeBanner}
-                    placeholder={t('profile.branding.banner.upload')}
+                    placeholder={'Upload a banner'}
                     aspectRatio="banner"
                     className="w-full"
                   />
@@ -1176,15 +1175,15 @@ const ProfilePage: React.FC = () => {
 
                 {/* Logo */}
                 <div>
-                  <label className={labelBase}>{t('profile.branding.logo')}</label>
+                  <label className={labelBase}>{'Profile logo'}</label>
                   <p className="text-xs text-slate-400 mb-2">
-                    {t('profile.branding.logo.desc')}
+                    {'Square logo for your profile (recommended: 200x200px)'}
                   </p>
                   <ImageUpload
                     currentImage={profile?.logo_url}
                     onImageChange={setLogoFile}
                     onImageRemove={removeLogo}
-                    placeholder={t('profile.branding.logo.upload')}
+                    placeholder={'Upload a logo'}
                     aspectRatio="logo"
                     className="w-full max-w-xs"
                   />
@@ -1201,12 +1200,12 @@ const ProfilePage: React.FC = () => {
                   {isUploading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      {uploadingBanner ? t('profile.branding.upload.banner') : uploadingLogo ? t('profile.branding.upload.logo') : uploadingAvatar ? t('profile.branding.upload.avatar') : t('profile.branding.saving')}
+                      {uploadingBanner ? 'Uploading banner...' : uploadingLogo ? 'Uploading logo...' : uploadingAvatar ? 'Uploading avatar...' : 'Saving...'}
                     </>
                   ) : (
                     <>
                       <Save size={16} />
-                      {t('profile.branding.save.images')}
+                      {'Save images'}
                     </>
                   )}
                 </button>
@@ -1220,7 +1219,7 @@ const ProfilePage: React.FC = () => {
                     }}
                     className="px-4 py-2 border border-[#1C2230] text-slate-200 rounded-lg hover:bg-[#141922] transition-colors"
                   >
-                    {t('common.cancel')}
+                    {'Cancel'}
                   </button>
                 )}
               </div>
@@ -1228,21 +1227,21 @@ const ProfilePage: React.FC = () => {
               {/* Aperçu des images actuelles */}
               {(profile?.banner_url || profile?.logo_url || profile?.avatar_url) && (
                 <div className="mt-4 p-3 bg-[#0E121A] ring-1 ring-[#1C2230] rounded-lg">
-                  <h5 className="text-sm font-medium text-slate-200 mb-2">{t('profile.branding.images.current')}</h5>
+                  <h5 className="text-sm font-medium text-slate-200 mb-2">{'Current images:'}</h5>
                   <div className="flex items-center gap-4">
                     {profile?.banner_url && (
                       <div className="text-xs text-slate-400">
-                        {t('profile.branding.images.banner')} <span className="font-mono break-all">{profile.banner_url}</span>
+                        {'Banner:'} <span className="font-mono break-all">{profile.banner_url}</span>
                       </div>
                     )}
                     {profile?.logo_url && (
                       <div className="text-xs text-slate-400">
-                        {t('profile.branding.images.logo')} <span className="font-mono break-all">{profile.logo_url}</span>
+                        {'Logo:'} <span className="font-mono break-all">{profile.logo_url}</span>
                       </div>
                     )}
                     {profile?.avatar_url && (
                       <div className="text-xs text-slate-400">
-                        {t('profile.branding.images.avatar')} <span className="font-mono break-all">{profile.avatar_url}</span>
+                        {'Avatar:'} <span className="font-mono break-all">{profile.avatar_url}</span>
                       </div>
                     )}
                   </div>
@@ -1254,7 +1253,7 @@ const ProfilePage: React.FC = () => {
 
             <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${soft} p-3 sm:p-4 rounded-lg`}>
               <div>
-                <label className={labelBase}>{t('profile.branding.from.name')}</label>
+                <label className={labelBase}>{'From name'}</label>
                 <input
                   className={inputBase}
                   placeholder="Ex: John Smith"
@@ -1263,7 +1262,7 @@ const ProfilePage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className={labelBase}>{t('profile.branding.from.email')}</label>
+                <label className={labelBase}>{'From email'}</label>
                 <input
                   className={inputBase}
                   placeholder="you@domain.com"
@@ -1272,7 +1271,7 @@ const ProfilePage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className={labelBase}>{t('profile.branding.reply.to')}</label>
+                <label className={labelBase}>{'Reply-To'}</label>
                 <input
                   className={inputBase}
                   placeholder="reply@domain.com"
@@ -1281,7 +1280,7 @@ const ProfilePage: React.FC = () => {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <label className={labelBase}>{t('profile.branding.smtp.enable')}</label>
+                <label className={labelBase}>{'Enable custom SMTP'}</label>
                 <button
                   type="button"
                   onClick={() => setSmtp((s) => s ? { ...s, enabled: !s.enabled } : s)}
@@ -1301,12 +1300,12 @@ const ProfilePage: React.FC = () => {
             <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
               <div className="flex items-center gap-2 mb-3">
                 <Server size={18} className="text-purple-400" />
-                <h4 className="text-sm sm:text-base font-medium text-white">{t('profile.branding.smtp.server')}</h4>
+                <h4 className="text-sm sm:text-base font-medium text-white">{'SMTP Server'}</h4>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className={labelBase}>{t('profile.branding.smtp.host')}</label>
+                  <label className={labelBase}>{'Host'}</label>
                   <input
                     className={inputBase}
                     placeholder="smtp.domain.com"
@@ -1316,7 +1315,7 @@ const ProfilePage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className={labelBase}>{t('profile.branding.smtp.port')}</label>
+                  <label className={labelBase}>{'Port'}</label>
                   <input
                     type="number"
                     className={inputBase}
@@ -1327,7 +1326,7 @@ const ProfilePage: React.FC = () => {
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <label className={labelBase}>{t('profile.branding.smtp.secure')}</label>
+                  <label className={labelBase}>{'Secure (SSL/TLS)'}</label>
                   <button
                     type="button"
                     onClick={() => setSmtp((s) => s ? { ...s, secure: !s.secure } : s)}
@@ -1344,7 +1343,7 @@ const ProfilePage: React.FC = () => {
                   </button>
                 </div>
                 <div>
-                  <label className={labelBase}>{t('profile.branding.smtp.username')}</label>
+                  <label className={labelBase}>{'Username'}</label>
                   <input
                     className={inputBase}
                     placeholder="smtp user"
@@ -1354,7 +1353,7 @@ const ProfilePage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className={labelBase}>{t('profile.branding.smtp.password')}</label>
+                  <label className={labelBase}>{'Password / App Password'}</label>
                   <input
                     type="password"
                     className={inputBase}
@@ -1372,7 +1371,7 @@ const ProfilePage: React.FC = () => {
                   disabled={smtpSaving || smtpLoading || !smtp}
                   className="px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 transition-all duration-200 shadow-lg"
                 >
-                  {smtpSaving ? t('profile.branding.smtp.saving') : t('profile.branding.smtp.save')}
+                  {smtpSaving ? 'Saving…' : 'Save Branding & Email'}
                 </button>
               </div>
             </div>
@@ -1391,7 +1390,7 @@ const ProfilePage: React.FC = () => {
         <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-            <p className="ml-4 text-slate-400">{t('profile.loading')}</p>
+            <p className="ml-4 text-slate-400">{'Loading profile...'}</p>
           </div>
         </div>
       </Layout>
@@ -1403,7 +1402,7 @@ const ProfilePage: React.FC = () => {
       <Layout>
         <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
           <div className="text-center py-12">
-            <p className="text-slate-400">{t('profile.error.load')}</p>
+            <p className="text-slate-400">{'Unable to load profile'}</p>
           </div>
         </div>
       </Layout>
@@ -1415,8 +1414,8 @@ const ProfilePage: React.FC = () => {
     <Layout>
       <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
         <div>
-          <h1 className={h1}>{t('profile.page.title')}</h1>
-          <p className={pSub}>{t('profile.page.subtitle')}</p>
+          <h1 className={h1}>{'My Profile'}</h1>
+          <p className={pSub}>{'Manage your personal information and account settings.'}</p>
         </div>
 
         {/* Profile Card (d'origine) */}
@@ -1466,7 +1465,7 @@ const ProfilePage: React.FC = () => {
                   <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="text-white text-center">
                       <User size={16} className="mx-auto mb-1" />
-                      <span className="text-xs">{t('profile.change')}</span>
+                      <span className="text-xs">{'Change'}</span>
                     </div>
                   </div>
                 </div>
@@ -1501,18 +1500,18 @@ const ProfilePage: React.FC = () => {
 
         {/* Account Information (d'origine) */}
         <div className={`${card} p-4 sm:p-6`}>
-          <h3 className={h2}>{t('profile.account.title')}</h3>
+          <h3 className={h2}>{'Account Information'}</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             <div>
-              <p className="text-xs sm:text-sm font-medium text-slate-400">{t('profile.account.member.since')}</p>
+              <p className="text-xs sm:text-sm font-medium text-slate-400">{'Member since'}</p>
               <p className="text-sm sm:text-base text-white mt-1">
                 {formatDate(profile.created_at)}
               </p>
             </div>
 
             <div>
-              <p className="text-xs sm:text-sm font-medium text-slate-400">{t('profile.account.user.id')}</p>
+              <p className="text-xs sm:text-sm font-medium text-slate-400">{'User ID'}</p>
               <p className={monoMuted}>
                 {profile.id}
               </p>
@@ -1520,7 +1519,7 @@ const ProfilePage: React.FC = () => {
 
             {profile.referrer_id && (
               <div>
-                <p className="text-xs sm:text-sm font-medium text-slate-400">{t('profile.account.referred.by')}</p>
+                <p className="text-xs sm:text-sm font-medium text-slate-400">{'Referred by'}</p>
                 <p className={monoMuted}>
                   {profile.referrer_id}
                 </p>
@@ -1568,7 +1567,7 @@ const ProfilePage: React.FC = () => {
                   className="inline-flex items-center px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm sm:text-base rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-lg disabled:opacity-50"
                 >
                   <Save size={16} className="mr-2 flex-shrink-0" />
-                  {saving ? t('common.save') + '...' : t('profile.save.changes')}
+                  {saving ? 'Save' + '...' : 'Save Changes'}
                 </button>
               </div>
             </div>
@@ -1582,7 +1581,7 @@ const ProfilePage: React.FC = () => {
           <div className="bg-[#11151D] rounded-lg p-6 max-w-md w-full mx-4 border border-[#1C2230]">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">
-                {t('profile.avatar.change')}
+                {'Change profile picture'}
               </h3>
               <button
                 onClick={() => {
@@ -1600,7 +1599,7 @@ const ProfilePage: React.FC = () => {
                 currentImage={profile?.avatar_url}
                 onImageChange={setAvatarFile}
                 onImageRemove={removeAvatar}
-                placeholder={t('profile.avatar.upload')}
+                placeholder={'Upload a profile picture'}
                 aspectRatio="logo"
                 className="w-full max-w-xs mx-auto"
               />
@@ -1615,12 +1614,12 @@ const ProfilePage: React.FC = () => {
                 {isUploading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    {uploadingAvatar ? t('profile.branding.upload.avatar') : t('profile.branding.saving')}
+                    {uploadingAvatar ? 'Uploading avatar...' : 'Saving...'}
                   </>
                 ) : (
                   <>
                     <Save size={16} />
-                    {t('profile.avatar.save')}
+                    {'Save'}
                   </>
                 )}
               </button>
@@ -1632,12 +1631,12 @@ const ProfilePage: React.FC = () => {
                 }}
                 className="px-4 py-2 border border-[#1C2230] text-slate-200 rounded-lg hover:bg-[#141922] transition-colors"
               >
-                {t('common.cancel')}
+                {'Cancel'}
               </button>
             </div>
 
             <p className="text-xs text-slate-400 mt-3">
-              {t('profile.avatar.format')}
+              {'Recommended format: 200x200px, PNG, JPG, GIF up to 5MB'}
             </p>
           </div>
         </div>

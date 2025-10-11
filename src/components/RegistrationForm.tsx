@@ -14,7 +14,7 @@ import {
   Shield
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
+
 import toast from 'react-hot-toast';
 import LogoImage from '../assets/LogoFiverFlow.png';
 
@@ -41,7 +41,6 @@ interface ValidationErrors {
 const RegistrationForm: React.FC = () => {
   const navigate = useNavigate();
   const { signUp } = useAuth();
-  const { t, language, setLanguage } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -67,7 +66,7 @@ const RegistrationForm: React.FC = () => {
     'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy',
     'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kuwait', 'Latvia', 'Lebanon', 'Lithuania', 'Luxembourg',
     'Malaysia', 'Mexico', 'Morocco', 'Netherlands', 'New Zealand', 'Nigeria', 'Norway',
-    'Pakistan', 'Panama', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar',
+    'Pakistan', 'Panama', 'Perut(', 'Philippines', 'Poland', 'Portugal', 'Qatar',
     'Romania', 'Russia', 'Saudi Arabia', 'Serbia', 'Singapore', 'Slovakia', 'Slovenia', 'South Africa', 'South Korea', 'Spain', 'Sri Lanka', 'Sweden', 'Switzerland',
     'Taiwan', 'Thailand', 'Tunisia', 'Turkey', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Venezuela', 'Vietnam'
   ];
@@ -340,14 +339,14 @@ const RegistrationForm: React.FC = () => {
           <div className="space-y-6">
             <div className="text-center mb-8">
               <Shield className="mx-auto h-12 w-12 text-purple-400 mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">{t('auth.register.account.info')}</h3>
-              <p className="text-sm text-slate-400">{t('auth.register.account.subtitle')}</p>
+              <h3 className="text-xl font-semibold text-white mb-2">{'Account Information'}</h3>
+              <p className="text-sm text-slate-400">{'Create your secure login credentials'}</p>
             </div>
 
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-                {t('auth.register.email')} *
+                {'Email Address'} *
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
@@ -378,7 +377,7 @@ const RegistrationForm: React.FC = () => {
             {/* Username */}
             <div>
               <label htmlFor='username' className='block text-sm font-medium text-slate-300 mb-2'>
-                {t('auth.register.username')} *
+                {'Username'} *
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
@@ -412,7 +411,7 @@ const RegistrationForm: React.FC = () => {
             {/* Password */}
             <div>
               <label htmlFor='password' className='block text-sm font-medium text-slate-300 mb-2'>
-                {t('auth.register.password')} *
+                {'Password'} *
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
@@ -497,7 +496,7 @@ const RegistrationForm: React.FC = () => {
             {/* Confirm Password */}
             <div>
               <label htmlFor='confirmPassword' className='block text-sm font-medium text-slate-300 mb-2'>
-                {t('auth.register.confirm.password')} *
+                {'Confirm Password'} *
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
@@ -536,14 +535,14 @@ const RegistrationForm: React.FC = () => {
           <div className="space-y-6">
             <div className="text-center mb-8">
               <Globe className="mx-auto h-12 w-12 text-purple-400 mb-4" />
-              <h3 className='text-xl font-semibold text-white mb-2'>{t('auth.register.personal.info')}</h3>
-              <p className='text-sm text-slate-400'>{t('auth.register.personal.subtitle')}</p>
+              <h3 className='text-xl font-semibold text-white mb-2'>{'Personal Information'}</h3>
+              <p className='text-sm text-slate-400'>{'Tell us more about yourself'}</p>
             </div>
 
             {/* Country */}
             <div>
               <label htmlFor='country' className='block text-sm font-medium text-slate-300 mb-2'>
-                {t('auth.register.country')} *
+                {'Country of Origin'} *
               </label>
               <div className="relative">
                 <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
@@ -577,7 +576,7 @@ const RegistrationForm: React.FC = () => {
             {/* Phone (Optional) */}
             <div>
               <label htmlFor='phone' className='block text-sm font-medium text-slate-300 mb-2'>
-                {t('auth.register.phone')} <span className='text-slate-500'>{t('auth.register.phone.optional')}</span>
+                {'Phone Number'} <span className='text-slate-500'>{'(optional)'}</span>
               </label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
@@ -614,13 +613,13 @@ const RegistrationForm: React.FC = () => {
           <div className="space-y-6">
             <div className="text-center mb-8">
               <Briefcase className="mx-auto h-12 w-12 text-purple-400 mb-4" />
-              <h3 className='text-xl font-semibold text-white mb-2'>{t('auth.register.services.info')}</h3>
-              <p className='text-sm text-slate-400'>{t('auth.register.services.subtitle')}</p>
+              <h3 className='text-xl font-semibold text-white mb-2'>{'Freelance Services'}</h3>
+              <p className='text-sm text-slate-400'>{'What services do you offer? (1-5 services)'}</p>
             </div>
 
             <div>
               <label className='block text-sm font-medium text-slate-300 mb-4'>
-                {t('auth.register.services')} *
+                {'Services Offered'} *
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto border border-[#1C2230] rounded-lg p-4 bg-[#0E121A]">
                 {freelanceServices.map((service) => (
@@ -680,7 +679,7 @@ const RegistrationForm: React.FC = () => {
     { code: 'zh', name: '中文', flag: '🇨🇳' },
     { code: 'it', name: 'Italiano', flag: '🇮🇹' },
     { code: 'pt', name: 'Português', flag: '🇵🇹' },
-    { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+    { code: 'rut(', name: 'Русский', flag: '🇷🇺' },
     { code: 'ja', name: '日本語', flag: '🇯🇵' },
     { code: 'ko', name: '한국어', flag: '🇰🇷' }
   ];
@@ -716,14 +715,14 @@ const RegistrationForm: React.FC = () => {
           <div className="flex items-center justify-center mb-4">
             <img src={LogoImage} alt="FiverFlow" className="h-8 w-auto" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">{t('auth.register.title')}</h1>
-          <p className="text-sm sm:text-base text-slate-400">{t('auth.register.subtitle')}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">{'Create Account'}</h1>
+          <p className="text-sm sm:text-base text-slate-400">{'Join the community of professional freelancers'}</p>
         </div>
 
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-slate-400">{t('auth.register.step')} {currentStep} {t('auth.register.of')} 3</span>
+            <span className="text-sm font-medium text-slate-400">{'Step'} {currentStep} {'of'} 3</span>
             <span className="text-sm font-medium text-slate-400">{Math.round((currentStep / 3) * 100)}%</span>
           </div>
           <div className="w-full bg-[#1C2230] rounded-full h-2">
@@ -752,7 +751,7 @@ const RegistrationForm: React.FC = () => {
               disabled={currentStep === 1}
               className='px-6 py-3 border border-[#1C2230] text-slate-300 rounded-lg hover:bg-[#121722] transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              {t('auth.register.previous')}
+              {'Previous'}
             </button>
             
             {currentStep < 3 ? (
@@ -761,7 +760,7 @@ const RegistrationForm: React.FC = () => {
                 onClick={nextStep}
                 className='px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
               >
-                {t('auth.register.next')}
+                {'Next'}
               </button>
             ) : (
               <button
@@ -772,12 +771,12 @@ const RegistrationForm: React.FC = () => {
                 {loading ? (
                   <>
                     <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2'></div>
-                    {t('auth.register.creating')}
+                    {'Creating...'}
                   </>
                 ) : (
                   <>
                     <CheckCircle size={16} className='mr-2' />
-                    {t('auth.register.create.account')}
+                    {'Create Account'}
                   </>
                 )}
               </button>
@@ -790,8 +789,8 @@ const RegistrationForm: React.FC = () => {
           <div className="flex items-start space-x-3">
             <Shield className="text-slate-400 mt-0.5" size={16} />
             <div className="text-xs text-slate-400">
-              <p className='font-medium mb-1 text-slate-300'>{t('auth.register.security.title')}</p>
-              <p>{t('auth.register.security.text')}</p>
+              <p className='font-medium mb-1 text-slate-300'>{'Security and Privacy'}</p>
+              <p>{'Your data is protected by bank-level encryption. We never share your personal information with third parties.'}</p>
             </div>
           </div>
         </div>
@@ -799,9 +798,9 @@ const RegistrationForm: React.FC = () => {
         {/* Login Link */}
         <div className="mt-6 text-center">
             <p className='text-sm text-slate-400'>
-              {t('auth.register.already.account')}{' '}
+              {'Already have an account?'}{' '}
               <Link to='/login' className='text-purple-400 hover:text-purple-300 font-medium transition-colors'>
-                {t('auth.register.signin')}
+                {'Sign in'}
               </Link>
             </p>
         </div>

@@ -75,7 +75,7 @@ const TemplateStylePanel: React.FC<Props> = ({ value, onChange }) => {
         <div className="text-xs mb-2 text-gray-600 dark:text-gray-300">Thèmes rapides</div>
         <div className="flex flex-wrap gap-2">
           {[
-            { name: 'Bleu', primary: '#2563eb', secondary: '#111827' },
+            { name: 'Bleut(', primary: '#2563eb', secondary: '#111827' },
             { name: 'Émeraude', primary: '#10b981', secondary: '#064e3b' },
             { name: 'Violet', primary: '#7c3aed', secondary: '#2e1065' },
             { name: 'Orange', primary: '#f97316', secondary: '#7c2d12' },

@@ -311,7 +311,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserSafe(data.user);
         await deriveAndCacheRole(data.session);
         
-        // 🔥 Forcer le rafraîchissement de la session pour s'assurer qu'elle est persistée
+        // 🔥 Forcer le rafraîchissement de la session pour s'assurer qut('elle est persistée
         try {
           await supabase.auth.getSession();
           console.log('✅ signIn: Session persistence verified');

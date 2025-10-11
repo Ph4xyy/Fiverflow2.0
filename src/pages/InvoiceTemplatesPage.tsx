@@ -1,7 +1,7 @@
 // src/pages/InvoiceTemplatesPage.tsx
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLanguage } from "@/contexts/LanguageContext";
+
 import { useInvoiceTemplates } from "@/hooks/useInvoiceTemplates";
 import type { InvoiceTemplate } from "@/types/invoiceTemplate";
 import TemplateCard from "@/components/invoices/templates/TemplateCard";
@@ -9,7 +9,6 @@ import { useNavigate } from "react-router-dom";
 
 const InvoiceTemplatesPage: React.FC = () => {
   const { user } = useAuth();
-  const { t } = useLanguage();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const { items, loading, create, duplicate, remove, setDefault } = useInvoiceTemplates(user?.id);
@@ -18,19 +17,19 @@ const InvoiceTemplatesPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{t('invoice.templates.title')}</h1>
-          <p className="text-gray-600 dark:text-gray-400">{t('invoice.templates.subtitle')}</p>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{'Invoice Templates'}</h1>
+          <p className="text-gray-600 dark:text-gray-400">{'Create, edit and select your default template.'}</p>
         </div>
         <div className="flex items-center gap-2">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={t('invoice.templates.name.placeholder')}
+            placeholder={'Template name'}
             className="px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900"
           />
           <button
             onClick={async () => {
-              const n = (name || "").trim() || t('invoice.templates.new.template');
+              const n = (name || "").trim() || 'New template';
               const created = await create(n);
               setName("");
               navigate(`/invoices/templates/${created.id}`);
@@ -38,7 +37,7 @@ const InvoiceTemplatesPage: React.FC = () => {
             className="px-4 py-2 rounded-lg text-white"
             style={{ backgroundColor: '#111827' }}
           >
-            {t('invoice.templates.create')}
+            {'Create'}
           </button>
         </div>
       </div>
@@ -46,11 +45,11 @@ const InvoiceTemplatesPage: React.FC = () => {
       {loading ? (
         <div className="p-10 flex items-center justify-center">
           <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-slate-500" />
-          <span className="ml-3 text-gray-600 dark:text-gray-400">{t('invoice.templates.loading')}</span>
+          <span className="ml-3 text-gray-600 dark:text-gray-400">{'Loading...'}</span>
         </div>
       ) : items.length === 0 ? (
         <div className="p-10 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-center">
-          {t('invoice.templates.no.templates')}
+          {'No templates yet. Create your first template!'}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

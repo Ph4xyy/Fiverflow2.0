@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, Globe } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
+
 import LogoImage from '../assets/LogoFiverFlow.png';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { signIn, user, loading: authLoading } = useAuth();
-  const { t, language, setLanguage } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,7 +32,7 @@ const LoginPage: React.FC = () => {
     console.log('Login form submitted with:', { email: formData.email, password: '***' });
     
     if (!formData.email.trim() || !formData.password.trim()) {
-      setError(t('auth.login.error.required'));
+      setError('Please enter both email and password');
       return;
     }
     
@@ -52,13 +51,13 @@ const LoginPage: React.FC = () => {
         setJustSignedIn(false);
       } else {
         console.log('Authentication successful, waiting for user context to update...');
-        // 🔥 FIXED: Marquer qu'on vient de se connecter, le useEffect s'occupera de la redirection
+        // 🔥 FIXED: Marquer qut('on vient de se connecter, le useEffect s'occupera de la redirection
         setJustSignedIn(true);
         // Le loading reste true pour montrer que la connexion est en cours
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError(t('auth.login.error.unexpected'));
+      setError('An unexpected error occurred. Please try again.');
       setLoading(false);
       setJustSignedIn(false);
     }
@@ -73,7 +72,7 @@ const LoginPage: React.FC = () => {
     { code: 'zh', name: '中文', flag: '🇨🇳' },
     { code: 'it', name: 'Italiano', flag: '🇮🇹' },
     { code: 'pt', name: 'Português', flag: '🇵🇹' },
-    { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+    { code: 'rut(', name: 'Русский', flag: '🇷🇺' },
     { code: 'ja', name: '日本語', flag: '🇯🇵' },
     { code: 'ko', name: '한국어', flag: '🇰🇷' }
   ];
@@ -109,8 +108,8 @@ const LoginPage: React.FC = () => {
           <div className="flex items-center justify-center mb-4">
             <img src={LogoImage} alt="FiverFlow" className="h-8 w-auto" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">{t('auth.login.title')}</h1>
-          <p className="text-sm sm:text-base text-slate-400">{t('auth.login.subtitle')}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">{'Welcome Back'}</h1>
+          <p className="text-sm sm:text-base text-slate-400">{'Sign in to your account'}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -122,7 +121,7 @@ const LoginPage: React.FC = () => {
 
           <div>
             <label htmlFor="email" className="block text-sm sm:text-base font-medium text-slate-300 mb-2">
-              {t('auth.login.email')}
+              {'Email Address'}
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
@@ -140,7 +139,7 @@ const LoginPage: React.FC = () => {
 
           <div>
             <label htmlFor="password" className="block text-sm sm:text-base font-medium text-slate-300 mb-2">
-              {t('auth.login.password')}
+              {'Password'}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
@@ -177,19 +176,19 @@ const LoginPage: React.FC = () => {
             {loading ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                {t('auth.login.signing')}
+                {'Signing In...'}
               </>
             ) : (
-              t('auth.login.signin')
+              'Sign In'
             )}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-sm sm:text-base text-slate-400">
-            {t('auth.login.no.account')}{' '}
+            {'Don\'t have an account?'}{' '}
             <Link to="/register" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
-              {t('auth.login.signup')}
+              {'Sign up'}
             </Link>
           </p>
         </div>

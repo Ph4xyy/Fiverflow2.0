@@ -248,7 +248,7 @@ const AdminDashboard: React.FC = () => {
         .slice(0, 5)
         .map((order: any) => ({
           id: order.id,
-          client_name: order.client_name || 'Client inconnu',
+          client_name: order.client_name || 'Client inconnut(',
           amount: safeNumber(order.amount),
           status: order.status || 'Unknown',
           created_at: order.created_at,
@@ -259,7 +259,7 @@ const AdminDashboard: React.FC = () => {
         .slice(0, 5)
         .map((invoice: any) => ({
           id: invoice.id,
-          client_name: invoice.client_name || 'Client inconnu',
+          client_name: invoice.client_name || 'Client inconnut(',
           total_amount: safeNumber(invoice.total_amount),
           status: invoice.status || 'Unknown',
           created_at: invoice.created_at,

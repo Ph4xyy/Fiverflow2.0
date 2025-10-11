@@ -1,7 +1,7 @@
 import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Toaster } from 'react-hot-toast';
-import { LanguageProvider } from './contexts/LanguageContext';
+
 import App from './App.tsx';
 import './index.css';
 import './utils/cleanAuth'; // Importer l'utilitaire de nettoyage
@@ -50,8 +50,7 @@ class GlobalErrorBoundary extends React.Component<{ children: React.ReactNode },
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <GlobalErrorBoundary>
-      <LanguageProvider>
-        <App />
+      <App />
         <Toaster
           position="top-right"
           toastOptions={{
@@ -101,7 +100,6 @@ createRoot(document.getElementById('root')!).render(
             },
           }}
         />
-      </LanguageProvider>
     </GlobalErrorBoundary>
   </StrictMode>
 );

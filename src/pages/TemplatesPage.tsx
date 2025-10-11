@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
-import { useLanguage } from '../contexts/LanguageContext';
+
 import { Plus, Search, Copy, Edit, Trash2, Eye } from 'lucide-react';
 
 const TemplatesPage: React.FC = () => {
-  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
 
   const templates = [
@@ -55,12 +54,12 @@ const TemplatesPage: React.FC = () => {
       <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('templates.title')}</h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-2">{t('templates.subtitle')}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{'Message Templates'}</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">{'Create and manage reusable message templates for your clients.'}</p>
           </div>
           <button className="mt-4 sm:mt-0 inline-flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white text-sm sm:text-base rounded-lg hover:bg-blue-700 transition-colors">
             <Plus size={16} className="mr-2" />
-{t('templates.new.template')}
+{'New Template'}
           </button>
         </div>
 
@@ -71,14 +70,14 @@ const TemplatesPage: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
-placeholder={t('templates.search.placeholder')}
+placeholder={'Search templates...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <select className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option>{t('templates.all.categories')}</option>
+              <option>{'All Categories'}</option>
               {categories.map(category => (
                 <option key={category}>{category}</option>
               ))}
@@ -120,8 +119,8 @@ placeholder={t('templates.search.placeholder')}
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm text-gray-500 pt-4 border-t border-gray-100 gap-1 sm:gap-0">
-                <span>{t('templates.used.times').replace('{count}', template.usageCount.toString())}</span>
-                <span>{t('templates.last.used')}: {new Date(template.lastUsed).toLocaleDateString()}</span>
+                <span>{'Used {count} times'.replace('{count}', template.usageCount.toString())}</span>
+                <span>{'Last used'}: {new Date(template.lastUsed).toLocaleDateString()}</span>
               </div>
             </div>
           ))}
@@ -129,32 +128,32 @@ placeholder={t('templates.search.placeholder')}
 
         {/* Template Variables Help */}
         <div className="bg-blue-50 rounded-lg p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3">{t('templates.variables.title')}</h3>
-          <p className="text-sm sm:text-base text-blue-800 mb-4">{t('templates.variables.description')}</p>
+          <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-3">{'Template Variables'}</h3>
+          <p className="text-sm sm:text-base text-blue-800 mb-4">{'Use these variables in your templates to automatically insert client-specific information:'}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <div className="bg-white rounded-lg p-2 sm:p-3 min-w-0">
               <code className="text-blue-600 font-mono text-xs sm:text-sm break-all">[CLIENT_NAME]</code>
-              <p className="text-gray-600 text-xs mt-1">{t('templates.variables.client.name')}</p>
+              <p className="text-gray-600 text-xs mt-1">{'Client\'s name'}</p>
             </div>
             <div className="bg-white rounded-lg p-2 sm:p-3 min-w-0">
               <code className="text-blue-600 font-mono text-xs sm:text-sm break-all">[PROJECT_TYPE]</code>
-              <p className="text-gray-600 text-xs mt-1">{t('templates.variables.project.type')}</p>
+              <p className="text-gray-600 text-xs mt-1">{'Type of project'}</p>
             </div>
             <div className="bg-white rounded-lg p-2 sm:p-3 min-w-0">
               <code className="text-blue-600 font-mono text-xs sm:text-sm break-all">[DEADLINE]</code>
-              <p className="text-gray-600 text-xs mt-1">{t('templates.variables.deadline')}</p>
+              <p className="text-gray-600 text-xs mt-1">{'Project deadline'}</p>
             </div>
             <div className="bg-white rounded-lg p-2 sm:p-3 min-w-0">
               <code className="text-blue-600 font-mono text-xs sm:text-sm break-all">[DUE_DATE]</code>
-              <p className="text-gray-600 text-xs mt-1">{t('templates.variables.due.date')}</p>
+              <p className="text-gray-600 text-xs mt-1">{'Payment due date'}</p>
             </div>
             <div className="bg-white rounded-lg p-2 sm:p-3 min-w-0">
               <code className="text-blue-600 font-mono text-xs sm:text-sm break-all">[AMOUNT]</code>
-              <p className="text-gray-600 text-xs mt-1">{t('templates.variables.amount')}</p>
+              <p className="text-gray-600 text-xs mt-1">{'Project amount'}</p>
             </div>
             <div className="bg-white rounded-lg p-2 sm:p-3 min-w-0">
               <code className="text-blue-600 font-mono text-xs sm:text-sm break-all">[PLATFORM]</code>
-              <p className="text-gray-600 text-xs mt-1">{t('templates.variables.platform')}</p>
+              <p className="text-gray-600 text-xs mt-1">{'Client\'s platform'}</p>
             </div>
           </div>
         </div>

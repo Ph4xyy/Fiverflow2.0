@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import Layout, { cardClass, subtleBg } from '@/components/Layout';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
+
 import { useCurrency } from '@/contexts/CurrencyContext';
 import { useClients } from '@/hooks/useClients';
 import { useStripeSubscription } from '@/hooks/useStripeSubscription';
@@ -31,7 +31,6 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 
 const DashboardPage = () => {
-  const { t } = useLanguage();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { currency } = useCurrency();
@@ -65,7 +64,7 @@ const DashboardPage = () => {
     const { data, error } = await supabase
       .from('orders')
       .select('id, title, amount, status, deadline, created_at, clients!inner(name, platform, user_id)')
-      .eq('clients.user_id', user.id)
+          .eq('clients.user_id', user.id)
       .order('deadline', { ascending: true });
 
     if (error) {
@@ -87,7 +86,7 @@ const DashboardPage = () => {
     const { data, error } = await supabase
       .from('tasks')
       .select('id, title, status, priority, due_date, color, client_id')
-      .eq('user_id', user.id)
+          .eq('user_id', user.id)
       .not('due_date', 'is', null)
       .order('due_date', { ascending: true });
 
@@ -126,8 +125,8 @@ const DashboardPage = () => {
 
       const { data, error } = await supabase
         .from("users")
-        .select("name")
-        .eq("id", user.id)
+        .select('name')
+          .eq("id", user.id)
         .single();
 
       if (!error && data) {
@@ -139,22 +138,22 @@ const DashboardPage = () => {
   }, [user]);
 
   const stats = [
-    { label: t('dashboard.total.clients'), value: clients.length, icon: Users, color: 'from-accent-blue to-accent-purple' },
-    { label: t('dashboard.active.orders'), value: orders.filter(o => o.status === 'In Progress').length, icon: ShoppingCart, color: 'from-amber-500 to-orange-600' },
-    { label: t('dashboard.recent.orders'), value: orders.length, icon: MessageSquare, color: 'from-fuchsia-500 to-pink-600' },
-    { label: t('dashboard.total.revenue'), value: new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(orders.reduce((sum, o) => sum + (o.amount || 0), 0)), icon: DollarSign, color: 'from-emerald-500 to-teal-600' }
+    { label: 'Total Clients', value: clients.length, icon: Users, color: 'from-accent-blue to-accent-purple' },
+    { label: 'Active Orders', value: orders.filter(o => o.status === 'In Progress').length, icon: ShoppingCart, color: 'from-amber-500 to-orange-600' },
+    { label: 'Recent Orders', value: orders.length, icon: MessageSquare, color: 'from-fuchsia-500 to-pink-600' },
+    { label: 'Total Revenue', value: new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(orders.reduce((sum, o) => sum + (o.amount || 0), 0)), icon: DollarSign, color: 'from-emerald-500 to-teal-600' }
   ];
 
   const getOrderStatusLabel = (s: string) => {
     switch (s) {
       case 'Completed':
-        return t('dashboard.status.completed');
+        return 'Completed';
       case 'In Progress':
-        return t('dashboard.status.in.progress');
+        return 'In Progress';
       case 'Pending':
-        return t('dashboard.status.pending');
+        return 'Pending';
       case 'Cancelled':
-        return t('dashboard.status.cancelled');
+        return 'Cancelled';
       default:
         return s;
     }
@@ -235,8 +234,8 @@ const DashboardPage = () => {
     if (!checkAccess('tasks')) {
       toast((t) => (
         <div>
-          <div className="font-medium">{t('dashboard.tasks.pro.feature')}</div>
-          <div className="text-sm opacity-80">{t('dashboard.upgrade.to.create')}</div>
+          <div className="font-medium">{'Tasks are a Pro feature'}</div>
+          <div className="text-sm opacity-80">{'Upgrade to create and manage tasks.'}</div>
           <div className="mt-2 flex gap-2">
             <button
               onClick={() => {
@@ -245,13 +244,13 @@ const DashboardPage = () => {
               }}
               className="px-3 py-1.5 text-sm rounded bg-blue-600 text-white"
             >
-              {t('dashboard.see.plans')}
+              {'See plans'}
             </button>
             <button
               onClick={() => toast.dismiss(t.id)}
               className="px-3 py-1.5 text-sm rounded border"
             >
-              {t('dashboard.not.now')}
+              {'Not now'}
             </button>
           </div>
         </div>
@@ -375,8 +374,8 @@ const DashboardPage = () => {
         <div className="flex items-center justify-between">
         <h1 className="text-3xl font-extrabold tracking-tight text-white">
           {userName
-            ? `${t('dashboard.welcome')}, ${userName}!`
-            : t('dashboard.welcome.guest')}
+            ? `${'Welcome'}, ${userName}!`
+            : 'Welcome to your dashboard'}
         </h1>
         </div>
 
@@ -402,13 +401,13 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className={`${cardClass} p-5`}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">{t('dashboard.recent.activities')}</h2>
+              <h2 className="text-lg font-semibold text-white">{'Recent Activities'}</h2>
               <div className="text-xs px-2 py-1 rounded-full bg-[#141922] text-slate-200">
-                {t('dashboard.last.7days')}
+                {'last 7 days'}
               </div>
             </div>
             {loadingOrders ? (
-              <p className="text-slate-400">{t('dashboard.loading')}</p>
+              <p className="text-slate-400">{'Loading...'}</p>
             ) : recentActivities.length > 0 ? (
               <div className="space-y-2">
                 {recentActivities.slice(0, 5).map((it: any) => {
@@ -440,8 +439,8 @@ const DashboardPage = () => {
                           <div className="flex items-center gap-2">
                             <p className="truncate text-sm font-medium text-white">{it.title}</p>
                             {isOrder && <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getOrderStatusBadge(it.status)}`}>{getOrderStatusLabel(it.status)}</span>}
-                            {it.kind === 'task' && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-slate-200">{t('dashboard.task')}</span>}
-                            {isSub && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-slate-200">{t('dashboard.subscription')}</span>}
+                            {it.kind === 'task' && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-slate-200">{'Task'}</span>}
+                            {isSub && <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-slate-200">{'Subscription'}</span>}
                           </div>
                           <div className="text-xs text-slate-400 truncate">{it.subtitle || '—'}</div>
                         </div>
@@ -455,37 +454,37 @@ const DashboardPage = () => {
                 })}
               </div>
             ) : (
-              <p className="text-slate-400">{t('dashboard.no.recent.orders')}</p>
+              <p className="text-slate-400">{'No recent orders.'}</p>
             )}
           </div>
 
           <div className={`${cardClass} p-5`}>
-            <h2 className="text-lg font-semibold mb-4 text-white">{t('dashboard.quick.actions')}</h2>
+            <h2 className="text-lg font-semibold mb-4 text-white">{'Quick Actions'}</h2>
             <div className="grid grid-cols-1 gap-3">
               <button onClick={handleAddClient} className="btn-primary w-full py-3 text-sm font-medium">
-                {t('dashboard.add.client')}
+                {'Add Client'}
               </button>
               <button onClick={handleAddOrder} className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-medium px-4 py-3 rounded-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm">
-                {t('dashboard.add.order')}
+                {'Add Order'}
               </button>
               <button
                 onClick={handleAddTask}
                 disabled={restrictionsLoading}
                 className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium px-4 py-3 rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-60 text-sm"
               >
-                {t('dashboard.add.task')}
+                {'Add Task'}
               </button>
               <button
                 onClick={() => navigate('/invoices')}
                 className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-medium px-4 py-3 rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm"
               >
-                {t('dashboard.add.invoice')}
+                {'Add Invoice'}
               </button>
               <button
                 onClick={() => navigate('/workspace/todo')}
                 className="w-full bg-gradient-to-r from-rose-500 to-rose-600 text-white font-medium px-4 py-3 rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm"
               >
-                {t('dashboard.add.todo')}
+                {'Add Task List'}
               </button>
             </div>
           </div>
@@ -499,11 +498,11 @@ const DashboardPage = () => {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center mr-2 shadow-glow-purple">
                 <CalendarIcon size={18} className="text-white" />
               </div>
-              <h2 className="text-lg font-semibold text-white">{t('dashboard.calendar.mini')}</h2>
+              <h2 className="text-lg font-semibold text-white">{'Calendar (Mini)'}</h2>
             </div>
 
             {restrictionsLoading ? (
-              <p className="text-slate-400">{t('dashboard.loading')}</p>
+              <p className="text-slate-400">{'Loading...'}</p>
             ) : checkAccess('calendar') ? (
               <div className="rounded-xl overflow-hidden ring-1 ring-[#1C2230]">
                 <FullCalendar
@@ -558,13 +557,13 @@ const DashboardPage = () => {
               <div className={`w-10 h-10 rounded-xl ${subtleBg} flex items-center justify-center mr-2`}>
                 <Clock size={18} className="text-white/90" />
               </div>
-              <h2 className="text-lg font-semibold text-white">{t('dashboard.upcoming.events')}</h2>
+              <h2 className="text-lg font-semibold text-white">{'Upcoming Events'}</h2>
             </div>
 
             {loadingOrders || loadingTasks ? (
-              <p className="text-slate-400">{t('dashboard.loading')}</p>
+              <p className="text-slate-400">{'Loading...'}</p>
             ) : upcoming.length === 0 ? (
-              <p className="text-slate-400">{t('dashboard.no.upcoming.deadlines')}</p>
+              <p className="text-slate-400">{'No upcoming deadlines.'}</p>
             ) : (
               <div className="space-y-2">
                 {upcoming.map((u) => {
@@ -631,7 +630,7 @@ const DashboardPage = () => {
           isOpen={isTaskFormOpen}
           onClose={() => setIsTaskFormOpen(false)}
           onSuccess={() => {
-            toast.success(t('dashboard.task.saved'));
+            toast.success('Task saved');
           }}
           task={null}
         />

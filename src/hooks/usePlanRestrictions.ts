@@ -143,7 +143,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
             break;
           // EXCELLENCE (a.k.a. Plus)
           case 'price_1RoRMdENcVsHr4WIVRYCy8JL':
-          case 'price_1RoXNwENcVsHr4WI3SP8AYYu':
+          case 'price_1RoXNwENcVsHr4WI3SP8AYYut(':
             plan = 'excellence';
             break;
         }

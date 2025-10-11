@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import PlanRestrictedPage from '../components/PlanRestrictedPage';
 import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
+
 import { useCurrency } from '../contexts/CurrencyContext';
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
@@ -95,7 +95,6 @@ const mockReferralLogs: ReferralLog[] = [
 
 export default function NetworkPage() {
   const { user } = useAuth();
-  const { t } = useLanguage();
   const { currency } = useCurrency();
 
   // 🔒 Plan access
@@ -322,7 +321,7 @@ export default function NetworkPage() {
         <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
-            <p className="mt-4 text-zinc-400">{t('network.loading')}</p>
+            <p className="mt-4 text-zinc-400">{'Loading referral network...'}</p>
           </div>
         </div>
       );
@@ -334,19 +333,19 @@ export default function NetworkPage() {
       <div className="min-h-screen bg-zinc-900 flex items-center justify-center p-4">
         <div className={`${card} max-w-md w-full p-8 text-center`}>
           <AlertCircle className="mx-auto h-12 w-12 text-red-400 mb-4" />
-          <h1 className="text-xl font-bold text-zinc-100 mb-4">{t('network.error.load')}</h1>
+          <h1 className="text-xl font-bold text-zinc-100 mb-4">{'Unable to Load Network Page'}</h1>
           <p className="text-zinc-400 mb-6">
-            {t('network.error.connection')}
+            {'We\'re having trouble connecting to our services. Please check your internet connection and try again.'}
           </p>
           <div className="space-y-2 text-sm text-zinc-400 mb-6 text-left">
-            <p><strong>{t('network.error.referral')}</strong> {pageError}</p>
-            <p><strong>{t('network.error.payout')}</strong> {payoutError}</p>
+            <p><strong>{'Referral Error:'}</strong> {pageError}</p>
+            <p><strong>{'Payout Error:'}</strong> {payoutError}</p>
           </div>
           <button
             onClick={handleRetry}
             className="w-full bg-blue-600 text-zinc-100 py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
           >
-            {t('network.error.try.again')}
+            {'Try Again'}
           </button>
         </div>
       </div>
@@ -361,15 +360,15 @@ export default function NetworkPage() {
             <div className="flex items-start space-x-3">
               <AlertCircle className="text-blue-400 mt-0.5 flex-shrink-0" size={20} />
               <div>
-                <h3 className="text-blue-300 font-medium">{t('network.error.demo')}</h3>
+                <h3 className="text-blue-300 font-medium">{'Demo Mode Active'}</h3>
                 <p className="text-blue-400 text-sm mt-1">
-                  {t('network.error.demo.desc')}
+                  {'We\'re showing demo data because we couldn\'t connect to the database. Your actual referral data will appear once the connection is restored.'}
                 </p>
                 <button
                   onClick={handleRetry}
                   className="mt-2 text-blue-300 hover:underline text-sm font-medium"
                 >
-                  {t('network.error.retry')}
+                  {'Try to reconnect'}
                 </button>
               </div>
             </div>
@@ -377,8 +376,8 @@ export default function NetworkPage() {
         )}
 
         <div className="mb-8">
-          <h1 className={h1}>{t('network.referral')}</h1>
-          <p className={pSub}>{t('network.share.link')}</p>
+          <h1 className={h1}>{'Referral Network'}</h1>
+          <p className={pSub}>{'Share your referral link and earn commissions'}</p>
         </div>
 
         {/* Stats Cards */}
@@ -389,7 +388,7 @@ export default function NetworkPage() {
                   <Users className="h-6 w-6 text-blue-400" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-zinc-400">{t('network.total.referrals')}</p>
+                  <p className="text-sm font-medium text-zinc-400">{'Total Referrals'}</p>
                   <p className="text-2xl font-bold text-zinc-100">{referrals.length}</p>
                 </div>
               </div>
@@ -401,7 +400,7 @@ export default function NetworkPage() {
                 <TrendingUp className="h-6 w-6 text-green-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-zinc-400">{t('network.paid.referrals')}</p>
+                <p className="text-sm font-medium text-zinc-400">{'Paid Referrals'}</p>
                 <p className="text-2xl font-bold text-zinc-100">
                   {referrals.filter((r) => r.subscription_status === 'paid').length}
                 </p>
@@ -415,7 +414,7 @@ export default function NetworkPage() {
                 <DollarSign className="h-6 w-6 text-blue-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-zinc-400">{t('network.total.earnings')}</p>
+                <p className="text-sm font-medium text-zinc-400">{'Total Earnings'}</p>
                 <p className="text-2xl font-bold text-zinc-100">{formatCurrency(totalEarnings)}</p>
               </div>
             </div>
@@ -428,16 +427,16 @@ export default function NetworkPage() {
             <div>
             <h2 className={h2 + ' flex items-center'}>
               <Wallet className="mr-2 text-green-400" size={24} />
-              {t('network.payout.management')}
+              {'Payout Management'}
             </h2>
-              <p className={pSub + ' mt-1'}>{t('network.manage.earnings')}</p>
+              <p className={pSub + ' mt-1'}>{'Manage your earnings and request payouts'}</p>
             </div>
             <button
               onClick={handleCheckStatus}
               className="inline-flex items-center px-3 py-2 bg-zinc-800 text-zinc-200 text-sm rounded-lg hover:bg-zinc-700 transition-colors"
             >
               <RefreshCw size={16} className="mr-2" />
-              {t('network.refresh.status')}
+              {'Refresh Status'}
             </button>
           </div>
 
@@ -446,11 +445,11 @@ export default function NetworkPage() {
               <div className="rounded-lg p-6 border border-green-800 bg-green-900/20">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-green-300">{t('network.available.earnings')}</h3>
+                    <h3 className="text-lg font-semibold text-green-300">{'Available Earnings'}</h3>
                     <p className="text-3xl font-bold text-green-400 mt-2">
                       {formatCurrency(availableEarnings)}
                     </p>
-                    <p className="text-sm text-green-400 mt-1">{t('network.ready.withdrawal')}</p>
+                    <p className="text-sm text-green-400 mt-1">{'Ready for withdrawal'}</p>
                   </div>
                   <DollarSign className="text-green-400" size={32} />
                 </div>
@@ -462,7 +461,7 @@ export default function NetworkPage() {
                   className="w-full inline-flex items-center justify-center px-4 py-3 bg-green-600 text-zinc-100 font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ArrowUpRight size={16} className="mr-2" />
-                  {t('network.request.payout')}
+                  {'Request Payout'}
                 </button>
               ) : (
                 <button
@@ -473,19 +472,19 @@ export default function NetworkPage() {
                   {setupLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      {t('network.setting.up')}
+                      {'Setting up...'}
                     </>
                   ) : (
                     <>
                       <Shield size={16} className="mr-2" />
-                      {t('network.setup.payout')}
+                      {'Setup Payout Account'}
                     </>
                   )}
                 </button>
               )}
 
                 {availableEarnings < 20 && (
-                  <p className="text-xs text-green-400 mt-2 text-center">{t('network.minimum.payout')}</p>
+                  <p className="text-xs text-green-400 mt-2 text-center">{'Minimum payout: $20.00'}</p>
                 )}
             </div>
 
@@ -493,7 +492,7 @@ export default function NetworkPage() {
             <div className="rounded-lg p-6 border border-blue-800 bg-blue-900/20">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-blue-300">{t('network.payout.account')}</h3>
+                  <h3 className="text-lg font-semibold text-blue-300">{'Payout Account'}</h3>
                   <div className="mt-2">
                     {payoutDetails ? (
                       <div className="space-y-2">
@@ -505,18 +504,18 @@ export default function NetworkPage() {
                                 : 'inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-900/30 text-blue-300'
                             }
                           >
-                            {payoutDetails.payout_enabled ? t('network.verified') : t('network.pending.verification')}
+                            {payoutDetails.payout_enabled ? 'Verified' : 'Pending Verification'}
                           </span>
                         </div>
                         {payoutDetails.bank_account_last4 && (
                           <p className="text-sm text-blue-300">
-                            {t('network.bank')} •••• {payoutDetails.bank_account_last4} ({payoutDetails.bank_account_country})
+                            {'Bank:'} •••• {payoutDetails.bank_account_last4} ({payoutDetails.bank_account_country})
                           </p>
                         )}
                       </div>
                     ) : (
                       <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-zinc-800 text-zinc-300">
-                        {t('network.not.setup')}
+                        {'Not Set Up'}
                       </span>
                     )}
                   </div>
@@ -529,8 +528,8 @@ export default function NetworkPage() {
                   <div className="flex items-start space-x-2">
                     <AlertCircle className="text-blue-400 mt-0.5 flex-shrink-0" size={16} />
                     <div className="text-sm text-blue-300">
-                      <p className="font-medium">{t('network.verification.required')}</p>
-                      <p className="mt-1">{t('network.complete.stripe')}</p>
+                      <p className="font-medium">{'Account verification required'}</p>
+                      <p className="mt-1">{'Complete your Stripe Connect setup to receive payouts.'}</p>
                     </div>
                   </div>
                 </div>
@@ -542,15 +541,15 @@ export default function NetworkPage() {
         {/* Payout History */}
         {payoutRequests.length > 0 && (
           <div className={`${card} p-6 mb-8`}>
-              <h2 className={h2 + ' mb-4'}>{t('network.payout.history')}</h2>
+              <h2 className={h2 + ' mb-4'}>{'Payout History'}</h2>
               <div className={tableWrap}>
                 <table className="min-w-full divide-y divide-zinc-800">
                   <thead className="bg-zinc-800/60">
                     <tr>
-                      <th className={thBase}>{t('network.amount')}</th>
-                      <th className={thBase}>{t('network.status')}</th>
-                      <th className={thBase}>{t('network.requested')}</th>
-                      <th className={thBase}>{t('network.processed')}</th>
+                      <th className={thBase}>{'Amount'}</th>
+                      <th className={thBase}>{'Status'}</th>
+                      <th className={thBase}>{'Requested'}</th>
+                      <th className={thBase}>{'Processed'}</th>
                     </tr>
                   </thead>
                   <tbody className="bg-zinc-900 divide-y divide-zinc-800">
@@ -559,7 +558,7 @@ export default function NetworkPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className={tdStrong}>{formatCurrency(request.amount_requested)}</div>
-                          <div className={tdMuted}>{t('network.net')} {formatCurrency(request.amount_net)}</div>
+                          <div className={tdMuted}>{'Net:'} {formatCurrency(request.amount_net)}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -587,7 +586,7 @@ export default function NetworkPage() {
 
         {/* Referral Link */}
         <div className={`${card} p-6 mb-8`}>
-          <h2 className={h2 + ' mb-4'}>{t('network.referral.link')}</h2>
+          <h2 className={h2 + ' mb-4'}>{'Your Referral Link'}</h2>
           <div className="flex items-center space-x-4">
             <div className="flex-1">
                 <input
@@ -604,36 +603,36 @@ export default function NetworkPage() {
               {copied ? (
                 <>
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  {t('network.copied')}
+                  {'Copied!'}
                 </>
               ) : (
                 <>
                   <Copy className="h-4 w-4 mr-2" />
-                  {t('network.copy')}
+                  {'Copy'}
                 </>
               )}
             </button>
           </div>
-          <p className={pSub + ' text-sm mt-2'}>{t('network.commission')}</p>
+          <p className={pSub + ' text-sm mt-2'}>{'Share this link to earn 20% commission on each paid subscription'}</p>
         </div>
 
         {/* Referrals List */}
         <div className={`${card} p-6 mb-8`}>
-          <h2 className={h2 + ' mb-4'}>{t('network.my.referrals')}</h2>
+          <h2 className={h2 + ' mb-4'}>{'My Referrals'}</h2>
           {referrals.length === 0 ? (
             <div className="text-center py-8">
               <Users className="h-12 w-12 text-zinc-400 mx-auto mb-4" />
-              <p className="text-zinc-400">{t('network.no.referrals')}</p>
-              <p className="text-sm text-zinc-400 mt-2">{t('network.share.start')}</p>
+              <p className="text-zinc-400">{'No referrals yet'}</p>
+              <p className="text-sm text-zinc-400 mt-2">{'Share your link to start earning commissions'}</p>
             </div>
           ) : (
             <div className={tableWrap}>
               <table className="min-w-full divide-y divide-zinc-800">
                 <thead className="bg-zinc-800/60">
                   <tr>
-                    <th className={thBase}>{t('network.user')}</th>
-                    <th className={thBase}>{t('network.status')}</th>
-                    <th className={thBase}>{t('network.registration.date')}</th>
+                    <th className={thBase}>{'User'}</th>
+                    <th className={thBase}>{'Status'}</th>
+                    <th className={thBase}>{'Registration Date'}</th>
                   </tr>
                 </thead>
                 <tbody className="bg-zinc-900 divide-y divide-zinc-800">
@@ -641,7 +640,7 @@ export default function NetworkPage() {
                     <tr key={referral.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className={tdStrong}>{referral.referred_user?.name || t('network.user')}</div>
+                          <div className={tdStrong}>{referral.referred_user?.name || 'User'}</div>
                           <div className={tdMuted}>{referral.referred_user?.email}</div>
                         </div>
                       </td>
@@ -653,7 +652,7 @@ export default function NetworkPage() {
                               : 'inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-900/30 text-blue-300'
                           }
                         >
-                          {referral.subscription_status === 'paid' ? t('network.paid') : t('network.trial')}
+                          {referral.subscription_status === 'paid' ? 'Paid' : 'Trial'}
                         </span>
                       </td>
                       <td className={`px-6 py-4 whitespace-nowrap ${tdMuted}`}>{formatDate(referral.created_at)}</td>
@@ -667,13 +666,13 @@ export default function NetworkPage() {
 
         {/* Earnings History */}
         <div className={`${card} p-6`}>
-          <h2 className={h2 + ' mb-4'}>{t('network.earnings.history')}</h2>
+          <h2 className={h2 + ' mb-4'}>{'Earnings History'}</h2>
           {referralLogs.length === 0 ? (
             <div className="text-center py-8">
               <DollarSign className="h-12 w-12 text-zinc-400 mx-auto mb-4" />
-              <p className="text-zinc-400">{t('network.no.earnings')}</p>
+              <p className="text-zinc-400">{'No earnings yet'}</p>
               <p className="text-sm text-zinc-400 mt-2">
-                {t('network.commissions.appear')}
+                {'Your commissions will appear here when your referrals subscribe'}
               </p>
             </div>
           ) : (
@@ -681,9 +680,9 @@ export default function NetworkPage() {
               <table className="min-w-full divide-y divide-zinc-800">
                 <thead className="bg-zinc-800/60">
                   <tr>
-                    <th className={thBase}>{t('network.user')}</th>
-                    <th className={thBase}>{t('network.commission.amount')}</th>
-                    <th className={thBase}>{t('network.date')}</th>
+                    <th className={thBase}>{'User'}</th>
+                    <th className={thBase}>{'Commission'}</th>
+                    <th className={thBase}>{'Date'}</th>
                   </tr>
                 </thead>
                 <tbody className="bg-zinc-900 divide-y divide-zinc-800">
@@ -691,7 +690,7 @@ export default function NetworkPage() {
                     <tr key={log.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
-                          <div className={tdStrong}>{log.referred_user?.name || t('network.user')}</div>
+                          <div className={tdStrong}>{log.referred_user?.name || 'User'}</div>
                           <div className={tdMuted}>{log.referred_user?.email}</div>
                         </div>
                       </td>

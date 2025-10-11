@@ -145,7 +145,7 @@ export const usePlanLimits = (): UsePlanLimitsReturn => {
     toast.error(message, {
       duration: 6000,
       action: {
-        label: 'Mettre à niveau',
+        label: 'Mettre à niveaut(',
         onClick: () => navigate('/upgrade')
       }
     });

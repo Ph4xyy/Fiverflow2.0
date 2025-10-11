@@ -8,7 +8,7 @@ import { useLoading } from '../contexts/LoadingContext';
 export const LoadingDebugPanel: React.FC = () => {
   const { loading, isLoading } = useLoading();
 
-  // Ne s'affiche qu'en développement
+  // Ne s'affiche qut('en développement
   if (process.env.NODE_ENV !== 'development') {
     return null;
   }

@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { useLanguage } from "../contexts/LanguageContext";
+
 import { useInvoiceTemplates } from "../hooks/useInvoiceTemplates";
 import type { InvoiceTemplate, TemplateSchema } from "../types/invoiceTemplate";
 import TemplateStylePanel from "../components/invoices/templates/TemplateStylePanel";
@@ -12,23 +12,23 @@ import { getFileUrl } from "../lib/storage";
 import toast from "react-hot-toast";
 
 const getSampleData = (t: any) => ({
-  company: { name: t('invoice.sample.company.name'), logoUrl: "", address: "" },
-  client: { name: t('invoice.sample.client.name'), email: t('invoice.sample.client.email'), address: t('invoice.sample.client.address') },
+  company: { name: 'FiverFlow', logoUrl: "", address: "" },
+  client: { name: 'John Doe', email: 'john@doe.com', address: 'Somewhere' },
   invoice: {
     number: "INV-2025-0001",
     currency: "USD",
     issue_date: new Date().toISOString(),
     due_date: new Date(Date.now() + 7 * 86400000).toISOString(),
     items: [
-      { description: t('invoice.sample.design'), quantity: 1, unit_price: 350, line_total: 350 },
-      { description: t('invoice.sample.development'), quantity: 10, unit_price: 60, line_total: 600 },
+      { description: 'Design', quantity: 1, unit_price: 350, line_total: 350 },
+      { description: 'Development', quantity: 10, unit_price: 60, line_total: 600 },
     ],
     subtotal: 950,
     discount: 0,
     tax_rate: 20,
     tax_amount: 190,
     total: 1140,
-    notes: t('invoice.sample.payment.due'),
+    notes: 'Payment due in 7 days.',
   },
 });
 
@@ -36,7 +36,6 @@ const InvoiceTemplateEditorPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useLanguage();
   const { items, update } = useInvoiceTemplates(user?.id);
   const tpl = useMemo(() => items.find((t: InvoiceTemplate) => t.id === id), [items, id]);
   const [name, setName] = useState<string>(tpl?.name || "");
@@ -48,7 +47,7 @@ const InvoiceTemplateEditorPage: React.FC = () => {
     
     try {
       const doc = await renderInvoiceWithTemplateToPdf(schema, getSampleData(t) as any);
-      const blob = doc.output("blob");
+        const blob = doc.output('blob');
       
       // Clean up previous URL
       if (pdfUrl) {
@@ -92,7 +91,7 @@ const InvoiceTemplateEditorPage: React.FC = () => {
 
   const save = async () => {
     await update(tpl.id, { name, schema });
-    toast.success(t('invoice.template.saved'));
+    toast.success('Template saved');
   };
 
   const previewPdf = async () => {

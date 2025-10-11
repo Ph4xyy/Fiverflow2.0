@@ -172,7 +172,7 @@ const PayoutModal: React.FC<PayoutModalProps> = ({
                   <span className="font-medium">-${TRANSFER_FEE.toFixed(2)}</span>
                 </div>
                 <div className="border-t border-gray-300 pt-2 flex justify-between">
-                  <span className="font-medium text-gray-900">You'll Receive:</span>
+                  <span className="font-medium text-gray-900">Yout('ll Receive:</span>
                   <span className="font-bold text-green-600">${calculateNetAmount().toFixed(2)}</span>
                 </div>
               </div>
