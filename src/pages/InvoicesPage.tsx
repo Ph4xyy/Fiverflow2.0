@@ -167,12 +167,12 @@ const InvoicesPage: React.FC = () => {
     return (
       <div className="p-6">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            {'Access restricted'}
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            {'You don\'t have access to this feature.'}
-          </p>
+           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+             Access restricted
+           </h2>
+           <p className="text-gray-600 dark:text-gray-400">
+             You don't have access to this feature.
+           </p>
         </div>
       </div>
     );
@@ -183,12 +183,12 @@ const InvoicesPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            {'Invoices'}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            {'Manage your invoices and track payments'}
-          </p>
+           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+             Invoices
+           </h1>
+           <p className="text-gray-600 dark:text-gray-400">
+             Manage your invoices and track payments
+           </p>
         </div>
         <button
           onClick={() => {
@@ -196,10 +196,10 @@ const InvoicesPage: React.FC = () => {
             setFormOpen(true);
           }}
           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          {'New Invoice'}
-        </button>
+         >
+           <Plus className="w-4 h-4 mr-2" />
+           New Invoice
+         </button>
       </div>
 
       {/* Filters */}

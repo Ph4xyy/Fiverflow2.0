@@ -88,7 +88,7 @@ class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, 
       return (
         <div className="p-4 border border-red-300/30 bg-red-900/10 rounded-lg">
           <div className="text-sm text-red-300 font-medium">
-            Le layout a rencontré une erreur. L’interface minimale reste affichée.
+            The layout encountered an error. Minimal interface is displayed.
           </div>
         </div>
       );
