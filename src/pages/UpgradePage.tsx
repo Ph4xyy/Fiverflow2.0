@@ -101,7 +101,7 @@ const UpgradePage: React.FC = () => {
     ],
     current: currentPlan === 'free',
     buttonText: t('upgrade.plan.current'),
-    buttonStyle: 'bg-gray-300 text-gray-700 dark:bg-slate-700 dark:text-slate-300 cursor-not-allowed',
+    buttonStyle: 'bg-slate-700 text-slate-300 cursor-not-allowed',
     disabled: true
   };
 
@@ -145,10 +145,10 @@ const UpgradePage: React.FC = () => {
       hasFreeTrial: isPro,       // Pro has 7‑day trial
       buttonText: isActive ? t('upgrade.plan.current') : `${t('upgrade.plan.upgrade')} ${isPro ? t('upgrade.plan.pro') : t('upgrade.plan.excellence')}`,
       buttonStyle: isActive
-        ? 'bg-gray-300 text-gray-700 dark:bg-slate-700 dark:text-slate-300 cursor-not-allowed'
+        ? 'bg-slate-700 text-slate-300 cursor-not-allowed'
         : isPro
-        ? 'bg-blue-600 text-white hover:bg-blue-700'
-        : 'bg-purple-600 text-white hover:bg-purple-700',
+        ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white hover:from-purple-600 hover:to-pink-700 shadow-lg'
+        : 'bg-gradient-to-r from-purple-600 to-pink-700 text-white hover:from-purple-700 hover:to-pink-800 shadow-lg',
       priceId: product.priceId,
       disabled: isActive,
       savings
@@ -180,8 +180,8 @@ const UpgradePage: React.FC = () => {
       <Layout>
         <div className="space-y-6 sm:space-y-8 p-4 sm:p-0">
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-            <p className="ml-4 text-gray-600 dark:text-slate-300">{t('upgrade.loading')}</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500" />
+            <p className="ml-4 text-slate-400">{t('upgrade.loading')}</p>
           </div>
         </div>
       </Layout>
@@ -193,21 +193,21 @@ const UpgradePage: React.FC = () => {
       <div className="space-y-6 sm:space-y-8 p-4 sm:p-0">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
             {t('upgrade.title')}
           </h1>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-slate-300 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg lg:text-xl text-slate-400 max-w-2xl mx-auto">
             {t('upgrade.subtitle')}
           </p>
 
           {/* Billing Toggle */}
-          <div className="inline-flex items-center bg-gray-100 dark:bg-slate-800 rounded-full p-1 mt-8">
+          <div className="inline-flex items-center bg-[#0E121A] ring-1 ring-[#1C2230] rounded-full p-1 mt-8">
             <button
               onClick={() => setBillingCycle('monthly')}
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                 billingCycle === 'monthly'
-                  ? 'bg-white dark:bg-slate-900 text-gray-900 dark:text-white shadow-sm'
-                  : 'text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
+                  : 'text-slate-300 hover:text-white'
               }`}
             >
               {t('upgrade.billing.monthly')}
@@ -216,12 +216,12 @@ const UpgradePage: React.FC = () => {
               onClick={() => setBillingCycle('yearly')}
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 relative ${
                 billingCycle === 'yearly'
-                  ? 'bg-white dark:bg-slate-900 text-gray-900 dark:text-white shadow-sm'
-                  : 'text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg'
+                  : 'text-slate-300 hover:text-white'
               }`}
             >
               {t('upgrade.billing.yearly')}
-              <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">
+              <span className="absolute -top-2 -right-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-xs px-2 py-0.5 rounded-full shadow-lg">
                 {t('upgrade.billing.save')} {Math.max(calculateSavings('pro'), calculateSavings('excellence'))}%
               </span>
             </button>
@@ -235,15 +235,15 @@ const UpgradePage: React.FC = () => {
             return (
               <div
                 key={index}
-                className="text-center p-4 sm:p-6 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 min-w-0"
+                className="text-center p-4 sm:p-6 bg-[#11151D] rounded-lg shadow-lg border border-[#1C2230] min-w-0"
               >
-                <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg mb-4">
-                  <Icon className="text-blue-600 dark:text-blue-400" size={20} />
+                <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-lg mb-4">
+                  <Icon className="text-purple-400" size={20} />
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-2">
                   {benefit.title}
                 </h3>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-slate-300 break-words">
+                <p className="text-sm sm:text-base text-slate-400 break-words">
                   {benefit.description}
                 </p>
               </div>
@@ -256,13 +256,13 @@ const UpgradePage: React.FC = () => {
           {allPlans.map((plan: any, index) => (
             <div
               key={index}
-              className={`relative bg-white dark:bg-slate-900 rounded-xl shadow-sm border-2 p-6 sm:p-8 min-w-0 ${
-                plan.popular ? 'border-blue-500 dark:border-blue-400' : 'border-gray-200 dark:border-slate-700'
+              className={`relative bg-[#11151D] rounded-xl shadow-lg border-2 p-6 sm:p-8 min-w-0 ${
+                plan.popular ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-[#1C2230]'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <span className="bg-blue-600 dark:bg-blue-500 text-white px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap">
+                  <span className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap shadow-lg">
                     {t('upgrade.plan.popular')}
                   </span>
                 </div>
@@ -270,36 +270,36 @@ const UpgradePage: React.FC = () => {
 
               {plan.savings ? (
                 <div className="absolute -top-4 right-4">
-                  <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
+                  <span className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap shadow-lg">
                     {t('upgrade.billing.save')} {plan.savings}%
                   </span>
                 </div>
               ) : null}
 
               <div className="text-center mb-6 sm:mb-8">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">{plan.name}</h3>
                 <div className="mb-3 sm:mb-4">
-                  <span className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">{plan.price}</span>
-                  <span className="text-sm sm:text-base text-gray-600 dark:text-slate-300 ml-2">{plan.period}</span>
+                  <span className="text-3xl sm:text-4xl font-bold text-white">{plan.price}</span>
+                  <span className="text-sm sm:text-base text-slate-400 ml-2">{plan.period}</span>
                 </div>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-slate-300 break-words">{plan.description}</p>
+                <p className="text-sm sm:text-base text-slate-400 break-words">{plan.description}</p>
               </div>
 
               <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                 {plan.features.map((feature: string, featureIndex: number) => (
                   <li key={featureIndex} className="flex items-start">
-                    <Check className="text-green-500 dark:text-green-400 mr-3 mt-0.5 flex-shrink-0" size={16} />
-                    <span className="text-sm sm:text-base text-gray-700 dark:text-slate-200 break-words">{feature}</span>
+                    <Check className="text-emerald-400 mr-3 mt-0.5 flex-shrink-0" size={16} />
+                    <span className="text-sm sm:text-base text-slate-200 break-words">{feature}</span>
                   </li>
                 ))}
               </ul>
 
               {plan.limitations && (
                 <div className="mb-6 sm:mb-8">
-                  <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-slate-400 mb-2">{t('upgrade.limitations')}</p>
+                  <p className="text-xs sm:text-sm font-medium text-slate-400 mb-2">{t('upgrade.limitations')}</p>
                   <ul className="space-y-2">
                     {plan.limitations.map((limitation: string, limitIndex: number) => (
-                      <li key={limitIndex} className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 break-words">
+                      <li key={limitIndex} className="text-xs sm:text-sm text-slate-500 break-words">
                         • {limitation}
                       </li>
                     ))}
@@ -341,24 +341,24 @@ const UpgradePage: React.FC = () => {
 
               {plan.hasFreeTrial && !plan.disabled ? (
                 <>
-                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mt-4">
+                  <div className="bg-gradient-to-r from-purple-500/10 to-pink-600/10 border border-purple-500/30 rounded-lg p-4 mt-4 ring-1 ring-purple-500/20">
                     <div className="flex items-center space-x-2 mb-2">
-                      <Star className="text-blue-600 dark:text-blue-400" size={16} />
-                      <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-200">{t('upgrade.trial.details')}</h4>
+                      <Star className="text-purple-400" size={16} />
+                      <h4 className="text-sm font-semibold text-purple-300">{t('upgrade.trial.details')}</h4>
                     </div>
-                    <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                    <ul className="text-sm text-slate-300 space-y-1">
                       <li>• {t('upgrade.trial.access')}</li>
                       <li>• {t('upgrade.trial.card')}</li>
                       <li>• {t('upgrade.trial.cancel')}</li>
                       <li>• {t('upgrade.trial.billing.after')}</li>
                     </ul>
                   </div>
-                  <p className="text-center text-xs text-gray-500 dark:text-slate-400 mt-3">
+                  <p className="text-center text-xs text-slate-400 mt-3">
                     {t('upgrade.trial.card.cancel')}
                   </p>
                 </>
               ) : plan.name !== 'Free' && !plan.disabled ? (
-                <p className="text-center text-xs text-gray-500 dark:text-slate-400 mt-3">
+                <p className="text-center text-xs text-slate-400 mt-3">
                   {t('upgrade.payment.immediate')}
                 </p>
               ) : null}
@@ -367,32 +367,32 @@ const UpgradePage: React.FC = () => {
         </div>
 
         {/* FAQ */}
-        <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 sm:p-6 lg:p-8 mt-12 border border-gray-200 dark:border-slate-700">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 text-center">
+        <div className="bg-[#0E121A] rounded-xl p-4 sm:p-6 lg:p-8 mt-12 border border-[#1C2230] ring-1 ring-[#1C2230]">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 text-center">
             {t('upgrade.faq.title')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">{t('upgrade.faq.change.plans')}</h3>
-              <p className="text-gray-600 dark:text-slate-300 text-xs sm:text-sm break-words">
+              <h3 className="text-sm sm:text-base font-semibold text-white mb-2">{t('upgrade.faq.change.plans')}</h3>
+              <p className="text-slate-400 text-xs sm:text-sm break-words">
                 {t('upgrade.faq.change.answer')}
               </p>
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">{t('upgrade.faq.trial.question')}</h3>
-              <p className="text-gray-600 dark:text-slate-300 text-xs sm:text-sm break-words">
+              <h3 className="text-sm sm:text-base font-semibold text-white mb-2">{t('upgrade.faq.trial.question')}</h3>
+              <p className="text-slate-400 text-xs sm:text-sm break-words">
                 {t('upgrade.faq.trial.answer')}
               </p>
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">{t('upgrade.faq.payment.methods')}</h3>
-              <p className="text-gray-600 dark:text-slate-300 text-xs sm:text-sm break-words">
+              <h3 className="text-sm sm:text-base font-semibold text-white mb-2">{t('upgrade.faq.payment.methods')}</h3>
+              <p className="text-slate-400 text-xs sm:text-sm break-words">
                 {t('upgrade.faq.payment.answer')}
               </p>
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2">{t('upgrade.faq.cancel.question')}</h3>
-              <p className="text-gray-600 dark:text-slate-300 text-xs sm:text-sm break-words">
+              <h3 className="text-sm sm:text-base font-semibold text-white mb-2">{t('upgrade.faq.cancel.question')}</h3>
+              <p className="text-slate-400 text-xs sm:text-sm break-words">
                 {t('upgrade.faq.cancel.answer')}
               </p>
             </div>
