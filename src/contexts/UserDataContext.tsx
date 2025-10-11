@@ -5,7 +5,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { debugAuth } from '../utils/debugAuth';
 
 interface UserDataContextType {
-  role: 'admin' | 'user';
+  role: 'admin' | 'user' | null; // null = rôle inconnu (skeleton)
   loading: boolean;
   refreshUserRole: () => Promise<void>;
 }
@@ -14,7 +14,7 @@ const UserDataContext = createContext<UserDataContextType | undefined>(undefined
 
 export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading: authLoading, authReady } = useAuth();
-  const [role, setRole] = useState<'admin' | 'user'>('user');
+  const [role, setRole] = useState<'admin' | 'user' | null>(null); // null par défaut
   const [loading, setLoading] = useState(true);
   const isFetchingRef = useRef(false);
   const lastFetchedUserIdRef = useRef<string | null>(null);
@@ -51,7 +51,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     
     if (!userId || !isSupabaseConfigured) {
       console.log('[UserDataContext] ❌ No user or Supabase not configured');
-      setRole('user');
+      setRole('user'); // Fallback seulement si vraiment pas de Supabase
       setLoading(false);
       return;
     }
@@ -63,21 +63,43 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const result = await debugAuth.testUserRoleQuery(userId);
       
       if (!result.success) {
+        const errorCode = (result.error as any)?.code;
+        const errorMessage = (result.error as any)?.message || '';
+        
+        // Gérer les erreurs 401/403 (JWT invalide) sans dégrader le rôle
+        if (errorCode === 'PGRST301' || errorMessage.includes('JWT') || errorMessage.includes('expired')) {
+          console.warn('[UserDataContext] ⚠️ Auth error, will retry after token refresh:', result.error);
+          // Ne pas changer le rôle, laisser null pour afficher skeleton
+          setLoading(false);
+          isFetchingRef.current = false;
+          return;
+        }
+        
         console.error('[UserDataContext] ❌ Error fetching user role:', result.error);
+        // En cas d'erreur autre que JWT, fallback sur 'user'
         setRole('user');
         sessionStorage.setItem('role', 'user');
         localStorage.setItem('userRole', 'user');
       } else {
-        const role = result.data?.role === 'admin' ? 'admin' : 'user';
-        console.log('[UserDataContext] ✅ Role fetched from DB:', role);
-        setRole(role);
-        sessionStorage.setItem('role', role);
-        localStorage.setItem('userRole', role);
+        const fetchedRole = result.data?.role === 'admin' ? 'admin' : 'user';
+        console.log('[UserDataContext] ✅ Role fetched from DB:', fetchedRole);
+        setRole(fetchedRole);
+        sessionStorage.setItem('role', fetchedRole);
+        localStorage.setItem('userRole', fetchedRole);
         lastFetchedUserIdRef.current = userId;
       }
-    } catch (err) {
+    } catch (err: any) {
+      // Gérer les erreurs non catchées (401/403)
+      if (err?.code === 'PGRST301' || err?.message?.includes('JWT')) {
+        console.warn('[UserDataContext] ⚠️ Auth error in catch, will retry:', err);
+        // Ne pas dégrader le rôle
+        setLoading(false);
+        isFetchingRef.current = false;
+        return;
+      }
+      
       console.error('[UserDataContext] 💥 Unexpected error while fetching role:', err);
-      setRole('user');
+      setRole('user'); // Fallback seulement en cas d'erreur vraiment inattendue
     } finally {
       console.log('[UserDataContext] 🏁 fetchUserRole completed');
       setLoading(false);
@@ -109,26 +131,40 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
     
     if (!user) {
-      console.log('[UserDataContext] ❌ No user, setting default role');
-      setRole('user');
+      console.log('[UserDataContext] ❌ No user, setting role to null');
+      setRole(null);
       setLoading(false);
       lastFetchedUserIdRef.current = null;
       return;
     }
 
-    // Check metadata first (most reliable)
-    const metaRole = user.app_metadata?.role || user.user_metadata?.role;
-    if (metaRole) {
-      console.log('[UserDataContext] ✅ Using metadata role:', metaRole);
-      setRole(metaRole === 'admin' ? 'admin' : 'user');
-      sessionStorage.setItem('role', String(metaRole));
-      localStorage.setItem('userRole', String(metaRole));
+    // PRIORITÉ 1: Check app_metadata (le plus fiable pour isAdmin)
+    const appMetaRole = user.app_metadata?.role;
+    if (appMetaRole) {
+      console.log('[UserDataContext] ✅ Using app_metadata role:', appMetaRole);
+      const resolvedRole = appMetaRole === 'admin' ? 'admin' : 'user';
+      setRole(resolvedRole);
+      sessionStorage.setItem('role', resolvedRole);
+      localStorage.setItem('userRole', resolvedRole);
+      setLoading(false);
+      lastFetchedUserIdRef.current = user.id;
+      return;
+    }
+
+    // PRIORITÉ 2: Check user_metadata
+    const userMetaRole = user.user_metadata?.role;
+    if (userMetaRole) {
+      console.log('[UserDataContext] ✅ Using user_metadata role:', userMetaRole);
+      const resolvedRole = userMetaRole === 'admin' ? 'admin' : 'user';
+      setRole(resolvedRole);
+      sessionStorage.setItem('role', resolvedRole);
+      localStorage.setItem('userRole', resolvedRole);
       setLoading(false);
       lastFetchedUserIdRef.current = user.id;
       return;
     }
     
-    // Check cache (sessionStorage first, then localStorage)
+    // PRIORITÉ 3: Check cache (sessionStorage first, then localStorage)
     const sessionRole = sessionStorage.getItem('role');
     const localRole = localStorage.getItem('userRole');
     const cachedRole = sessionRole || localRole;
@@ -143,15 +179,30 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
 
-    // Dernier recours : fetch depuis la DB avec debounce
+    // PRIORITÉ 4: Fetch depuis la DB profiles avec debounce
     const timeoutId = setTimeout(() => {
-      console.log('[UserDataContext] 🔄 Starting role fetch from DB...');
+      console.log('[UserDataContext] 🔄 Starting role fetch from profiles table...');
       setLoading(true);
+      // Ne pas mettre de rôle par défaut, laisser null pour skeleton
       fetchUserRole(user.id);
     }, 100);
 
     return () => clearTimeout(timeoutId);
   }, [user?.id, authLoading, authReady, fetchUserRole]);
+
+  // Écouter les refreshs de session pour refetch le rôle
+  useEffect(() => {
+    const handleSessionRefreshed = () => {
+      console.log('[UserDataContext] 🔄 Session refreshed, refetching role...');
+      if (user?.id && authReady) {
+        lastFetchedUserIdRef.current = null; // Force refetch
+        fetchUserRole(user.id);
+      }
+    };
+
+    window.addEventListener('ff:session:refreshed', handleSessionRefreshed as any);
+    return () => window.removeEventListener('ff:session:refreshed', handleSessionRefreshed as any);
+  }, [user?.id, authReady, fetchUserRole]);
 
   const refreshUserRole = useCallback(async () => {
     console.log('[UserDataContext] refreshUserRole: Manual refresh requested');

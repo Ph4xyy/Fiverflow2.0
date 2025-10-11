@@ -63,7 +63,7 @@ export const useClients = (): UseClientsReturn => {
   const fetchClients = useCallback(async () => {
     if (!isMountedRef.current) return;
 
-    // GUARD: NE PAS FETCHER tant que authReady n'est pas true et que user n'est pas confirmé
+    // GUARD: NE PAS FETCHER tant que authReady n'est pas true
     if (!authReady) {
       console.log('[useClients] fetchClients: ⏳ Waiting for auth to be ready...');
       setLoading(true);
@@ -106,19 +106,46 @@ export const useClients = (): UseClientsReturn => {
         .order('created_at', { ascending: false });
 
       if (supabaseError) {
-        console.error('[useClients] fetchClients: ❌ Fetch error:', supabaseError);
-        setClients(mockClients);
-        setError(null);
+        // Gérer spécifiquement les erreurs 401/403 (JWT invalide/expiré)
+        const errorCode = (supabaseError as any)?.code;
+        const errorMessage = supabaseError.message || '';
+        
+        if (errorCode === 'PGRST301' || errorMessage.includes('JWT') || errorMessage.includes('expired') || errorMessage.includes('auth')) {
+          console.warn('[useClients] fetchClients: ⚠️ Auth error (401/403), will retry after token refresh:', supabaseError);
+          // Ne pas afficher d'erreur à l'utilisateur, juste attendre le refresh
+          setError(null);
+          // Garder les données actuelles si disponibles
+          if (clients.length === 0) {
+            setClients(mockClients); // Afficher mock en attendant
+          }
+        } else {
+          // Erreur autre que JWT
+          console.error('[useClients] fetchClients: ❌ Fetch error:', supabaseError);
+          setClients(mockClients); // Fallback sur mock
+          setError(null); // Ne pas afficher d'erreur à l'utilisateur
+        }
       } else {
         console.log('[useClients] fetchClients: ✅ Fetched', data?.length || 0, 'clients');
         setClients(data || []);
         setError(null);
         lastFetchedUserIdRef.current = user.id;
       }
-    } catch (_err) {
-      console.error('[useClients] fetchClients: 💥 Unexpected error:', _err);
-      setClients(mockClients);
-      setError(null);
+    } catch (err: any) {
+      // Gérer les erreurs non catchées (401/403)
+      const errorCode = err?.code;
+      const errorMessage = err?.message || '';
+      
+      if (errorCode === 'PGRST301' || errorMessage.includes('JWT') || errorMessage.includes('expired')) {
+        console.warn('[useClients] fetchClients: ⚠️ Auth error in catch, will retry:', err);
+        setError(null);
+        if (clients.length === 0) {
+          setClients(mockClients);
+        }
+      } else {
+        console.error('[useClients] fetchClients: 💥 Unexpected error:', err);
+        setClients(mockClients);
+        setError(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -139,16 +166,19 @@ export const useClients = (): UseClientsReturn => {
     }
   }, [user?.id, authReady, fetchClients]);
 
-  // Écouter les événements de refresh de session
+  // Écouter les événements de refresh de session pour refetch
   useEffect(() => {
-    const handleSessionRefreshed = () => {
-      console.log('[useClients] Session refreshed event received, refetching...');
-      refetchClients();
+    const handleSessionRefreshed = (e: CustomEvent) => {
+      console.log('[useClients] 🔄 Session refreshed event received:', e.detail, '- refetching clients...');
+      // Réinitialiser les guards et refetch
+      hasFetchedRef.current = false;
+      lastFetchedUserIdRef.current = null;
+      fetchClients();
     };
 
     window.addEventListener('ff:session:refreshed', handleSessionRefreshed as any);
     return () => window.removeEventListener('ff:session:refreshed', handleSessionRefreshed as any);
-  }, [refetchClients]);
+  }, [fetchClients]);
 
   useEffect(() => {
     return () => {

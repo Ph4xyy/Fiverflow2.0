@@ -30,7 +30,7 @@ interface UsePlanRestrictionsReturn {
 export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
   const { user, authReady } = useAuth();
   const userData = useUserData();
-  const ctxRole = (userData?.role ?? null) as string | null;
+  const ctxRole = userData?.role; // Peut être 'admin', 'user' ou null
 
   const { subscription: stripeSubscription, loading: stripeLoading } = useStripeSubscription();
 
@@ -69,56 +69,93 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
         return;
       }
 
-      // If role already provided by context, trust it
-      if (ctxRole) {
+      // Si le rôle est fourni par le context, l'utiliser (y compris null)
+      if (ctxRole !== undefined) {
         console.log('[usePlanRestrictions] fetchRole: ✅ Using context role:', ctxRole);
         setRole(ctxRole);
         setRoleLoading(false);
-        sessionStorage.setItem('role', String(ctxRole));
+        if (ctxRole) {
+          sessionStorage.setItem('role', String(ctxRole));
+        }
         return;
       }
 
-      // Otherwise try cache, metadata, or DB
-      const cached = sessionStorage.getItem('role');
-      const metaRole =
-        (user.app_metadata as any)?.role ||
-        (user.user_metadata as any)?.role ||
-        cached;
-
-      if (metaRole) {
-        console.log('[usePlanRestrictions] fetchRole: ✅ Using cached/metadata role:', metaRole);
-        setRole(String(metaRole));
+      // PRIORITÉ 1: Vérifier app_metadata (le plus fiable pour isAdmin)
+      const appMetaRole = user.app_metadata?.role;
+      if (appMetaRole) {
+        console.log('[usePlanRestrictions] fetchRole: ✅ Using app_metadata role:', appMetaRole);
+        setRole(String(appMetaRole));
         setRoleLoading(false);
-        sessionStorage.setItem('role', String(metaRole));
+        sessionStorage.setItem('role', String(appMetaRole));
+        return;
+      }
+
+      // PRIORITÉ 2: Vérifier user_metadata
+      const userMetaRole = user.user_metadata?.role;
+      if (userMetaRole) {
+        console.log('[usePlanRestrictions] fetchRole: ✅ Using user_metadata role:', userMetaRole);
+        setRole(String(userMetaRole));
+        setRoleLoading(false);
+        sessionStorage.setItem('role', String(userMetaRole));
+        return;
+      }
+
+      // PRIORITÉ 3: Check cache
+      const cached = sessionStorage.getItem('role');
+      if (cached) {
+        console.log('[usePlanRestrictions] fetchRole: ✅ Using cached role:', cached);
+        setRole(String(cached));
+        setRoleLoading(false);
         return;
       }
 
       if (!isSupabaseConfigured || !supabase) {
-        setRole(null);
+        setRole(null); // Pas de Supabase = rôle inconnu
         setRoleLoading(false);
         return;
       }
 
-      console.log('[usePlanRestrictions] fetchRole: 📡 Fetching role from database...');
+      console.log('[usePlanRestrictions] fetchRole: 📡 Fetching role from profiles table...');
       setRoleLoading(true);
-      const { data, error } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle();
+      
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', user.id)
+          .maybeSingle();
 
-      if (!isMounted) return;
+        if (!isMounted) return;
 
-      if (error) {
-        console.error('[usePlanRestrictions] fetchRole: ❌ Error:', error.message);
-        setError(error.message);
-        setRole(null);
-      } else {
-        console.log('[usePlanRestrictions] fetchRole: ✅ Role fetched:', data?.role);
-        setRole(data?.role ?? null);
-        if (data?.role) sessionStorage.setItem('role', String(data.role));
+        if (error) {
+          // Gérer les erreurs 401/403 sans dégrader le rôle
+          if (error.code === 'PGRST301' || error.message.includes('JWT')) {
+            console.warn('[usePlanRestrictions] fetchRole: ⚠️ Auth error, will retry:', error.message);
+            setRole(null); // Laisser null pour skeleton
+          } else {
+            console.error('[usePlanRestrictions] fetchRole: ❌ Error:', error.message);
+            setError(error.message);
+            setRole(null);
+          }
+        } else {
+          console.log('[usePlanRestrictions] fetchRole: ✅ Role fetched:', data?.role);
+          setRole(data?.role ?? null);
+          if (data?.role) sessionStorage.setItem('role', String(data.role));
+        }
+      } catch (err: any) {
+        if (!isMounted) return;
+        
+        // Gérer les erreurs 401/403 dans le catch
+        if (err?.code === 'PGRST301' || err?.message?.includes('JWT')) {
+          console.warn('[usePlanRestrictions] fetchRole: ⚠️ Auth error in catch:', err);
+          setRole(null);
+        } else {
+          console.error('[usePlanRestrictions] fetchRole: 💥 Unexpected error:', err);
+          setRole(null);
+        }
+      } finally {
+        setRoleLoading(false);
       }
-      setRoleLoading(false);
     };
 
     fetchRole();
@@ -128,6 +165,17 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
     };
   }, [user?.id, ctxRole, authReady]);
 
+  // Écouter les refreshs de session
+  useEffect(() => {
+    const handleSessionRefreshed = () => {
+      console.log('[usePlanRestrictions] 🔄 Session refreshed, recalculating restrictions...');
+      lastCalculatedUserIdRef.current = null; // Force recalcul
+    };
+
+    window.addEventListener('ff:session:refreshed', handleSessionRefreshed as any);
+    return () => window.removeEventListener('ff:session:refreshed', handleSessionRefreshed as any);
+  }, []);
+
   useEffect(() => {
     // GUARD: NE PAS CALCULER les restrictions tant que authReady n'est pas true
     if (!authReady) {
@@ -135,11 +183,15 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
       return;
     }
 
-    if (!user || roleLoading) {
-      console.log('[usePlanRestrictions] Calculate: ⏳ Waiting for user or role...', { 
-        hasUser: !!user, 
-        roleLoading 
-      });
+    if (!user) {
+      console.log('[usePlanRestrictions] Calculate: ❌ No user');
+      setRestrictions(null);
+      return;
+    }
+
+    // Si le rôle est encore en chargement, ne pas calculer
+    if (roleLoading || role === undefined) {
+      console.log('[usePlanRestrictions] Calculate: ⏳ Waiting for role...', { roleLoading, role });
       return;
     }
 
@@ -157,7 +209,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
 
     // Debounce minimal
     const timeoutId = setTimeout(() => {
-      // ADMIN OVERRIDE
+      // ADMIN OVERRIDE - Vérifier role === 'admin'
       if (role === 'admin') {
         const adminRestrictions: PlanRestrictions = {
           plan: 'excellence',
@@ -177,7 +229,15 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
         return;
       }
 
-      // Default role = user
+      // Si role === null, on ne peut pas calculer les restrictions
+      // Laisser restrictions à null pour afficher un skeleton
+      if (role === null) {
+        console.log('[usePlanRestrictions] Calculate: ⏳ Role still unknown, keeping restrictions null');
+        setRestrictions(null);
+        return;
+      }
+
+      // Default role = user (ou tout rôle non-admin)
       let plan: UserPlan = 'free';
       let isTrialActive = false;
       let trialDaysRemaining: number | null = null;
@@ -235,8 +295,8 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
 
   const checkAccess = (feature: FeatureKey) => {
     if (!restrictions) {
-      console.log('[usePlanRestrictions] checkAccess: ❌ No restrictions available');
-      return false;
+      console.log('[usePlanRestrictions] checkAccess: ❌ No restrictions available (role unknown)');
+      return false; // Tant que le rôle n'est pas connu, bloquer l'accès
     }
     if (restrictions.isAdmin) return true;
 
@@ -260,7 +320,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
 
   return {
     restrictions,
-    loading: stripeLoading || roleLoading || !authReady,
+    loading: stripeLoading || roleLoading || !authReady || role === null,
     error,
     checkAccess
   };

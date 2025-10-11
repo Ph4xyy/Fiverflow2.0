@@ -24,20 +24,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const hasInitialized = useRef(false);
   const authStateListenerRef = useRef<any>(null);
   const previousUserIdRef = useRef<string | null>(null);
+  const realtimeChannelsHealthyRef = useRef(true);
 
   console.log('[AuthContext] Render:', { 
     hasUser: !!user, 
     loading, 
     authReady,
     userId: user?.id,
-    storageIssue: storageSupport.hasIssue
+    storageIssue: storageSupport.hasIssue,
+    realtimeHealthy: realtimeChannelsHealthyRef.current
   });
 
   // Afficher un avertissement si problème de storage détecté
   useEffect(() => {
     if (storageSupport.hasIssue) {
       console.warn('[AuthContext] ⚠️ STORAGE ISSUE:', storageSupport.message);
-      // Vous pourriez afficher une notification à l'utilisateur ici
     }
   }, []);
 
@@ -50,6 +51,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setLoadingSafe = safeSetState(setLoading);
   const setAuthReadySafe = safeSetState(setAuthReady);
 
+  // Fonction pour mettre à jour Realtime auth et émettre l'événement
+  const updateRealtimeAndEmit = async (session: Session | null) => {
+    if (!supabase) return;
+
+    try {
+      // Mettre à jour l'auth token pour les channels Realtime
+      const accessToken = session?.access_token ?? '';
+      console.log('[AuthContext] updateRealtimeAndEmit: Updating Realtime auth...', {
+        hasToken: !!accessToken,
+        tokenLength: accessToken.length
+      });
+      
+      await supabase.realtime.setAuth(accessToken);
+      console.log('[AuthContext] updateRealtimeAndEmit: ✅ Realtime auth updated');
+      realtimeChannelsHealthyRef.current = true;
+
+      // Émettre l'événement de refresh de session
+      if (session?.user) {
+        console.log('[AuthContext] updateRealtimeAndEmit: 📡 Emitting ff:session:refreshed event');
+        try {
+          window.dispatchEvent(new CustomEvent('ff:session:refreshed', { 
+            detail: { 
+              userId: session.user.id,
+              timestamp: Date.now()
+            } 
+          }));
+        } catch (err) {
+          console.warn('[AuthContext] updateRealtimeAndEmit: Failed to emit event:', err);
+        }
+      }
+    } catch (err) {
+      console.error('[AuthContext] updateRealtimeAndEmit: ❌ Failed to update Realtime auth:', err);
+      realtimeChannelsHealthyRef.current = false;
+      
+      // Si les channels sont KO, les nettoyer pour permettre la reconnexion
+      try {
+        console.log('[AuthContext] updateRealtimeAndEmit: 🧹 Removing all channels due to error');
+        await supabase.removeAllChannels();
+        console.log('[AuthContext] updateRealtimeAndEmit: ✅ Channels removed, modules can resubscribe');
+      } catch (cleanupErr) {
+        console.error('[AuthContext] updateRealtimeAndEmit: ❌ Failed to remove channels:', cleanupErr);
+      }
+    }
+  };
+
   const deriveAndCacheRole = async (session: Session | null) => {
     try {
       const sessionUser = session?.user ?? null;
@@ -59,39 +105,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const metaRole =
-        (sessionUser.app_metadata as any)?.role ||
-        (sessionUser.user_metadata as any)?.role;
-
-      if (metaRole) {
-        console.log('[AuthContext] deriveAndCacheRole: Found role in metadata:', metaRole);
-        sessionStorage.setItem('role', String(metaRole));
-        localStorage.setItem('userRole', String(metaRole));
+      // PRIORITÉ 1: Vérifier app_metadata (le plus fiable)
+      const appMetaRole = sessionUser.app_metadata?.role;
+      if (appMetaRole) {
+        console.log('[AuthContext] deriveAndCacheRole: ✅ Found role in app_metadata:', appMetaRole);
+        sessionStorage.setItem('role', String(appMetaRole));
+        localStorage.setItem('userRole', String(appMetaRole));
         return;
       }
 
-      if (isSupabaseConfigured && supabase) {
-        console.log('[AuthContext] deriveAndCacheRole: Fetching role from database...');
-        const { data: profile, error } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', sessionUser.id)
-          .maybeSingle();
+      // PRIORITÉ 2: Vérifier user_metadata
+      const userMetaRole = sessionUser.user_metadata?.role;
+      if (userMetaRole) {
+        console.log('[AuthContext] deriveAndCacheRole: ✅ Found role in user_metadata:', userMetaRole);
+        sessionStorage.setItem('role', String(userMetaRole));
+        localStorage.setItem('userRole', String(userMetaRole));
+        return;
+      }
 
-        if (error) {
-          console.error('[AuthContext] deriveAndCacheRole: DB error:', error.message);
-        } else if (profile?.role) {
-          console.log('[AuthContext] deriveAndCacheRole: Found role in DB:', profile.role);
-          sessionStorage.setItem('role', String(profile.role));
-          localStorage.setItem('userRole', String(profile.role));
-        } else {
-          console.log('[AuthContext] deriveAndCacheRole: No role found, defaulting to user');
-          sessionStorage.setItem('role', 'user');
-          localStorage.setItem('userRole', 'user');
+      // PRIORITÉ 3: Charger depuis la table profiles (avec RLS)
+      if (isSupabaseConfigured && supabase) {
+        console.log('[AuthContext] deriveAndCacheRole: 📡 Fetching role from profiles table...');
+        
+        try {
+          const { data: profile, error } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', sessionUser.id)
+            .maybeSingle();
+
+          if (error) {
+            // Gérer les erreurs 401/403 sans crash
+            if (error.code === 'PGRST301' || error.message.includes('JWT')) {
+              console.warn('[AuthContext] deriveAndCacheRole: ⚠️ Auth error, will retry after token refresh:', error.message);
+              // Ne pas cacher de rôle par défaut, laisser undefined pour afficher skeleton
+              return;
+            }
+            console.error('[AuthContext] deriveAndCacheRole: ❌ DB error:', error.message);
+          } else if (profile?.role) {
+            console.log('[AuthContext] deriveAndCacheRole: ✅ Found role in profiles table:', profile.role);
+            sessionStorage.setItem('role', String(profile.role));
+            localStorage.setItem('userRole', String(profile.role));
+            return;
+          } else {
+            console.log('[AuthContext] deriveAndCacheRole: ⚠️ No role found in profiles, defaulting to user');
+            sessionStorage.setItem('role', 'user');
+            localStorage.setItem('userRole', 'user');
+          }
+        } catch (fetchErr) {
+          console.error('[AuthContext] deriveAndCacheRole: 💥 Unexpected error:', fetchErr);
+          // Ne pas cacher de rôle par défaut en cas d'erreur
         }
       }
     } catch (err) {
-      console.error('[AuthContext] deriveAndCacheRole: Error:', err);
+      console.error('[AuthContext] deriveAndCacheRole: 💥 Error:', err);
     }
   };
 
@@ -109,12 +176,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       await deriveAndCacheRole(session);
       
-      // Émettre un événement pour que les composants puissent refetch leurs données
-      try {
-        window.dispatchEvent(new CustomEvent('ff:session:refreshed', { 
-          detail: { userId: session.user.id } 
-        }));
-      } catch {}
+      // Mettre à jour Realtime et émettre l'événement
+      await updateRealtimeAndEmit(session);
     },
     onSessionLost: () => {
       console.log('[AuthContext] ❌ Session lost after max retries');
@@ -123,6 +186,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       previousUserIdRef.current = null;
       sessionStorage.removeItem('role');
       localStorage.removeItem('userRole');
+      
+      // Nettoyer les channels Realtime
+      if (supabase) {
+        try {
+          console.log('[AuthContext] 🧹 Removing all Realtime channels after session lost');
+          supabase.removeAllChannels();
+        } catch (err) {
+          console.error('[AuthContext] Failed to remove channels:', err);
+        }
+      }
     }
   });
 
@@ -175,11 +248,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (session) {
-          console.log('[AuthContext] ✅ Session found:', {
+          console.log('[AuthContext] ✅ Initial session found:', {
             userId: session.user.id,
             email: session.user.email,
             expiresAt: new Date(session.expires_at * 1000).toISOString(),
-            isExpired: new Date(session.expires_at * 1000) < new Date()
+            isExpired: new Date(session.expires_at * 1000) < new Date(),
+            appMetaRole: session.user.app_metadata?.role
           });
 
           const expiresAt = new Date(session.expires_at * 1000);
@@ -189,20 +263,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log('[AuthContext] ⚠️ Session expired on init, using resilience hook...');
             await attemptSessionRefresh();
           } else {
-            console.log('[AuthContext] Session valid, setting user');
+            console.log('[AuthContext] Session valid, setting user and updating Realtime');
             setUserSafe(session.user);
             previousUserIdRef.current = session.user.id;
             await deriveAndCacheRole(session);
+            
+            // Mettre à jour Realtime auth et émettre l'événement
+            await updateRealtimeAndEmit(session);
           }
         } else {
-          console.log('[AuthContext] No session found');
+          console.log('[AuthContext] No initial session found');
           setUserSafe(null);
           previousUserIdRef.current = null;
         }
 
         setLoadingSafe(false);
         setAuthReadySafe(true);
-        console.log('[AuthContext] ✅ Initialization complete');
+        console.log('[AuthContext] ✅ Initialization complete, authReady=true');
 
         // Nettoyer le listener précédent s'il existe
         if (authStateListenerRef.current) {
@@ -223,31 +300,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
           
           if (event === 'TOKEN_REFRESHED') {
-            console.log('[AuthContext] ✅ Token refreshed automatically by Supabase');
+            console.log('[AuthContext] ✅ TOKEN_REFRESHED event');
             if (nextSession?.user) {
               setUserSafe(nextSession.user);
               previousUserIdRef.current = nextSession.user.id;
               await deriveAndCacheRole(nextSession);
+              
+              // Mettre à jour Realtime et émettre
+              await updateRealtimeAndEmit(nextSession);
             }
           } else if (event === 'SIGNED_OUT') {
-            console.log('[AuthContext] 🚪 User signed out');
+            console.log('[AuthContext] 🚪 SIGNED_OUT event');
             setUserSafe(null);
             previousUserIdRef.current = null;
             sessionStorage.removeItem('role');
             localStorage.removeItem('userRole');
+            
+            // Nettoyer les channels
+            try {
+              await supabase.removeAllChannels();
+            } catch (err) {
+              console.error('[AuthContext] Failed to remove channels on sign out:', err);
+            }
           } else if (event === 'SIGNED_IN') {
-            console.log('[AuthContext] ✅ User signed in');
+            console.log('[AuthContext] ✅ SIGNED_IN event');
             if (nextSession?.user) {
               setUserSafe(nextSession.user);
               previousUserIdRef.current = nextSession.user.id;
               await deriveAndCacheRole(nextSession);
+              
+              // Mettre à jour Realtime et émettre
+              await updateRealtimeAndEmit(nextSession);
             }
           } else if (event === 'USER_UPDATED') {
-            console.log('[AuthContext] 👤 User updated');
+            console.log('[AuthContext] 👤 USER_UPDATED event');
             if (nextSession?.user) {
               setUserSafe(nextSession.user);
               previousUserIdRef.current = nextSession.user.id;
               await deriveAndCacheRole(nextSession);
+              
+              // Mettre à jour Realtime et émettre
+              await updateRealtimeAndEmit(nextSession);
             }
           }
           
@@ -328,6 +421,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('[AuthContext] signUp: Error:', error.message);
       } else {
         console.log('[AuthContext] signUp: Success');
+        
+        // Mettre à jour Realtime et émettre si session disponible
+        if (data.session) {
+          await updateRealtimeAndEmit(data.session);
+        }
       }
 
       await deriveAndCacheRole(data.session ?? null);
@@ -354,11 +452,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.user && data.session) {
         console.log('[AuthContext] signIn: ✅ Success', {
           userId: data.user.id,
-          email: data.user.email
+          email: data.user.email,
+          appMetaRole: data.user.app_metadata?.role
         });
         setUserSafe(data.user);
         previousUserIdRef.current = data.user.id;
         await deriveAndCacheRole(data.session);
+        
+        // Mettre à jour Realtime et émettre
+        await updateRealtimeAndEmit(data.session);
         
         try {
           await supabase.auth.getSession();
@@ -385,6 +487,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     try {
+      // Nettoyer les channels avant de se déconnecter
+      try {
+        await supabase.removeAllChannels();
+        console.log('[AuthContext] signOut: Realtime channels removed');
+      } catch (err) {
+        console.error('[AuthContext] signOut: Failed to remove channels:', err);
+      }
+      
       await supabase.auth.signOut();
       setUserSafe(null);
       previousUserIdRef.current = null;
