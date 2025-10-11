@@ -388,21 +388,20 @@ const ProfilePage: React.FC = () => {
     return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
-  // UI class helpers (dark-ready)
-  const card = 'bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700';
-  const soft = 'bg-gray-50 dark:bg-slate-800';
-  const h1 = 'text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white';
-  const h2 = 'text-lg sm:text-xl font-semibold text-gray-900 dark:text-white';
-  const h3 = 'text-base sm:text-lg font-medium text-gray-900 dark:text-white';
-  const pSub = 'text-sm sm:text-base text-gray-600 dark:text-gray-400';
-  const labelBase = 'block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2';
+  // UI class helpers - Nouveau thème sombre
+  const card = 'bg-[#11151D] rounded-lg shadow-lg border border-[#1C2230]';
+  const soft = 'bg-[#0E121A] ring-1 ring-[#1C2230]';
+  const h1 = 'text-2xl sm:text-3xl font-bold text-white';
+  const h2 = 'text-lg sm:text-xl font-semibold text-white';
+  const h3 = 'text-base sm:text-lg font-medium text-white';
+  const pSub = 'text-sm sm:text-base text-slate-400';
+  const labelBase = 'block text-xs sm:text-sm font-medium text-slate-300 mb-2';
   const inputBase =
     'w-full px-3 py-2 text-sm sm:text-base border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ' +
-    'border-[#1C2230] text-slate-100 placeholder-slate-400 ' +
-    'bg-[#11151D]/95 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-400';
+    'border-[#1C2230] text-slate-100 placeholder-slate-400 bg-[#11151D]/95';
   const selectBase = inputBase;
-  const monoMuted = 'text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-mono mt-1 break-all';
-  const divider = 'border-t border-gray-200 dark:border-slate-700';
+  const monoMuted = 'text-xs sm:text-sm text-slate-400 font-mono mt-1 break-all';
+  const divider = 'border-t border-[#1C2230]';
 
   /* ---------- Fonctions Images ---------- */
   const saveImages = async () => {
@@ -861,17 +860,17 @@ const ProfilePage: React.FC = () => {
                 ].map((row) => (
                   <div key={row.key} className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg space-y-2 sm:space-y-0 ${soft}`}>
                     <div>
-                      <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">{row.title}</h4>
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{row.desc}</p>
+                      <h4 className="text-sm sm:text-base font-medium text-white">{row.title}</h4>
+                      <p className="text-xs sm:text-sm text-slate-400">{row.desc}</p>
                     </div>
                     <button
                       onClick={() => savePreferences({ ...preferences, [row.key]: !preferences[row.key] })}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                        preferences[row.key] ? 'bg-gradient-to-r from-purple-500 to-pink-600' : 'bg-gray-200 dark:bg-slate-700'
+                        preferences[row.key] ? 'bg-gradient-to-r from-purple-500 to-pink-600' : 'bg-slate-700'
                       }`}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
                           preferences[row.key] ? 'translate-x-6' : 'translate-x-1'
                         }`}
                       />
@@ -886,11 +885,11 @@ const ProfilePage: React.FC = () => {
               <div className="space-y-4">
                 <div className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg space-y-2 sm:space-y-0 ${soft}`}>
                   <div>
-                    <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">{t('profile.notifications.orders')}</h4>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('profile.notifications.orders.desc')}</p>
+                    <h4 className="text-sm sm:text-base font-medium text-white">{t('profile.notifications.orders')}</h4>
+                    <p className="text-xs sm:text-sm text-slate-400">{t('profile.notifications.orders.desc')}</p>
                   </div>
                   <div className="flex space-x-3 sm:space-x-4">
-                    <label className="flex items-center text-sm text-gray-800 dark:text-gray-200">
+                    <label className="flex items-center text-sm text-slate-200">
                       <input
                         type="checkbox"
                         checked={notifications.emailOrders}
@@ -899,7 +898,7 @@ const ProfilePage: React.FC = () => {
                       />
                       Email
                     </label>
-                    <label className="flex items-center text-sm text-gray-800 dark:text-gray-200">
+                    <label className="flex items-center text-sm text-slate-200">
                       <input
                         type="checkbox"
                         checked={notifications.pushOrders}
@@ -913,11 +912,11 @@ const ProfilePage: React.FC = () => {
 
                 <div className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg space-y-2 sm:space-y-0 ${soft}`}>
                   <div>
-                    <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">{t('profile.notifications.clients')}</h4>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('profile.notifications.clients.desc')}</p>
+                    <h4 className="text-sm sm:text-base font-medium text-white">{t('profile.notifications.clients')}</h4>
+                    <p className="text-xs sm:text-sm text-slate-400">{t('profile.notifications.clients.desc')}</p>
                   </div>
                   <div className="flex space-x-3 sm:space-x-4">
-                    <label className="flex items-center text-sm text-gray-800 dark:text-gray-200">
+                    <label className="flex items-center text-sm text-slate-200">
                       <input
                         type="checkbox"
                         checked={notifications.emailClients}
@@ -931,11 +930,11 @@ const ProfilePage: React.FC = () => {
 
                 <div className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-lg space-y-2 sm:space-y-0 ${soft}`}>
                   <div>
-                    <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">{t('profile.notifications.payments')}</h4>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('profile.notifications.payments.desc')}</p>
+                    <h4 className="text-sm sm:text-base font-medium text-white">{t('profile.notifications.payments')}</h4>
+                    <p className="text-xs sm:text-sm text-slate-400">{t('profile.notifications.payments.desc')}</p>
                   </div>
                   <div className="flex space-x-3 sm:space-x-4">
-                    <label className="flex items-center text-sm text-gray-800 dark:text-gray-200">
+                    <label className="flex items-center text-sm text-slate-200">
                       <input
                         type="checkbox"
                         checked={notifications.pushPayments}
@@ -958,10 +957,10 @@ const ProfilePage: React.FC = () => {
               <h3 className={h3}>{t('profile.security.title')}</h3>
               <div className="space-y-4">
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
-                  <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-2">{t('profile.security.password')}</h4>
+                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{t('profile.security.password')}</h4>
                   <div className="space-y-3">
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={20} />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         placeholder={t('profile.security.password.current')}
@@ -972,7 +971,7 @@ const ProfilePage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
                       >
                         {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                       </button>
@@ -995,7 +994,7 @@ const ProfilePage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
                       >
                         {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                       </button>
@@ -1011,8 +1010,8 @@ const ProfilePage: React.FC = () => {
                 </div>
 
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
-                  <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-2">{t('profile.security.2fa')}</h4>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3">{t('profile.security.2fa.desc')}</p>
+                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{t('profile.security.2fa')}</h4>
+                  <p className="text-xs sm:text-sm text-slate-400 mb-3">{t('profile.security.2fa.desc')}</p>
                   <button className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg">
                     {t('profile.security.2fa.enable')}
                   </button>
@@ -1029,10 +1028,10 @@ const ProfilePage: React.FC = () => {
               <h3 className={h3}>{t('profile.billing.title')}</h3>
               <div className="space-y-4">
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
-                  <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-2">{t('profile.billing.plan')}</h4>
+                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{t('profile.billing.plan')}</h4>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-xs sm:text-sm text-slate-400">
                         {stripeSubscription?.product_name
                           ? `${stripeSubscription.product_name} - ${stripeSubscription.product_description}`
                           : t('profile.billing.plan.free')}
@@ -1061,22 +1060,22 @@ const ProfilePage: React.FC = () => {
                 </div>
 
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
-                  <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-2">{t('profile.billing.payment')}</h4>
+                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{t('profile.billing.payment')}</h4>
                   {stripeSubscription?.payment_method_brand && stripeSubscription?.payment_method_last4 ? (
                     <div>
-                      <p className="text-xs sm:text-sm text-gray-900 dark:text-white font-medium">
+                      <p className="text-xs sm:text-sm text-white font-medium">
                         {stripeSubscription.payment_method_brand.toUpperCase()} •••• {stripeSubscription.payment_method_last4}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <p className="text-xs text-slate-400 mt-1">
                         {stripeSubscription.current_period_end && (
                           `${t('profile.billing.payment.next')} ${new Date(stripeSubscription.current_period_end * 1000).toLocaleDateString()}`
                         )}
                       </p>
                     </div>
                   ) : (
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{t('profile.billing.payment.none')}</p>
+                    <p className="text-xs sm:text-sm text-slate-400">{t('profile.billing.payment.none')}</p>
                   )}
-                  <button className="mt-2 px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 dark:border-slate-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800">
+                  <button className="mt-2 px-3 sm:px-4 py-2 text-sm sm:text-base border border-[#1C2230] text-slate-200 rounded-lg hover:bg-[#141922] transition-colors">
                     {stripeSubscription?.payment_method_brand ? t('profile.billing.payment.update') : t('profile.billing.payment.add')}
                   </button>
                 </div>
@@ -1092,7 +1091,7 @@ const ProfilePage: React.FC = () => {
               <h3 className={h3}>{t('profile.preferences.title')}</h3>
               <div className="space-y-4">
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
-                  <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-2">{t('profile.preferences.currency')}</h4>
+                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{t('profile.preferences.currency')}</h4>
                   <select 
                     className={selectBase}
                     value={currency}
@@ -1154,15 +1153,15 @@ const ProfilePage: React.FC = () => {
             {/* Section Images */}
             <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
               <div className="flex items-center gap-2 mb-4">
-                <Palette size={18} />
-                <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">{t('profile.branding.images')}</h4>
+                <Palette size={18} className="text-purple-400" />
+                <h4 className="text-sm sm:text-base font-medium text-white">{t('profile.branding.images')}</h4>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Bannière */}
                 <div>
                   <label className={labelBase}>{t('profile.branding.banner')}</label>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                  <p className="text-xs text-slate-400 mb-2">
                     {t('profile.branding.banner.desc')}
                   </p>
                   <ImageUpload
@@ -1178,7 +1177,7 @@ const ProfilePage: React.FC = () => {
                 {/* Logo */}
                 <div>
                   <label className={labelBase}>{t('profile.branding.logo')}</label>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                  <p className="text-xs text-slate-400 mb-2">
                     {t('profile.branding.logo.desc')}
                   </p>
                   <ImageUpload
@@ -1219,7 +1218,7 @@ const ProfilePage: React.FC = () => {
                       setLogoFile(null);
                       setAvatarFile(null);
                     }}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="px-4 py-2 border border-[#1C2230] text-slate-200 rounded-lg hover:bg-[#141922] transition-colors"
                   >
                     {t('common.cancel')}
                   </button>
@@ -1287,11 +1286,11 @@ const ProfilePage: React.FC = () => {
                   type="button"
                   onClick={() => setSmtp((s) => s ? { ...s, enabled: !s.enabled } : s)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                    smtp?.enabled ? 'bg-gradient-to-r from-purple-500 to-pink-600' : 'bg-gray-200 dark:bg-slate-700'
+                    smtp?.enabled ? 'bg-gradient-to-r from-purple-500 to-pink-600' : 'bg-slate-700'
                   }`}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
                       smtp?.enabled ? 'translate-x-6' : 'translate-x-1'
                     }`}
                   />
@@ -1301,8 +1300,8 @@ const ProfilePage: React.FC = () => {
 
             <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
               <div className="flex items-center gap-2 mb-3">
-                <Server size={18} />
-                <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">{t('profile.branding.smtp.server')}</h4>
+                <Server size={18} className="text-purple-400" />
+                <h4 className="text-sm sm:text-base font-medium text-white">{t('profile.branding.smtp.server')}</h4>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1333,12 +1332,12 @@ const ProfilePage: React.FC = () => {
                     type="button"
                     onClick={() => setSmtp((s) => s ? { ...s, secure: !s.secure } : s)}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                      smtp?.secure ? 'bg-gradient-to-r from-purple-500 to-pink-600' : 'bg-gray-200 dark:bg-slate-700'
+                      smtp?.secure ? 'bg-gradient-to-r from-purple-500 to-pink-600' : 'bg-slate-700'
                     }`}
                     disabled={!smtp?.enabled}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
                         smtp?.secure ? 'translate-x-6' : 'translate-x-1'
                       }`}
                     />
@@ -1392,7 +1391,7 @@ const ProfilePage: React.FC = () => {
         <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-            <p className="ml-4 text-gray-600 dark:text-gray-400">{t('profile.loading')}</p>
+            <p className="ml-4 text-slate-400">{t('profile.loading')}</p>
           </div>
         </div>
       </Layout>
@@ -1404,7 +1403,7 @@ const ProfilePage: React.FC = () => {
       <Layout>
         <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
           <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">{t('profile.error.load')}</p>
+            <p className="text-slate-400">{t('profile.error.load')}</p>
           </div>
         </div>
       </Layout>
@@ -1439,7 +1438,7 @@ const ProfilePage: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-end space-y-4 sm:space-y-0 sm:space-x-4">
                 {/* Avatar personnalisé ou par défaut */}
                 <div 
-                  className="w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-slate-900 rounded-full border-4 border-white dark:border-slate-900 shadow-lg flex items-center justify-center mx-auto sm:mx-0 cursor-pointer hover:opacity-80 transition-opacity relative group"
+                  className="w-20 h-20 sm:w-24 sm:h-24 bg-[#11151D] rounded-full border-4 border-[#11151D] shadow-lg flex items-center justify-center mx-auto sm:mx-0 cursor-pointer hover:opacity-80 transition-opacity relative group"
                   onClick={() => setShowAvatarUpload(true)}
                   title="Cliquer pour changer la photo de profil"
                 >
@@ -1473,12 +1472,12 @@ const ProfilePage: React.FC = () => {
                 </div>
 
                 <div className="text-center sm:text-left mb-4 sm:mb-2">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">
                     {profile.name || 'User'}
                   </h2>
-                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">{profile.email}</p>
+                  <p className="text-sm sm:text-base text-slate-400">{profile.email}</p>
                   {profile.activity && (
-                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">{profile.activity}</p>
+                    <p className="text-xs sm:text-sm text-slate-400 mt-1">{profile.activity}</p>
                   )}
                   <div className="flex items-center justify-center sm:justify-start space-x-2 mt-2">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
@@ -1506,14 +1505,14 @@ const ProfilePage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             <div>
-              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">{t('profile.account.member.since')}</p>
-              <p className="text-sm sm:text-base text-gray-900 dark:text-white mt-1">
+              <p className="text-xs sm:text-sm font-medium text-slate-400">{t('profile.account.member.since')}</p>
+              <p className="text-sm sm:text-base text-white mt-1">
                 {formatDate(profile.created_at)}
               </p>
             </div>
 
             <div>
-              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">{t('profile.account.user.id')}</p>
+              <p className="text-xs sm:text-sm font-medium text-slate-400">{t('profile.account.user.id')}</p>
               <p className={monoMuted}>
                 {profile.id}
               </p>
@@ -1521,7 +1520,7 @@ const ProfilePage: React.FC = () => {
 
             {profile.referrer_id && (
               <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">{t('profile.account.referred.by')}</p>
+                <p className="text-xs sm:text-sm font-medium text-slate-400">{t('profile.account.referred.by')}</p>
                 <p className={monoMuted}>
                   {profile.referrer_id}
                 </p>
@@ -1580,9 +1579,9 @@ const ProfilePage: React.FC = () => {
       {/* Modal d'upload d'avatar */}
       {showAvatarUpload && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-slate-900 rounded-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-[#11151D] rounded-lg p-6 max-w-md w-full mx-4 border border-[#1C2230]">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-white">
                 {t('profile.avatar.change')}
               </h3>
               <button
@@ -1590,7 +1589,7 @@ const ProfilePage: React.FC = () => {
                   setShowAvatarUpload(false);
                   setAvatarFile(null);
                 }}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-slate-400 hover:text-slate-200 transition-colors"
               >
                 <X size={20} />
               </button>
@@ -1631,7 +1630,7 @@ const ProfilePage: React.FC = () => {
                   setShowAvatarUpload(false);
                   setAvatarFile(null);
                 }}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="px-4 py-2 border border-[#1C2230] text-slate-200 rounded-lg hover:bg-[#141922] transition-colors"
               >
                 {t('common.cancel')}
               </button>
