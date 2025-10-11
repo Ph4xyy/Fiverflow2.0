@@ -327,8 +327,8 @@ const RegistrationForm: React.FC = () => {
 
     if (score <= 2) return { score, label: 'Faible', color: 'bg-red-500' };
     if (score <= 3) return { score, label: 'Moyen', color: 'bg-yellow-500' };
-    if (score <= 4) return { score, label: 'Fort', color: 'bg-blue-500' };
-    return { score, label: 'Très fort', color: 'bg-green-500' };
+    if (score <= 4) return { score, label: 'Fort', color: 'bg-gradient-to-r from-purple-500 to-pink-600' };
+    return { score, label: 'Très fort', color: 'bg-gradient-to-r from-emerald-500 to-teal-600' };
   };
 
   const passwordStrength = getPasswordStrength(formData.password);
@@ -339,7 +339,7 @@ const RegistrationForm: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <Shield className="mx-auto h-12 w-12 text-blue-400 mb-4" />
+              <Shield className="mx-auto h-12 w-12 text-purple-400 mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2">{t('auth.register.account.info')}</h3>
               <p className="text-sm text-slate-400">{t('auth.register.account.subtitle')}</p>
             </div>
@@ -357,7 +357,7 @@ const RegistrationForm: React.FC = () => {
                   value={formData.email}
                   onChange={(e) => handleFieldChange('email', e.target.value)}
                   onBlur={() => handleFieldBlur('email')}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
                     errors.email ? 'border-red-500/50 bg-red-900/20' : 'border-[#1C2230]'
                   }`}
                   placeholder="votre@email.com"
@@ -388,7 +388,7 @@ const RegistrationForm: React.FC = () => {
                   value={formData.username}
                   onChange={(e) => handleFieldChange('username', e.target.value.toLowerCase())}
                   onBlur={() => handleFieldBlur('username')}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
                     errors.username ? 'border-red-500/50 bg-red-900/20' : 'border-[#1C2230]'
                   }`}
                   placeholder="nom-utilisateur"
@@ -422,7 +422,7 @@ const RegistrationForm: React.FC = () => {
                   value={formData.password}
                   onChange={(e) => handleFieldChange('password', e.target.value)}
                   onBlur={() => handleFieldBlur('password')}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
+                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
                     errors.password ? 'border-red-500/50 bg-red-900/20' : 'border-[#1C2230]'
                   }`}
                   placeholder="Créez un mot de passe sécurisé"
@@ -445,7 +445,7 @@ const RegistrationForm: React.FC = () => {
                     <span className={`text-xs font-medium ${
                       passwordStrength.score <= 2 ? 'text-red-400' :
                       passwordStrength.score <= 3 ? 'text-yellow-400' :
-                      passwordStrength.score <= 4 ? 'text-blue-400' : 'text-green-400'
+                      passwordStrength.score <= 4 ? 'text-purple-400' : 'text-green-400'
                     }`}>
                       {passwordStrength.label}
                     </span>
@@ -507,7 +507,7 @@ const RegistrationForm: React.FC = () => {
                   value={formData.confirmPassword}
                   onChange={(e) => handleFieldChange('confirmPassword', e.target.value)}
                   onBlur={() => handleFieldBlur('confirmPassword')}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
+                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
                     errors.confirmPassword ? 'border-red-500/50 bg-red-900/20' : 'border-[#1C2230]'
                   }`}
                   placeholder="Confirmez votre mot de passe"
@@ -535,7 +535,7 @@ const RegistrationForm: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <Globe className="mx-auto h-12 w-12 text-blue-400 mb-4" />
+              <Globe className="mx-auto h-12 w-12 text-purple-400 mb-4" />
               <h3 className='text-xl font-semibold text-white mb-2'>{t('auth.register.personal.info')}</h3>
               <p className='text-sm text-slate-400'>{t('auth.register.personal.subtitle')}</p>
             </div>
@@ -552,7 +552,7 @@ const RegistrationForm: React.FC = () => {
                   value={formData.country}
                   onChange={(e) => handleFieldChange('country', e.target.value)}
                   onBlur={() => handleFieldBlur('country')}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#0E121A] text-white ${
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-white ${
                     errors.country ? 'border-red-500/50 bg-red-900/20' : 'border-[#1C2230]'
                   }`}
                   required
@@ -587,7 +587,7 @@ const RegistrationForm: React.FC = () => {
                   value={formData.phone}
                   onChange={(e) => handleFieldChange('phone', e.target.value)}
                   onBlur={() => handleFieldBlur('phone')}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
                     errors.phone ? 'border-red-500/50 bg-red-900/20' : 'border-[#1C2230]'
                   }`}
                   placeholder="+33 1 23 45 67 89"
@@ -613,7 +613,7 @@ const RegistrationForm: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <Briefcase className="mx-auto h-12 w-12 text-blue-400 mb-4" />
+              <Briefcase className="mx-auto h-12 w-12 text-purple-400 mb-4" />
               <h3 className='text-xl font-semibold text-white mb-2'>{t('auth.register.services.info')}</h3>
               <p className='text-sm text-slate-400'>{t('auth.register.services.subtitle')}</p>
             </div>
@@ -628,7 +628,7 @@ const RegistrationForm: React.FC = () => {
                     key={service.id}
                     className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${
                       formData.services.includes(service.id)
-                        ? 'border-blue-500 bg-blue-900/20 text-blue-300'
+                        ? 'border-purple-500 bg-gradient-to-r from-purple-500/20 to-pink-600/20 text-purple-300 ring-1 ring-purple-500/30'
                         : 'border-[#1C2230] hover:border-[#2A3347] hover:bg-[#121722] text-slate-300'
                     }`}
                     onClick={() => {
@@ -644,7 +644,7 @@ const RegistrationForm: React.FC = () => {
                     <span className="text-2xl mr-3">{service.icon}</span>
                     <span className="text-sm font-medium">{service.label}</span>
                     {formData.services.includes(service.id) && (
-                      <CheckCircle className="ml-auto text-blue-600" size={16} />
+                      <CheckCircle className="ml-auto text-purple-400" size={16} />
                     )}
                   </label>
                 ))}
@@ -700,7 +700,7 @@ const RegistrationForm: React.FC = () => {
                 key={lang.code}
                 onClick={() => setLanguage(lang.code as any)}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#141A26] transition-colors duration-200 first:rounded-t-lg last:rounded-b-lg ${
-                  language === lang.code ? 'bg-blue-900/20 text-blue-300' : 'text-slate-300'
+                  language === lang.code ? 'bg-gradient-to-r from-purple-500/20 to-pink-600/20 text-purple-300' : 'text-slate-300'
                 }`}
               >
                 <span className="text-lg">{lang.flag}</span>
@@ -728,16 +728,16 @@ const RegistrationForm: React.FC = () => {
           </div>
           <div className="w-full bg-[#1C2230] rounded-full h-2">
             <div 
-              className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300" 
+              className="bg-gradient-to-r from-purple-500 to-pink-600 h-2 rounded-full transition-all duration-300" 
               style={{ width: `${(currentStep / 3) * 100}%` }}
             ></div>
           </div>
           
           {/* Step Labels */}
           <div className="flex justify-between mt-2 text-xs text-slate-500">
-            <span className={currentStep >= 1 ? 'text-blue-400 font-medium' : ''}>Compte</span>
-            <span className={currentStep >= 2 ? 'text-blue-400 font-medium' : ''}>Personnel</span>
-            <span className={currentStep >= 3 ? 'text-blue-400 font-medium' : ''}>Services</span>
+            <span className={currentStep >= 1 ? 'text-purple-400 font-medium' : ''}>Compte</span>
+            <span className={currentStep >= 2 ? 'text-purple-400 font-medium' : ''}>Personnel</span>
+            <span className={currentStep >= 3 ? 'text-purple-400 font-medium' : ''}>Services</span>
           </div>
         </div>
 
@@ -759,7 +759,7 @@ const RegistrationForm: React.FC = () => {
               <button
                 type='button'
                 onClick={nextStep}
-                className='px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                className='px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
               >
                 {t('auth.register.next')}
               </button>
@@ -767,7 +767,7 @@ const RegistrationForm: React.FC = () => {
               <button
                 type='submit'
                 disabled={loading || Object.values(errors).some(error => error !== undefined)}
-                className='px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center'
+                className='px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center'
               >
                 {loading ? (
                   <>
@@ -800,7 +800,7 @@ const RegistrationForm: React.FC = () => {
         <div className="mt-6 text-center">
             <p className='text-sm text-slate-400'>
               {t('auth.register.already.account')}{' '}
-              <Link to='/login' className='text-blue-400 hover:text-blue-300 font-medium transition-colors'>
+              <Link to='/login' className='text-purple-400 hover:text-purple-300 font-medium transition-colors'>
                 {t('auth.register.signin')}
               </Link>
             </p>

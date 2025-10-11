@@ -190,13 +190,13 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
     { value: 'platform', label: 'Plateforme' }
   ];
 
-  // === Thème unique sombre (par défaut) ===
+  // === Nouveau thème sombre ===
   const baseField =
     'w-full px-4 py-2.5 rounded-xl border transition-colors ' +
-    'bg-zinc-900 text-zinc-100 placeholder-zinc-500 border-zinc-800 ' +
-    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
+    'bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] ' +
+    'focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500';
 
-  const labelCls = 'block text-sm font-semibold mb-2 text-zinc-200';
+  const labelCls = 'block text-sm font-semibold mb-2 text-slate-300';
 
   const handleServicesChange = (service: string) => {
     const currentServices = formData.services_needed;
@@ -340,8 +340,8 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
       case 1:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center text-zinc-100">
-              <User className="mr-2" size={20} />
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
+              <User className="mr-2 text-purple-400" size={20} />
               Informations de base
             </h3>
 
@@ -402,8 +402,8 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
       case 2:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center text-zinc-100">
-              <Mail className="mr-2" size={20} />
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
+              <Mail className="mr-2 text-purple-400" size={20} />
               Contact & Localisation
             </h3>
 
@@ -574,14 +574,14 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
 
             <div>
               <label className={labelCls}>Services demandés</label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded-xl p-3 border-zinc-800">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded-xl p-3 border-[#1C2230] bg-[#0E121A]">
                 {servicesOptions.map((service) => (
-                  <label key={service} className="flex items-center text-sm text-zinc-300">
+                  <label key={service} className="flex items-center text-sm text-slate-300">
                     <input
                       type="checkbox"
                       checked={formData.services_needed.includes(service)}
                       onChange={() => handleServicesChange(service)}
-                      className="mr-2 rounded accent-blue-600"
+                      className="mr-2 rounded accent-purple-500"
                     />
                     {service}
                   </label>
@@ -593,8 +593,8 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
       case 4:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center text-zinc-100">
-              <MessageSquare className="mr-2" size={20} />
+            <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
+              <MessageSquare className="mr-2 text-purple-400" size={20} />
               Gestion & Communication
             </h3>
 
@@ -709,13 +709,13 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   {formData.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-blue-950 text-blue-300"
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-gradient-to-r from-purple-500/20 to-pink-600/20 text-purple-300 ring-1 ring-purple-500/30"
                     >
                       {tag}
                       <button
                         type="button"
                         onClick={() => removeTag(tag)}
-                        className="ml-1 text-blue-300 hover:text-blue-200"
+                        className="ml-1 text-purple-300 hover:text-purple-200"
                       >
                         ×
                       </button>
@@ -733,9 +733,9 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-zinc-900 text-zinc-100 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-zinc-800">
+      <div className="bg-[#11151D] text-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-[#1C2230]">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+        <div className="flex items-center justify-between p-6 border-b border-[#1C2230]">
           <div>
             <h2 className="text-xl font-bold">
               {client ? 'Modifier le client' : 'Nouveau client'}
@@ -745,7 +745,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                 <div
                   key={step}
                   className={`h-2 w-10 rounded-full transition-all ${
-                    step <= currentStep ? 'bg-blue-600' : 'bg-zinc-700'
+                    step <= currentStep ? 'bg-gradient-to-r from-purple-500 to-pink-600' : 'bg-slate-700'
                   }`}
                 />
               ))}
@@ -753,7 +753,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors"
+            className="rounded-full p-2 text-slate-400 hover:bg-[#0E121A] hover:text-slate-200 transition-colors"
           >
             <X size={24} />
           </button>
@@ -764,13 +764,13 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
           {renderStep()}
 
           {/* Footer */}
-          <div className="flex justify-between mt-8 pt-6 border-t border-zinc-800">
+          <div className="flex justify-between mt-8 pt-6 border-t border-[#1C2230]">
             <button
               type="button"
               onClick={prevStep}
               disabled={currentStep === 1}
               className="px-4 py-2 border rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed
-                         border-zinc-700 text-zinc-200 hover:bg-zinc-800"
+                         border-[#1C2230] text-slate-200 hover:bg-[#0E121A]"
             >
               Précédent
             </button>
@@ -780,7 +780,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                 type="button"
                 onClick={onClose}
                 className="px-4 py-2 border rounded-lg transition-colors
-                           border-zinc-700 text-zinc-200 hover:bg-zinc-800"
+                           border-[#1C2230] text-slate-200 hover:bg-[#0E121A]"
                 disabled={loading}
               >
                 Annuler
@@ -790,7 +790,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200"
                 >
                   Suivant
                 </button>
@@ -798,7 +798,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'En cours...' : (client ? 'Mettre à jour' : 'Créer')}
                 </button>

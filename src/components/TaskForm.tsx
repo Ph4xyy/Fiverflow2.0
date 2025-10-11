@@ -154,14 +154,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
+      <div className="bg-[#11151D] rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#1C2230]">
+        <div className="flex items-center justify-between p-6 border-b border-[#1C2230]">
+          <h2 className="text-xl font-semibold text-white">
             {task ? 'Edit Task' : 'Create New Task'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+            className="text-slate-400 hover:text-slate-200 transition-colors"
           >
             <X size={24} />
           </button>
@@ -170,16 +170,16 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Titre */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
               Task Title *
             </label>
             <div className="relative">
-              <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-slate-500" size={20} />
+              <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400" size={20} />
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-accent-blue focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
+                className="w-full pl-10 pr-4 py-3 border border-[#1C2230] rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-slate-100"
                 placeholder="e.g., Create wireframes for homepage"
                 required
               />
@@ -188,13 +188,13 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-300 mb-2">
               Description
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-accent-blue focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
+              className="w-full px-3 py-3 border border-[#1C2230] rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-slate-100"
               rows={3}
               placeholder="Detailed description of what needs to be done..."
             />
@@ -203,13 +203,13 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
           {/* Order Selection (si pas d'orderId fourni) */}
           {!orderId && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Order *
               </label>
               <select
                 value={formData.order_id}
                 onChange={(e) => setFormData({ ...formData, order_id: e.target.value })}
-                className="w-full px-3 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-accent-blue focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
+                className="w-full px-3 py-3 border border-[#1C2230] rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-slate-100"
                 required
               >
                 <option value="">Select an order</option>
@@ -225,13 +225,13 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Statut */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Status
               </label>
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                className="w-full px-3 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-accent-blue focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
+                className="w-full px-3 py-3 border border-[#1C2230] rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-slate-100"
               >
                 {statusOptions.map((status) => (
                   <option key={status.value} value={status.value}>
@@ -243,13 +243,13 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
 
             {/* Priorité */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Priority
               </label>
               <select
                 value={formData.priority}
                 onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
-                className="w-full px-3 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-accent-blue focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
+                className="w-full px-3 py-3 border border-[#1C2230] rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-slate-100"
               >
                 {priorityOptions.map((priority) => (
                   <option key={priority.value} value={priority.value}>
@@ -261,16 +261,16 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
 
             {/* Heures estimées */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Estimated Hours
               </label>
               <div className="relative">
-                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-slate-500" size={20} />
+                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400" size={20} />
                 <input
                   type="number"
                   value={formData.estimated_hours}
                   onChange={(e) => setFormData({ ...formData, estimated_hours: parseFloat(e.target.value) || 0 })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-accent-blue focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
+                  className="w-full pl-10 pr-4 py-3 border border-[#1C2230] rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-slate-100"
                   placeholder="0"
                   min="0"
                   step="0.5"
@@ -280,26 +280,26 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
 
             {/* Date d'échéance */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-300 mb-2">
                 Due Date
               </label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-slate-500" size={20} />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400" size={20} />
                 <input
                   type="date"
                   value={formData.due_date}
                   onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-accent-blue focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
+                  className="w-full pl-10 pr-4 py-3 border border-[#1C2230] rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-slate-100"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-slate-700">
+          <div className="flex justify-end space-x-3 pt-6 border-t border-[#1C2230]">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+              className="px-4 py-2 border border-[#1C2230] text-slate-200 rounded-lg hover:bg-[#0E121A] transition-colors"
               disabled={loading}
             >
               Cancel
@@ -307,7 +307,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 dark:bg-accent-blue text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               {loading ? (
                 <>
