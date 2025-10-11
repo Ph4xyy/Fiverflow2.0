@@ -1053,7 +1053,7 @@ const ProfilePage: React.FC = () => {
                       )}
                     </div>
                     {!stripeSubscription && (
-                      <button className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-accent-blue to-accent-purple text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg">
+                      <button className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-lg">
                         {t('profile.billing.plan.upgrade')}
                       </button>
                     )}
@@ -1391,7 +1391,7 @@ const ProfilePage: React.FC = () => {
       <Layout>
         <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
             <p className="ml-4 text-gray-600 dark:text-gray-400">{t('profile.loading')}</p>
           </div>
         </div>
