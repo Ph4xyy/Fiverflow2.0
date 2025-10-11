@@ -28,7 +28,7 @@ interface UsePlanRestrictionsReturn {
 }
 
 export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
-  const { user } = useAuth();
+  const { user, authReady } = useAuth();
   const userData = useUserData();
   const ctxRole = (userData?.role ?? null) as string | null;
 
@@ -39,11 +39,27 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
   const [role, setRole] = useState<string | null>(ctxRole);
   const [roleLoading, setRoleLoading] = useState<boolean>(Boolean(userData?.loading));
 
+  console.log('[usePlanRestrictions] State:', { 
+    hasUser: !!user, 
+    authReady, 
+    roleLoading, 
+    stripeLoading,
+    role,
+    ctxRole
+  });
+
   // Fallback role fetch if context is missing or empty
   useEffect(() => {
     let isMounted = true;
 
     const fetchRole = async () => {
+      // NE PAS FETCHER tant que authReady n'est pas true
+      if (!authReady) {
+        console.log('[usePlanRestrictions] Waiting for auth to be ready...');
+        setRoleLoading(true);
+        return;
+      }
+
       if (!user) {
         setRole(null);
         setRoleLoading(false);
@@ -102,14 +118,25 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
     return () => {
       isMounted = false;
     };
-  }, [user?.id, ctxRole]); // Only depend on user.id and ctxRole
+  }, [user?.id, ctxRole, authReady]);
 
   useEffect(() => {
-    if (!user || roleLoading) return;
+    // NE PAS CALCULER les restrictions tant que authReady n'est pas true
+    if (!authReady) {
+      console.log('[usePlanRestrictions] Waiting for auth to be ready before calculating restrictions...');
+      return;
+    }
 
-    // 🔥 Debounce minimal pour une authentification fluide
+    if (!user || roleLoading) {
+      console.log('[usePlanRestrictions] Waiting for user or role...', { hasUser: !!user, roleLoading });
+      return;
+    }
+
+    console.log('[usePlanRestrictions] Calculating restrictions...', { role, stripeLoading });
+
+    // Debounce minimal pour éviter les calculs trop fréquents
     const timeoutId = setTimeout(() => {
-      // ADMIN OVERRIDE (guarantee admin full access regardless of plan)
+      // ADMIN OVERRIDE
       if (role === 'admin') {
         const adminRestrictions: PlanRestrictions = {
           plan: 'excellence',
@@ -124,6 +151,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
         };
         setRestrictions(adminRestrictions);
         setError(null);
+        console.log('[usePlanRestrictions] Admin restrictions set');
         return;
       }
 
@@ -133,17 +161,15 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
       let trialDaysRemaining: number | null = null;
 
       // Stripe subscription parsing
-      let isPaidActive = false; // only true when subscription is actually active (not trial)
+      let isPaidActive = false;
       if (stripeSubscription) {
         switch (stripeSubscription.price_id) {
-          // PRO
           case 'price_1RoRLDENcVsHr4WI6TViAPNb':
           case 'price_1RoXOgENcVsHr4WIitiOEaaz':
             plan = 'pro';
             break;
-          // EXCELLENCE (a.k.a. Plus)
           case 'price_1RoRMdENcVsHr4WIVRYCy8JL':
-          case 'price_1RoXNwENcVsHr4WI3SP8AYYut(':
+          case 'price_1RoXNwENcVsHr4WI3SP8AYYu':
             plan = 'excellence';
             break;
         }
@@ -161,19 +187,11 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
 
       const calculated: PlanRestrictions = {
         plan,
-        // Calendar & Tasks (& Todo): available for PRO/EXCELLENCE and also during trial
         canAccessCalendar: plan !== 'free' || isTrialActive,
         canAccessTasks: plan !== 'free' || isTrialActive,
-
-        // Referrals: only for paying users (active subscription)
         canAccessReferrals: isPaidActive,
-
-        // Invoices: Excellence only
         canAccessInvoices: plan === 'excellence',
-
-        // Stats: Excellence only
         canAccessStats: plan === 'excellence',
-
         isTrialActive,
         trialDaysRemaining,
         isAdmin: false
@@ -181,10 +199,11 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
 
       setRestrictions(calculated);
       setError(null);
-    }, 50); // Réduit de 100ms à 50ms
+      console.log('[usePlanRestrictions] Restrictions calculated:', calculated);
+    }, 50);
 
     return () => clearTimeout(timeoutId);
-  }, [user?.id, role, roleLoading, stripeSubscription]); // 🔥 Ajouter stripeSubscription aux dépendances
+  }, [user?.id, role, roleLoading, stripeSubscription, authReady]);
 
   const checkAccess = (feature: FeatureKey) => {
     if (!restrictions) return false;
@@ -201,7 +220,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
         return restrictions.canAccessTasks;
       case 'invoices':
         return restrictions.canAccessInvoices;
-      case 'todo': // 👈 même règle que tasks
+      case 'todo':
         return restrictions.canAccessTasks;
       default:
         return false;
@@ -210,7 +229,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
 
   return {
     restrictions,
-    loading: stripeLoading || roleLoading,
+    loading: stripeLoading || roleLoading || !authReady,
     error,
     checkAccess
   };

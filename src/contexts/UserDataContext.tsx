@@ -1,5 +1,5 @@
 // src/contexts/UserDataContext.tsx
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { debugAuth } from '../utils/debugAuth';
@@ -13,105 +13,125 @@ interface UserDataContextType {
 const UserDataContext = createContext<UserDataContextType | undefined>(undefined);
 
 export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, authReady } = useAuth();
   const [role, setRole] = useState<'admin' | 'user'>('user');
   const [loading, setLoading] = useState(true);
+  const isFetchingRef = useRef(false);
 
   const fetchUserRole = useCallback(async (userId: string) => {
-    console.log('🔄 fetchUserRole called for user:', userId);
+    // Protection contre les appels simultanés
+    if (isFetchingRef.current) {
+      console.log('[UserDataContext] fetchUserRole: Already fetching, skipping');
+      return;
+    }
+
+    console.log('[UserDataContext] fetchUserRole called for user:', userId);
     
     if (!userId || !isSupabaseConfigured) {
-      console.log('❌ No user or Supabase not configured');
+      console.log('[UserDataContext] No user or Supabase not configured');
       setRole('user');
       setLoading(false);
       return;
     }
 
+    isFetchingRef.current = true;
+
     try {
-      console.log('🌐 Making database query for role...');
+      console.log('[UserDataContext] Making database query for role...');
       const result = await debugAuth.testUserRoleQuery(userId);
       
       if (!result.success) {
-        console.error('❌ Error fetching user role:', result.error);
+        console.error('[UserDataContext] Error fetching user role:', result.error);
         setRole('user');
         sessionStorage.setItem('role', 'user');
         localStorage.setItem('userRole', 'user');
       } else {
         const role = result.data?.role === 'admin' ? 'admin' : 'user';
-        console.log('✅ Role fetched from DB:', role);
+        console.log('[UserDataContext] Role fetched from DB:', role);
         setRole(role);
-        // 🔥 Persister dans les deux caches
         sessionStorage.setItem('role', role);
         localStorage.setItem('userRole', role);
       }
     } catch (err) {
-      console.error('💥 Unexpected error while fetching role:', err);
+      console.error('[UserDataContext] Unexpected error while fetching role:', err);
       setRole('user');
     } finally {
-      console.log('🏁 fetchUserRole completed, setting loading to false');
+      console.log('[UserDataContext] fetchUserRole completed, setting loading to false');
       setLoading(false);
+      isFetchingRef.current = false;
     }
-  }, []); // Pas de dépendances pour éviter les loops
+  }, []);
 
   useEffect(() => {
-    console.log('🔄 UserDataContext useEffect triggered for user:', user?.id, 'authLoading:', authLoading);
+    console.log('[UserDataContext] useEffect triggered:', { 
+      hasUser: !!user, 
+      userId: user?.id,
+      authLoading, 
+      authReady 
+    });
     
-    // 🔥 Attendre que l'auth soit complètement chargé avant de traiter
+    // NE PAS FETCHER tant que authReady n'est pas true
+    if (!authReady) {
+      console.log('[UserDataContext] Waiting for auth to be ready...');
+      setLoading(true);
+      return;
+    }
+
+    // Attendre que l'auth soit complètement chargé
     if (authLoading) {
-      console.log('⏳ UserDataContext: Waiting for auth to finish loading...');
-      setLoading(true); // 🔥 S'assurer que loading est true pendant l'attente
+      console.log('[UserDataContext] Waiting for auth to finish loading...');
+      setLoading(true);
       return;
     }
     
     if (!user) {
-      console.log('❌ UserDataContext: No user, setting default role');
+      console.log('[UserDataContext] No user, setting default role');
       setRole('user');
       setLoading(false);
       return;
     }
 
-    // 🔥 Check metadata first (most reliable)
+    // Check metadata first (most reliable)
     const metaRole = user.app_metadata?.role || user.user_metadata?.role;
     if (metaRole) {
-      console.log('🔄 UserDataContext: Using metadata role:', metaRole);
+      console.log('[UserDataContext] Using metadata role:', metaRole);
       setRole(metaRole === 'admin' ? 'admin' : 'user');
       sessionStorage.setItem('role', String(metaRole));
-      localStorage.setItem('userRole', String(metaRole)); // 🔥 Persister aussi
+      localStorage.setItem('userRole', String(metaRole));
       setLoading(false);
       return;
     }
     
-    // 🔥 Check cache (sessionStorage first, then localStorage)
+    // Check cache (sessionStorage first, then localStorage)
     const sessionRole = sessionStorage.getItem('role');
     const localRole = localStorage.getItem('userRole');
     const cachedRole = sessionRole || localRole;
     
     if (cachedRole) {
-      console.log('🔄 UserDataContext: Using cached role:', cachedRole, '(from', sessionRole ? 'sessionStorage' : 'localStorage', ')');
+      console.log('[UserDataContext] Using cached role:', cachedRole, '(from', sessionRole ? 'sessionStorage' : 'localStorage', ')');
       const resolvedRole = cachedRole === 'admin' ? 'admin' : 'user';
       setRole(resolvedRole);
-      // Sync les deux caches
       sessionStorage.setItem('role', resolvedRole);
       localStorage.setItem('userRole', resolvedRole);
       setLoading(false);
       return;
     }
 
-    // 🔥 Debounce minimal pour éviter les loading loops
+    // Dernier recours : fetch depuis la DB avec debounce
     const timeoutId = setTimeout(() => {
-      console.log('🔄 UserDataContext: Starting role fetch...');
+      console.log('[UserDataContext] Starting role fetch from DB...');
       setLoading(true);
       fetchUserRole(user.id);
-    }, 50); // Debounce minimal
+    }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [user?.id, authLoading]); // Dépendre aussi de authLoading
+  }, [user?.id, authLoading, authReady, fetchUserRole]);
 
-  const refreshUserRole = useCallback(() => {
-    if (user?.id) {
-      fetchUserRole(user.id);
+  const refreshUserRole = useCallback(async () => {
+    if (user?.id && authReady) {
+      await fetchUserRole(user.id);
     }
-  }, [user?.id]); // 🔥 FIXED: Remove fetchUserRole from dependencies to prevent infinite loops
+  }, [user?.id, authReady, fetchUserRole]);
 
   return (
     <UserDataContext.Provider value={{ role, loading, refreshUserRole }}>

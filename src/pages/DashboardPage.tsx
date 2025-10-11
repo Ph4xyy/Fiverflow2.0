@@ -32,7 +32,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, authReady } = useAuth();
   const { currency } = useCurrency();
   const { clients } = useClients();
   const { subscription: stripeSubscription } = useStripeSubscription();
@@ -53,89 +53,115 @@ const DashboardPage = () => {
   // 👉 Nouvel état pour le nom de l'utilisateur
   const [userName, setUserName] = useState<string | null>(null);
 
+  console.log('[DashboardPage] Render:', { hasUser: !!user, authReady, hasFetched: hasFetchedOrders.current });
+
   const fetchOrders = useCallback(async () => {
+    // NE PAS FETCHER tant que authReady n'est pas true
+    if (!authReady) {
+      console.log('[DashboardPage] fetchOrders: Waiting for auth to be ready...');
+      setLoadingOrders(true);
+      return;
+    }
+
     if (!isSupabaseConfigured || !supabase || !user) {
       setOrders([]);
       setLoadingOrders(false);
       return;
     }
+
+    console.log('[DashboardPage] Fetching orders...');
     setLoadingOrders(true);
 
     const { data, error } = await supabase
       .from('orders')
       .select('id, title, amount, status, deadline, created_at, clients!inner(name, platform, user_id)')
-          .eq('clients.user_id', user.id)
+      .eq('clients.user_id', user.id)
       .order('deadline', { ascending: true });
 
     if (error) {
-      console.error('Failed to fetch orders:', error);
+      console.error('[DashboardPage] Failed to fetch orders:', error);
     } else {
+      console.log('[DashboardPage] Fetched', data?.length || 0, 'orders');
       setOrders(data || []);
     }
 
     setLoadingOrders(false);
-  }, [user]);
+  }, [user, authReady]);
 
   const fetchTasks = useCallback(async () => {
+    // NE PAS FETCHER tant que authReady n'est pas true
+    if (!authReady) {
+      console.log('[DashboardPage] fetchTasks: Waiting for auth to be ready...');
+      setLoadingTasks(true);
+      return;
+    }
+
     if (!isSupabaseConfigured || !supabase || !user) {
       setTasks([]);
       setLoadingTasks(false);
       return;
     }
+
+    console.log('[DashboardPage] Fetching tasks...');
     setLoadingTasks(true);
     const { data, error } = await supabase
       .from('tasks')
       .select('id, title, status, priority, due_date, color, client_id')
-          .eq('user_id', user.id)
+      .eq('user_id', user.id)
       .not('due_date', 'is', null)
       .order('due_date', { ascending: true });
 
     if (error) {
-      console.error('Failed to fetch tasks:', error);
+      console.error('[DashboardPage] Failed to fetch tasks:', error);
       setTasks([]);
     } else {
+      console.log('[DashboardPage] Fetched', data?.length || 0, 'tasks');
       setTasks(data || []);
     }
     setLoadingTasks(false);
-  }, [user]);
+  }, [user, authReady]);
 
   useEffect(() => {
-    if (!hasFetchedOrders.current) {
+    if (!hasFetchedOrders.current && authReady && user) {
+      console.log('[DashboardPage] Initial fetch triggered');
       hasFetchedOrders.current = true;
       fetchOrders();
       fetchTasks();
     }
-  }, []); // Remove fetch functions from dependencies to prevent infinite loops
+  }, [authReady, user, fetchOrders, fetchTasks]);
 
   // Listen for session refresh to refetch data
   useEffect(() => {
     const onRefreshed = () => {
+      console.log('[DashboardPage] Session refreshed event received, refetching data...');
       hasFetchedOrders.current = false;
       fetchOrders();
       fetchTasks();
     };
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
     return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-  }, []); // 🔥 FIXED: Empty dependencies to prevent infinite loops
+  }, [fetchOrders, fetchTasks]);
 
   // 👉 Récupérer le nom depuis la table users
   useEffect(() => {
     const fetchUserName = async () => {
-      if (!user) return;
+      if (!authReady || !user) return;
 
+      console.log('[DashboardPage] Fetching user name...');
       const { data, error } = await supabase
         .from("users")
         .select('name')
-          .eq("id", user.id)
+        .eq("id", user.id)
         .single();
 
       if (!error && data) {
+        console.log('[DashboardPage] User name fetched:', data.name);
         setUserName(data.name);
       }
     };
 
     fetchUserName();
-  }, [user]);
+  }, [user, authReady]);
 
   const stats = [
     { label: 'Total Clients', value: clients.length, icon: Users, color: 'from-accent-blue to-accent-purple' },

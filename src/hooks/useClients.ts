@@ -43,15 +43,24 @@ const mockClients: Client[] = [
 ];
 
 export const useClients = (): UseClientsReturn => {
-  const { user } = useAuth();
+  const { user, authReady } = useAuth();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const isMountedRef = useRef(true);
   const hasFetchedRef = useRef(false);
 
+  console.log('[useClients] State:', { hasUser: !!user, authReady, hasFetched: hasFetchedRef.current });
+
   const fetchClients = useCallback(async () => {
     if (!isMountedRef.current) return;
+
+    // NE PAS FETCHER tant que authReady n'est pas true et que user n'est pas confirmé
+    if (!authReady) {
+      console.log('[useClients] Waiting for auth to be ready...');
+      setLoading(true);
+      return;
+    }
 
     if (!isSupabaseConfigured || !supabase) {
       setClients(mockClients);
@@ -68,6 +77,7 @@ export const useClients = (): UseClientsReturn => {
     }
 
     try {
+      console.log('[useClients] Fetching clients...');
       setLoading(true);
       setError(null);
 
@@ -78,31 +88,34 @@ export const useClients = (): UseClientsReturn => {
         .order('created_at', { ascending: false });
 
       if (supabaseError) {
+        console.error('[useClients] Fetch error:', supabaseError);
         setClients(mockClients);
         setError(null);
       } else {
+        console.log('[useClients] Fetched', data?.length || 0, 'clients');
         setClients(data || []);
         setError(null);
       }
     } catch (_err) {
+      console.error('[useClients] Unexpected error:', _err);
       setClients(mockClients);
       setError(null);
     } finally {
       setLoading(false);
     }
-  }, [user?.id]); // Only depend on user.id to prevent infinite loops
+  }, [user?.id, authReady]);
 
   const refetchClients = useCallback(async () => {
     hasFetchedRef.current = false;
     await fetchClients();
-  }, []); // 🔥 FIXED: Remove fetchClients from dependencies to prevent infinite loops
+  }, [fetchClients]);
 
   useEffect(() => {
-    if (!hasFetchedRef.current && user !== undefined) {
+    if (!hasFetchedRef.current && user !== undefined && authReady) {
       hasFetchedRef.current = true;
       fetchClients();
     }
-  }, [user?.id]); // Remove fetchClients from dependencies to prevent infinite loops
+  }, [user?.id, authReady, fetchClients]);
 
   useEffect(() => {
     return () => {
