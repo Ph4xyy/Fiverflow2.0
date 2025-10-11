@@ -139,13 +139,13 @@ export const usePlanLimits = (): UsePlanLimitsReturn => {
 
   const showLimitError = (type: 'client' | 'order') => {
     const message = type === 'client' 
-      ? 'Limite de 5 clients atteinte pour le plan gratuit. Veuillez mettre à niveau pour continuer.'
-      : 'Limite de 10 commandes par mois atteinte pour le plan gratuit. Veuillez mettre à niveau pour continuer.';
+      ? 'Free plan limit of 5 clients reached. Please upgrade to continue.'
+      : 'Free plan limit of 10 orders per month reached. Please upgrade to continue.';
     
     toast.error(message, {
       duration: 6000,
       action: {
-        label: 'Mettre à niveaut(',
+        label: 'Upgrade',
         onClick: () => navigate('/upgrade')
       }
     });

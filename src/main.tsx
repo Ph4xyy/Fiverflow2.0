@@ -29,15 +29,15 @@ class GlobalErrorBoundary extends React.Component<{ children: React.ReactNode },
       return (
         <div className="min-h-screen flex items-center justify-center bg-slate-900 p-6">
           <div className="max-w-md w-full rounded-xl border border-slate-700 bg-slate-900 p-6 text-center">
-            <h1 className="text-lg font-semibold text-white mb-2">Oups, une erreur est survenue</h1>
+            <h1 className="text-lg font-semibold text-white mb-2">Oops, an error occurred</h1>
             <p className="text-sm text-gray-300 mb-4">
-              L’application a rencontré un problème. Essayez d’actualiser la page. Si cela persiste, reconnectez-vous.
+              The application encountered a problem. Try refreshing the page. If this persists, please sign in again.
             </p>
             <button
               onClick={() => location.reload()}
               className="px-4 py-2 rounded-lg bg-slate-700 text-white hover:bg-slate-600"
             >
-              Actualiser
+              Refresh
             </button>
           </div>
         </div>

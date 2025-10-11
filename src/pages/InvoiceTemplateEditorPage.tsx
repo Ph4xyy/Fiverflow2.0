@@ -11,7 +11,7 @@ import { renderInvoiceWithTemplateToPdf } from "../utils/invoiceTemplate";
 import { getFileUrl } from "../lib/storage";
 import toast from "react-hot-toast";
 
-const getSampleData = (t: any) => ({
+const getSampleData = () => ({
   company: { name: 'FiverFlow', logoUrl: "", address: "" },
   client: { name: 'John Doe', email: 'john@doe.com', address: 'Somewhere' },
   invoice: {
@@ -46,7 +46,7 @@ const InvoiceTemplateEditorPage: React.FC = () => {
     if (!schema) return;
     
     try {
-      const doc = await renderInvoiceWithTemplateToPdf(schema, getSampleData(t) as any);
+      const doc = await renderInvoiceWithTemplateToPdf(schema, getSampleData() as any);
         const blob = doc.output('blob');
       
       // Clean up previous URL
@@ -95,7 +95,7 @@ const InvoiceTemplateEditorPage: React.FC = () => {
   };
 
   const previewPdf = async () => {
-    const doc = await renderInvoiceWithTemplateToPdf(schema, getSampleData(t) as any);
+    const doc = await renderInvoiceWithTemplateToPdf(schema, getSampleData() as any);
     doc.save(`${name || "template"}.pdf`);
   };
 
