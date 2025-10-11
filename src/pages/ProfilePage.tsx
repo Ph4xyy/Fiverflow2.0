@@ -397,9 +397,9 @@ const ProfilePage: React.FC = () => {
   const pSub = 'text-sm sm:text-base text-gray-600 dark:text-gray-400';
   const labelBase = 'block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2';
   const inputBase =
-    'w-full px-3 py-2 text-sm sm:text-base border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ' +
-    'border-gray-300 text-gray-900 placeholder-gray-400 ' +
-    'dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-400';
+    'w-full px-3 py-2 text-sm sm:text-base border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ' +
+    'border-[#1C2230] text-slate-100 placeholder-slate-400 ' +
+    'bg-[#11151D]/95 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-400';
   const selectBase = inputBase;
   const monoMuted = 'text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-mono mt-1 break-all';
   const divider = 'border-t border-gray-200 dark:border-slate-700';
@@ -866,8 +866,8 @@ const ProfilePage: React.FC = () => {
                     </div>
                     <button
                       onClick={() => savePreferences({ ...preferences, [row.key]: !preferences[row.key] })}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        preferences[row.key] ? 'bg-blue-600' : 'bg-gray-200 dark:bg-slate-700'
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                        preferences[row.key] ? 'bg-gradient-to-r from-purple-500 to-pink-600' : 'bg-gray-200 dark:bg-slate-700'
                       }`}
                     >
                       <span
@@ -1003,7 +1003,7 @@ const ProfilePage: React.FC = () => {
                     <button
                       onClick={handleChangePassword}
                       disabled={saving}
-                      className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                      className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 transition-all duration-200 shadow-lg"
                     >
                       {saving ? t('profile.security.password.updating') : t('profile.security.password.update')}
                     </button>
@@ -1013,7 +1013,7 @@ const ProfilePage: React.FC = () => {
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
                   <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-2">{t('profile.security.2fa')}</h4>
                   <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3">{t('profile.security.2fa.desc')}</p>
-                  <button className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-green-600 text-white rounded-lg hover:bg-green-700">
+                  <button className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg">
                     {t('profile.security.2fa.enable')}
                   </button>
                 </div>
@@ -1040,20 +1040,20 @@ const ProfilePage: React.FC = () => {
                       {stripeSubscription?.subscription_status && (
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 ${
                           stripeSubscription.subscription_status === 'active'
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                            ? 'bg-gradient-to-r from-emerald-500/20 to-teal-600/20 text-emerald-300 ring-1 ring-emerald-500/30'
+                            : 'bg-gradient-to-r from-yellow-500/20 to-amber-600/20 text-yellow-300 ring-1 ring-yellow-500/30'
                         }`}>
                           {stripeSubscription.subscription_status}
                         </span>
                       )}
                       {profile?.role === 'admin' && (
-                        <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                        <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-300 ring-1 ring-red-500/30">
                           {t('profile.billing.plan.admin')}
                         </span>
                       )}
                     </div>
                     {!stripeSubscription && (
-                      <button className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                      <button className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-accent-blue to-accent-purple text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg">
                         {t('profile.billing.plan.upgrade')}
                       </button>
                     )}
@@ -1146,7 +1146,7 @@ const ProfilePage: React.FC = () => {
             </div>
 
             {!isSupabaseConfigured && (
-              <div className="text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 rounded p-3">
+              <div className="text-sm text-yellow-300 bg-gradient-to-r from-yellow-500/10 to-amber-600/10 border border-yellow-500/30 rounded-lg p-3 ring-1 ring-yellow-500/20">
                 Supabase n'est pas configuré — affichage en mode démo, sauvegarde désactivée.
               </div>
             )}
@@ -1197,7 +1197,7 @@ const ProfilePage: React.FC = () => {
                 <button
                   onClick={saveImages}
                   disabled={isUploading || (!bannerFile && !logoFile && !avatarFile)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 shadow-lg"
                 >
                   {isUploading ? (
                     <>
@@ -1228,21 +1228,21 @@ const ProfilePage: React.FC = () => {
 
               {/* Aperçu des images actuelles */}
               {(profile?.banner_url || profile?.logo_url || profile?.avatar_url) && (
-                <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('profile.branding.images.current')}</h5>
+                <div className="mt-4 p-3 bg-[#0E121A] ring-1 ring-[#1C2230] rounded-lg">
+                  <h5 className="text-sm font-medium text-slate-200 mb-2">{t('profile.branding.images.current')}</h5>
                   <div className="flex items-center gap-4">
                     {profile?.banner_url && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="text-xs text-slate-400">
                         {t('profile.branding.images.banner')} <span className="font-mono break-all">{profile.banner_url}</span>
                       </div>
                     )}
                     {profile?.logo_url && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="text-xs text-slate-400">
                         {t('profile.branding.images.logo')} <span className="font-mono break-all">{profile.logo_url}</span>
                       </div>
                     )}
                     {profile?.avatar_url && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="text-xs text-slate-400">
                         {t('profile.branding.images.avatar')} <span className="font-mono break-all">{profile.avatar_url}</span>
                       </div>
                     )}
@@ -1286,8 +1286,8 @@ const ProfilePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSmtp((s) => s ? { ...s, enabled: !s.enabled } : s)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    smtp?.enabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-slate-700'
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                    smtp?.enabled ? 'bg-gradient-to-r from-purple-500 to-pink-600' : 'bg-gray-200 dark:bg-slate-700'
                   }`}
                 >
                   <span
@@ -1332,8 +1332,8 @@ const ProfilePage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setSmtp((s) => s ? { ...s, secure: !s.secure } : s)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      smtp?.secure ? 'bg-blue-600' : 'bg-gray-200 dark:bg-slate-700'
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                      smtp?.secure ? 'bg-gradient-to-r from-purple-500 to-pink-600' : 'bg-gray-200 dark:bg-slate-700'
                     }`}
                     disabled={!smtp?.enabled}
                   >
@@ -1371,7 +1371,7 @@ const ProfilePage: React.FC = () => {
                 <button
                   onClick={saveSmtpSettings}
                   disabled={smtpSaving || smtpLoading || !smtp}
-                  className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 transition-all duration-200 shadow-lg"
                 >
                   {smtpSaving ? t('profile.branding.smtp.saving') : t('profile.branding.smtp.save')}
                 </button>
@@ -1431,7 +1431,7 @@ const ProfilePage: React.FC = () => {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 h-full"></div>
+              <div className="bg-gradient-to-r from-purple-500 to-pink-600 h-full"></div>
             )}
           </div>
           <div className="relative px-4 sm:px-6 pb-6">
@@ -1456,7 +1456,7 @@ const ProfilePage: React.FC = () => {
                       className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
                       <span className="text-white font-bold text-lg sm:text-xl">
                         {getInitials(profile.name, profile.email)}
                       </span>
@@ -1483,13 +1483,13 @@ const ProfilePage: React.FC = () => {
                   <div className="flex items-center justify-center sm:justify-start space-x-2 mt-2">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                       profile.is_pro
-                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
-                        : 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-300'
+                        ? 'bg-gradient-to-r from-purple-500/20 to-pink-600/20 text-purple-300 ring-1 ring-purple-500/30'
+                        : 'bg-slate-800/50 text-slate-300 ring-1 ring-slate-700/50'
                     }`}>
                       {profile.is_pro ? 'Pro' : 'Free'}
                     </span>
                     {profile.role === 'admin' && (
-                      <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                      <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-300 ring-1 ring-red-500/30">
                         Admin
                       </span>
                     )}
@@ -1545,8 +1545,8 @@ const ProfilePage: React.FC = () => {
                       onClick={() => setActiveTab(tab.id as TabId)}
                       className={`w-full flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-2 rounded-lg text-left transition-colors ${
                         active
-                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                          : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700/60'
+                          ? 'bg-gradient-to-r from-purple-500/20 to-pink-600/20 text-purple-300 ring-1 ring-purple-500/30'
+                          : 'text-gray-200 hover:bg-slate-700/60'
                       }`}
                     >
                       <Icon size={16} className="flex-shrink-0" />
@@ -1566,7 +1566,7 @@ const ProfilePage: React.FC = () => {
                 <button
                   onClick={handleSaveProfile}
                   disabled={saving}
-                  className="inline-flex items-center px-3 sm:px-4 py-2 bg-blue-600 text-white text-sm sm:text-base rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  className="inline-flex items-center px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white text-sm sm:text-base rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-lg disabled:opacity-50"
                 >
                   <Save size={16} className="mr-2 flex-shrink-0" />
                   {saving ? t('common.save') + '...' : t('profile.save.changes')}
@@ -1611,7 +1611,7 @@ const ProfilePage: React.FC = () => {
               <button
                 onClick={saveAvatar}
                 disabled={!avatarFile || isUploading}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 shadow-lg"
               >
                 {isUploading ? (
                   <>
@@ -1637,7 +1637,7 @@ const ProfilePage: React.FC = () => {
               </button>
             </div>
 
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+            <p className="text-xs text-slate-400 mt-3">
               {t('profile.avatar.format')}
             </p>
           </div>
