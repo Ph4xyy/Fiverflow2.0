@@ -17,18 +17,40 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [role, setRole] = useState<'admin' | 'user'>('user');
   const [loading, setLoading] = useState(true);
   const isFetchingRef = useRef(false);
+  const lastFetchedUserIdRef = useRef<string | null>(null);
+
+  console.log('[UserDataContext] Render:', { 
+    hasUser: !!user, 
+    userId: user?.id,
+    authLoading, 
+    authReady,
+    role,
+    loading
+  });
 
   const fetchUserRole = useCallback(async (userId: string) => {
-    // Protection contre les appels simultanés
-    if (isFetchingRef.current) {
-      console.log('[UserDataContext] fetchUserRole: Already fetching, skipping');
+    // GUARD: Ne pas fetcher tant que authReady n'est pas true
+    if (!authReady) {
+      console.log('[UserDataContext] fetchUserRole: ⏳ Waiting for auth to be ready...');
       return;
     }
 
-    console.log('[UserDataContext] fetchUserRole called for user:', userId);
+    // Protection contre les appels simultanés
+    if (isFetchingRef.current) {
+      console.log('[UserDataContext] fetchUserRole: ⏭️ Already fetching, skipping');
+      return;
+    }
+
+    // Éviter de refetch pour le même utilisateur
+    if (lastFetchedUserIdRef.current === userId) {
+      console.log('[UserDataContext] fetchUserRole: ✓ Already fetched for this user');
+      return;
+    }
+
+    console.log('[UserDataContext] fetchUserRole: 🔄 Fetching role for user:', userId);
     
     if (!userId || !isSupabaseConfigured) {
-      console.log('[UserDataContext] No user or Supabase not configured');
+      console.log('[UserDataContext] ❌ No user or Supabase not configured');
       setRole('user');
       setLoading(false);
       return;
@@ -37,68 +59,72 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     isFetchingRef.current = true;
 
     try {
-      console.log('[UserDataContext] Making database query for role...');
+      console.log('[UserDataContext] 📡 Making database query for role...');
       const result = await debugAuth.testUserRoleQuery(userId);
       
       if (!result.success) {
-        console.error('[UserDataContext] Error fetching user role:', result.error);
+        console.error('[UserDataContext] ❌ Error fetching user role:', result.error);
         setRole('user');
         sessionStorage.setItem('role', 'user');
         localStorage.setItem('userRole', 'user');
       } else {
         const role = result.data?.role === 'admin' ? 'admin' : 'user';
-        console.log('[UserDataContext] Role fetched from DB:', role);
+        console.log('[UserDataContext] ✅ Role fetched from DB:', role);
         setRole(role);
         sessionStorage.setItem('role', role);
         localStorage.setItem('userRole', role);
+        lastFetchedUserIdRef.current = userId;
       }
     } catch (err) {
-      console.error('[UserDataContext] Unexpected error while fetching role:', err);
+      console.error('[UserDataContext] 💥 Unexpected error while fetching role:', err);
       setRole('user');
     } finally {
-      console.log('[UserDataContext] fetchUserRole completed, setting loading to false');
+      console.log('[UserDataContext] 🏁 fetchUserRole completed');
       setLoading(false);
       isFetchingRef.current = false;
     }
-  }, []);
+  }, [authReady]);
 
   useEffect(() => {
     console.log('[UserDataContext] useEffect triggered:', { 
       hasUser: !!user, 
       userId: user?.id,
       authLoading, 
-      authReady 
+      authReady,
+      lastFetchedUserId: lastFetchedUserIdRef.current
     });
     
-    // NE PAS FETCHER tant que authReady n'est pas true
+    // GUARD: NE PAS FETCHER tant que authReady n'est pas true
     if (!authReady) {
-      console.log('[UserDataContext] Waiting for auth to be ready...');
+      console.log('[UserDataContext] ⏳ Waiting for auth to be ready...');
       setLoading(true);
       return;
     }
 
     // Attendre que l'auth soit complètement chargé
     if (authLoading) {
-      console.log('[UserDataContext] Waiting for auth to finish loading...');
+      console.log('[UserDataContext] ⏳ Waiting for auth to finish loading...');
       setLoading(true);
       return;
     }
     
     if (!user) {
-      console.log('[UserDataContext] No user, setting default role');
+      console.log('[UserDataContext] ❌ No user, setting default role');
       setRole('user');
       setLoading(false);
+      lastFetchedUserIdRef.current = null;
       return;
     }
 
     // Check metadata first (most reliable)
     const metaRole = user.app_metadata?.role || user.user_metadata?.role;
     if (metaRole) {
-      console.log('[UserDataContext] Using metadata role:', metaRole);
+      console.log('[UserDataContext] ✅ Using metadata role:', metaRole);
       setRole(metaRole === 'admin' ? 'admin' : 'user');
       sessionStorage.setItem('role', String(metaRole));
       localStorage.setItem('userRole', String(metaRole));
       setLoading(false);
+      lastFetchedUserIdRef.current = user.id;
       return;
     }
     
@@ -107,8 +133,8 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const localRole = localStorage.getItem('userRole');
     const cachedRole = sessionRole || localRole;
     
-    if (cachedRole) {
-      console.log('[UserDataContext] Using cached role:', cachedRole, '(from', sessionRole ? 'sessionStorage' : 'localStorage', ')');
+    if (cachedRole && lastFetchedUserIdRef.current === user.id) {
+      console.log('[UserDataContext] ✓ Using cached role:', cachedRole);
       const resolvedRole = cachedRole === 'admin' ? 'admin' : 'user';
       setRole(resolvedRole);
       sessionStorage.setItem('role', resolvedRole);
@@ -119,7 +145,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     // Dernier recours : fetch depuis la DB avec debounce
     const timeoutId = setTimeout(() => {
-      console.log('[UserDataContext] Starting role fetch from DB...');
+      console.log('[UserDataContext] 🔄 Starting role fetch from DB...');
       setLoading(true);
       fetchUserRole(user.id);
     }, 100);
@@ -128,8 +154,12 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [user?.id, authLoading, authReady, fetchUserRole]);
 
   const refreshUserRole = useCallback(async () => {
+    console.log('[UserDataContext] refreshUserRole: Manual refresh requested');
     if (user?.id && authReady) {
+      lastFetchedUserIdRef.current = null; // Force refetch
       await fetchUserRole(user.id);
+    } else {
+      console.log('[UserDataContext] refreshUserRole: ❌ Cannot refresh - no user or auth not ready');
     }
   }, [user?.id, authReady, fetchUserRole]);
 

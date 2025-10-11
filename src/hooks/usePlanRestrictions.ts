@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useStripeSubscription } from './useStripeSubscription';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
@@ -38,14 +38,17 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
   const [error, setError] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(ctxRole);
   const [roleLoading, setRoleLoading] = useState<boolean>(Boolean(userData?.loading));
+  const lastCalculatedUserIdRef = useRef<string | null>(null);
 
   console.log('[usePlanRestrictions] State:', { 
     hasUser: !!user, 
+    userId: user?.id,
     authReady, 
     roleLoading, 
     stripeLoading,
     role,
-    ctxRole
+    ctxRole,
+    hasRestrictions: !!restrictions
   });
 
   // Fallback role fetch if context is missing or empty
@@ -53,9 +56,9 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
     let isMounted = true;
 
     const fetchRole = async () => {
-      // NE PAS FETCHER tant que authReady n'est pas true
+      // GUARD: NE PAS FETCHER tant que authReady n'est pas true
       if (!authReady) {
-        console.log('[usePlanRestrictions] Waiting for auth to be ready...');
+        console.log('[usePlanRestrictions] fetchRole: ⏳ Waiting for auth to be ready...');
         setRoleLoading(true);
         return;
       }
@@ -68,6 +71,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
 
       // If role already provided by context, trust it
       if (ctxRole) {
+        console.log('[usePlanRestrictions] fetchRole: ✅ Using context role:', ctxRole);
         setRole(ctxRole);
         setRoleLoading(false);
         sessionStorage.setItem('role', String(ctxRole));
@@ -82,6 +86,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
         cached;
 
       if (metaRole) {
+        console.log('[usePlanRestrictions] fetchRole: ✅ Using cached/metadata role:', metaRole);
         setRole(String(metaRole));
         setRoleLoading(false);
         sessionStorage.setItem('role', String(metaRole));
@@ -94,6 +99,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
         return;
       }
 
+      console.log('[usePlanRestrictions] fetchRole: 📡 Fetching role from database...');
       setRoleLoading(true);
       const { data, error } = await supabase
         .from('users')
@@ -104,9 +110,11 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
       if (!isMounted) return;
 
       if (error) {
+        console.error('[usePlanRestrictions] fetchRole: ❌ Error:', error.message);
         setError(error.message);
         setRole(null);
       } else {
+        console.log('[usePlanRestrictions] fetchRole: ✅ Role fetched:', data?.role);
         setRole(data?.role ?? null);
         if (data?.role) sessionStorage.setItem('role', String(data.role));
       }
@@ -121,20 +129,33 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
   }, [user?.id, ctxRole, authReady]);
 
   useEffect(() => {
-    // NE PAS CALCULER les restrictions tant que authReady n'est pas true
+    // GUARD: NE PAS CALCULER les restrictions tant que authReady n'est pas true
     if (!authReady) {
-      console.log('[usePlanRestrictions] Waiting for auth to be ready before calculating restrictions...');
+      console.log('[usePlanRestrictions] Calculate: ⏳ Waiting for auth to be ready...');
       return;
     }
 
     if (!user || roleLoading) {
-      console.log('[usePlanRestrictions] Waiting for user or role...', { hasUser: !!user, roleLoading });
+      console.log('[usePlanRestrictions] Calculate: ⏳ Waiting for user or role...', { 
+        hasUser: !!user, 
+        roleLoading 
+      });
       return;
     }
 
-    console.log('[usePlanRestrictions] Calculating restrictions...', { role, stripeLoading });
+    // Éviter de recalculer inutilement
+    if (lastCalculatedUserIdRef.current === user.id && restrictions && !stripeLoading) {
+      console.log('[usePlanRestrictions] Calculate: ✓ Already calculated for this user');
+      return;
+    }
 
-    // Debounce minimal pour éviter les calculs trop fréquents
+    console.log('[usePlanRestrictions] Calculate: 🔄 Calculating restrictions...', { 
+      role, 
+      stripeLoading,
+      hasSubscription: !!stripeSubscription
+    });
+
+    // Debounce minimal
     const timeoutId = setTimeout(() => {
       // ADMIN OVERRIDE
       if (role === 'admin') {
@@ -151,7 +172,8 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
         };
         setRestrictions(adminRestrictions);
         setError(null);
-        console.log('[usePlanRestrictions] Admin restrictions set');
+        lastCalculatedUserIdRef.current = user.id;
+        console.log('[usePlanRestrictions] Calculate: ✅ Admin restrictions set');
         return;
       }
 
@@ -163,6 +185,11 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
       // Stripe subscription parsing
       let isPaidActive = false;
       if (stripeSubscription) {
+        console.log('[usePlanRestrictions] Calculate: Processing subscription:', {
+          priceId: stripeSubscription.price_id,
+          status: stripeSubscription.subscription_status
+        });
+
         switch (stripeSubscription.price_id) {
           case 'price_1RoRLDENcVsHr4WI6TViAPNb':
           case 'price_1RoXOgENcVsHr4WIitiOEaaz':
@@ -199,14 +226,18 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
 
       setRestrictions(calculated);
       setError(null);
-      console.log('[usePlanRestrictions] Restrictions calculated:', calculated);
+      lastCalculatedUserIdRef.current = user.id;
+      console.log('[usePlanRestrictions] Calculate: ✅ Restrictions calculated:', calculated);
     }, 50);
 
     return () => clearTimeout(timeoutId);
-  }, [user?.id, role, roleLoading, stripeSubscription, authReady]);
+  }, [user?.id, role, roleLoading, stripeSubscription, stripeLoading, authReady, restrictions]);
 
   const checkAccess = (feature: FeatureKey) => {
-    if (!restrictions) return false;
+    if (!restrictions) {
+      console.log('[usePlanRestrictions] checkAccess: ❌ No restrictions available');
+      return false;
+    }
     if (restrictions.isAdmin) return true;
 
     switch (feature) {

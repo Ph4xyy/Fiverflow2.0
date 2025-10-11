@@ -53,23 +53,40 @@ const DashboardPage = () => {
   // 👉 Nouvel état pour le nom de l'utilisateur
   const [userName, setUserName] = useState<string | null>(null);
 
-  console.log('[DashboardPage] Render:', { hasUser: !!user, authReady, hasFetched: hasFetchedOrders.current });
+  const hasFetchedUserIdRef = useRef<string | null>(null);
+
+  console.log('[DashboardPage] Render:', { 
+    hasUser: !!user, 
+    userId: user?.id,
+    authReady, 
+    hasFetched: hasFetchedOrders.current,
+    hasFetchedUserId: hasFetchedUserIdRef.current,
+    loadingOrders,
+    loadingTasks
+  });
 
   const fetchOrders = useCallback(async () => {
-    // NE PAS FETCHER tant que authReady n'est pas true
+    // GUARD: NE PAS FETCHER tant que authReady n'est pas true
     if (!authReady) {
-      console.log('[DashboardPage] fetchOrders: Waiting for auth to be ready...');
+      console.log('[DashboardPage] fetchOrders: ⏳ Waiting for auth to be ready...');
       setLoadingOrders(true);
       return;
     }
 
     if (!isSupabaseConfigured || !supabase || !user) {
+      console.log('[DashboardPage] fetchOrders: ❌ No Supabase or no user');
       setOrders([]);
       setLoadingOrders(false);
       return;
     }
 
-    console.log('[DashboardPage] Fetching orders...');
+    // Éviter de refetch inutilement
+    if (hasFetchedUserIdRef.current === user.id && orders.length > 0) {
+      console.log('[DashboardPage] fetchOrders: ✓ Already fetched for this user');
+      return;
+    }
+
+    console.log('[DashboardPage] fetchOrders: 📡 Fetching orders for user:', user.id);
     setLoadingOrders(true);
 
     const { data, error } = await supabase
@@ -79,30 +96,38 @@ const DashboardPage = () => {
       .order('deadline', { ascending: true });
 
     if (error) {
-      console.error('[DashboardPage] Failed to fetch orders:', error);
+      console.error('[DashboardPage] fetchOrders: ❌ Failed to fetch orders:', error);
     } else {
-      console.log('[DashboardPage] Fetched', data?.length || 0, 'orders');
+      console.log('[DashboardPage] fetchOrders: ✅ Fetched', data?.length || 0, 'orders');
       setOrders(data || []);
+      hasFetchedUserIdRef.current = user.id;
     }
 
     setLoadingOrders(false);
-  }, [user, authReady]);
+  }, [user, authReady, orders.length]);
 
   const fetchTasks = useCallback(async () => {
-    // NE PAS FETCHER tant que authReady n'est pas true
+    // GUARD: NE PAS FETCHER tant que authReady n'est pas true
     if (!authReady) {
-      console.log('[DashboardPage] fetchTasks: Waiting for auth to be ready...');
+      console.log('[DashboardPage] fetchTasks: ⏳ Waiting for auth to be ready...');
       setLoadingTasks(true);
       return;
     }
 
     if (!isSupabaseConfigured || !supabase || !user) {
+      console.log('[DashboardPage] fetchTasks: ❌ No Supabase or no user');
       setTasks([]);
       setLoadingTasks(false);
       return;
     }
 
-    console.log('[DashboardPage] Fetching tasks...');
+    // Éviter de refetch inutilement
+    if (hasFetchedUserIdRef.current === user.id && tasks.length > 0) {
+      console.log('[DashboardPage] fetchTasks: ✓ Already fetched for this user');
+      return;
+    }
+
+    console.log('[DashboardPage] fetchTasks: 📡 Fetching tasks for user:', user.id);
     setLoadingTasks(true);
     const { data, error } = await supabase
       .from('tasks')
@@ -112,18 +137,18 @@ const DashboardPage = () => {
       .order('due_date', { ascending: true });
 
     if (error) {
-      console.error('[DashboardPage] Failed to fetch tasks:', error);
+      console.error('[DashboardPage] fetchTasks: ❌ Failed to fetch tasks:', error);
       setTasks([]);
     } else {
-      console.log('[DashboardPage] Fetched', data?.length || 0, 'tasks');
+      console.log('[DashboardPage] fetchTasks: ✅ Fetched', data?.length || 0, 'tasks');
       setTasks(data || []);
     }
     setLoadingTasks(false);
-  }, [user, authReady]);
+  }, [user, authReady, tasks.length]);
 
   useEffect(() => {
     if (!hasFetchedOrders.current && authReady && user) {
-      console.log('[DashboardPage] Initial fetch triggered');
+      console.log('[DashboardPage] useEffect: 🚀 Initial fetch triggered');
       hasFetchedOrders.current = true;
       fetchOrders();
       fetchTasks();
@@ -132,9 +157,10 @@ const DashboardPage = () => {
 
   // Listen for session refresh to refetch data
   useEffect(() => {
-    const onRefreshed = () => {
-      console.log('[DashboardPage] Session refreshed event received, refetching data...');
+    const onRefreshed = (e: CustomEvent) => {
+      console.log('[DashboardPage] 🔄 Session refreshed event received:', e.detail);
       hasFetchedOrders.current = false;
+      hasFetchedUserIdRef.current = null;
       fetchOrders();
       fetchTasks();
     };
@@ -145,9 +171,13 @@ const DashboardPage = () => {
   // 👉 Récupérer le nom depuis la table users
   useEffect(() => {
     const fetchUserName = async () => {
-      if (!authReady || !user) return;
+      // GUARD: Attendre que auth soit prêt
+      if (!authReady || !user) {
+        console.log('[DashboardPage] fetchUserName: ⏳ Waiting for auth to be ready...');
+        return;
+      }
 
-      console.log('[DashboardPage] Fetching user name...');
+      console.log('[DashboardPage] fetchUserName: 📡 Fetching user name for:', user.id);
       const { data, error } = await supabase
         .from("users")
         .select('name')
@@ -155,8 +185,10 @@ const DashboardPage = () => {
         .single();
 
       if (!error && data) {
-        console.log('[DashboardPage] User name fetched:', data.name);
+        console.log('[DashboardPage] fetchUserName: ✅ User name fetched:', data.name);
         setUserName(data.name);
+      } else if (error) {
+        console.error('[DashboardPage] fetchUserName: ❌ Error:', error);
       }
     };
 

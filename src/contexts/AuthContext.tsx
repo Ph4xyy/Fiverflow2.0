@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import type { User, AuthError, Session, PostgrestError } from '@supabase/supabase-js';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, storageSupport } from '../lib/supabase';
+import { useAuthResilience } from '../hooks/useAuthResilience';
 
 interface AuthContextType {
   user: User | null;
@@ -20,10 +21,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authReady, setAuthReady] = useState(false);
   
   const mountedRef = useRef(true);
-  const lastRefreshAttempt = useRef<number>(0);
-  const isRefreshing = useRef(false);
   const hasInitialized = useRef(false);
   const authStateListenerRef = useRef<any>(null);
+  const previousUserIdRef = useRef<string | null>(null);
+
+  console.log('[AuthContext] Render:', { 
+    hasUser: !!user, 
+    loading, 
+    authReady,
+    userId: user?.id,
+    storageIssue: storageSupport.hasIssue
+  });
+
+  // Afficher un avertissement si problème de storage détecté
+  useEffect(() => {
+    if (storageSupport.hasIssue) {
+      console.warn('[AuthContext] ⚠️ STORAGE ISSUE:', storageSupport.message);
+      // Vous pourriez afficher une notification à l'utilisateur ici
+    }
+  }, []);
 
   const safeSetState = <T,>(setter: React.Dispatch<React.SetStateAction<T>>) =>
     (value: React.SetStateAction<T>) => {
@@ -79,128 +95,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const cleanupAndValidateStorage = () => {
-    try {
-      if (typeof window === 'undefined') return false;
+  // Hook de résilience - gère les retries sans mettre user=null
+  const { attemptSessionRefresh } = useAuthResilience({
+    onSessionRestored: async (session: Session) => {
+      console.log('[AuthContext] 🔄 Session restored by resilience hook');
       
-      const testKey = 'ff-storage-test';
-      localStorage.setItem(testKey, 'test');
-      const canAccess = localStorage.getItem(testKey) === 'test';
-      localStorage.removeItem(testKey);
-      
-      if (!canAccess) {
-        console.warn('[AuthContext] localStorage not accessible');
-        return false;
+      // Ne mettre à jour que si l'utilisateur a changé
+      if (session.user.id !== previousUserIdRef.current) {
+        console.log('[AuthContext] User changed, updating state');
+        setUserSafe(session.user);
+        previousUserIdRef.current = session.user.id;
       }
       
-      return true;
-    } catch (e) {
-      console.warn('[AuthContext] Storage validation failed:', e);
-      return false;
+      await deriveAndCacheRole(session);
+      
+      // Émettre un événement pour que les composants puissent refetch leurs données
+      try {
+        window.dispatchEvent(new CustomEvent('ff:session:refreshed', { 
+          detail: { userId: session.user.id } 
+        }));
+      } catch {}
+    },
+    onSessionLost: () => {
+      console.log('[AuthContext] ❌ Session lost after max retries');
+      // Seulement maintenant on peut mettre user à null
+      setUserSafe(null);
+      previousUserIdRef.current = null;
+      sessionStorage.removeItem('role');
+      localStorage.removeItem('userRole');
     }
-  };
-
-  // Fonction pour rafraîchir la session de manière sécurisée
-  const refreshSessionIfNeeded = async (silent: boolean = false) => {
-    if (!isSupabaseConfigured || !supabase) return null;
-    
-    // Éviter les refresh trop fréquents (minimum 3 secondes)
-    const now = Date.now();
-    if (now - lastRefreshAttempt.current < 3000) {
-      if (!silent) console.log('[AuthContext] refreshSessionIfNeeded: Skipping (too soon)');
-      return null;
-    }
-    
-    // Éviter les refresh simultanés
-    if (isRefreshing.current) {
-      if (!silent) console.log('[AuthContext] refreshSessionIfNeeded: Already refreshing');
-      return null;
-    }
-
-    lastRefreshAttempt.current = now;
-    isRefreshing.current = true;
-
-    try {
-      console.log('[AuthContext] refreshSessionIfNeeded: Getting session...');
-      const { data: { session }, error } = await supabase.auth.getSession();
-
-      if (error) {
-        console.error('[AuthContext] refreshSessionIfNeeded: getSession error:', error.message);
-        
-        // Tentative de refresh du token
-        if (error.message.includes('refresh_token') || error.message.includes('expired')) {
-          console.log('[AuthContext] refreshSessionIfNeeded: Attempting token refresh...');
-          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-          
-          if (!refreshError && refreshData.session) {
-            console.log('[AuthContext] refreshSessionIfNeeded: Token refreshed successfully');
-            setUserSafe(refreshData.session.user);
-            await deriveAndCacheRole(refreshData.session);
-            return refreshData.session;
-          } else {
-            console.error('[AuthContext] refreshSessionIfNeeded: Token refresh failed:', refreshError?.message);
-          }
-        }
-        
-        // Ne pas propager user=null immédiatement, garder l'état actuel
-        return null;
-      }
-
-      // Vérifier si la session est expirée ou sur le point d'expirer
-      if (session) {
-        const expiresAt = new Date(session.expires_at * 1000);
-        const now = new Date();
-        const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
-        
-        if (expiresAt < now) {
-          console.log('[AuthContext] refreshSessionIfNeeded: Session expired, refreshing...');
-          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-          
-          if (!refreshError && refreshData.session) {
-            console.log('[AuthContext] refreshSessionIfNeeded: Expired session refreshed');
-            setUserSafe(refreshData.session.user);
-            await deriveAndCacheRole(refreshData.session);
-            return refreshData.session;
-          } else {
-            console.error('[AuthContext] refreshSessionIfNeeded: Failed to refresh expired session');
-            // Ne pas propager null, garder l'état actuel
-            return null;
-          }
-        } else if (expiresAt < fiveMinutesFromNow) {
-          console.log('[AuthContext] refreshSessionIfNeeded: Session expiring soon, refreshing...');
-          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-          
-          if (!refreshError && refreshData.session) {
-            console.log('[AuthContext] refreshSessionIfNeeded: Session refreshed proactively');
-            setUserSafe(refreshData.session.user);
-            await deriveAndCacheRole(refreshData.session);
-            return refreshData.session;
-          } else {
-            // Si le refresh échoue mais la session est encore valide, on la garde
-            console.warn('[AuthContext] refreshSessionIfNeeded: Proactive refresh failed, keeping current session');
-            setUserSafe(session.user);
-            await deriveAndCacheRole(session);
-            return session;
-          }
-        } else {
-          // Session valide
-          if (!silent) console.log('[AuthContext] refreshSessionIfNeeded: Session still valid');
-          setUserSafe(session.user);
-          await deriveAndCacheRole(session);
-          return session;
-        }
-      } else {
-        // Pas de session, mais ne pas forcer user=null si on est en train de rafraîchir
-        console.log('[AuthContext] refreshSessionIfNeeded: No session found');
-        return null;
-      }
-    } catch (err) {
-      console.error('[AuthContext] refreshSessionIfNeeded: Error:', err);
-      return null;
-    } finally {
-      isRefreshing.current = false;
-    }
-  };
+  });
 
   useEffect(() => {
     // Protection contre le double mount en StrictMode
@@ -215,15 +139,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let initTimeout: number | undefined;
 
     const init = async () => {
+      console.log('[AuthContext] ========================================');
       console.log('[AuthContext] Initializing...');
-      
-      const storageValid = cleanupAndValidateStorage();
-      if (!storageValid) {
-        console.warn('[AuthContext] Storage validation failed');
-      }
+      console.log('[AuthContext] Environment:', {
+        mode: import.meta.env.MODE,
+        dev: import.meta.env.DEV,
+        hasSupabase: !!supabase,
+        storageIssue: storageSupport.hasIssue
+      });
+      console.log('[AuthContext] ========================================');
       
       if (!isSupabaseConfigured || !supabase) {
-        console.log('[AuthContext] Supabase not configured');
+        console.log('[AuthContext] ❌ Supabase not configured');
         setUserSafe(null);
         setLoadingSafe(false);
         setAuthReadySafe(true);
@@ -231,65 +158,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        console.log('[AuthContext] Getting initial session...');
+        console.log('[AuthContext] 🔍 Getting initial session...');
         
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('[AuthContext] getSession error:', error.message);
+          console.error('[AuthContext] ❌ getSession error:', error.message);
           
-          if (error.message.includes('refresh_token') || error.message.includes('expired')) {
-            console.log('[AuthContext] Attempting initial token refresh...');
-            try {
-              const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-              if (!refreshError && refreshData.session) {
-                console.log('[AuthContext] Initial token refreshed successfully');
-                setUserSafe(refreshData.session.user);
-                await deriveAndCacheRole(refreshData.session);
-                setLoadingSafe(false);
-                setAuthReadySafe(true);
-                return;
-              }
-            } catch (refreshErr) {
-              console.error('[AuthContext] Initial token refresh failed:', refreshErr);
-            }
-          }
+          // Laisser le hook de résilience gérer les retries
+          console.log('[AuthContext] Delegating to resilience hook...');
+          await attemptSessionRefresh();
           
-          setUserSafe(null);
           setLoadingSafe(false);
           setAuthReadySafe(true);
           return;
         }
 
-        console.log('[AuthContext] Session retrieved:', {
-          hasSession: !!session,
-          hasUser: !!session?.user,
-          userId: session?.user?.id,
-          expiresAt: session?.expires_at
-        });
+        if (session) {
+          console.log('[AuthContext] ✅ Session found:', {
+            userId: session.user.id,
+            email: session.user.email,
+            expiresAt: new Date(session.expires_at * 1000).toISOString(),
+            isExpired: new Date(session.expires_at * 1000) < new Date()
+          });
 
-        if (session && new Date(session.expires_at * 1000) < new Date()) {
-          console.log('[AuthContext] Session expired on init, attempting refresh...');
-          try {
-            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-            if (!refreshError && refreshData.session) {
-              console.log('[AuthContext] Expired session refreshed on init');
-              setUserSafe(refreshData.session.user);
-              await deriveAndCacheRole(refreshData.session);
-              setLoadingSafe(false);
-              setAuthReadySafe(true);
-              return;
-            }
-          } catch (refreshErr) {
-            console.error('[AuthContext] Failed to refresh expired session on init:', refreshErr);
+          const expiresAt = new Date(session.expires_at * 1000);
+          const now = new Date();
+
+          if (expiresAt < now) {
+            console.log('[AuthContext] ⚠️ Session expired on init, using resilience hook...');
+            await attemptSessionRefresh();
+          } else {
+            console.log('[AuthContext] Session valid, setting user');
+            setUserSafe(session.user);
+            previousUserIdRef.current = session.user.id;
+            await deriveAndCacheRole(session);
           }
+        } else {
+          console.log('[AuthContext] No session found');
+          setUserSafe(null);
+          previousUserIdRef.current = null;
         }
 
-        setUserSafe(session?.user ?? null);
-        await deriveAndCacheRole(session);
         setLoadingSafe(false);
         setAuthReadySafe(true);
-        console.log('[AuthContext] Initialization complete');
+        console.log('[AuthContext] ✅ Initialization complete');
 
         // Nettoyer le listener précédent s'il existe
         if (authStateListenerRef.current) {
@@ -302,7 +215,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Configurer le listener d'état d'authentification
         const { data } = supabase.auth.onAuthStateChange(async (event, nextSession) => {
-          console.log('[AuthContext] onAuthStateChange:', {
+          console.log('[AuthContext] 🔔 onAuthStateChange:', {
             event,
             hasSession: !!nextSession,
             hasUser: !!nextSession?.user,
@@ -310,31 +223,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
           
           if (event === 'TOKEN_REFRESHED') {
-            console.log('[AuthContext] Token refreshed automatically by Supabase');
+            console.log('[AuthContext] ✅ Token refreshed automatically by Supabase');
+            if (nextSession?.user) {
+              setUserSafe(nextSession.user);
+              previousUserIdRef.current = nextSession.user.id;
+              await deriveAndCacheRole(nextSession);
+            }
           } else if (event === 'SIGNED_OUT') {
-            console.log('[AuthContext] User signed out');
+            console.log('[AuthContext] 🚪 User signed out');
+            setUserSafe(null);
+            previousUserIdRef.current = null;
             sessionStorage.removeItem('role');
             localStorage.removeItem('userRole');
           } else if (event === 'SIGNED_IN') {
-            console.log('[AuthContext] User signed in');
+            console.log('[AuthContext] ✅ User signed in');
+            if (nextSession?.user) {
+              setUserSafe(nextSession.user);
+              previousUserIdRef.current = nextSession.user.id;
+              await deriveAndCacheRole(nextSession);
+            }
+          } else if (event === 'USER_UPDATED') {
+            console.log('[AuthContext] 👤 User updated');
+            if (nextSession?.user) {
+              setUserSafe(nextSession.user);
+              previousUserIdRef.current = nextSession.user.id;
+              await deriveAndCacheRole(nextSession);
+            }
           }
-          
-          setUserSafe(nextSession?.user ?? null);
-          await deriveAndCacheRole(nextSession);
           
           if (!authReady) {
             setAuthReadySafe(true);
           }
           
           try {
-            window.dispatchEvent(new CustomEvent('ff:cleanup', { detail: { userId: nextSession?.user?.id || null } }));
+            window.dispatchEvent(new CustomEvent('ff:cleanup', { 
+              detail: { userId: nextSession?.user?.id || null } 
+            }));
           } catch {}
         });
 
         authStateListenerRef.current = data;
 
       } catch (err) {
-        console.error('[AuthContext] Initialization error:', err);
+        console.error('[AuthContext] 💥 Initialization error:', err);
         setUserSafe(null);
         setLoadingSafe(false);
         setAuthReadySafe(true);
@@ -343,7 +274,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Timeout de sécurité
     initTimeout = window.setTimeout(() => {
-      console.warn('[AuthContext] Initialization timeout, forcing completion');
+      console.warn('[AuthContext] ⏱️ Initialization timeout (10s), forcing completion');
       setLoadingSafe(false);
       setAuthReadySafe(true);
     }, 10000);
@@ -354,39 +285,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    // Gestionnaire pour le retour de focus/visibilité de l'onglet
-    const handleVisibilityChange = () => {
-      if (!document.hidden && mountedRef.current && authReady) {
-        console.log('[AuthContext] Tab became visible, checking session...');
-        refreshSessionIfNeeded(true);
-      }
-    };
-
-    const handleFocus = () => {
-      if (mountedRef.current && authReady) {
-        console.log('[AuthContext] Window focused, checking session...');
-        refreshSessionIfNeeded(true);
-      }
-    };
-
-    // Ajouter les listeners
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-
-    // Refresh périodique (toutes les 5 minutes si l'onglet est actif)
-    const refreshInterval = setInterval(() => {
-      if (!document.hidden && mountedRef.current && authReady) {
-        console.log('[AuthContext] Periodic session check...');
-        refreshSessionIfNeeded(true);
-      }
-    }, 5 * 60 * 1000);
-
     return () => {
+      console.log('[AuthContext] 🧹 Cleanup');
       mountedRef.current = false;
       if (initTimeout) clearTimeout(initTimeout);
-      clearInterval(refreshInterval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleFocus);
       
       // Nettoyer le listener d'état d'authentification
       if (authStateListenerRef.current) {
@@ -404,6 +306,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { user: null, error: null as unknown as AuthError };
     }
     try {
+      console.log('[AuthContext] signUp: Starting registration...');
       const urlParams = new URLSearchParams(window.location.search);
       const referralCode = urlParams.get('ref');
 
@@ -421,9 +324,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       sessionStorage.setItem('pendingRegistrationData', JSON.stringify(userData));
       const { data, error } = await supabase.auth.signUp({ email, password });
 
+      if (error) {
+        console.error('[AuthContext] signUp: Error:', error.message);
+      } else {
+        console.log('[AuthContext] signUp: Success');
+      }
+
       await deriveAndCacheRole(data.session ?? null);
       return { user: data.user, error };
     } catch (error) {
+      console.error('[AuthContext] signUp: Unexpected error:', error);
       return { user: null, error: error as AuthError };
     }
   };
@@ -442,8 +352,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       
       if (data.user && data.session) {
-        console.log('[AuthContext] signIn: Success, updating user and caching role');
+        console.log('[AuthContext] signIn: ✅ Success', {
+          userId: data.user.id,
+          email: data.user.email
+        });
         setUserSafe(data.user);
+        previousUserIdRef.current = data.user.id;
         await deriveAndCacheRole(data.session);
         
         try {
@@ -456,7 +370,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       return { user: data.user, error };
     } catch (error) {
-      console.error('[AuthContext] signIn: Unexpected error:', error);
+      console.error('[AuthContext] signIn: 💥 Unexpected error:', error);
       return { user: null, error: error as AuthError };
     }
   };
@@ -465,6 +379,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('[AuthContext] signOut: Starting sign out process...');
     if (!isSupabaseConfigured || !supabase) {
       setUserSafe(null);
+      previousUserIdRef.current = null;
       sessionStorage.removeItem('role');
       localStorage.removeItem('userRole');
       return;
@@ -472,12 +387,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await supabase.auth.signOut();
       setUserSafe(null);
+      previousUserIdRef.current = null;
       sessionStorage.removeItem('role');
       localStorage.removeItem('userRole');
       sessionStorage.clear();
-      console.log('[AuthContext] signOut: Signed out and caches cleared');
+      console.log('[AuthContext] signOut: ✅ Signed out and caches cleared');
     } catch (error) {
-      console.error('[AuthContext] signOut: Error:', error);
+      console.error('[AuthContext] signOut: ❌ Error:', error);
     }
   };
 
@@ -485,10 +401,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!isSupabaseConfigured || !supabase || !user) {
       return { error: null };
     }
+    console.log('[AuthContext] updateProfile: Updating profile...');
     const { error } = await supabase.from('users').update(updates).eq('id', user.id);
     if (!error && typeof updates?.role !== 'undefined') {
       sessionStorage.setItem('role', String(updates.role));
       localStorage.setItem('userRole', String(updates.role));
+      console.log('[AuthContext] updateProfile: ✅ Role updated in cache');
     }
     return { error };
   };

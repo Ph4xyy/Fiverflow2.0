@@ -31,7 +31,16 @@ const ClientsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
 
-  console.log('[ClientsPage] Render:', { hasUser: !!user, authReady });
+  const lastFetchedUserIdRef = useRef<string | null>(null);
+
+  console.log('[ClientsPage] Render:', { 
+    hasUser: !!user, 
+    userId: user?.id,
+    authReady,
+    loading,
+    clientsCount: clients.length,
+    lastFetchedUserId: lastFetchedUserIdRef.current
+  });
 
   // Search (debounced)
   const [search, setSearch] = useState('');
@@ -71,13 +80,18 @@ const ClientsPage: React.FC = () => {
   // Load distinct filters
   useEffect(() => {
     const loadDistincts = async () => {
-      if (!authReady || !user) return;
+      // GUARD: Attendre que auth soit prêt
+      if (!authReady || !user) {
+        console.log('[ClientsPage] loadDistincts: ⏳ Waiting for auth to be ready...');
+        return;
+      }
       if (!isSupabaseConfigured || !supabase) {
+        console.log('[ClientsPage] loadDistincts: Using default options (no Supabase)');
         setPlatformOptions(['Fiverr', 'Upwork', 'Direct']);
         setCountryOptions(['France', 'Canada', 'United States']);
         return;
       }
-      console.log('[ClientsPage] Loading distinct filters...');
+      console.log('[ClientsPage] loadDistincts: 📡 Loading distinct filters for user:', user.id);
       try {
         const [plat, ctry] = await Promise.all([
           supabase
@@ -97,9 +111,9 @@ const ClientsPage: React.FC = () => {
         (ctry.data || []).forEach((r: any) => r.country && cSet.add(r.country));
         setPlatformOptions(Array.from(pSet).sort());
         setCountryOptions(Array.from(cSet).sort());
-        console.log('[ClientsPage] Distinct filters loaded');
+        console.log('[ClientsPage] loadDistincts: ✅ Distinct filters loaded');
       } catch (err) {
-        console.error('[ClientsPage] Failed to load distinct filters:', err);
+        console.error('[ClientsPage] loadDistincts: ❌ Failed:', err);
       }
     };
     loadDistincts();
@@ -107,21 +121,29 @@ const ClientsPage: React.FC = () => {
 
   // Fetch clients (with search + filters + pagination)
   const fetchClients = async () => {
-    // NE PAS FETCHER tant que authReady n'est pas true
+    // GUARD: NE PAS FETCHER tant que authReady n'est pas true
     if (!authReady) {
-      console.log('[ClientsPage] fetchClients: Waiting for auth to be ready...');
+      console.log('[ClientsPage] fetchClients: ⏳ Waiting for auth to be ready...');
       setLoading(true);
       return;
     }
 
     if (!user) {
+      console.log('[ClientsPage] fetchClients: ❌ No user, clearing clients');
       setClients([]);
       setTotal(0);
       setLoading(false);
+      lastFetchedUserIdRef.current = null;
       return;
     }
 
-    console.log('[ClientsPage] Fetching clients...');
+    console.log('[ClientsPage] fetchClients: 📡 Fetching clients for user:', user.id, {
+      search: debouncedSearch,
+      status,
+      platform,
+      country,
+      page
+    });
 
     // Demo mode
     if (!isSupabaseConfigured || !supabase) {
@@ -189,9 +211,10 @@ const ClientsPage: React.FC = () => {
 
       setClients(data || []);
       setTotal(count || 0);
-      console.log('[ClientsPage] Fetched', data?.length || 0, 'clients (total:', count || 0, ')');
+      lastFetchedUserIdRef.current = user.id;
+      console.log('[ClientsPage] fetchClients: ✅ Fetched', data?.length || 0, 'clients (total:', count || 0, ')');
     } catch (e: any) {
-      console.error('[ClientsPage] fetch error:', e);
+      console.error('[ClientsPage] fetchClients: ❌ Error:', e);
       setError(e?.message || 'Failed to load clients');
       toast.error('Unable to load clients');
     } finally {
@@ -201,15 +224,19 @@ const ClientsPage: React.FC = () => {
 
   useEffect(() => {
     if (authReady) {
+      console.log('[ClientsPage] useEffect: Triggering fetch');
       fetchClients();
+    } else {
+      console.log('[ClientsPage] useEffect: Waiting for auth ready');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authReady, debouncedSearch, status, platform, country, page]);
 
   // Listen for session refresh to refetch data
   useEffect(() => {
-    const onRefreshed = () => {
-      console.log('[ClientsPage] Session refreshed event received, refetching clients...');
+    const onRefreshed = (e: CustomEvent) => {
+      console.log('[ClientsPage] 🔄 Session refreshed event received:', e.detail);
+      lastFetchedUserIdRef.current = null;
       fetchClients();
     };
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
@@ -230,12 +257,13 @@ const ClientsPage: React.FC = () => {
 
   // --- VIEW (lecture seule) ---
   const openView = async (id: string) => {
+    // GUARD: Attendre que auth soit prêt
     if (!authReady) {
-      console.log('[ClientsPage] openView: Waiting for auth to be ready...');
+      console.log('[ClientsPage] openView: ⏳ Waiting for auth to be ready...');
       return;
     }
 
-    console.log('[ClientsPage] Opening view for client:', id);
+    console.log('[ClientsPage] openView: 📂 Opening view for client:', id);
     setIsViewOpen(true);
     setViewLoading(true);
     setViewClient(null);
