@@ -16,9 +16,9 @@ import {
   Palette,
   SlidersHorizontal,
   Filter,
-  Trash2,
   Save,
   X,
+  Trash2,
   Check,
   Clock,
   Building2,
@@ -253,7 +253,7 @@ const TodoListPage: React.FC = () => {
       }
 
       // Tasks → essai étendu, fallback base si colonnes manquent
-      let tRes = await supabase
+      let tRes: any = await supabase
         .from('tasks')
         .select(`
           id, user_id, title, description, status, priority, due_date,
@@ -313,7 +313,7 @@ const TodoListPage: React.FC = () => {
     };
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
     return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-  }, []); // 🔥 FIXED: Remove loadAll from dependencies to prevent infinite loops
+  }, [loadAll]);
 
   /* ----------- CALENDAR UPSERT ----------- */
   const upsertCalendar = useCallback(async (task: TaskRow) => {
@@ -455,13 +455,13 @@ const TodoListPage: React.FC = () => {
         // sync calendrier si due_date déjà définie (peu probable à la création)
         if (data?.due_date) await upsertCalendar({ ...optimistic, id: data.id, due_date: data.due_date });
       }
-      toast.success('Task created' || 'Tâche créée');
+      toast.success('Task created');
     } catch (e: any) {
       console.error('[insertTask] catch:', e);
-      toast.error('Task creation failed' || `Création impossible: ${e?.message || 'erreur inconnue'}`);
+      toast.error(`Task creation failed: ${e?.message || 'unknown error'}`);
       setRows(prev => prev.filter(r => r.id !== optimistic.id));
     }
-  }, [user, rows, upsertCalendar, t]);
+  }, [user, rows, upsertCalendar]);
 
   const removeTask = useCallback(async (task: TaskRow) => {
     setRows(prev => prev.filter(r => r.id !== task.id && r.parent_id !== task.id));
@@ -469,12 +469,12 @@ const TodoListPage: React.FC = () => {
     try {
       const { error } = await supabase.from('tasks').delete().eq('id', task.id);
       if (error) throw error;
-      toast('Task deleted' || 'Tâche supprimée', { icon: '🗑️' });
+      toast('Task deleted', { icon: '🗑️' });
     } catch (e: any) {
       console.error('[removeTask]', e);
-      toast.error('Task deletion failed' || `Suppression impossible: ${e?.message || 'erreur inconnue'}`);
+      toast.error(`Task deletion failed: ${e?.message || 'unknown error'}`);
     }
-  }, [t]);
+  }, []);
 
   /* ----------- UI helpers ----------- */
   const toggleCollapse = (id: string) => {
@@ -623,15 +623,28 @@ const TodoListPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Bouton d'ajout de sous-tâche */}
-            <button
-              onClick={() => insertTask(task)}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 hover:text-emerald-300 transition-colors text-xs"
-              title={'Add Subtask'}
-            >
-              <PlusCircle size={12} />
-              <span>{'Add Subtask'}</span>
-            </button>
+            {/* Bouton d'ajout de sous-tâche et suppression */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => insertTask(task)}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 hover:text-emerald-300 transition-colors text-xs"
+                title={'Add Subtask'}
+              >
+                <PlusCircle size={12} />
+                <span>{'Add Subtask'}</span>
+              </button>
+              <button
+                onClick={() => {
+                  if (window.confirm(`Delete task "${task.title}"?`)) {
+                    removeTask(task);
+                  }
+                }}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 transition-colors text-xs"
+                title={'Delete task'}
+              >
+                <Trash2 size={12} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
