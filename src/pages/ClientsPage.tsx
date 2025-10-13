@@ -1,5 +1,5 @@
 // src/pages/ClientsPage.tsx
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import Layout, { cardClass } from '@/components/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 
