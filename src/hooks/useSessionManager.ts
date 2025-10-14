@@ -2,6 +2,17 @@ import { useEffect, useRef, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
+
+export const useSessionManager = () => {
+  console.log("🧠 useSessionManager mounted");
+
+  useEffect(() => {
+    console.log("🚀 useSessionManager effect triggered");
+
+    return () => {
+      console.log("🧹 useSessionManager cleanup");
+    };
+  }, []);
 /**
  * Hook pour gérer les sessions de manière robuste
  * Évite les pertes de session lors des changements d'onglet
@@ -113,3 +124,6 @@ export const useSessionManager = () => {
     checkAndRefreshSession
   };
 };
+};
+
+
