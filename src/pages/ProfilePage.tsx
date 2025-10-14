@@ -103,6 +103,23 @@ const ProfilePage: React.FC = () => {
     confirmPassword: ''
   });
 
+  // Email change state (secured by password)
+  const [emailChange, setEmailChange] = useState({
+    newEmail: '',
+    currentPassword: ''
+  });
+  const [emailChanging, setEmailChanging] = useState(false);
+  const [showEmailPassword, setShowEmailPassword] = useState(false);
+
+  // 2FA (TOTP) state
+  const [mfaLoading, setMfaLoading] = useState(false);
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [mfaEnrolling, setMfaEnrolling] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaQrCode, setMfaQrCode] = useState<string | null>(null);
+  const [mfaSecret, setMfaSecret] = useState<string | null>(null);
+  const [mfaVerificationCode, setMfaVerificationCode] = useState('');
+
   // Mock data si Supabase non configuré
   const mockProfile: UserProfile = {
     id: 'mock-user',
@@ -375,6 +392,153 @@ const ProfilePage: React.FC = () => {
       toast.error('Failed to update password', { id: toastId });
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Change email with password verification
+  const handleChangeEmail = async () => {
+    if (!isSupabaseConfigured || !supabase || !user) {
+      toast.error('Database not configured');
+      return;
+    }
+
+    const trimmedEmail = emailChange.newEmail.trim();
+    if (!trimmedEmail) {
+      toast.error('Please enter a new email');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      toast.error('Please enter a valid email');
+      return;
+    }
+    if (!emailChange.currentPassword) {
+      toast.error('Please enter your current password');
+      return;
+    }
+
+    setEmailChanging(true);
+    const toastId = toast.loading('Updating email...');
+    try {
+      // Re-authenticate to enforce password requirement
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: profileData.email || user.email || '',
+        password: emailChange.currentPassword,
+      });
+      if (signInError) throw signInError;
+
+      // Request email update (may trigger confirmation email depending on project settings)
+      const { error: updateError } = await supabase.auth.updateUser({ email: trimmedEmail });
+      if (updateError) throw updateError;
+
+      // Mirror email to app users table for display
+      const { error: dbError } = await supabase
+        .from('users')
+        .update({ email: trimmedEmail, updated_at: new Date().toISOString() })
+        .eq('id', user.id);
+      if (dbError) throw dbError;
+
+      setProfile((prev) => (prev ? { ...prev, email: trimmedEmail } : prev));
+      setProfileData((prev) => ({ ...prev, email: trimmedEmail }));
+      setEmailChange({ newEmail: '', currentPassword: '' });
+      toast.success('Email updated. Check your inbox if confirmation is required.', { id: toastId });
+    } catch (e) {
+      console.error('[Profile] handleChangeEmail error:', e);
+      toast.error('Failed to update email', { id: toastId });
+    } finally {
+      setEmailChanging(false);
+    }
+  };
+
+  // 2FA (TOTP) helpers
+  const loadMfaStatus = async () => {
+    if (!isSupabaseConfigured || !supabase || !user) return;
+    try {
+      setMfaLoading(true);
+      const { data, error } = await (supabase as any).auth.mfa.listFactors();
+      if (error) throw error;
+      // Find verified TOTP factor if any
+      const allFactors: any[] = (data?.all as any[]) || [];
+      const verifiedTotp = allFactors.find((f) => f.factor_type === 'totp' && f.status === 'verified');
+      if (verifiedTotp) {
+        setMfaEnabled(true);
+        setMfaFactorId(verifiedTotp.id);
+      } else {
+        setMfaEnabled(false);
+        setMfaFactorId(null);
+      }
+    } catch (e) {
+      console.warn('[Profile] loadMfaStatus failed:', e);
+      setMfaEnabled(false);
+      setMfaFactorId(null);
+    } finally {
+      setMfaLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMfaStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  const startEnrollMfa = async () => {
+    if (!isSupabaseConfigured || !supabase || !user) {
+      toast.error('Database not configured');
+      return;
+    }
+    try {
+      setMfaEnrolling(true);
+      setMfaQrCode(null);
+      setMfaSecret(null);
+      setMfaVerificationCode('');
+      const { data, error } = await (supabase as any).auth.mfa.enroll({ factor_type: 'totp', friendly_name: 'Authenticator App' });
+      if (error) throw error;
+      const totp = (data as any)?.totp;
+      const factorId = (data as any)?.id;
+      setMfaFactorId(factorId || null);
+      setMfaQrCode(totp?.qr_code || null);
+      setMfaSecret(totp?.secret || null);
+    } catch (e) {
+      console.error('[Profile] startEnrollMfa error:', e);
+      toast.error('Failed to start 2FA enrollment');
+      setMfaEnrolling(false);
+    }
+  };
+
+  const verifyEnrollMfa = async () => {
+    if (!isSupabaseConfigured || !supabase || !user || !mfaFactorId) return;
+    if (!mfaVerificationCode.trim()) {
+      toast.error('Enter the 6-digit code from your app');
+      return;
+    }
+    const tId = toast.loading('Verifying code...');
+    try {
+      const { error } = await (supabase as any).auth.mfa.verify({ factorId: mfaFactorId, code: mfaVerificationCode.trim() });
+      if (error) throw error;
+      setMfaEnabled(true);
+      setMfaEnrolling(false);
+      setMfaQrCode(null);
+      setMfaSecret(null);
+      setMfaVerificationCode('');
+      toast.success('Two-factor authentication enabled', { id: tId });
+    } catch (e) {
+      console.error('[Profile] verifyEnrollMfa error:', e);
+      toast.error('Invalid or expired code', { id: tId });
+    }
+  };
+
+  const disableMfa = async () => {
+    if (!isSupabaseConfigured || !supabase || !user || !mfaFactorId) return;
+    const tId = toast.loading('Disabling 2FA...');
+    try {
+      const { error } = await (supabase as any).auth.mfa.unenroll({ factorId: mfaFactorId });
+      if (error) throw error;
+      setMfaEnabled(false);
+      setMfaFactorId(null);
+      toast.success('Two-factor authentication disabled', { id: tId });
+    } catch (e) {
+      console.error('[Profile] disableMfa error:', e);
+      toast.error('Failed to disable 2FA', { id: tId });
     }
   };
 
@@ -818,17 +982,7 @@ const ProfilePage: React.FC = () => {
                     <option value="UTC-8">Pacific Time (UTC-8)</option>
                   </select>
                 </div>
-                <div>
-                  <label className={labelBase}>{'Language'}</label>
-                  <select
-                    value={profileData.language}
-                    onChange={(e) => setProfileData({ ...profileData, language: e.target.value })}
-                    className={selectBase}
-                  >
-                    <option value="English">English</option>
-                    <option value="French">Français</option>
-                  </select>
-                </div>
+                {/* Language selector hidden as requested */}
               </div>
             </div>
           </div>
@@ -1009,11 +1163,106 @@ const ProfilePage: React.FC = () => {
                 </div>
 
                 <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
-                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{'Two-Factor Authentication'}</h4>
+                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{'Change Email'}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <input
+                        type="email"
+                        placeholder={'New email address'}
+                        value={emailChange.newEmail}
+                        onChange={(e) => setEmailChange({ ...emailChange, newEmail: e.target.value })}
+                        className={inputBase}
+                      />
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showEmailPassword ? 'text' : 'password'}
+                        placeholder={'Current password'}
+                        value={emailChange.currentPassword}
+                        onChange={(e) => setEmailChange({ ...emailChange, currentPassword: e.target.value })}
+                        className={`${inputBase} pr-12`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowEmailPassword(!showEmailPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                      >
+                        {showEmailPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <button
+                      onClick={handleChangeEmail}
+                      disabled={emailChanging}
+                      className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 transition-all duration-200 shadow-lg"
+                    >
+                      {emailChanging ? 'Updating…' : 'Update Email'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
+                  <h4 className="text-sm sm:text-base font-medium text-white mb-2">{'Two-Factor Authentication (2FA)'}</h4>
                   <p className="text-xs sm:text-sm text-slate-400 mb-3">{'Add an extra layer of security to your account'}</p>
-                  <button className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg">
-                    {'Enable 2FA'}
-                  </button>
+
+                  {mfaLoading ? (
+                    <div className="text-xs text-slate-400">{'Loading 2FA status…'}</div>
+                  ) : mfaEnabled ? (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-emerald-300">{'2FA is enabled on your account'}</span>
+                      <button
+                        onClick={disableMfa}
+                        className="px-3 sm:px-4 py-2 text-xs sm:text-sm border border-[#1C2230] text-slate-200 rounded-lg hover:bg-[#141922] transition-colors"
+                      >
+                        {'Disable 2FA'}
+                      </button>
+                    </div>
+                  ) : !mfaEnrolling ? (
+                    <button
+                      onClick={startEnrollMfa}
+                      className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg"
+                    >
+                      {'Enable 2FA'}
+                    </button>
+                  ) : (
+                    <div className="space-y-3">
+                      {mfaQrCode && (
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+                          <img src={mfaQrCode} alt="2FA QR" className="w-40 h-40 bg-white p-2 rounded" />
+                          <div className="mt-2 sm:mt-0">
+                            <p className="text-xs text-slate-400">{'Scan this QR with Google Authenticator, Authy, or similar app.'}</p>
+                            {mfaSecret && (
+                              <p className="text-xs text-slate-400 mt-1">{'Or enter this secret manually:'} <span className="font-mono text-slate-300">{mfaSecret}</span></p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <input
+                          type="text"
+                          placeholder={'6-digit code'}
+                          value={mfaVerificationCode}
+                          onChange={(e) => setMfaVerificationCode(e.target.value)}
+                          className={inputBase}
+                        />
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={verifyEnrollMfa}
+                            className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg"
+                          >
+                            {'Verify & Enable'}
+                          </button>
+                          <button
+                            onClick={() => { setMfaEnrolling(false); setMfaQrCode(null); setMfaSecret(null); setMfaVerificationCode(''); }}
+                            className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-[#1C2230] text-slate-200 rounded-lg hover:bg-[#141922] transition-colors"
+                          >
+                            {'Cancel'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1035,15 +1284,13 @@ const ProfilePage: React.FC = () => {
                           ? `${stripeSubscription.product_name} - ${stripeSubscription.product_description}`
                           : 'Free Plan - Limited features'}
                       </p>
-                      {stripeSubscription?.subscription_status && (
-                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 ${
-                          stripeSubscription.subscription_status === 'active'
-                            ? 'bg-gradient-to-r from-emerald-500/20 to-teal-600/20 text-emerald-300 ring-1 ring-emerald-500/30'
-                            : 'bg-gradient-to-r from-yellow-500/20 to-amber-600/20 text-yellow-300 ring-1 ring-yellow-500/30'
-                        }`}>
-                          {stripeSubscription.subscription_status}
-                        </span>
-                      )}
+                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 ${
+                        stripeSubscription?.subscription_status === 'active'
+                          ? 'bg-gradient-to-r from-emerald-500/20 to-teal-600/20 text-emerald-300 ring-1 ring-emerald-500/30'
+                          : 'bg-slate-800/50 text-slate-300 ring-1 ring-slate-700/50'
+                      }`}>
+                        {stripeSubscription?.subscription_status === 'active' ? 'Active' : 'Free'}
+                      </span>
                       {profile?.role === 'admin' && (
                         <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full mt-1 bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-300 ring-1 ring-red-500/30">
                           {'Administrator'}
