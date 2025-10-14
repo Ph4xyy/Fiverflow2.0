@@ -22,11 +22,11 @@ export const useSessionManager = () => {
     isCheckingRef.current = true;
     const now = Date.now();
   
-    // Sécurité : timeout au cas où Supabase ne répond pas
+    // Timeout de sécurité : si Supabase bloque, on débloque après 10s
     const timeout = setTimeout(() => {
       console.warn('⚠️ Session check timeout — forcing reset');
       isCheckingRef.current = false;
-    }, 10000); // 10 secondes max
+    }, 10000);
   
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -35,43 +35,24 @@ export const useSessionManager = () => {
         console.log('🔄 SessionManager: Session check failed:', error.message);
   
         if (error.message.includes('refresh_token') || error.message.includes('expired')) {
-          console.log('🔄 SessionManager: Attempting token refresh...');
           try {
             const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
             if (!refreshError && refreshData.session) {
-              console.log('✅ SessionManager: Token refreshed successfully');
               window.dispatchEvent(new CustomEvent('ff:session:refreshed', { 
                 detail: { userId: refreshData.session.user?.id } 
               }));
-            } else {
-              console.log('❌ SessionManager: Token refresh failed:', refreshError?.message);
             }
           } catch (refreshErr) {
-            console.log('❌ SessionManager: Token refresh error:', refreshErr);
+            console.log('❌ Token refresh error:', refreshErr);
           }
         }
-      } else if (session) {
-        const expiresAt = session.expires_at ? new Date(session.expires_at * 1000) : null;
-        if (expiresAt) {
-          const timeUntilExpiry = expiresAt.getTime() - now;
-          if (timeUntilExpiry < 5 * 60 * 1000 && timeUntilExpiry > 0) {
-            console.log('🔄 SessionManager: Session expires soon, refreshing...');
-            try {
-              await supabase.auth.refreshSession();
-              console.log('✅ SessionManager: Proactive refresh completed');
-            } catch (refreshErr) {
-              console.log('❌ SessionManager: Proactive refresh failed:', refreshErr);
-            }
-          }
-        }
-      } else {
-        console.log('🔄 SessionManager: No active session found');
       }
+  
     } catch (err) {
-      console.log('❌ SessionManager: Session check error:', err);
+      console.log('❌ Session check error:', err);
     } finally {
-      clearTimeout(timeout);
-      isCheckingRef.current = false;
+      clearTimeout(timeout);       // Stop le timeout
+      isCheckingRef.current = false; // Toujours débloquer
       lastSessionCheckRef.current = now;
     }
   }, []);
