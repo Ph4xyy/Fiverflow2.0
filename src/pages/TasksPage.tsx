@@ -37,7 +37,7 @@ const WorkboardPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="space-y-6 p-4 sm:p-0">
+      <div className="space-y-6 p-4 sm:p-0 max-w-full overflow-x-hidden">
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 grid place-items-center text-white shadow-glow-sm">
@@ -52,13 +52,13 @@ const WorkboardPage: React.FC = () => {
         </div>
 
         {/* Carte sombre + scope pour forcer le nouveau thème à l’intérieur */}
-        <div className={`${cardClass} p-0 bg-[#0B0E14] border-[#1C2230]`}>
+        <div className={`${cardClass} p-0 bg-[#0B0E14] border-[#1C2230] min-w-0 overflow-hidden`}>
           <div className="task-scope p-4 sm:p-5">
             <TaskManager showRecentTimeEntries={false} />
           </div>
         </div>
 
-        <div className={`${cardClass} p-0 bg-[#0B0E14] border-[#1C2230]`}>
+        <div className={`${cardClass} p-0 bg-[#0B0E14] border-[#1C2230] min-w-0 overflow-hidden`}>
           <div className="task-scope p-4 sm:p-5">
             <TodoTable />
           </div>

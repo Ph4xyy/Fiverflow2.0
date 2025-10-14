@@ -73,7 +73,7 @@ const BTN_SOFT =
   'inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-slate-200 bg-[#111722] hover:bg-[#141B27] ring-1 ring-inset ring-[#20293C] transition';
 const CHIP_SOFT = 'inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-white/5 text-slate-300';
 const TABLE_HEAD = 'bg-white/5 text-left text-[11px] uppercase tracking-[0.08em] text-slate-300';
-const CELL_BASE = 'px-4 py-3 text-[15px] text-slate-200 border-b border-white/5 align-top';
+const CELL_BASE = 'px-4 py-3 text-[15px] text-slate-200 border-b border-white/5 align-top min-w-0 break-words';
 const SELECT_WRAPPER = 'relative inline-flex items-center w-full';
 const SELECT_BASE =
   'appearance-none w-full px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 ' +
@@ -498,6 +498,7 @@ const TodoTable: React.FC = () => {
               onClick={() => toggleCollapse(task.id)}
               className="p-1.5 rounded-xl hover:bg-white/10"
               title={collapsed.has(task.id) ? 'Expand' : 'Collapse'}
+              aria-label={collapsed.has(task.id) ? 'Expand' : 'Collapse'}
             >
               {collapsed.has(task.id) ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
             </button>
@@ -546,6 +547,7 @@ const TodoTable: React.FC = () => {
                   onClick={() => openAdvancedColorPicker(task)}
                   className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#1C2230] hover:bg-[#2A3347] transition-colors"
                   title={'Advanced color picker'}
+                  aria-label={'Advanced color picker'}
                 >
                   <div className="w-4 h-4 rounded ring-1 ring-white/20" style={{ background: task.color || '#3f3f46' }} />
                   <Palette size={12} className="text-slate-400" />
@@ -559,7 +561,7 @@ const TodoTable: React.FC = () => {
                     title={c}
                   />
                 ))}
-                <button onClick={() => setTaskColor(task, null)} className="px-1.5 text-[11px] rounded bg-white/5 hover:bg-white/10 text-slate-400">{'Clear'}</button>
+                <button onClick={() => setTaskColor(task, null)} aria-label={'Clear color'} className="px-1.5 text-[11px] rounded bg-white/5 hover:bg-white/10 text-slate-400">{'Clear'}</button>
               </div>
             </div>
 
@@ -568,6 +570,7 @@ const TodoTable: React.FC = () => {
                 onClick={() => insertTask(task)}
                 className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 hover:text-emerald-300 transition-colors text-xs"
                 title={'Add Subtask'}
+                aria-label={'Add Subtask'}
               >
                 <PlusCircle size={12} />
                 <span>{'Add Subtask'}</span>
@@ -576,6 +579,7 @@ const TodoTable: React.FC = () => {
                 onClick={() => { if (window.confirm(`Delete task "${task.title}"?`)) removeTask(task); }}
                 className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 transition-colors text-xs"
                 title={'Delete task'}
+                aria-label={'Delete task'}
               >
                 <Trash2 size={12} />
               </button>
@@ -592,6 +596,7 @@ const TodoTable: React.FC = () => {
         value={task.status}
         onChange={(e) => updateTask(task.id, { status: e.target.value as TaskStatus })}
         className={SELECT_BASE}
+        aria-label={'Status'}
       >
         {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
       </select>
@@ -607,6 +612,7 @@ const TodoTable: React.FC = () => {
           value={task.priority}
           onChange={(e) => updateTask(task.id, { priority: e.target.value as TaskPriority })}
           className={`${SELECT_BASE} font-medium`}
+          aria-label={'Priority'}
           style={{
             color: currentPriority?.color || '#6B7280',
             backgroundColor: currentPriority?.bgColor ? `${currentPriority.bgColor}20` : 'transparent',
@@ -634,6 +640,7 @@ const TodoTable: React.FC = () => {
           value={task.client_id || ''}
           onChange={(e) => updateTask(task.id, { client_id: e.target.value || null })}
           className={SELECT_BASE}
+          aria-label={'Client'}
         >
           <option value="">—</option>
           {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -653,6 +660,7 @@ const TodoTable: React.FC = () => {
           value={task.order_id || ''}
           onChange={(e) => updateTask(task.id, { order_id: e.target.value || null })}
           className={SELECT_BASE}
+          aria-label={'Order'}
         >
           <option value="">—</option>
           {orders.map(o => <option key={o.id} value={o.id}>{o.title}</option>)}
@@ -683,6 +691,7 @@ const TodoTable: React.FC = () => {
           onClick={handleIconClick}
           className="shrink-0 p-2 rounded-2xl bg-[#111722] ring-1 ring-inset ring-[#20293C] hover:bg-[#1A2332] hover:ring-[#2A3347] transition-colors"
           title={'Set due date'}
+          aria-label={'Set due date'}
         >
           <CalendarIcon size={16} className="text-slate-300" />
         </button>
@@ -694,6 +703,7 @@ const TodoTable: React.FC = () => {
             onChange={handleDateChange}
             onBlur={handleBlur}
             className="px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[15px]"
+            aria-label={'Due date'}
             autoFocus
           />
         ) : (
@@ -737,6 +747,7 @@ const TodoTable: React.FC = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' ? onAdd() : null}
             placeholder={'Add tag...'}
+            aria-label={'Add tag'}
             className="flex-1 px-3.5 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[13px]"
           />
           <button onClick={onAdd} className={BTN_SOFT + ' text-[13px] py-2 px-3'}>
@@ -771,7 +782,7 @@ const TodoTable: React.FC = () => {
               </button>
 
               <div className="relative" ref={colsPop.ref}>
-                <button onClick={() => colsPop.setOpen(v => !v)} className={BTN_SOFT} title={'Columns'}>
+                <button onClick={() => colsPop.setOpen(v => !v)} className={BTN_SOFT} title={'Columns'} aria-label={'Columns'}>
                   <SlidersHorizontal size={18} /> {'Columns'}
                 </button>
                 {colsPop.open && (
@@ -787,7 +798,7 @@ const TodoTable: React.FC = () => {
               </div>
 
               <div className="relative" ref={statusPop.ref}>
-                <button onClick={() => statusPop.setOpen(v => !v)} className={BTN_SOFT + ' min-w-[160px] justify-between'} title={'Filter by status'}>
+                <button onClick={() => statusPop.setOpen(v => !v)} className={BTN_SOFT + ' min-w-[160px] justify-between'} title={'Filter by status'} aria-label={'Filter by status'}>
                   <span className="inline-flex items-center gap-2">
                     <Filter size={18} />
                     {statusLabel}
@@ -808,7 +819,7 @@ const TodoTable: React.FC = () => {
               </div>
 
               <div className="relative" ref={colorsPop.ref}>
-                <button onClick={() => colorsPop.setOpen(v => !v)} className={BTN_SOFT} title={'Colors'}>
+                <button onClick={() => colorsPop.setOpen(v => !v)} className={BTN_SOFT} title={'Colors'} aria-label={'Colors'}>
                   <Palette size={18} /> {'Colors'}
                 </button>
                 {colorsPop.open && (
@@ -833,6 +844,7 @@ const TodoTable: React.FC = () => {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={'Search tasks, tags, descriptions…'}
+                  aria-label={'Search tasks'}
                   className="w-full pl-10 pr-3 py-2.5 rounded-2xl bg-[#0F141C] text-slate-100 border border-[#1C2230] hover:border-[#2A3347] focus:outline-none focus:ring-2 focus:ring-[#2A3347] text-[15px]"
                 />
                 <SearchIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -860,18 +872,19 @@ const TodoTable: React.FC = () => {
 
       <div className="px-4 sm:px-6 mt-5 pb-12">
         <div className={`${cardClass} overflow-hidden`}>
-          <div className="max-h-[70vh] overflow-auto">
-            <table className="min-w-full table-fixed border-collapse">
+          <div className="max-h-[70vh] overflow-y-auto overflow-x-auto">
+            <table className="w-full border-collapse">
+              <caption className="sr-only">Tasks table</caption>
               <thead className="sticky top-0 z-10">
                 <tr className={`${TABLE_HEAD} bg-[#0F141C]`}>
-                  {visibleCols.includes('task') && <th className="px-4 py-3 w-[32%]">{'Task'}</th>}
-                  {visibleCols.includes('status') && <th className="px-4 py-3 w-[10%]">{'Status'}</th>}
-                  {visibleCols.includes('priority') && <th className="px-4 py-3 w-[10%]">{'Priority'}</th>}
-                  {visibleCols.includes('client') && <th className="px-4 py-3 hidden md:table-cell md:w-[12%]">{'Client'}</th>}
-                  {visibleCols.includes('order') && <th className="px-4 py-3 hidden md:table-cell md:w-[12%]">{'Order'}</th>}
-                  {visibleCols.includes('due') && <th className="px-4 py-3 w-[10%]">{'Due'}</th>}
-                  {visibleCols.includes('comments') && <th className="px-4 py-3 hidden lg:table-cell lg:w-[6%]">{'Comments'}</th>}
-                  {visibleCols.includes('tags') && <th className="px-4 py-3 hidden xl:table-cell xl:w-[8%]">{'Tags'}</th>}
+                  {visibleCols.includes('task') && <th scope="col" className="px-4 py-3 w-[32%]">{'Task'}</th>}
+                  {visibleCols.includes('status') && <th scope="col" className="px-4 py-3 w-[10%]">{'Status'}</th>}
+                  {visibleCols.includes('priority') && <th scope="col" className="px-4 py-3 w-[10%]">{'Priority'}</th>}
+                  {visibleCols.includes('client') && <th scope="col" className="px-4 py-3 hidden md:table-cell md:w-[12%]">{'Client'}</th>}
+                  {visibleCols.includes('order') && <th scope="col" className="px-4 py-3 hidden md:table-cell md:w-[12%]">{'Order'}</th>}
+                  {visibleCols.includes('due') && <th scope="col" className="px-4 py-3 w-[10%]">{'Due'}</th>}
+                  {visibleCols.includes('comments') && <th scope="col" className="px-4 py-3 hidden lg:table-cell lg:w-[6%]">{'Comments'}</th>}
+                  {visibleCols.includes('tags') && <th scope="col" className="px-4 py-3 hidden xl:table-cell xl:w-[8%]">{'Tags'}</th>}
                 </tr>
               </thead>
               <tbody>
