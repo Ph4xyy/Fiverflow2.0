@@ -19,7 +19,6 @@ import {
   Lock,
   Save,
   Mail,
-  Server,
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -428,20 +427,28 @@ const ProfilePage: React.FC = () => {
       if (signInError) throw signInError;
 
       // Request email update (may trigger confirmation email depending on project settings)
-      const { error: updateError } = await supabase.auth.updateUser({ email: trimmedEmail });
+      const { data: updateData, error: updateError } = await supabase.auth.updateUser({ email: trimmedEmail });
       if (updateError) throw updateError;
 
-      // Mirror email to app users table for display
-      const { error: dbError } = await supabase
-        .from('users')
-        .update({ email: trimmedEmail, updated_at: new Date().toISOString() })
-        .eq('id', user.id);
-      if (dbError) throw dbError;
+      const updatedAuthEmail = updateData?.user?.email ?? null;
 
-      setProfile((prev) => (prev ? { ...prev, email: trimmedEmail } : prev));
-      setProfileData((prev) => ({ ...prev, email: trimmedEmail }));
-      setEmailChange({ newEmail: '', currentPassword: '' });
-      toast.success('Email updated. Check your inbox if confirmation is required.', { id: toastId });
+      if (updatedAuthEmail && updatedAuthEmail.toLowerCase() === trimmedEmail.toLowerCase()) {
+        // Auth email already changed -> mirror to users table
+        const { error: dbError } = await supabase
+          .from('users')
+          .update({ email: trimmedEmail, updated_at: new Date().toISOString() })
+          .eq('id', user.id);
+        if (dbError) throw dbError;
+
+        setProfile((prev) => (prev ? { ...prev, email: trimmedEmail } : prev));
+        setProfileData((prev) => ({ ...prev, email: trimmedEmail }));
+        setEmailChange({ newEmail: '', currentPassword: '' });
+        toast.success('Email updated successfully', { id: toastId });
+      } else {
+        // Likely requires email confirmation. Do NOT update app DB yet.
+        setEmailChange({ newEmail: '', currentPassword: '' });
+        toast.success('Confirmation sent. Validate the link to finalize.', { id: toastId });
+      }
     } catch (e) {
       console.error('[Profile] handleChangeEmail error:', e);
       toast.error('Failed to update email', { id: toastId });
@@ -491,7 +498,7 @@ const ProfilePage: React.FC = () => {
       setMfaQrCode(null);
       setMfaSecret(null);
       setMfaVerificationCode('');
-      const { data, error } = await (supabase as any).auth.mfa.enroll({ factor_type: 'totp', friendly_name: 'Authenticator App' });
+      const { data, error } = await (supabase as any).auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Authenticator App' });
       if (error) throw error;
       const totp = (data as any)?.totp;
       const factorId = (data as any)?.id;
@@ -848,16 +855,10 @@ const ProfilePage: React.FC = () => {
       return;
     }
 
-    // validations simples
-    if (smtp.enabled) {
-      if (!smtp.host || !smtp.port || !smtp.username || !smtp.password) {
-        toast.error('Please complete host, port, username and password.');
-        return;
-      }
-      if (!smtp.from_email) {
-        toast.error('Please complete host, port, username and password.');
-        return;
-      }
+    // validations simples (SMTP server fields removed from UI)
+    if (smtp.enabled && !smtp.from_email) {
+      toast.error('Please enter a From email to enable custom sending.');
+      return;
     }
 
     setSmtpSaving(true);
@@ -1544,84 +1545,18 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
 
-            <div className={`${soft} p-3 sm:p-4 rounded-lg`}>
-              <div className="flex items-center gap-2 mb-3">
-                <Server size={18} className="text-purple-400" />
-                <h4 className="text-sm sm:text-base font-medium text-white">{'SMTP Server'}</h4>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelBase}>{'Host'}</label>
-                  <input
-                    className={inputBase}
-                    placeholder="smtp.domain.com"
-                    value={smtp?.host || ''}
-                    onChange={(e) => setSmtp((s) => s ? { ...s, host: e.target.value } : s)}
-                    disabled={!smtp?.enabled}
-                  />
-                </div>
-                <div>
-                  <label className={labelBase}>{'Port'}</label>
-                  <input
-                    type="number"
-                    className={inputBase}
-                    placeholder="587"
-                    value={smtp?.port ?? 587}
-                    onChange={(e) => setSmtp((s) => s ? { ...s, port: Number(e.target.value || 0) } : s)}
-                    disabled={!smtp?.enabled}
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className={labelBase}>{'Secure (SSL/TLS)'}</label>
-                  <button
-                    type="button"
-                    onClick={() => setSmtp((s) => s ? { ...s, secure: !s.secure } : s)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                      smtp?.secure ? 'bg-gradient-to-r from-purple-500 to-pink-600' : 'bg-slate-700'
-                    }`}
-                    disabled={!smtp?.enabled}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
-                        smtp?.secure ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
-                </div>
-                <div>
-                  <label className={labelBase}>{'Username'}</label>
-                  <input
-                    className={inputBase}
-                    placeholder="smtp user"
-                    value={smtp?.username || ''}
-                    onChange={(e) => setSmtp((s) => s ? { ...s, username: e.target.value } : s)}
-                    disabled={!smtp?.enabled}
-                  />
-                </div>
-                <div>
-                  <label className={labelBase}>{'Password / App Password'}</label>
-                  <input
-                    type="password"
-                    className={inputBase}
-                    placeholder="••••••••"
-                    value={smtp?.password || ''}
-                    onChange={(e) => setSmtp((s) => s ? { ...s, password: e.target.value } : s)}
-                    disabled={!smtp?.enabled}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <button
-                  onClick={saveSmtpSettings}
-                  disabled={smtpSaving || smtpLoading || !smtp}
-                  className="px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 transition-all duration-200 shadow-lg"
-                >
-                  {smtpSaving ? 'Saving…' : 'Save Branding & Email'}
-                </button>
-              </div>
+            {/* Save Branding & Email (moved up after removing SMTP Server section) */}
+            <div className="mt-4">
+              <button
+                onClick={saveSmtpSettings}
+                disabled={smtpSaving || smtpLoading || !smtp}
+                className="px-3 sm:px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 disabled:opacity-50 transition-all duration-200 shadow-lg"
+              >
+                {smtpSaving ? 'Saving…' : 'Save Branding & Email'}
+              </button>
             </div>
+
+            
           </div>
         );
 
