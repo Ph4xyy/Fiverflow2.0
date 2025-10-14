@@ -194,20 +194,11 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     },
     { 
       path: '/tasks', 
-      label: 'Tasks', 
+      label: 'Workboard', 
       icon: CheckSquare,
       restricted: !checkAccess('tasks') && !restrictions?.isAdmin,
       requiredPlan: 'Pro' as const,
       tone: 'from-indigo-500 to-blue-600'
-    },
-    // 👇 To-Do List (Pro & Plus/Excellence, pas Free)
-    { 
-      path: '/workspace/todo',
-      label: 'To-Do List',
-      icon: ListChecks,
-      restricted: !checkAccess('todo') && !restrictions?.isAdmin,
-      requiredPlan: 'Pro' as const, // badge "Pro" si restreint
-      tone: 'from-violet-500 to-fuchsia-600'
     },
   ];
 

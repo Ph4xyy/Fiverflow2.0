@@ -26,9 +26,19 @@ interface TaskManagerProps {
   orderId?: string;
   orderTitle?: string;
   clientName?: string;
+  showHeaderAndKpis?: boolean;
+  showTasksList?: boolean;
+  showRecentTimeEntries?: boolean;
 }
 
-const TaskManager: React.FC<TaskManagerProps> = ({ orderId, orderTitle, clientName }) => {
+const TaskManager: React.FC<TaskManagerProps> = ({
+  orderId,
+  orderTitle,
+  clientName,
+  showHeaderAndKpis = true,
+  showTasksList = true,
+  showRecentTimeEntries = true,
+}) => {
   const {
     tasks,
     timeEntries,
@@ -124,6 +134,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ orderId, orderTitle, clientNa
   return (
     <div className="space-y-6">
       {/* Header + KPIs */}
+      {showHeaderAndKpis && (
       <div className="rounded-xl border bg-[#0B0E14] border-[#1C2230] p-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
           <div className="flex items-center gap-3">
@@ -215,6 +226,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ orderId, orderTitle, clientNa
           </div>
         </div>
       </div>
+      )}
 
       {/* Active timer */}
       {activeTimer && (
@@ -263,6 +275,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({ orderId, orderTitle, clientNa
       )}
 
       {/* Tasks list */}
+      {showTasksList && (
       <div className="rounded-xl border bg-[#0B0E14] border-[#1C2230] overflow-hidden">
         <div className="px-6 py-4 border-b border-[#1C2230] bg-[#0F141C]">
           <h3 className="text-lg font-semibold text-white">Tasks ({tasks.length})</h3>
@@ -405,9 +418,10 @@ const TaskManager: React.FC<TaskManagerProps> = ({ orderId, orderTitle, clientNa
           </div>
         )}
       </div>
+      )}
 
       {/* Recent Time Entries */}
-      {timeEntries.length > 0 && (
+      {showRecentTimeEntries && timeEntries.length > 0 && (
         <div className="rounded-xl border bg-[#0B0E14] border-[#1C2230] p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Recent Time Entries</h3>
           <div className="space-y-3">

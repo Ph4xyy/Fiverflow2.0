@@ -34,13 +34,13 @@ import PricingPage from './pages/PricingPage';
 import NetworkPage from './pages/NetworkPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import CalendarPage from './pages/CalendarPage';
-import TasksPage from './pages/TasksPage';
+import WorkboardPage from './pages/TasksPage';
 import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import CookiePolicy from "./components/CookiePolicy";
 import TermsOfService from "./components/TermsOfService";
-import TodoListPage from './pages/TodoListPage'; // 👈 nouvelle page
+// removed old TodoListPage after consolidation
 
 // Lazy invoices
 const InvoicesLayout = lazy(() => import('./pages/InvoicesLayout'));
@@ -49,11 +49,9 @@ const InvoiceTemplatesPage = lazy(() => import('./pages/InvoiceTemplatesPage'));
 const InvoiceTemplateEditorPage = lazy(() => import('./pages/InvoiceTemplateEditorPage'));
 
 /** 
- * PlanGate : garde d'accès par feature (ici on s'en sert pour 'todo')
- * - Autorisé : Pro & Plus/Excellence (+ trial)
- * - Non autorisé : Free -> redirige vers /upgrade
+ * PlanGate : garde d'accès par feature
  */
-const PlanGate: React.FC<{ feature: 'calendar' | 'referrals' | 'stats' | 'tasks' | 'invoices' | 'todo'; children: React.ReactNode }> = ({ feature, children }) => {
+const PlanGate: React.FC<{ feature: 'calendar' | 'referrals' | 'stats' | 'tasks' | 'invoices'; children: React.ReactNode }> = ({ feature, children }) => {
   const { checkAccess, loading } = usePlanRestrictions();
   const location = useLocation();
 
@@ -98,7 +96,7 @@ function App() {
               <Route path="/clients" element={<InstantProtectedRoute><ClientsPage /></InstantProtectedRoute>} />
               <Route path="/orders" element={<InstantProtectedRoute><OrdersPage /></InstantProtectedRoute>} />
               <Route path="/calendar" element={<InstantProtectedRoute><CalendarPage /></InstantProtectedRoute>} />
-              <Route path="/tasks" element={<InstantProtectedRoute><TasksPage /></InstantProtectedRoute>} />
+              <Route path="/tasks" element={<InstantProtectedRoute><WorkboardPage /></InstantProtectedRoute>} />
               <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
               <Route path="/stats" element={<InstantProtectedRoute><StatsPage /></InstantProtectedRoute>} />
               <Route path="/profile" element={<InstantProtectedRoute><ProfilePage /></InstantProtectedRoute>} />
@@ -107,17 +105,7 @@ function App() {
               <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
 
-              {/* Nouvelle route : To-Do (Pro & Plus/Excellence seulement) */}
-              <Route
-                path="/workspace/todo"
-                element={
-                  <InstantProtectedRoute>
-                    <PlanGate feature="todo">
-                      <TodoListPage />
-                    </PlanGate>
-                  </InstantProtectedRoute>
-                }
-              />
+              {/* Old To-Do route removed; consolidated into /tasks (Workboard) */}
 
               {/* Pages légales */}
               <Route path="/terms-of-service" element={<TermsOfService />} />

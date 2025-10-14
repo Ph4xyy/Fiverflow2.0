@@ -1,13 +1,14 @@
-// src/pages/TasksPage.tsx
+// src/pages/WorkboardPage.tsx (renamed from TasksPage)
 import React from 'react';
 import Layout, { cardClass } from '../components/Layout';
+import TodoTable from '../components/TodoTable';
 import PlanRestrictedPage from '../components/PlanRestrictedPage';
 
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import TaskManager from '../components/TaskManager';
 import { CheckSquare } from 'lucide-react';
 
-const TasksPage: React.FC = () => {
+const WorkboardPage: React.FC = () => {
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
 
   if (restrictionsLoading) {
@@ -43,9 +44,9 @@ const TasksPage: React.FC = () => {
             <CheckSquare size={18} />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">{'Tasks & Time Tracking'}</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">{'Workboard'}</h1>
             <p className="text-sm sm:text-base text-slate-400">
-              {'Manage your project tasks and track time spent on each activity.'}
+              {'Centralize task tracking, time entries, and advanced to-do table.'}
             </p>
           </div>
         </div>
@@ -53,7 +54,13 @@ const TasksPage: React.FC = () => {
         {/* Carte sombre + scope pour forcer le nouveau thème à l’intérieur */}
         <div className={`${cardClass} p-0 bg-[#0B0E14] border-[#1C2230]`}>
           <div className="task-scope p-4 sm:p-5">
-            <TaskManager />
+            <TaskManager showRecentTimeEntries={false} />
+          </div>
+        </div>
+
+        <div className={`${cardClass} p-0 bg-[#0B0E14] border-[#1C2230]`}>
+          <div className="task-scope p-4 sm:p-5">
+            <TodoTable />
           </div>
         </div>
       </div>
@@ -61,4 +68,4 @@ const TasksPage: React.FC = () => {
   );
 };
 
-export default TasksPage;
+export default WorkboardPage;
