@@ -764,8 +764,8 @@ const TodoTable: React.FC = () => {
     return (
       <div className={`px-4 sm:px-6`}>
         <div className={`rounded-3xl border border-[#1C2230] bg-[#0F141C]/90 backdrop-blur-xl shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] px-4 sm:px-6 py-4`}>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+          <div className="grid gap-3 md:grid-cols-[1fr_auto] items-center">
+            <div className="flex flex-wrap items-center gap-2">
               <button onClick={() => insertTask()} className={BTN_PRIMARY}>
                 <Plus size={18} /> {'New task'}
               </button>
@@ -812,7 +812,7 @@ const TodoTable: React.FC = () => {
                   <Palette size={18} /> {'Colors'}
                 </button>
                 {colorsPop.open && (
-                  <div className="absolute z-20 mt-2 p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230] shadow-xl min-w-[260px]">
+                  <div className="absolute z-30 mt-2 p-3 rounded-2xl bg-[#0F141C] border border-[#1C2230] shadow-xl min-w-[260px]">
                     <div className="grid grid-cols-6 gap-2">
                       {COLOR_SWATCHES.map((c) => (
                         <div key={c} className="flex items-center gap-2">
@@ -827,8 +827,8 @@ const TodoTable: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 min-w-[260px] w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-[320px]">
+            <div className="flex items-center gap-2 min-w-[260px] w-full md:w-auto md:justify-end">
+              <div className="relative w-full md:w-[320px]">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -838,7 +838,7 @@ const TodoTable: React.FC = () => {
                 <SearchIcon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               </div>
 
-              <div className="hidden sm:flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-2">
                 {pill(`${'Total:'} ${rows.length}`)}
                 {pill(`${'Visible:'} ${visibleRows.length}`)}
                 <span className={`${CHIP_SOFT} gap-1.5`}>
@@ -860,18 +860,18 @@ const TodoTable: React.FC = () => {
 
       <div className="px-4 sm:px-6 mt-5 pb-12">
         <div className={`${cardClass} overflow-hidden`}>
-          <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse">
-              <thead>
-                <tr className={TABLE_HEAD}>
-                  {visibleCols.includes('task') && <th className="px-4 py-3 w-[38%]">{'Task'}</th>}
-                  {visibleCols.includes('status') && <th className="px-4 py-3 w-[12%]">{'Status'}</th>}
-                  {visibleCols.includes('priority') && <th className="px-4 py-3 w-[12%]">{'Priority'}</th>}
-                  {visibleCols.includes('client') && <th className="px-4 py-3 w-[14%]">{'Client'}</th>}
-                  {visibleCols.includes('order') && <th className="px-4 py-3 w-[14%]">{'Order'}</th>}
-                  {visibleCols.includes('due') && <th className="px-4 py-3 w-[12%]">{'Due'}</th>}
-                  {visibleCols.includes('comments') && <th className="px-4 py-3 w-[8%]">{'Comments'}</th>}
-                  {visibleCols.includes('tags') && <th className="px-4 py-3 w-[20%]">{'Tags'}</th>}
+          <div className="max-h-[70vh] overflow-auto">
+            <table className="min-w-full table-fixed border-collapse">
+              <thead className="sticky top-0 z-10">
+                <tr className={`${TABLE_HEAD} bg-[#0F141C]`}>
+                  {visibleCols.includes('task') && <th className="px-4 py-3 w-[32%]">{'Task'}</th>}
+                  {visibleCols.includes('status') && <th className="px-4 py-3 w-[10%]">{'Status'}</th>}
+                  {visibleCols.includes('priority') && <th className="px-4 py-3 w-[10%]">{'Priority'}</th>}
+                  {visibleCols.includes('client') && <th className="px-4 py-3 hidden md:table-cell md:w-[12%]">{'Client'}</th>}
+                  {visibleCols.includes('order') && <th className="px-4 py-3 hidden md:table-cell md:w-[12%]">{'Order'}</th>}
+                  {visibleCols.includes('due') && <th className="px-4 py-3 w-[10%]">{'Due'}</th>}
+                  {visibleCols.includes('comments') && <th className="px-4 py-3 hidden lg:table-cell lg:w-[6%]">{'Comments'}</th>}
+                  {visibleCols.includes('tags') && <th className="px-4 py-3 hidden xl:table-cell xl:w-[8%]">{'Tags'}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -888,17 +888,17 @@ const TodoTable: React.FC = () => {
                   visibleRows.map((taskRow) => (
                     <tr key={taskRow.id} className="hover:bg-white/3">
                       {visibleCols.includes('task') && (
-                        <td className={`${CELL_BASE}`}>
+                        <td className={`${CELL_BASE} min-w-0`}>
                           <TitleCell t={taskRow} />
                         </td>
                       )}
                       {visibleCols.includes('status') && <td className={`${CELL_BASE}`}><StatusCell t={taskRow} /></td>}
                       {visibleCols.includes('priority') && <td className={`${CELL_BASE}`}><PriorityCell t={taskRow} /></td>}
-                      {visibleCols.includes('client') && <td className={`${CELL_BASE}`}><ClientCell t={taskRow} /></td>}
-                      {visibleCols.includes('order') && <td className={`${CELL_BASE}`}><OrderCell t={taskRow} /></td>}
+                      {visibleCols.includes('client') && <td className={`${CELL_BASE} hidden md:table-cell`}><ClientCell t={taskRow} /></td>}
+                      {visibleCols.includes('order') && <td className={`${CELL_BASE} hidden md:table-cell`}><OrderCell t={taskRow} /></td>}
                       {visibleCols.includes('due') && <td className={`${CELL_BASE}`}><DueCell t={taskRow} /></td>}
                       {visibleCols.includes('comments') && (
-                        <td className={`${CELL_BASE}`}>
+                        <td className={`${CELL_BASE} hidden lg:table-cell`}>
                           <div className="space-y-2">
                             <button
                               onClick={() => { /* inline comment composer can be implemented later */ }}
@@ -911,7 +911,7 @@ const TodoTable: React.FC = () => {
                           </div>
                         </td>
                       )}
-                      {visibleCols.includes('tags') && <td className={`${CELL_BASE}`}><TagsCell t={taskRow} /></td>}
+                      {visibleCols.includes('tags') && <td className={`${CELL_BASE} hidden xl:table-cell`}><TagsCell t={taskRow} /></td>}
                     </tr>
                   ))
                 )}

@@ -336,13 +336,13 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed lg:static inset-y-0 left-0 z-40 w-72
+            fixed inset-y-0 left-0 z-40 w-72
             bg-[#0D1117]/85 backdrop-blur-xl
             border-r border-[#1C2230]
             shadow-[20px_0_40px_-30px_rgba(0,0,0,0.6)]
             transform transition-transform duration-300 ease-in-out
             ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-            pt-16 lg:pt-0
+            pt-16 lg:pt-16
           `}
         >
           <nav className="h-full px-3 sm:px-4 py-5 space-y-2 overflow-y-auto">
@@ -409,7 +409,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           />
         )}
 
-        <main className="flex-1 lg:ml-0 min-h-screen">
+        <main className="flex-1 lg:ml-72 min-h-screen">
           <div className={`p-0 sm:p-6 min-h-screen transition-colors duration-300`}>
             <LocalErrorBoundary>{children}</LocalErrorBoundary>
           </div>
