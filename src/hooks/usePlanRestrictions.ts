@@ -18,7 +18,7 @@ interface PlanRestrictions {
   isAdmin: boolean;
 }
 
-type FeatureKey = 'calendar' | 'referrals' | 'stats' | 'tasks' | 'invoices' | 'todo';
+type FeatureKey = 'calendar' | 'referrals' | 'stats' | 'tasks' | 'invoices';
 
 interface UsePlanRestrictionsReturn {
   restrictions: PlanRestrictions | null;
@@ -311,8 +311,6 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
         return restrictions.canAccessTasks;
       case 'invoices':
         return restrictions.canAccessInvoices;
-      case 'todo':
-        return restrictions.canAccessTasks;
       default:
         return false;
     }

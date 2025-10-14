@@ -539,10 +539,10 @@ const DashboardPage = () => {
                 {'Add Invoice'}
               </button>
               <button
-                onClick={() => navigate('/workspace/todo')}
-                className="w-full bg-gradient-to-r from-rose-500 to-rose-600 text-white font-medium px-4 py-3 rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm"
+                onClick={() => navigate('/tasks')}
+                className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-600 text-white font-medium px-4 py-3 rounded-lg hover:from-violet-600 hover:to-fuchsia-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 text-sm"
               >
-                {'Add Task List'}
+                {'Open Workboard'}
               </button>
             </div>
           </div>
