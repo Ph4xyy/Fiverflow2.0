@@ -1,0 +1,40 @@
+# Fichiers de développement
+node_modules
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Fichiers de build locaux
+dist
+build
+
+# Fichiers de logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Fichiers temporaires
+.tmp
+.temp
+
+# Fichiers de cache
+.cache
+.parcel-cache
+
+# Fichiers de test
+coverage
+.nyc_output
+
+# Fichiers de documentation
+*.md
+docs/
+
+# Fichiers de configuration locale
+.vscode
+.idea
+
+# Fichiers Supabase locaux (si pas utilisés en production)
+supabase/.branches
+supabase/.temp

@@ -110,7 +110,7 @@ const ProfilePage: React.FC = () => {
     currentPassword: ''
   });
   const [emailChanging, setEmailChanging] = useState(false);
-  const { setLoading } = useLoading();
+  const { setLoading: setGlobalLoading } = useLoading();
   const [showEmailPassword, setShowEmailPassword] = useState(false);
 
   // 2FA (TOTP) state
@@ -419,13 +419,13 @@ const ProfilePage: React.FC = () => {
     }
 
     // Utiliser le système de loading global
-    setLoading('data', true);
+    setGlobalLoading('data', true);
     setEmailChanging(true);
     const toastId = toast.loading('Updating email...');
     
     // Timeout de sécurité pour éviter le loading infini
     const timeoutId = setTimeout(() => {
-      setLoading('data', false);
+      setGlobalLoading('data', false);
       setEmailChanging(false);
       toast.error('Timeout: Email update took too long. Please try again.', { id: toastId });
     }, 30000); // 30 secondes max
@@ -469,7 +469,7 @@ const ProfilePage: React.FC = () => {
       toast.error('Failed to update email', { id: toastId });
     } finally {
       clearTimeout(timeoutId);
-      setLoading('data', false);
+      setGlobalLoading('data', false);
       setEmailChanging(false);
     }
   };

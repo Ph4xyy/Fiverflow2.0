@@ -12,4 +12,19 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['lucide-react', 'framer-motion'],
+          charts: ['recharts'],
+          pdf: ['jspdf', 'html2canvas'],
+          calendar: ['@fullcalendar/react', '@fullcalendar/daygrid', '@fullcalendar/timegrid', '@fullcalendar/list'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
 });
