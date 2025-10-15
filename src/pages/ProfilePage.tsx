@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
 import { useStripeSubscription } from '../hooks/useStripeSubscription';
 import { useImageUpload } from '../hooks/useImageUpload';
+import { useLoading } from '../contexts/LoadingContext';
 import ImageUpload from '../components/ImageUpload';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import {
@@ -22,14 +23,6 @@ import {
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-<<<<<<< HEAD
-<<<<<<< HEAD
-import SimpleTwoFactorAuthModal from '../components/SimpleTwoFactorAuthModal';
-import { useTwoFactorAuth } from '../hooks/useTwoFactorAuth';
-=======
->>>>>>> parent of 4833866 (A2F, Email, Loading)
-=======
->>>>>>> parent of 4833866 (A2F, Email, Loading)
 
 /* ---------- Types d'origine ---------- */
 interface UserProfile {
@@ -1844,21 +1837,6 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       )}
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-      {/* Two-Factor Authentication Modal */}
-      <SimpleTwoFactorAuthModal
-        isOpen={showTwoFactorModal}
-        onClose={() => setShowTwoFactorModal(false)}
-        onSuccess={() => {
-          // Le hook useTwoFactorAuth se mettra à jour automatiquement
-        }}
-      />
-=======
->>>>>>> parent of 4833866 (A2F, Email, Loading)
-=======
->>>>>>> parent of 4833866 (A2F, Email, Loading)
     </Layout>
   );
 };
