@@ -301,7 +301,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
         ? `${iconClassBase} bg-[#151A22] ring-1 ring-inset ring-[#202839] opacity-50`
         : isActive
         ? `${iconClassBase} bg-gradient-to-br ${item.tone} shadow-xl ${getGlowEffect(item.color)} ring-1 ring-inset ring-white/10 transform scale-105`
-        : `${iconClassBase} bg-[#151A22] group-hover:bg-gradient-to-br group-hover:${item.tone} ring-1 ring-inset ring-[#202839] group-hover:ring-white/10 group-hover:shadow-lg group-hover:${getGlowEffect(item.color)} group-hover:scale-105`;
+        : `${iconClassBase} bg-gradient-to-br ${item.tone} ring-1 ring-inset ring-white/5 shadow-md ${getGlowEffect(item.color)} group-hover:shadow-lg group-hover:scale-105`;
 
     return (
       <Link
