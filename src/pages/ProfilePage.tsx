@@ -23,8 +23,11 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import SimpleTwoFactorAuthModal from '../components/SimpleTwoFactorAuthModal';
 import { useTwoFactorAuth } from '../hooks/useTwoFactorAuth';
+=======
+>>>>>>> parent of 4833866 (A2F, Email, Loading)
 =======
 >>>>>>> parent of 4833866 (A2F, Email, Loading)
 
@@ -1842,6 +1845,7 @@ const ProfilePage: React.FC = () => {
         </div>
       )}
 <<<<<<< HEAD
+<<<<<<< HEAD
 
       {/* Two-Factor Authentication Modal */}
       <SimpleTwoFactorAuthModal
@@ -1851,6 +1855,8 @@ const ProfilePage: React.FC = () => {
           // Le hook useTwoFactorAuth se mettra à jour automatiquement
         }}
       />
+=======
+>>>>>>> parent of 4833866 (A2F, Email, Loading)
 =======
 >>>>>>> parent of 4833866 (A2F, Email, Loading)
     </Layout>
