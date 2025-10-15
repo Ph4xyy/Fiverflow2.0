@@ -109,8 +109,19 @@ const ProfilePage: React.FC = () => {
     currentPassword: ''
   });
   const [emailChanging, setEmailChanging] = useState(false);
-  const { setLoading: setGlobalLoading } = useLoading();
   const [showEmailPassword, setShowEmailPassword] = useState(false);
+  
+  // Safe loading context access with fallback
+  let setGlobalLoading: ((key: 'auth' | 'role' | 'subscription' | 'data', value: boolean) => void) | null = null;
+  
+  try {
+    const loadingContext = useLoading();
+    setGlobalLoading = loadingContext.setLoading;
+  } catch (error) {
+    console.warn('ProfilePage: LoadingProvider not available, using fallback');
+    // Fallback function that does nothing
+    setGlobalLoading = () => {};
+  }
 
   // 2FA (TOTP) state
   const [mfaLoading, setMfaLoading] = useState(false);
@@ -419,13 +430,17 @@ const ProfilePage: React.FC = () => {
     }
 
     // Utiliser le système de loading global
-    setGlobalLoading('data', true);
+    if (setGlobalLoading) {
+      setGlobalLoading('data', true);
+    }
     setEmailChanging(true);
     const toastId = toast.loading('Updating email...');
     
     // Timeout de sécurité pour éviter le loading infini
     const timeoutId = setTimeout(() => {
-      setGlobalLoading('data', false);
+      if (setGlobalLoading) {
+        setGlobalLoading('data', false);
+      }
       setEmailChanging(false);
       toast.error('Timeout: Email update took too long. Please try again.', { id: toastId });
     }, 30000); // 30 secondes max
@@ -466,7 +481,9 @@ const ProfilePage: React.FC = () => {
       toast.error('Failed to update email', { id: toastId });
     } finally {
       clearTimeout(timeoutId);
-      setGlobalLoading('data', false);
+      if (setGlobalLoading) {
+        setGlobalLoading('data', false);
+      }
       setEmailChanging(false);
     }
   };
