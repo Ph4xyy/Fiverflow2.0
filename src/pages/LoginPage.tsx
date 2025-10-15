@@ -2,20 +2,12 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useAuthWith2FA } from '../hooks/useAuthWith2FA';
-import TwoFactorVerification from '../components/TwoFactorVerification';
 
 import LogoImage from '../assets/LogoFiverFlow.png';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
-  const { 
-    isVerifying2FA, 
-    userEmail, 
-    signInWith2FA, 
-    cancel2FA 
-  } = useAuthWith2FA();
+  const { signIn, user, loading: authLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -50,22 +42,18 @@ const LoginPage: React.FC = () => {
     console.log('Starting authentication process...');
 
     try {
-      // Utiliser le nouveau système avec 2FA
-      const result = await signInWith2FA(formData.email, formData.password);
+      const { error } = await signIn(formData.email, formData.password);
       
-      if (result.success) {
-        console.log('Authentication successful, waiting for user context to update...');
-        setJustSignedIn(true);
-        // Le loading reste true pour montrer que la connexion est en cours
-      } else if (result.requires2FA) {
-        console.log('2FA required, showing verification modal');
-        setLoading(false);
-        // Le modal 2FA sera affiché automatiquement
-      } else {
-        console.error('Authentication failed');
-        setError('Email ou mot de passe incorrect');
+      if (error) {
+        console.error('Authentication error:', error);
+        setError(error.message);
         setLoading(false);
         setJustSignedIn(false);
+      } else {
+        console.log('Authentication successful, waiting for user context to update...');
+        // 🔥 FIXED: Mark that we just signed in, the useEffect will handle the redirection
+        setJustSignedIn(true);
+        // Le loading reste true pour montrer que la connexion est en cours
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -73,15 +61,6 @@ const LoginPage: React.FC = () => {
       setLoading(false);
       setJustSignedIn(false);
     }
-  };
-
-  const handle2FASuccess = () => {
-    setJustSignedIn(true);
-  };
-
-  const handle2FACancel = () => {
-    cancel2FA();
-    setLoading(false);
   };
     
 
@@ -177,15 +156,6 @@ const LoginPage: React.FC = () => {
           </p>
         </div>
       </div>
-
-      {/* Two-Factor Authentication Verification Modal */}
-      {isVerifying2FA && (
-        <TwoFactorVerification
-          onSuccess={handle2FASuccess}
-          onCancel={handle2FACancel}
-          userEmail={userEmail}
-        />
-      )}
     </div>
   );
 };

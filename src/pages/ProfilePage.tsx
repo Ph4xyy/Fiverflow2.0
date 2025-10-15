@@ -22,8 +22,11 @@ import {
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+<<<<<<< HEAD
 import SimpleTwoFactorAuthModal from '../components/SimpleTwoFactorAuthModal';
 import { useTwoFactorAuth } from '../hooks/useTwoFactorAuth';
+=======
+>>>>>>> parent of 4833866 (A2F, Email, Loading)
 
 /* ---------- Types d'origine ---------- */
 interface UserProfile {
@@ -114,12 +117,13 @@ const ProfilePage: React.FC = () => {
   const [showEmailPassword, setShowEmailPassword] = useState(false);
 
   // 2FA (TOTP) state
-  const { 
-    loading: mfaLoading, 
-    isEnabled: mfaEnabled, 
-    disable: disableMfa 
-  } = useTwoFactorAuth();
-  const [showTwoFactorModal, setShowTwoFactorModal] = useState(false);
+  const [mfaLoading, setMfaLoading] = useState(false);
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [mfaEnrolling, setMfaEnrolling] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null);
+  const [mfaQrCode, setMfaQrCode] = useState<string | null>(null);
+  const [mfaSecret, setMfaSecret] = useState<string | null>(null);
+  const [mfaVerificationCode, setMfaVerificationCode] = useState('');
 
   // Mock data si Supabase non configuré
   const mockProfile: UserProfile = {
@@ -459,10 +463,7 @@ const ProfilePage: React.FC = () => {
       } else {
         // Likely requires email confirmation. Do NOT update app DB yet.
         setEmailChange({ newEmail: '', currentPassword: '' });
-        toast.success('Un email de vérification a été envoyé. Veuillez vérifier votre boîte de réception et cliquer sur le lien pour finaliser le changement d\'adresse email.', { 
-          id: toastId,
-          duration: 8000 
-        });
+        toast.success('Confirmation sent. Validate the link to finalize.', { id: toastId });
       }
     } catch (e) {
       console.error('[Profile] handleChangeEmail error:', e);
@@ -474,6 +475,97 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  // 2FA (TOTP) helpers
+  const loadMfaStatus = async () => {
+    if (!isSupabaseConfigured || !supabase || !user) return;
+    try {
+      setMfaLoading(true);
+      const { data, error } = await (supabase as any).auth.mfa.listFactors();
+      if (error) throw error;
+      // Find verified TOTP factor if any
+      const allFactors: any[] = (data?.all as any[]) || [];
+      const verifiedTotp = allFactors.find((f) => f.factor_type === 'totp' && f.status === 'verified');
+      if (verifiedTotp) {
+        setMfaEnabled(true);
+        setMfaFactorId(verifiedTotp.id);
+      } else {
+        setMfaEnabled(false);
+        setMfaFactorId(null);
+      }
+    } catch (e) {
+      console.warn('[Profile] loadMfaStatus failed:', e);
+      setMfaEnabled(false);
+      setMfaFactorId(null);
+    } finally {
+      setMfaLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMfaStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  const startEnrollMfa = async () => {
+    if (!isSupabaseConfigured || !supabase || !user) {
+      toast.error('Database not configured');
+      return;
+    }
+    try {
+      setMfaEnrolling(true);
+      setMfaQrCode(null);
+      setMfaSecret(null);
+      setMfaVerificationCode('');
+      const { data, error } = await (supabase as any).auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Authenticator App' });
+      if (error) throw error;
+      const totp = (data as any)?.totp;
+      const factorId = (data as any)?.id;
+      setMfaFactorId(factorId || null);
+      setMfaQrCode(totp?.qr_code || null);
+      setMfaSecret(totp?.secret || null);
+    } catch (e) {
+      console.error('[Profile] startEnrollMfa error:', e);
+      toast.error('Failed to start 2FA enrollment');
+      setMfaEnrolling(false);
+    }
+  };
+
+  const verifyEnrollMfa = async () => {
+    if (!isSupabaseConfigured || !supabase || !user || !mfaFactorId) return;
+    if (!mfaVerificationCode.trim()) {
+      toast.error('Enter the 6-digit code from your app');
+      return;
+    }
+    const tId = toast.loading('Verifying code...');
+    try {
+      const { error } = await (supabase as any).auth.mfa.verify({ factorId: mfaFactorId, code: mfaVerificationCode.trim() });
+      if (error) throw error;
+      setMfaEnabled(true);
+      setMfaEnrolling(false);
+      setMfaQrCode(null);
+      setMfaSecret(null);
+      setMfaVerificationCode('');
+      toast.success('Two-factor authentication enabled', { id: tId });
+    } catch (e) {
+      console.error('[Profile] verifyEnrollMfa error:', e);
+      toast.error('Invalid or expired code', { id: tId });
+    }
+  };
+
+  const disableMfa = async () => {
+    if (!isSupabaseConfigured || !supabase || !user || !mfaFactorId) return;
+    const tId = toast.loading('Disabling 2FA...');
+    try {
+      const { error } = await (supabase as any).auth.mfa.unenroll({ factorId: mfaFactorId });
+      if (error) throw error;
+      setMfaEnabled(false);
+      setMfaFactorId(null);
+      toast.success('Two-factor authentication disabled', { id: tId });
+    } catch (e) {
+      console.error('[Profile] disableMfa error:', e);
+      toast.error('Failed to disable 2FA', { id: tId });
+    }
+  };
 
   /* ---------- Helpers UI d’origine ---------- */
     const getInitials = (name: string | null, email: string) =>
@@ -1145,13 +1237,50 @@ const ProfilePage: React.FC = () => {
                         {'Disable 2FA'}
                       </button>
                     </div>
-                  ) : (
+                  ) : !mfaEnrolling ? (
                     <button
-                      onClick={() => setShowTwoFactorModal(true)}
+                      onClick={startEnrollMfa}
                       className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg"
                     >
                       {'Enable 2FA'}
                     </button>
+                  ) : (
+                    <div className="space-y-3">
+                      {mfaQrCode && (
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+                          <img src={mfaQrCode} alt="2FA QR" className="w-40 h-40 bg-white p-2 rounded" />
+                          <div className="mt-2 sm:mt-0">
+                            <p className="text-xs text-slate-400">{'Scan this QR with Google Authenticator, Authy, or similar app.'}</p>
+                            {mfaSecret && (
+                              <p className="text-xs text-slate-400 mt-1">{'Or enter this secret manually:'} <span className="font-mono text-slate-300">{mfaSecret}</span></p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <input
+                          type="text"
+                          placeholder={'6-digit code'}
+                          value={mfaVerificationCode}
+                          onChange={(e) => setMfaVerificationCode(e.target.value)}
+                          className={inputBase}
+                        />
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={verifyEnrollMfa}
+                            className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg"
+                          >
+                            {'Verify & Enable'}
+                          </button>
+                          <button
+                            onClick={() => { setMfaEnrolling(false); setMfaQrCode(null); setMfaSecret(null); setMfaVerificationCode(''); }}
+                            className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-[#1C2230] text-slate-200 rounded-lg hover:bg-[#141922] transition-colors"
+                          >
+                            {'Cancel'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
@@ -1712,6 +1841,7 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       )}
+<<<<<<< HEAD
 
       {/* Two-Factor Authentication Modal */}
       <SimpleTwoFactorAuthModal
@@ -1721,6 +1851,8 @@ const ProfilePage: React.FC = () => {
           // Le hook useTwoFactorAuth se mettra à jour automatiquement
         }}
       />
+=======
+>>>>>>> parent of 4833866 (A2F, Email, Loading)
     </Layout>
   );
 };
