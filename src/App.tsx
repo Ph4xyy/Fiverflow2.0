@@ -138,6 +138,8 @@ function App() {
                          <SessionDiagnostic />
                        </>
                      )}
+                     {/* Loading Diagnostic - visible avec Ctrl+Shift+L */}
+                     <LoadingDiagnostic />
                 </UserDataProvider>
               </CurrencyProvider>
             </LoadingProvider>
@@ -145,9 +147,6 @@ function App() {
         </Router>
         {/* EmergencyFallback temporairement désactivé pour debugging */}
         {/* <EmergencyFallback /> */}
-        
-        {/* Loading Diagnostic - visible avec Ctrl+Shift+L */}
-        <LoadingDiagnostic />
       </AuthProvider>
     </AppErrorBoundary>
   );

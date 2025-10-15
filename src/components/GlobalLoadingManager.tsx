@@ -11,7 +11,18 @@ interface GlobalLoadingManagerProps {
  * Version améliorée avec gestion des timeouts
  */
 export const GlobalLoadingManager: React.FC<GlobalLoadingManagerProps> = ({ children }) => {
-  const { loading, isLoading } = useLoading();
+  // Safe loading context access
+  let loadingContext: { loading: any; isLoading: () => boolean } | null = null;
+  
+  try {
+    loadingContext = useLoading();
+  } catch (error) {
+    console.warn('GlobalLoadingManager: LoadingProvider not available, skipping global loading management');
+    // If LoadingProvider is not available, just render children
+    return <>{children}</>;
+  }
+
+  const { loading, isLoading } = loadingContext;
   const [showGlobalLoading, setShowGlobalLoading] = useState(false);
 
   useEffect(() => {
