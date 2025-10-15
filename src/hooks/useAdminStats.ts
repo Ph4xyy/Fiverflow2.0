@@ -12,6 +12,7 @@ export interface AdminStats {
     totalClients: number;
     totalTasks: number;
     totalTimeEntries: number;
+    totalReferrals: number;
     totalRevenue: number;
   };
   plans: {
@@ -20,9 +21,16 @@ export interface AdminStats {
   };
   revenue: {
     total: number;
+    fromOrders: number;
     fromInvoices: number;
     fromReferrals: number;
     currency: string;
+  };
+  subscriptions: {
+    total: number;
+    active: number;
+    monthlyRevenue: number;
+    yearlyRevenue: number;
   };
   recentUsers: Array<{
     id: string;
@@ -86,9 +94,21 @@ export const useAdminStats = (startDate: string, endDate: string) => {
         const startISO = new Date(`${startDate}T00:00:00.000Z`).toISOString();
         const endISO = new Date(`${endDate}T23:59:59.999Z`).toISOString();
 
-        console.log('🔍 Loading admin stats from:', startISO, 'to:', endISO);
+        console.log('🔍 Loading ADMIN stats from:', startISO, 'to:', endISO);
 
-        // ===== UTILISATEURS =====
+        // ===== UTILISER LA FONCTION ADMIN =====
+        const { data: adminStatsData, error: adminStatsErr } = await supabase
+          .rpc('get_admin_stats', {
+            start_date: startISO,
+            end_date: endISO
+          });
+
+        if (adminStatsErr) {
+          console.warn('Admin function not available, falling back to direct queries:', adminStatsErr);
+          // Fallback to direct queries if admin function doesn't exist
+        }
+
+        // ===== UTILISATEURS (avec politiques admin) =====
         const [
           { data: usersAll, error: usersAllErr },
           { data: usersRange, error: usersRangeErr }
@@ -106,9 +126,12 @@ export const useAdminStats = (startDate: string, endDate: string) => {
         const newUsersInRange = usersRange?.length ?? 0;
         const adminsAllTime = (usersAll ?? []).filter(u => u.role === 'admin').length;
 
-        // Répartition des plans
-        const freeUsers = (usersRange ?? []).filter(u => !u.is_pro).length;
-        const proUsers = (usersRange ?? []).filter(u => u.is_pro).length;
+        console.log('👑 Admins found:', (usersAll ?? []).filter(u => u.role === 'admin'));
+
+        // Répartition des plans (TOUS les utilisateurs, pas seulement la période)
+        const allUsers = usersAll ?? [];
+        const freeUsers = allUsers.filter(u => !u.is_pro).length;
+        const proUsers = allUsers.filter(u => u.is_pro).length;
 
         // Utilisateurs récents (tous)
         const { data: recentUsersData, error: recentUsersErr } = await supabase
@@ -119,7 +142,7 @@ export const useAdminStats = (startDate: string, endDate: string) => {
 
         if (recentUsersErr) throw recentUsersErr;
 
-        // ===== COMMANDES =====
+        // ===== COMMANDES (avec politiques admin) =====
         const { data: ordersData, error: ordersErr } = await supabase
           .from('orders')
           .select(`
@@ -146,7 +169,7 @@ export const useAdminStats = (startDate: string, endDate: string) => {
             client_name: order.clients?.name || 'Client inconnu'
           }));
 
-        // ===== FACTURES =====
+        // ===== FACTURES (avec politiques admin) =====
         const { data: invoicesData, error: invoicesErr } = await supabase
           .from('invoices')
           .select(`
@@ -173,7 +196,7 @@ export const useAdminStats = (startDate: string, endDate: string) => {
             client_name: invoice.clients?.name || 'Client inconnu'
           }));
 
-        // ===== CLIENTS =====
+        // ===== CLIENTS (avec politiques admin) =====
         const { data: clientsData, error: clientsErr } = await supabase
           .from('clients')
           .select('id, platform');
@@ -193,7 +216,7 @@ export const useAdminStats = (startDate: string, endDate: string) => {
           .sort((a, b) => b.count - a.count)
           .slice(0, 5);
 
-        // ===== TÂCHES ET TEMPS =====
+        // ===== TÂCHES ET TEMPS (avec politiques admin) =====
         const [
           { data: tasksData, error: tasksErr },
           { data: timeEntriesData, error: timeEntriesErr }
@@ -208,7 +231,7 @@ export const useAdminStats = (startDate: string, endDate: string) => {
         const totalTasks = tasksData?.length ?? 0;
         const totalTimeEntries = timeEntriesData?.length ?? 0;
 
-        // ===== REFERRALS =====
+        // ===== REFERRALS (avec politiques admin) =====
         const { data: referralsData, error: referralsErr } = await supabase
           .from('referrals')
           .select(`
@@ -219,6 +242,8 @@ export const useAdminStats = (startDate: string, endDate: string) => {
           .lte('created_at', endISO);
 
         if (referralsErr) throw referralsErr;
+
+        const totalReferrals = referralsData?.length ?? 0;
 
         // Calculer les top referrers
         const referrerCounts = new Map<string, { user: any; count: number }>();
@@ -243,8 +268,37 @@ export const useAdminStats = (startDate: string, endDate: string) => {
             total_earnings: item.count * 10 // Estimation basique
           }));
 
+        // ===== ABONNEMENTS =====
+        let subscriptionStats = {
+          total: 0,
+          active: 0,
+          monthlyRevenue: 0,
+          yearlyRevenue: 0
+        };
+
+        try {
+          const { data: subscriptionsData, error: subscriptionsErr } = await supabase
+            .from('subscriptions')
+            .select('id, amount, billing_cycle, is_active');
+
+          if (!subscriptionsErr && subscriptionsData) {
+            subscriptionStats = {
+              total: subscriptionsData.length,
+              active: subscriptionsData.filter(s => s.is_active).length,
+              monthlyRevenue: subscriptionsData
+                .filter(s => s.billing_cycle === 'monthly' && s.is_active)
+                .reduce((sum, s) => sum + safeNumber(s.amount), 0),
+              yearlyRevenue: subscriptionsData
+                .filter(s => s.billing_cycle === 'yearly' && s.is_active)
+                .reduce((sum, s) => sum + safeNumber(s.amount), 0)
+            };
+          }
+        } catch (e) {
+          console.warn('Subscriptions table not available:', e);
+        }
+
         // ===== REVENUS =====
-        const totalRevenue = totalOrdersRevenue + totalInvoicesRevenue;
+        const totalRevenue = totalOrdersRevenue + totalInvoicesRevenue + subscriptionStats.monthlyRevenue + subscriptionStats.yearlyRevenue;
 
         const finalStats: AdminStats = {
           totals: {
@@ -256,6 +310,7 @@ export const useAdminStats = (startDate: string, endDate: string) => {
             totalClients,
             totalTasks,
             totalTimeEntries,
+            totalReferrals,
             totalRevenue
           },
           plans: {
@@ -264,10 +319,12 @@ export const useAdminStats = (startDate: string, endDate: string) => {
           },
           revenue: {
             total: totalRevenue,
+            fromOrders: totalOrdersRevenue,
             fromInvoices: totalInvoicesRevenue,
             fromReferrals: topReferrers.reduce((sum, ref) => sum + ref.total_earnings, 0),
             currency: 'USD'
           },
+          subscriptions: subscriptionStats,
           recentUsers: recentUsersData ?? [],
           recentOrders,
           recentInvoices,
@@ -278,7 +335,7 @@ export const useAdminStats = (startDate: string, endDate: string) => {
           }
         };
 
-        console.log('📊 Admin stats loaded:', finalStats);
+        console.log('📊 GLOBAL Admin stats loaded:', finalStats);
         setStats(finalStats);
 
       } catch (err: any) {
