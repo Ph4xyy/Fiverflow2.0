@@ -15,6 +15,7 @@ import EnvironmentDiagnostic from './components/EnvironmentDiagnostic';
 import SessionTest from './components/SessionTest';
 import AuthDiagnostic from './components/AuthDiagnostic';
 import SessionDiagnostic from './components/SessionDiagnostic';
+import LoadingDiagnostic from './components/LoadingDiagnostic';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
 import { useSessionManager } from './hooks/useSessionManager';
 
@@ -144,6 +145,9 @@ function App() {
         </Router>
         {/* EmergencyFallback temporairement désactivé pour debugging */}
         {/* <EmergencyFallback /> */}
+        
+        {/* Loading Diagnostic - visible avec Ctrl+Shift+L */}
+        <LoadingDiagnostic />
       </AuthProvider>
     </AppErrorBoundary>
   );

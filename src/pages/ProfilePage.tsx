@@ -22,7 +22,7 @@ import {
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import TwoFactorAuthModal from '../components/TwoFactorAuthModal';
+import SimpleTwoFactorAuthModal from '../components/SimpleTwoFactorAuthModal';
 import { useTwoFactorAuth } from '../hooks/useTwoFactorAuth';
 
 /* ---------- Types d'origine ---------- */
@@ -110,6 +110,7 @@ const ProfilePage: React.FC = () => {
     currentPassword: ''
   });
   const [emailChanging, setEmailChanging] = useState(false);
+  const { setLoading } = useLoading();
   const [showEmailPassword, setShowEmailPassword] = useState(false);
 
   // 2FA (TOTP) state
@@ -417,8 +418,18 @@ const ProfilePage: React.FC = () => {
       return;
     }
 
+    // Utiliser le système de loading global
+    setLoading('data', true);
     setEmailChanging(true);
     const toastId = toast.loading('Updating email...');
+    
+    // Timeout de sécurité pour éviter le loading infini
+    const timeoutId = setTimeout(() => {
+      setLoading('data', false);
+      setEmailChanging(false);
+      toast.error('Timeout: Email update took too long. Please try again.', { id: toastId });
+    }, 30000); // 30 secondes max
+
     try {
       // Re-authenticate to enforce password requirement
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -457,6 +468,8 @@ const ProfilePage: React.FC = () => {
       console.error('[Profile] handleChangeEmail error:', e);
       toast.error('Failed to update email', { id: toastId });
     } finally {
+      clearTimeout(timeoutId);
+      setLoading('data', false);
       setEmailChanging(false);
     }
   };
@@ -1701,7 +1714,7 @@ const ProfilePage: React.FC = () => {
       )}
 
       {/* Two-Factor Authentication Modal */}
-      <TwoFactorAuthModal
+      <SimpleTwoFactorAuthModal
         isOpen={showTwoFactorModal}
         onClose={() => setShowTwoFactorModal(false)}
         onSuccess={() => {

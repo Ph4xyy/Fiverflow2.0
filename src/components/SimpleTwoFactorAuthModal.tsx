@@ -4,32 +4,21 @@ import { useTwoFactorAuth } from '../hooks/useTwoFactorAuth';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 
-interface TwoFactorAuthModalProps {
+interface SimpleTwoFactorAuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-interface TwoFactorAuthStep {
-  step: 'password' | 'email' | 'qr' | 'verification';
-  title: string;
-  description: string;
-}
-
-const TwoFactorAuthModal: React.FC<TwoFactorAuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const SimpleTwoFactorAuthModal: React.FC<SimpleTwoFactorAuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { user } = useAuth();
   const { generateSecret, verifyAndEnable, loading: twoFactorLoading } = useTwoFactorAuth();
-  const [currentStep, setCurrentStep] = useState<TwoFactorAuthStep['step']>('password');
+  const [currentStep, setCurrentStep] = useState<'password' | 'qr' | 'verification'>('password');
   const [loading, setLoading] = useState(false);
   
   // Password step
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  
-  // Email step
-  const [emailCode, setEmailCode] = useState('');
-  const [emailCodeSent, setEmailCodeSent] = useState(false);
-  const [emailCodeError, setEmailCodeError] = useState('');
   
   // QR step
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -40,44 +29,16 @@ const TwoFactorAuthModal: React.FC<TwoFactorAuthModalProps> = ({ isOpen, onClose
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationError, setVerificationError] = useState('');
 
-  const steps: TwoFactorAuthStep[] = [
-    {
-      step: 'password',
-      title: 'Vérification du mot de passe',
-      description: 'Entrez votre mot de passe actuel pour continuer'
-    },
-    {
-      step: 'email',
-      title: 'Vérification de sécurité',
-      description: 'Entrez un code de vérification à 6 chiffres pour continuer'
-    },
-    {
-      step: 'qr',
-      title: 'Configuration 2FA',
-      description: 'Scannez ce QR code avec votre application d\'authentification'
-    },
-    {
-      step: 'verification',
-      title: 'Activation 2FA',
-      description: 'Entrez le code à 6 chiffres de votre application'
-    }
-  ];
-
-  const currentStepData = steps.find(s => s.step === currentStep);
-
   useEffect(() => {
     if (isOpen) {
       setCurrentStep('password');
       setPassword('');
-      setEmailCode('');
       setVerificationCode('');
       setQrCode(null);
       setSecret(null);
       setBackupCodes([]);
       setPasswordError('');
-      setEmailCodeError('');
       setVerificationError('');
-      setEmailCodeSent(false);
     }
   }, [isOpen]);
 
@@ -106,37 +67,7 @@ const TwoFactorAuthModal: React.FC<TwoFactorAuthModalProps> = ({ isOpen, onClose
         return;
       }
 
-      // Passer directement à l'étape email (simulation)
-      setEmailCodeSent(true);
-      setCurrentStep('email');
-      toast.success('Mot de passe vérifié. Veuillez entrer un code de vérification à 6 chiffres.');
-    } catch (error) {
-      console.error('Erreur vérification mot de passe:', error);
-      setPasswordError('Erreur lors de la vérification');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEmailVerification = async () => {
-    if (!emailCode.trim()) {
-      setEmailCodeError('Veuillez entrer le code de vérification');
-      return;
-    }
-
-    if (emailCode.length !== 6 || !/^\d+$/.test(emailCode)) {
-      setEmailCodeError('Le code doit contenir 6 chiffres');
-      return;
-    }
-
-    setLoading(true);
-    setEmailCodeError('');
-
-    try {
-      // Pour simplifier, on accepte n'importe quel code de 6 chiffres
-      // En production, vous pourriez implémenter un vrai système d'envoi d'email
-      
-      // Générer le QR code 2FA avec le nouveau hook
+      // Générer directement le QR code 2FA
       const result = await generateSecret();
       if (result) {
         setQrCode(result.qrCode);
@@ -145,11 +76,11 @@ const TwoFactorAuthModal: React.FC<TwoFactorAuthModalProps> = ({ isOpen, onClose
         setCurrentStep('qr');
         toast.success('QR code généré avec succès');
       } else {
-        setEmailCodeError('Erreur lors de la génération du QR code');
+        setPasswordError('Erreur lors de la génération du QR code');
       }
     } catch (error) {
-      console.error('Erreur vérification email:', error);
-      setEmailCodeError('Erreur lors de la vérification');
+      console.error('Erreur vérification mot de passe:', error);
+      setPasswordError('Erreur lors de la vérification');
     } finally {
       setLoading(false);
     }
@@ -193,11 +124,8 @@ const TwoFactorAuthModal: React.FC<TwoFactorAuthModalProps> = ({ isOpen, onClose
 
   const handleBack = () => {
     switch (currentStep) {
-      case 'email':
-        setCurrentStep('password');
-        break;
       case 'qr':
-        setCurrentStep('email');
+        setCurrentStep('password');
         break;
       case 'verification':
         setCurrentStep('qr');
@@ -214,10 +142,14 @@ const TwoFactorAuthModal: React.FC<TwoFactorAuthModalProps> = ({ isOpen, onClose
         <div className="flex items-center justify-between p-6 border-b border-[#1C2230]">
           <div>
             <h2 className="text-xl font-semibold text-white">
-              {currentStepData?.title}
+              {currentStep === 'password' && 'Vérification du mot de passe'}
+              {currentStep === 'qr' && 'Configuration 2FA'}
+              {currentStep === 'verification' && 'Activation 2FA'}
             </h2>
             <p className="text-sm text-slate-400 mt-1">
-              {currentStepData?.description}
+              {currentStep === 'password' && 'Entrez votre mot de passe actuel pour continuer'}
+              {currentStep === 'qr' && 'Scannez ce QR code avec votre application d\'authentification'}
+              {currentStep === 'verification' && 'Entrez le code à 6 chiffres de votre application'}
             </p>
           </div>
           <button
@@ -234,18 +166,18 @@ const TwoFactorAuthModal: React.FC<TwoFactorAuthModalProps> = ({ isOpen, onClose
         <div className="p-6">
           {/* Progress indicator */}
           <div className="flex items-center justify-center mb-6">
-            {steps.map((step, index) => (
-              <div key={step.step} className="flex items-center">
+            {['password', 'qr', 'verification'].map((step, index) => (
+              <div key={step} className="flex items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    currentStep === step.step
+                    currentStep === step
                       ? 'bg-purple-500 text-white'
-                      : steps.findIndex(s => s.step === currentStep) > index
+                      : ['password', 'qr', 'verification'].indexOf(currentStep) > index
                       ? 'bg-green-500 text-white'
                       : 'bg-[#1C2230] text-slate-400'
                   }`}
                 >
-                  {steps.findIndex(s => s.step === currentStep) > index ? (
+                  {['password', 'qr', 'verification'].indexOf(currentStep) > index ? (
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
@@ -253,10 +185,10 @@ const TwoFactorAuthModal: React.FC<TwoFactorAuthModalProps> = ({ isOpen, onClose
                     index + 1
                   )}
                 </div>
-                {index < steps.length - 1 && (
+                {index < 2 && (
                   <div
                     className={`w-12 h-0.5 mx-2 ${
-                      steps.findIndex(s => s.step === currentStep) > index
+                      ['password', 'qr', 'verification'].indexOf(currentStep) > index
                         ? 'bg-green-500'
                         : 'bg-[#1C2230]'
                     }`}
@@ -283,39 +215,6 @@ const TwoFactorAuthModal: React.FC<TwoFactorAuthModalProps> = ({ isOpen, onClose
                 />
                 {passwordError && (
                   <p className="text-red-400 text-sm mt-1">{passwordError}</p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {currentStep === 'email' && (
-            <div className="space-y-4">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <p className="text-slate-300 text-sm mb-2">
-                  Entrez un code de vérification à 6 chiffres<br />
-                  <span className="text-slate-400 text-xs">(exemple: 123456)</span>
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Code de vérification
-                </label>
-                <input
-                  type="text"
-                  value={emailCode}
-                  onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="w-full px-4 py-3 bg-[#0E121A] border border-[#1C2230] rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center text-lg tracking-widest"
-                  placeholder="000000"
-                  maxLength={6}
-                  disabled={loading}
-                />
-                {emailCodeError && (
-                  <p className="text-red-400 text-sm mt-1">{emailCodeError}</p>
                 )}
               </div>
             </div>
@@ -417,9 +316,6 @@ const TwoFactorAuthModal: React.FC<TwoFactorAuthModalProps> = ({ isOpen, onClose
                   case 'password':
                     handlePasswordVerification();
                     break;
-                  case 'email':
-                    handleEmailVerification();
-                    break;
                   case 'qr':
                     handleQrStep();
                     break;
@@ -448,4 +344,4 @@ const TwoFactorAuthModal: React.FC<TwoFactorAuthModalProps> = ({ isOpen, onClose
   );
 };
 
-export default TwoFactorAuthModal;
+export default SimpleTwoFactorAuthModal;
