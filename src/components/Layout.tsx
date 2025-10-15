@@ -399,7 +399,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             pt-16 lg:pt-16
           `}
         >
-          <nav className="h-full px-3 sm:px-4 py-5 space-y-2 overflow-y-auto">
+          <nav className="h-full px-3 sm:px-4 py-5 space-y-2">
             <LocalErrorBoundary>
               {/* -------- Section: Overview -------- */}
               <div className="px-3 sm:px-4">
