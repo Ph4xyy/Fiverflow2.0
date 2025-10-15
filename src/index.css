@@ -293,6 +293,16 @@
   background: #64748b;
 }
 
+/* Hide scrollbar utility class */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
 /* Selection colors for dark mode */
 .dark ::selection {
   background-color: rgba(74, 158, 255, 0.3);
