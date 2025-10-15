@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useLoading } from '../contexts/LoadingContext';
-import { OptimizedLoadingScreen } from './OptimizedLoadingScreen';
+import { SmartLoadingScreen } from './SmartLoadingScreen';
 
 interface GlobalLoadingManagerProps {
   children: React.ReactNode;
 }
 
 /**
- * Composant qui gère l'affichage global du loading
- * Version améliorée avec gestion des timeouts
+ * Composant qui gère l'affichage global du loading de manière intelligente
+ * Version optimisée avec délais et timeouts pour éviter les flashs
  */
 export const GlobalLoadingManager: React.FC<GlobalLoadingManagerProps> = ({ children }) => {
   // Safe loading context access
@@ -24,26 +24,52 @@ export const GlobalLoadingManager: React.FC<GlobalLoadingManagerProps> = ({ chil
 
   const { loading, isLoading } = loadingContext;
   const [showGlobalLoading, setShowGlobalLoading] = useState(false);
+  const timeoutRef = useRef<number>();
+  const delayTimeoutRef = useRef<number>();
 
   useEffect(() => {
     const isAnyLoading = isLoading();
-    setShowGlobalLoading(isAnyLoading);
     
-    // Auto-hide loading after 15 seconds to prevent infinite loading
-    if (isAnyLoading) {
-      const timeout = setTimeout(() => {
-        setShowGlobalLoading(false);
-      }, 15000);
-      
-      return () => clearTimeout(timeout);
+    // Clear existing timeouts
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
+    if (delayTimeoutRef.current) {
+      clearTimeout(delayTimeoutRef.current);
+    }
+
+    if (isAnyLoading) {
+      // Délai avant d'afficher le loading global (évite les flashs rapides)
+      delayTimeoutRef.current = window.setTimeout(() => {
+        setShowGlobalLoading(true);
+        
+        // Timeout de sécurité après 12 secondes
+        timeoutRef.current = window.setTimeout(() => {
+          console.warn('🚨 GlobalLoadingManager: Loading timeout (12s), forcing stop');
+          setShowGlobalLoading(false);
+        }, 12000);
+      }, 300); // 300ms de délai pour éviter les flashs
+    } else {
+      // Arrêter le loading immédiatement
+      setShowGlobalLoading(false);
+    }
+    
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      if (delayTimeoutRef.current) {
+        clearTimeout(delayTimeoutRef.current);
+      }
+    };
   }, [loading, isLoading]);
 
   if (showGlobalLoading) {
     return (
-      <OptimizedLoadingScreen 
+      <SmartLoadingScreen 
         message="Loading application..." 
-        showSpinner={true}
+        delay={0} // Pas de délai supplémentaire ici car on a déjà géré le délai
+        minDisplayTime={500} // 500ms minimum d'affichage pour le loading global
       />
     );
   }

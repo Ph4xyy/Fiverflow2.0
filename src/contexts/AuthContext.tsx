@@ -222,6 +222,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       console.log('[AuthContext] ========================================');
       
+      // Timeout de sécurité pour l'initialisation (15 secondes)
+      initTimeout = window.setTimeout(() => {
+        console.warn('[AuthContext] ⚠️ Initialization timeout (15s), forcing completion');
+        setLoadingSafe(false);
+        setAuthReadySafe(true);
+      }, 15000);
+      
       if (!isSupabaseConfigured || !supabase) {
         console.log('[AuthContext] ❌ Supabase not configured');
         setUserSafe(null);
@@ -365,12 +372,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // Timeout de sécurité
-    initTimeout = window.setTimeout(() => {
-      console.warn('[AuthContext] ⏱️ Initialization timeout (10s), forcing completion');
-      setLoadingSafe(false);
-      setAuthReadySafe(true);
-    }, 10000);
+    // Note: Le timeout de sécurité est déjà défini dans init() avec 15s
 
     init().finally(() => {
       if (initTimeout) {

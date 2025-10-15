@@ -6,6 +6,7 @@ import { UserDataProvider } from './contexts/UserDataContext';
 import { LoadingProvider } from './contexts/LoadingContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
 import InstantProtectedRoute from './components/InstantProtectedRoute';
+import SmartProtectedRoute from './components/SmartProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
@@ -21,6 +22,7 @@ import { useSessionManager } from './hooks/useSessionManager';
 
 // Core pages
 import RootRedirect from './components/RootRedirect';
+import SmartRootRedirect from './components/SmartRootRedirect';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -76,35 +78,42 @@ function App() {
                 <UserDataProvider>
                   <SessionManagerWrapper>
                   <GlobalLoadingManager>
-              <Suspense fallback={<div className="p-6"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-slate-500"></div></div>}>
+              <Suspense fallback={
+                <div className="min-h-screen flex items-center justify-center bg-slate-900">
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
+                    <p className="text-white text-sm">Loading page...</p>
+                  </div>
+                </div>
+              }>
               <Routes>
-              {/* Redirection racine intelligente */}
-              <Route path="/" element={<RootRedirect />} />
+              {/* Redirection racine intelligente - version optimisée */}
+              <Route path="/" element={<SmartRootRedirect />} />
               {/* Pages publiques */}
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/support" element={<SupportPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
 
-              {/* Dashboard */}
+              {/* Dashboard - version optimisée pour éviter les flashs */}
               <Route path="/dashboard" element={
-                <InstantProtectedRoute>
+                <SmartProtectedRoute>
                   <DashboardPage />
-                </InstantProtectedRoute>
+                </SmartProtectedRoute>
               } />
 
-              {/* Autres pages internes du dashboard */}
-              <Route path="/clients" element={<InstantProtectedRoute><ClientsPage /></InstantProtectedRoute>} />
-              <Route path="/orders" element={<InstantProtectedRoute><OrdersPage /></InstantProtectedRoute>} />
-              <Route path="/calendar" element={<InstantProtectedRoute><CalendarPage /></InstantProtectedRoute>} />
-              <Route path="/tasks" element={<InstantProtectedRoute><WorkboardPage /></InstantProtectedRoute>} />
-              <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
-              <Route path="/stats" element={<InstantProtectedRoute><StatsPage /></InstantProtectedRoute>} />
-              <Route path="/profile" element={<InstantProtectedRoute><ProfilePage /></InstantProtectedRoute>} />
-              <Route path="/network" element={<InstantProtectedRoute><NetworkPage /></InstantProtectedRoute>} />
-              <Route path="/upgrade" element={<InstantProtectedRoute><UpgradePage /></InstantProtectedRoute>} />
+              {/* Autres pages internes du dashboard - version optimisée */}
+              <Route path="/clients" element={<SmartProtectedRoute><ClientsPage /></SmartProtectedRoute>} />
+              <Route path="/orders" element={<SmartProtectedRoute><OrdersPage /></SmartProtectedRoute>} />
+              <Route path="/calendar" element={<SmartProtectedRoute><CalendarPage /></SmartProtectedRoute>} />
+              <Route path="/tasks" element={<SmartProtectedRoute><WorkboardPage /></SmartProtectedRoute>} />
+              <Route path="/templates" element={<SmartProtectedRoute><TemplatesPage /></SmartProtectedRoute>} />
+              <Route path="/stats" element={<SmartProtectedRoute><StatsPage /></SmartProtectedRoute>} />
+              <Route path="/profile" element={<SmartProtectedRoute><ProfilePage /></SmartProtectedRoute>} />
+              <Route path="/network" element={<SmartProtectedRoute><NetworkPage /></SmartProtectedRoute>} />
+              <Route path="/upgrade" element={<SmartProtectedRoute><UpgradePage /></SmartProtectedRoute>} />
               <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-              <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
+              <Route path="/success" element={<SmartProtectedRoute><SuccessPage /></SmartProtectedRoute>} />
 
               {/* Old To-Do route removed; consolidated into /tasks (Workboard) */}
 
@@ -113,8 +122,8 @@ function App() {
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/cookie-policy" element={<CookiePolicy />} />
 
-              {/* Invoices */}
-              <Route path="/invoices" element={<InstantProtectedRoute><InvoicesLayout /></InstantProtectedRoute>}>
+              {/* Invoices - version optimisée */}
+              <Route path="/invoices" element={<SmartProtectedRoute><InvoicesLayout /></SmartProtectedRoute>}>
                 <Route index element={<InvoicesPage />} />
                 <Route path="sent" element={<InvoicesPage />} />
                 <Route path="create" element={<InvoicesPage />} />
@@ -122,8 +131,8 @@ function App() {
                 <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
               </Route>
 
-              {/* Onboarding */}
-              <Route path="/onboarding" element={<InstantProtectedRoute><OnboardingPage /></InstantProtectedRoute>} />
+              {/* Onboarding - version optimisée */}
+              <Route path="/onboarding" element={<SmartProtectedRoute><OnboardingPage /></SmartProtectedRoute>} />
               </Routes>
               </Suspense>
                 </GlobalLoadingManager>
