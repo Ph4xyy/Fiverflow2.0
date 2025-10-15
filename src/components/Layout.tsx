@@ -25,10 +25,9 @@ import {
   LogOut,
   Share2,
   Lock,
-  Receipt,
   CheckCircle2,
   Shield,
-  ListChecks,
+  FileText,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -150,14 +149,21 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   /* ---------- NAV STRUCTURE EN 3 SECTIONS + MICRO SECTION BAS ---------- */
   // Section 1: Overview (principales)
   const overviewItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: Home, tone: 'from-accent-blue to-accent-purple' },
+    { 
+      path: '/dashboard', 
+      label: 'Dashboard', 
+      icon: Home, 
+      tone: 'from-blue-500 to-indigo-600',
+      color: 'blue'
+    },
     { 
       path: '/calendar', 
       label: 'Calendar', 
       icon: CalendarIcon,
       restricted: !checkAccess('calendar') && !restrictions?.isAdmin,
       requiredPlan: 'Pro' as const,
-      tone: 'from-purple-500 to-violet-600'
+      tone: 'from-purple-500 to-pink-600',
+      color: 'purple'
     },
     { 
       path: '/stats', 
@@ -165,7 +171,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       icon: BarChart3,
       restricted: !checkAccess('stats') && !restrictions?.isAdmin,
       requiredPlan: 'Excellence' as const,
-      tone: 'from-cyan-500 to-sky-600'
+      tone: 'from-emerald-500 to-teal-600',
+      color: 'emerald'
     },
     { 
       path: '/network', 
@@ -173,7 +180,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       icon: Share2,
       restricted: !checkAccess('referrals') && !restrictions?.isAdmin,
       requiredPlan: 'Pro' as const,
-      tone: 'from-rose-500 to-red-600'
+      tone: 'from-orange-500 to-red-600',
+      color: 'orange'
     },
   ];
 
@@ -182,15 +190,28 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
   // Section 3: Workspace
   const workspaceItems = [
-    { path: '/clients', label: 'Clients', icon: Users, tone: 'from-emerald-500 to-teal-600' },
-    { path: '/orders',  label: 'Orders',  icon: ShoppingCart, tone: 'from-amber-500 to-orange-600' },
+    { 
+      path: '/clients', 
+      label: 'Clients', 
+      icon: Users, 
+      tone: 'from-green-500 to-emerald-600',
+      color: 'green'
+    },
+    { 
+      path: '/orders',  
+      label: 'Orders',  
+      icon: ShoppingCart, 
+      tone: 'from-yellow-500 to-amber-600',
+      color: 'yellow'
+    },
     { 
       path: '/invoices',
       label: 'Invoices',
-      icon: Receipt,
+      icon: FileText,
       restricted: !(restrictions?.isAdmin || checkAccess('invoices')),
       requiredPlan: 'Excellence' as const,
-      tone: 'from-fuchsia-500 to-pink-600'
+      tone: 'from-pink-500 to-rose-600',
+      color: 'pink'
     },
     { 
       path: '/tasks', 
@@ -198,20 +219,35 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       icon: CheckSquare,
       restricted: !checkAccess('tasks') && !restrictions?.isAdmin,
       requiredPlan: 'Pro' as const,
-      tone: 'from-indigo-500 to-blue-600'
+      tone: 'from-violet-500 to-purple-600',
+      color: 'violet'
     },
   ];
 
   // Micro section (tout en bas)
   const bottomItems = [
-    { path: '/profile', label: 'Profile', icon: User, tone: 'from-accent-blue to-accent-purple' },
+    { 
+      path: '/profile', 
+      label: 'Profile', 
+      icon: User, 
+      tone: 'from-slate-500 to-gray-600',
+      color: 'slate'
+    },
     ...(isAdmin ? [{
       path: '/admin/dashboard',
       label: 'Admin',
       icon: Shield,
-      tone: 'from-lime-500 to-green-600'
+      tone: 'from-red-500 to-rose-600',
+      color: 'red'
     }] as const : []),
-    { path: '/upgrade', label: 'Upgrade', icon: Crown, tone: 'from-accent-orange to-accent-yellow', special: 'upgrade' as const },
+    { 
+      path: '/upgrade', 
+      label: 'Upgrade', 
+      icon: Crown, 
+      tone: 'from-amber-500 to-yellow-500', 
+      color: 'amber',
+      special: 'upgrade' as const 
+    },
   ];
 
   const handleSignOut = async () => {
@@ -241,13 +277,31 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
         ? 'text-white bg-[#121722] ring-1 ring-inset ring-[#2A3347] shadow-glow-sm'
         : 'text-slate-300 hover:text-white hover:bg-[#11161F] ring-1 ring-inset ring-transparent hover:ring-[#21293C]';
 
-    const iconClassBase = 'size-9 rounded-xl grid place-items-center text-white/90';
+    // Get glow effect based on color
+    const getGlowEffect = (color: string) => {
+      const glowMap: Record<string, string> = {
+        blue: 'shadow-blue-500/30',
+        purple: 'shadow-purple-500/30',
+        emerald: 'shadow-emerald-500/30',
+        orange: 'shadow-orange-500/30',
+        green: 'shadow-green-500/30',
+        yellow: 'shadow-yellow-500/30',
+        pink: 'shadow-pink-500/30',
+        violet: 'shadow-violet-500/30',
+        slate: 'shadow-slate-500/30',
+        red: 'shadow-red-500/30',
+        amber: 'shadow-amber-500/30'
+      };
+      return glowMap[color] || 'shadow-slate-500/30';
+    };
+
+    const iconClassBase = 'size-9 rounded-xl grid place-items-center text-white/90 transition-all duration-300 ease-out';
     const iconClass =
       isRestricted
-        ? `${iconClassBase} bg-[#151A22] ring-1 ring-inset ring-[#202839]`
+        ? `${iconClassBase} bg-[#151A22] ring-1 ring-inset ring-[#202839] opacity-50`
         : isActive
-        ? `${iconClassBase} bg-gradient-to-br ${item.tone} shadow-glow-sm`
-        : `${iconClassBase} bg-[#151A22] group-hover:bg-[#17202C] ring-1 ring-inset ring-[#202839] group-hover:ring-[#2A3347]`;
+        ? `${iconClassBase} bg-gradient-to-br ${item.tone} shadow-xl ${getGlowEffect(item.color)} ring-1 ring-inset ring-white/10 transform scale-105`
+        : `${iconClassBase} bg-[#151A22] group-hover:bg-gradient-to-br group-hover:${item.tone} ring-1 ring-inset ring-[#202839] group-hover:ring-white/10 group-hover:shadow-lg group-hover:${getGlowEffect(item.color)} group-hover:scale-105`;
 
     return (
       <Link
