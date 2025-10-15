@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import Layout, { pageBgClass, cardClass } from '../../components/Layout';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAdminStats } from '../../hooks/useAdminStats';
+import AdminSubscriptionManager from '../../components/AdminSubscriptionManager';
 import {
   Users,
   UserCheck,
@@ -640,6 +641,9 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Gestion des Abonnements */}
+            <AdminSubscriptionManager startDate={startDate} endDate={endDate} />
 
             {/* Footer Info */}
             <div className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">

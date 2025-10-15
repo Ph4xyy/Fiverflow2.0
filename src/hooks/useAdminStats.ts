@@ -96,16 +96,64 @@ export const useAdminStats = (startDate: string, endDate: string) => {
 
         console.log('🔍 Loading ADMIN stats from:', startISO, 'to:', endISO);
 
-        // ===== UTILISER LA FONCTION ADMIN =====
+        // ===== UTILISER LA FONCTION ADMIN COMPLÈTE =====
         const { data: adminStatsData, error: adminStatsErr } = await supabase
-          .rpc('get_admin_stats', {
+          .rpc('get_complete_admin_stats', {
             start_date: startISO,
             end_date: endISO
           });
 
         if (adminStatsErr) {
-          console.warn('Admin function not available, falling back to direct queries:', adminStatsErr);
+          console.warn('Complete admin function not available, falling back to direct queries:', adminStatsErr);
           // Fallback to direct queries if admin function doesn't exist
+        } else if (adminStatsData) {
+          console.log('📊 Using complete admin stats function:', adminStatsData);
+          // Utiliser les données de la fonction admin si disponible
+          const stats = adminStatsData;
+          
+          const finalStats: AdminStats = {
+            totals: {
+              allTimeUsers: stats.users.total,
+              newUsersInRange: stats.users.new_period,
+              adminsAllTime: stats.users.admins,
+              totalOrders: stats.orders,
+              totalInvoices: stats.invoices,
+              totalClients: stats.clients,
+              totalTasks: stats.tasks,
+              totalTimeEntries: stats.time_entries,
+              totalReferrals: 0, // Pas dans la fonction pour l'instant
+              totalRevenue: stats.revenue.orders + stats.revenue.invoices + stats.revenue.subscriptions
+            },
+            plans: {
+              free: stats.plans.free,
+              pro: stats.plans.pro
+            },
+            revenue: {
+              total: stats.revenue.orders + stats.revenue.invoices + stats.revenue.subscriptions,
+              fromOrders: stats.revenue.orders,
+              fromInvoices: stats.revenue.invoices,
+              fromReferrals: 0, // Pas dans la fonction pour l'instant
+              currency: 'USD'
+            },
+            subscriptions: {
+              total: stats.subscriptions.total,
+              active: stats.subscriptions.active,
+              monthlyRevenue: stats.subscriptions.monthly_revenue,
+              yearlyRevenue: stats.subscriptions.yearly_revenue
+            },
+            recentUsers: [], // Pas dans la fonction pour l'instant
+            recentOrders: [],
+            recentInvoices: [],
+            topReferrers: [],
+            platformStats: {
+              totalClients: stats.clients,
+              topPlatforms: []
+            }
+          };
+
+          console.log('📊 GLOBAL Admin stats loaded from function:', finalStats);
+          setStats(finalStats);
+          return;
         }
 
         // ===== UTILISATEURS (avec politiques admin) =====
