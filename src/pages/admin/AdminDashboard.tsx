@@ -1,8 +1,8 @@
-// src/pages/admin/AdminDashboard.tsx
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Layout, { pageBgClass, cardClass } from '../../components/Layout';
 import { useAuth } from '../../contexts/AuthContext';
-import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { useAdminStats } from '../../hooks/useAdminStats';
+import AdminSubscriptionManager from '../../components/AdminSubscriptionManager';
 import {
   Users,
   UserCheck,
@@ -14,402 +14,38 @@ import {
   Calendar as CalendarIcon,
   RefreshCw,
   Filter,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Eye,
+  Activity,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-type PlanKey = 'free' | 'trial' | 'pro' | 'excellence';
-
-interface AdminStats {
-  totals: {
-    allTimeUsers: number;
-    newUsersInRange: number;
-    adminsAllTime: number;
-    totalOrders: number;
-    totalInvoices: number;
-    totalClients: number;
-    totalViews: number;
-    activeUsers: number;
-  };
-  plans: Record<PlanKey, number>;
-  revenue: {
-    total: number;
-    fromSubscriptions: number;
-    fromInvoices: number;
-    fromOther: number;
-    currency: string;
-  };
-  recentUsers: Array<{
-    id: string;
-    email: string;
-    name: string | null;
-    created_at: string;
-    role: string | null;
-    plan?: PlanKey | null;
-  }>;
-  topReferrers: Array<{
-    id: string;
-    email: string | null;
-    name: string | null;
-    referral_count: number;
-    total_earnings: number;
-  }>;
-  recentOrders: Array<{
-    id: string;
-    client_name: string;
-    amount: number;
-    status: string;
-    created_at: string;
-  }>;
-  recentInvoices: Array<{
-    id: string;
-    client_name: string;
-    total_amount: number;
-    status: string;
-    created_at: string;
-  }>;
-}
-
-const mockStats: AdminStats = {
-  totals: { allTimeUsers: 1287, newUsersInRange: 42, adminsAllTime: 2, totalOrders: 0, totalInvoices: 0, totalClients: 0, totalViews: 0, activeUsers: 0 },
-  plans: { free: 820, trial: 0, pro: 320, excellence: 112 },
-  revenue: { total: 4823.5, fromSubscriptions: 4410, fromInvoices: 270, fromOther: 143.5, currency: 'USD' },
-  recentUsers: [
-    { id: '1', email: 'alice@example.com', name: 'Alice Martin', created_at: '2025-08-07T10:00:00Z', role: 'user', plan: 'pro' },
-    { id: '2', email: 'bob@example.com', name: 'Bob Dupont', created_at: '2025-08-05T15:20:00Z', role: 'user', plan: 'free' },
-    { id: '3', email: 'charlie@example.com', name: 'Charlie Leroy', created_at: '2025-08-02T09:10:00Z', role: 'user', plan: 'free' },
-    { id: '4', email: 'dora@example.com', name: 'Dora Lamy', created_at: '2025-08-01T12:45:00Z', role: 'user', plan: 'excellence' },
-    { id: '5', email: 'evan@example.com', name: 'Evan Picard', created_at: '2025-07-31T19:30:00Z', role: 'user', plan: 'free' },
-  ],
-  topReferrers: [
-    { id: 'r1', email: 'ref1@example.com', name: 'Top Referrer', referral_count: 11, total_earnings: 210 },
-    { id: 'r2', email: 'ref2@example.com', name: 'Second Ref', referral_count: 7, total_earnings: 140 },
-    { id: 'r3', email: 'ref3@example.com', name: 'Third Ref', referral_count: 5, total_earnings: 93 },
-  ],
-  recentOrders: [],
-  recentInvoices: [],
-};
-
 const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
+  const [startDate, setStartDate] = useState<string>(
+    new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)
+  );
+  const [endDate, setEndDate] = useState<string>(
+    new Date().toISOString().slice(0, 10)
+  );
 
-  const [loading, setLoading] = useState(true);
-  const [startDate, setStartDate] = useState<string>(new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10));
-  const [endDate, setEndDate] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [working, setWorking] = useState(false);
-  const [stats, setStats] = useState<AdminStats>(mockStats);
-  const [dbStatus, setDbStatus] = useState<'connected' | 'disconnected' | 'error'>('disconnected');
-  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const { stats, loading, error } = useAdminStats(startDate, endDate);
 
   const startISO = useMemo(() => new Date(`${startDate}T00:00:00.000Z`).toISOString(), [startDate]);
   const endISO = useMemo(() => new Date(`${endDate}T23:59:59.999Z`).toISOString(), [endDate]);
 
-  useEffect(() => {
-    void loadAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]); // 🔥 FIXED: Remove loadAll from dependencies to prevent infinite loops
-
   const preset = (days: number) => {
-    const today = new Date(); today.setHours(0,0,0,0);
-    const d = new Date(today); d.setDate(d.getDate() - days);
-    setStartDate(d.toISOString().slice(0,10));
-    setEndDate(today.toISOString().slice(0,10));
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const d = new Date(today);
+    d.setDate(d.getDate() - days);
+    setStartDate(d.toISOString().slice(0, 10));
+    setEndDate(today.toISOString().slice(0, 10));
   };
 
-  const safeNumber = (n: any) => (typeof n === 'number' && !Number.isNaN(n) ? n : Number(n) || 0);
-
-  const loadAll = async () => {
-    if (!isSupabaseConfigured || !supabase) {
-      setDbStatus('disconnected');
-      setStats(mockStats);
-      setLoading(false);
-      return;
-    }
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setDbStatus('connected');
-
-      // ---------- USERS ----------
-      console.log('🔍 Récupération des données utilisateurs...');
-      
-      const [{ data: usersAll, error: usersAllErr }, { data: usersRange, error: usersRangeErr }] = await Promise.all([
-        supabase.from('users').select('id, role, email, created_at'),
-        supabase.from('users').select('id, role, email, created_at').gte('created_at', startISO).lte('created_at', endISO),
-      ]);
-      
-      if (usersAllErr) {
-        console.error('❌ Erreur usersAll:', usersAllErr);
-        throw usersAllErr;
-      }
-      if (usersRangeErr) {
-        console.error('❌ Erreur usersRange:', usersRangeErr);
-        throw usersRangeErr;
-      }
-
-      console.log('👥 Données utilisateurs récupérées:', {
-        allUsers: usersAll?.length || 0,
-        rangeUsers: usersRange?.length || 0,
-        allUsersData: usersAll,
-        rangeUsersData: usersRange
-      });
-
-      const allTimeUsers = usersAll?.length ?? 0;
-      const adminsAllTime = (usersAll ?? []).filter(u => (u as any).role === 'admin').length;
-      const newUsersInRange = usersRange?.length ?? 0;
-
-      // Debug info pour les admins
-      const adminUsers = (usersAll ?? []).filter(u => (u as any).role === 'admin');
-      console.log('👑 Admins trouvés:', adminUsers);
-
-      // ---------- ORDERS & INVOICES & CLIENTS ----------
-      const [{ data: ordersData, error: ordersErr }, { data: invoicesData, error: invoicesErr }, { data: clientsData, error: clientsErr }] = await Promise.all([
-        supabase.from('orders').select('id, amount, status, created_at, client_name'),
-        supabase.from('invoices').select('id, total_amount, status, created_at, client_name'),
-        supabase.from('clients').select('id'),
-      ]);
-
-      if (ordersErr) console.warn('Orders error:', ordersErr?.message);
-      if (invoicesErr) console.warn('Invoices error:', invoicesErr?.message);
-      if (clientsErr) console.warn('Clients error:', clientsErr?.message);
-
-      const totalOrders = ordersData?.length ?? 0;
-      const totalInvoices = invoicesData?.length ?? 0;
-      const totalClients = clientsData?.length ?? 0;
-
-      // ---------- ANALYTICS (VUES & UTILISATEURS ACTIFS) ----------
-      let totalViews = 0;
-      let activeUsers = 0;
-
-      try {
-        // Récupérer le total des vues
-        const { data: viewsData, error: viewsErr } = await supabase
-          .from('page_views')
-          .select('id')
-          .gte('created_at', startISO)
-          .lte('created_at', endISO);
-        
-        if (viewsErr) throw viewsErr;
-        totalViews = viewsData?.length ?? 0;
-
-        // Récupérer les utilisateurs actifs (sessions actives dans les dernières 30 minutes)
-        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
-        const { data: activeSessionsData, error: activeSessionsErr } = await supabase
-          .from('user_sessions')
-          .select('user_id')
-          .eq('is_active', true)
-          .gte('last_activity', thirtyMinutesAgo);
-        
-        if (activeSessionsErr) throw activeSessionsErr;
-        activeUsers = activeSessionsData?.length ?? 0;
-      } catch (e: any) {
-        console.warn('Analytics not available:', e?.message || e);
-        // Utiliser des données de démonstration si les tables n'existent pas
-        totalViews = Math.floor(Math.random() * 1000) + 500;
-        activeUsers = Math.floor(Math.random() * 50) + 10;
-      }
-
-      // Plans (fallback sans trial_end ni table subscriptions) -> is_pro = pro / sinon free
-      const { data: usersRangeFull } = await supabase
-        .from('users')
-        .select('id, email, name, created_at, role, is_pro')
-        .gte('created_at', startISO)
-        .lte('created_at', endISO);
-
-      const plans: Record<PlanKey, number> = { free: 0, trial: 0, pro: 0, excellence: 0 };
-      (usersRangeFull ?? []).forEach((u: any) => {
-        if (u.is_pro) plans.pro += 1; else plans.free += 1;
-      });
-
-      // Récents
-      const { data: recentUsersData, error: recentErr } = await supabase
-        .from('users')
-        .select('id, email, name, created_at, role, is_pro')
-        .order('created_at', { ascending: false })
-        .limit(5);
-      if (recentErr) console.warn('Recent users warning:', recentErr?.message);
-
-      const recentUsers =
-        (recentUsersData ?? []).map((u: any) => ({
-          id: u.id,
-          email: u.email,
-          name: u.name,
-          created_at: u.created_at,
-          role: u.role ?? null,
-          plan: u.is_pro ? ('pro' as PlanKey) : ('free' as PlanKey),
-        })) ?? [];
-
-      // ---------- RECENT ORDERS & INVOICES ----------
-      const recentOrders = (ordersData ?? [])
-        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 5)
-        .map((order: any) => ({
-          id: order.id,
-          client_name: order.client_name || 'Client inconnut(',
-          amount: safeNumber(order.amount),
-          status: order.status || 'Unknown',
-          created_at: order.created_at,
-        }));
-
-      const recentInvoices = (invoicesData ?? [])
-        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 5)
-        .map((invoice: any) => ({
-          id: invoice.id,
-          client_name: invoice.client_name || 'Client inconnut(',
-          total_amount: safeNumber(invoice.total_amount),
-          status: invoice.status || 'Unknown',
-          created_at: invoice.created_at,
-        }));
-
-      // ---------- REVENUE ----------
-      let fromSubscriptions = 0;
-      let fromInvoices = 0;
-      let fromOther = 0; // on ne la calcule plus ici (pas de table)
-      const currency = 'USD'; // défaut
-
-      // 1) payments (amount, created_at)
-      try {
-        const { data, error } = await supabase
-          .from('payments')
-          .select('amount, created_at')
-          .gte('created_at', startISO)
-          .lte('created_at', endISO);
-        if (error) throw error;
-        if (data?.length) {
-          fromSubscriptions += data.reduce((acc: number, p: any) => acc + safeNumber(p.amount), 0);
-        }
-      } catch (e: any) {
-        console.warn('payments not usable:', e?.message || e);
-      }
-
-      // 2) subscription_invoices (amount_paid, paid_at)
-      try {
-        const { data, error } = await supabase
-          .from('subscription_invoices')
-          .select('amount_paid, paid_at')
-          .gte('paid_at', startISO)
-          .lte('paid_at', endISO);
-        if (error) throw error;
-        if (data?.length) {
-          fromSubscriptions += data.reduce((acc: number, p: any) => acc + safeNumber(p.amount_paid), 0);
-        }
-      } catch (e: any) {
-        console.warn('subscription_invoices not usable:', e?.message || e);
-      }
-
-      // 3) invoice_payments (amount, paid_at) — sans currency
-      try {
-        const { data, error } = await supabase
-          .from('invoice_payments')
-          .select('amount, paid_at')
-          .gte('paid_at', startISO)
-          .lte('paid_at', endISO);
-        if (error) throw error;
-        if (data?.length) {
-          fromInvoices += data.reduce((acc: number, p: any) => acc + safeNumber(p.amount), 0);
-        }
-      } catch (e: any) {
-        console.warn('invoice_payments not usable:', e?.message || e);
-      }
-
-      // ---------- Referrers ----------
-      let topReferrers: AdminStats['topReferrers'] = [];
-      try {
-        const { data: logs } = await supabase
-          .from('referral_logs')
-          .select(
-            `
-            referrer_id,
-            amount_earned,
-            created_at,
-            users!referral_logs_referrer_id_fkey (
-              id, email, name
-            )
-          `
-          )
-          .gte('created_at', startISO)
-          .lte('created_at', endISO);
-
-        if (logs && logs.length) {
-          const map = new Map<string, { id: string; email: string | null; name: string | null; referral_count: number; total_earnings: number }>();
-          logs.forEach((l: any) => {
-            const refId = l.referrer_id as string;
-            const info = l.users ?? {};
-            if (!map.has(refId)) {
-              map.set(refId, {
-                id: refId,
-                email: info.email ?? null,
-                name: info.name ?? null,
-                referral_count: 0,
-                total_earnings: 0,
-              });
-            }
-            const entry = map.get(refId)!;
-            entry.referral_count += 1;
-            entry.total_earnings += safeNumber(l.amount_earned);
-          });
-          topReferrers = Array.from(map.values()).sort((a, b) => b.total_earnings - a.total_earnings).slice(0, 5);
-        }
-      } catch (e: any) {
-        console.warn('referral_logs not usable:', e?.message || e);
-        topReferrers = mockStats.topReferrers;
-      }
-
-      const revenue = {
-        total: fromSubscriptions + fromInvoices + fromOther,
-        fromSubscriptions,
-        fromInvoices,
-        fromOther,
-        currency,
-      };
-
-      // Debug info
-      const debugData = {
-        usersAll: usersAll?.length || 0,
-        usersRange: usersRange?.length || 0,
-        adminUsers: adminUsers,
-        adminsCount: adminsAllTime,
-        ordersCount: totalOrders,
-        invoicesCount: totalInvoices,
-        clientsCount: totalClients,
-        viewsCount: totalViews,
-        activeUsersCount: activeUsers,
-        dateRange: { start: startISO, end: endISO }
-      };
-      
-      console.log('📊 Debug Admin Data:', debugData);
-      setDebugInfo(debugData);
-
-      setStats({
-        totals: { allTimeUsers, newUsersInRange, adminsAllTime, totalOrders, totalInvoices, totalClients, totalViews, activeUsers },
-        plans,
-        revenue,
-        recentUsers,
-        topReferrers,
-        recentOrders,
-        recentInvoices,
-      });
-    } catch (err: any) {
-      console.error('💥 Admin load error', err?.message || err);
-      setDbStatus('error');
-      toast.error("Erreur lors du chargement des stats Admin");
-      setStats(mockStats);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const refetchWithRange = async () => {
-    setWorking(true);
-    await loadAll();
-    setWorking(false);
-  };
-
-  const formatCurrency = (amount: number, currency = stats.revenue.currency) =>
+  const formatCurrency = (amount: number, currency = 'USD') =>
     new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(amount);
 
   const formatDate = (dateString: string) =>
@@ -427,6 +63,41 @@ const AdminDashboard: React.FC = () => {
     return 'US';
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+      case 'paid':
+        return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300';
+      case 'in progress':
+      case 'pending':
+      case 'sent':
+        return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300';
+      case 'cancelled':
+      case 'failed':
+        return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300';
+      default:
+        return 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200';
+    }
+  };
+
+  if (!user) {
+    return (
+      <Layout>
+        <div className={`space-y-4 p-4 ${pageBgClass}`}>
+          <div className={`${cardClass} p-6 text-center`}>
+            <AlertCircle className="mx-auto mb-4 text-red-500" size={48} />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Accès non autorisé
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Vous devez être connecté pour accéder au tableau de bord administrateur.
+            </p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className={`space-y-4 sm:space-y-6 p-4 sm:p-0 ${pageBgClass}`}>
@@ -437,22 +108,12 @@ const AdminDashboard: React.FC = () => {
               <Shield className="text-white" size={20} />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Administration</h1>
-              <div className="flex items-center gap-2">
-                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Tableau de bord — vue globale & période</p>
-                <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                  dbStatus === 'connected' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
-                  dbStatus === 'error' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' :
-                  'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                }`}>
-                  <div className={`w-2 h-2 rounded-full mr-1 ${
-                    dbStatus === 'connected' ? 'bg-green-500' :
-                    dbStatus === 'error' ? 'bg-red-500' :
-                    'bg-yellow-500'
-                  }`} />
-                  {dbStatus === 'connected' ? 'DB Connectée' : dbStatus === 'error' ? 'DB Erreur' : 'Mode Démo'}
-                </div>
-              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                Administration
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                Tableau de bord global — Données synchronisées en temps réel
+              </p>
             </div>
           </div>
 
@@ -473,7 +134,7 @@ const AdminDashboard: React.FC = () => {
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               min={startDate}
-              max={new Date().toISOString().slice(0,10)}
+              max={new Date().toISOString().slice(0, 10)}
             />
             <div className="h-5 w-px bg-gray-200 dark:bg-slate-700 mx-1" />
             <button
@@ -497,533 +158,504 @@ const AdminDashboard: React.FC = () => {
             >
               90d
             </button>
-            <button
-              onClick={refetchWithRange}
-              disabled={working || loading}
-              className="text-xs px-2 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-60 flex items-center gap-1"
-              title="Rafraîchir"
-            >
-              <RefreshCw size={14} className={working ? 'animate-spin' : ''} />
-              Update
-            </button>
-            <button
-              onClick={() => setDebugInfo(debugInfo ? null : 'show')}
-              className="text-xs px-2 py-1 rounded-md bg-gray-600 text-white hover:bg-gray-700 flex items-center gap-1"
-              title="Afficher Debug Info"
-            >
-              🐛 Debug
-            </button>
           </div>
         </div>
 
-        {/* KPIs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between">
+        {/* Error State */}
+        {error && (
+          <div className={`${cardClass} border border-red-200 dark:border-red-800 p-4`}>
+            <div className="flex items-center gap-3">
+              <AlertCircle className="text-red-500" size={20} />
               <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Utilisateurs (Total)</p>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.totals.allTimeUsers}</p>
-              </div>
-              <div className="bg-blue-100 dark:bg-blue-900/30 p-2 sm:p-3 rounded-lg">
-                <Users className="text-blue-600 dark:text-blue-400" size={20} />
+                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+                  Erreur de chargement
+                </h3>
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
               </div>
             </div>
           </div>
+        )}
 
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Nouveaux (période)</p>
-                <p className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400 mt-1">{stats.totals.newUsersInRange}</p>
-              </div>
-              <div className="bg-green-100 dark:bg-green-900/30 p-2 sm:p-3 rounded-lg">
-                <TrendingUp className="text-green-600 dark:text-green-400" size={20} />
-              </div>
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex items-center gap-3">
+              <RefreshCw className="animate-spin text-indigo-600" size={24} />
+              <span className="text-gray-600 dark:text-gray-400">
+                Chargement des statistiques...
+              </span>
             </div>
           </div>
+        )}
 
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Admins (Total)</p>
-                <p className="text-2xl sm:text-3xl font-bold text-purple-600 dark:text-purple-400 mt-1">{stats.totals.adminsAllTime}</p>
-              </div>
-              <div className="bg-purple-100 dark:bg-purple-900/30 p-2 sm:p-3 rounded-lg">
-                <Shield className="text-purple-600 dark:text-purple-400" size={20} />
-              </div>
-            </div>
-          </div>
-
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Revenu (période)</p>
-                <p className="text-2xl sm:text-3xl font-bold text-orange-600 dark:text-orange-400 mt-1">
-                  {formatCurrency(stats.revenue.total)}
-                </p>
-              </div>
-              <div className="bg-orange-100 dark:bg-orange-900/30 p-2 sm:p-3 rounded-lg">
-                <DollarSign className="text-orange-600 dark:text-orange-400" size={20} />
-              </div>
-            </div>
-          </div>
-
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Commandes (Total)</p>
-                <p className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 mt-1">{stats.totals.totalOrders}</p>
-              </div>
-              <div className="bg-blue-100 dark:bg-blue-900/30 p-2 sm:p-3 rounded-lg">
-                <BarChart3 className="text-blue-600 dark:text-blue-400" size={20} />
-              </div>
-            </div>
-          </div>
-
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Factures (Total)</p>
-                <p className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">{stats.totals.totalInvoices}</p>
-              </div>
-              <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 sm:p-3 rounded-lg">
-                <CalendarIcon className="text-indigo-600 dark:text-indigo-400" size={20} />
-              </div>
-            </div>
-          </div>
-
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Clients (Total)</p>
-                <p className="text-2xl sm:text-3xl font-bold text-teal-600 dark:text-teal-400 mt-1">{stats.totals.totalClients}</p>
-              </div>
-              <div className="bg-teal-100 dark:bg-teal-900/30 p-2 sm:p-3 rounded-lg">
-                <Users className="text-teal-600 dark:text-teal-400" size={20} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Analytics KPIs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Vues (période)</p>
-                <p className="text-2xl sm:text-3xl font-bold text-purple-600 dark:text-purple-400 mt-1">{stats.totals.totalViews.toLocaleString()}</p>
-              </div>
-              <div className="bg-purple-100 dark:bg-purple-900/30 p-2 sm:p-3 rounded-lg">
-                <BarChart3 className="text-purple-600 dark:text-purple-400" size={20} />
-              </div>
-            </div>
-          </div>
-
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Utilisateurs Actifs</p>
-                <p className="text-2xl sm:text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{stats.totals.activeUsers}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Dernières 30 min</p>
-              </div>
-              <div className="bg-emerald-100 dark:bg-emerald-900/30 p-2 sm:p-3 rounded-lg">
-                <TrendingUp className="text-emerald-600 dark:text-emerald-400" size={20} />
-              </div>
-            </div>
-          </div>
-
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Commandes (Total)</p>
-                <p className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 mt-1">{stats.totals.totalOrders}</p>
-              </div>
-              <div className="bg-blue-100 dark:bg-blue-900/30 p-2 sm:p-3 rounded-lg">
-                <BarChart3 className="text-blue-600 dark:text-blue-400" size={20} />
-              </div>
-            </div>
-          </div>
-
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Factures (Total)</p>
-                <p className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">{stats.totals.totalInvoices}</p>
-              </div>
-              <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 sm:p-3 rounded-lg">
-                <CalendarIcon className="text-indigo-600 dark:text-indigo-400" size={20} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Plan breakdown */}
-        <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Répartition des plans (période)</h2>
-            <Filter className="text-gray-400 dark:text-gray-500" size={18} />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <div className="rounded-lg p-4 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700">
-              <div className="text-xs font-medium text-gray-500 dark:text-gray-400">Free</div>
-              <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{stats.plans.free}</div>
-            </div>
-            <div className="rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/70 dark:border-blue-900/40">
-              <div className="text-xs font-medium text-blue-600 dark:text-blue-300">Trial</div>
-              <div className="mt-1 text-2xl font-bold text-blue-700 dark:text-blue-300">{stats.plans.trial}</div>
-            </div>
-            <div className="rounded-lg p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200/70 dark:border-purple-900/40">
-              <div className="text-xs font-medium text-purple-600 dark:text-purple-300">Pro</div>
-              <div className="mt-1 text-2xl font-bold text-purple-700 dark:text-purple-300">{stats.plans.pro}</div>
-            </div>
-            <div className="rounded-lg p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200/70 dark:border-amber-900/40">
-              <div className="text-xs font-medium text-amber-600 dark:text-amber-300">Excellence</div>
-              <div className="mt-1 text-2xl font-bold text-amber-700 dark:text-amber-300">{stats.plans.excellence}</div>
-            </div>
-          </div>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="rounded-lg p-3 bg-white/70 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700">
-              <div className="text-xs text-gray-500 dark:text-gray-400">Abonnements</div>
-              <div className="mt-1 text-sm text-gray-900 dark:text-white">{formatCurrency(stats.revenue.fromSubscriptions)} (période)</div>
-            </div>
-            <div className="rounded-lg p-3 bg-white/70 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700">
-              <div className="text-xs text-gray-500 dark:text-gray-400">Factures</div>
-              <div className="mt-1 text-sm text-gray-900 dark:text-white">{formatCurrency(stats.revenue.fromInvoices)} (période)</div>
-            </div>
-            <div className="rounded-lg p-3 bg-white/70 dark:bg-slate-900/50 border border-gray-200 dark:border-slate-700">
-              <div className="text-xs text-gray-500 dark:text-gray-400">Autres revenus</div>
-              <div className="mt-1 text-sm text-gray-900 dark:text-white">{formatCurrency(stats.revenue.fromOther)} (période)</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Orders & Invoices */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Commandes récentes</h2>
-              <BarChart3 className="text-gray-400 dark:text-gray-500" size={20} />
-            </div>
-            <div className="space-y-3">
-              {stats.recentOrders.length ? (
-                stats.recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xs font-semibold">
-                        {order.client_name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {order.client_name}
-                        </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{formatDate(order.created_at)}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                        {formatCurrency(order.amount)}
-                      </span>
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        order.status === 'Completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
-                        order.status === 'In Progress' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
-                        'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200'
-                      }`}>
-                        {order.status}
-                      </span>
-                    </div>
+        {/* Main Stats */}
+        {stats && !loading && (
+          <>
+            {/* KPIs Principaux */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Utilisateurs (Total)
+                    </p>
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                      {stats.totals.allTimeUsers.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      +{stats.totals.newUsersInRange} cette période
+                    </p>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Aucune commande récente</p>
+                  <div className="bg-blue-100 dark:bg-blue-900/30 p-2 sm:p-3 rounded-lg">
+                    <Users className="text-blue-600 dark:text-blue-400" size={20} />
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
 
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Factures récentes</h2>
-              <CalendarIcon className="text-gray-400 dark:text-gray-500" size={20} />
+              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Administrateurs
+                    </p>
+                    <p className="text-2xl sm:text-3xl font-bold text-purple-600 dark:text-purple-400 mt-1">
+                      {stats.totals.adminsAllTime}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Accès complet
+                    </p>
+                  </div>
+                  <div className="bg-purple-100 dark:bg-purple-900/30 p-2 sm:p-3 rounded-lg">
+                    <Shield className="text-purple-600 dark:text-purple-400" size={20} />
+                  </div>
+                </div>
+              </div>
+
+              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Revenus (Total)
+                    </p>
+                    <p className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400 mt-1">
+                      {formatCurrency(stats.totals.totalRevenue)}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Toutes sources
+                    </p>
+                  </div>
+                  <div className="bg-green-100 dark:bg-green-900/30 p-2 sm:p-3 rounded-lg">
+                    <DollarSign className="text-green-600 dark:text-green-400" size={20} />
+                  </div>
+                </div>
+              </div>
+
+              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Clients Actifs
+                    </p>
+                    <p className="text-2xl sm:text-3xl font-bold text-orange-600 dark:text-orange-400 mt-1">
+                      {stats.totals.totalClients.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Plateformes diverses
+                    </p>
+                  </div>
+                  <div className="bg-orange-100 dark:bg-orange-900/30 p-2 sm:p-3 rounded-lg">
+                    <UserCheck className="text-orange-600 dark:text-orange-400" size={20} />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="space-y-3">
-              {stats.recentInvoices.length ? (
-                stats.recentInvoices.map((invoice) => (
-                  <div key={invoice.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
-                    <div className="flex items-center gap-3 min-w-0">
+
+            {/* KPIs Secondaires */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Commandes
+                    </p>
+                    <p className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 mt-1">
+                      {stats.totals.totalOrders.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Tous statuts
+                    </p>
+                  </div>
+                  <div className="bg-blue-100 dark:bg-blue-900/30 p-2 sm:p-3 rounded-lg">
+                    <BarChart3 className="text-blue-600 dark:text-blue-400" size={20} />
+                  </div>
+                </div>
+              </div>
+
+              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Factures
+                    </p>
+                    <p className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">
+                      {stats.totals.totalInvoices.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Générées
+                    </p>
+                  </div>
+                  <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 sm:p-3 rounded-lg">
+                    <CalendarIcon className="text-indigo-600 dark:text-indigo-400" size={20} />
+                  </div>
+                </div>
+              </div>
+
+              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Tâches
+                    </p>
+                    <p className="text-2xl sm:text-3xl font-bold text-teal-600 dark:text-teal-400 mt-1">
+                      {stats.totals.totalTasks.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Créées
+                    </p>
+                  </div>
+                  <div className="bg-teal-100 dark:bg-teal-900/30 p-2 sm:p-3 rounded-lg">
+                    <CheckCircle className="text-teal-600 dark:text-teal-400" size={20} />
+                  </div>
+                </div>
+              </div>
+
+              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Entrées Temps
+                    </p>
+                    <p className="text-2xl sm:text-3xl font-bold text-amber-600 dark:text-amber-400 mt-1">
+                      {stats.totals.totalTimeEntries.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Enregistrées
+                    </p>
+                  </div>
+                  <div className="bg-amber-100 dark:bg-amber-900/30 p-2 sm:p-3 rounded-lg">
+                    <Clock className="text-amber-600 dark:text-amber-400" size={20} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Répartition des Plans Globale */}
+            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                  Répartition des Plans (GLOBALE)
+                </h2>
+                <Filter className="text-gray-400 dark:text-gray-500" size={18} />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div className="rounded-lg p-4 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-700">
+                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400">Free Users</div>
+                  <div className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+                    {stats.plans.free.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {((stats.plans.free / (stats.plans.free + stats.plans.pro)) * 100).toFixed(1)}% du total
+                  </div>
+                </div>
+                <div className="rounded-lg p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200/70 dark:border-purple-900/40">
+                  <div className="text-xs font-medium text-purple-600 dark:text-purple-300">Pro Users</div>
+                  <div className="mt-1 text-2xl font-bold text-purple-700 dark:text-purple-300">
+                    {stats.plans.pro.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-purple-500 dark:text-purple-400 mt-1">
+                    {((stats.plans.pro / (stats.plans.free + stats.plans.pro)) * 100).toFixed(1)}% du total
+                  </div>
+                </div>
+                <div className="rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/70 dark:border-blue-900/40">
+                  <div className="text-xs font-medium text-blue-600 dark:text-blue-300">Revenus Factures</div>
+                  <div className="mt-1 text-2xl font-bold text-blue-700 dark:text-blue-300">
+                    {formatCurrency(stats.revenue.fromInvoices)}
+                  </div>
+                  <div className="text-xs text-blue-500 dark:text-blue-400 mt-1">
+                    {stats.totals.totalInvoices} factures
+                  </div>
+                </div>
+                <div className="rounded-lg p-4 bg-green-50 dark:bg-green-900/20 border border-green-200/70 dark:border-green-900/40">
+                  <div className="text-xs font-medium text-green-600 dark:text-green-300">Revenus Commandes</div>
+                  <div className="mt-1 text-2xl font-bold text-green-700 dark:text-green-300">
+                    {formatCurrency(stats.revenue.fromOrders)}
+                  </div>
+                  <div className="text-xs text-green-500 dark:text-green-400 mt-1">
+                    {stats.totals.totalOrders} commandes
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Statistiques Abonnements */}
+            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                  Statistiques Abonnements
+                </h2>
+                <Crown className="text-yellow-500" size={20} />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div className="rounded-lg p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200/70 dark:border-yellow-900/40">
+                  <div className="text-xs font-medium text-yellow-600 dark:text-yellow-300">Total Abonnements</div>
+                  <div className="mt-1 text-2xl font-bold text-yellow-700 dark:text-yellow-300">
+                    {stats.subscriptions.total.toLocaleString()}
+                  </div>
+                </div>
+                <div className="rounded-lg p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200/70 dark:border-emerald-900/40">
+                  <div className="text-xs font-medium text-emerald-600 dark:text-emerald-300">Abonnements Actifs</div>
+                  <div className="mt-1 text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                    {stats.subscriptions.active.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-emerald-500 dark:text-emerald-400 mt-1">
+                    {stats.subscriptions.total > 0 ? ((stats.subscriptions.active / stats.subscriptions.total) * 100).toFixed(1) : 0}% d'activation
+                  </div>
+                </div>
+                <div className="rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200/70 dark:border-blue-900/40">
+                  <div className="text-xs font-medium text-blue-600 dark:text-blue-300">Revenus Mensuels</div>
+                  <div className="mt-1 text-2xl font-bold text-blue-700 dark:text-blue-300">
+                    {formatCurrency(stats.subscriptions.monthlyRevenue)}
+                  </div>
+                  <div className="text-xs text-blue-500 dark:text-blue-400 mt-1">
+                    Par mois
+                  </div>
+                </div>
+                <div className="rounded-lg p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200/70 dark:border-purple-900/40">
+                  <div className="text-xs font-medium text-purple-600 dark:text-purple-300">Revenus Annuels</div>
+                  <div className="mt-1 text-2xl font-bold text-purple-700 dark:text-purple-300">
+                    {formatCurrency(stats.subscriptions.yearlyRevenue)}
+                  </div>
+                  <div className="text-xs text-purple-500 dark:text-purple-400 mt-1">
+                    Par an
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Plateformes */}
+            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                  Top Plateformes Clients
+                </h2>
+                <Activity className="text-gray-400 dark:text-gray-500" size={18} />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {stats.platformStats.topPlatforms.map((platform, index) => (
+                  <div key={platform.platform} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
+                    <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xs font-semibold">
-                        {invoice.client_name.charAt(0).toUpperCase()}
+                        {index + 1}
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          {platform.platform}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {platform.count} client{platform.count > 1 ? 's' : ''}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                      {((platform.count / stats.platformStats.totalClients) * 100).toFixed(1)}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Utilisateurs Récents */}
+            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                  Utilisateurs Récents
+                </h2>
+                <UserCheck className="text-gray-400 dark:text-gray-500" size={20} />
+              </div>
+              <div className="space-y-3">
+                {stats.recentUsers.map((u) => (
+                  <div key={u.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-600 text-white flex items-center justify-center text-xs font-semibold">
+                        {getInitials(u.name, u.email)}
                       </div>
                       <div className="min-w-0">
                         <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {invoice.client_name}
+                          {u.name || u.email || 'Utilisateur'}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{formatDate(invoice.created_at)}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {formatDate(u.created_at)}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                        {formatCurrency(invoice.total_amount)}
-                      </span>
+                      {u.role === 'admin' && (
+                        <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+                          Admin
+                        </span>
+                      )}
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        invoice.status === 'Paid' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
-                        invoice.status === 'Pending' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
-                        'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200'
+                        u.is_pro 
+                          ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                          : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200'
                       }`}>
-                        {invoice.status}
+                        {u.is_pro ? 'Pro' : 'Free'}
                       </span>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Aucune facture récente</p>
-                </div>
-              )}
+                ))}
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Recent Users & Top Referrers */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Utilisateurs récents</h2>
-              <UserCheck className="text-gray-400 dark:text-gray-500" size={20} />
-            </div>
-            <div className="space-y-3">
-              {stats.recentUsers.map((u) => (
-                <div key={u.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-600 text-white flex items-center justify-center text-xs font-semibold">
-                      {getInitials(u.name, u.email)}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {u.name || u.email || 'Utilisateur'}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{formatDate(u.created_at)}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {u.role === 'admin' && (
-                      <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
-                        Admin
-                      </span>
-                    )}
-                    {u.plan && (
-                      <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 capitalize">
-                        {u.plan}
-                      </span>
-                    )}
-                  </div>
+            {/* Commandes et Factures Récentes */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
+              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                    Commandes Récentes
+                  </h2>
+                  <BarChart3 className="text-gray-400 dark:text-gray-500" size={20} />
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Top Parrains (période)</h2>
-              <BarChart3 className="text-gray-400 dark:text-gray-500" size={20} />
-            </div>
-            <div className="space-y-3">
-              {stats.topReferrers.length ? (
-                stats.topReferrers.map((r, idx) => (
-                  <div key={r.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 flex items-center justify-center text-xs font-semibold">
-                        #{idx + 1}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {r.name || r.email || 'Referrer'}
+                <div className="space-y-3">
+                  {stats.recentOrders.length ? (
+                    stats.recentOrders.map((order) => (
+                      <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xs font-semibold">
+                            {order.client_name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {order.title}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {order.client_name} • {formatDate(order.created_at)}
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{r.referral_count} filleuls</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                            {formatCurrency(order.amount)}
+                          </span>
+                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}>
+                            {order.status}
+                          </span>
+                        </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Aucune commande récente
+                      </p>
                     </div>
-                    <div className="text-sm font-medium text-green-700 dark:text-green-300">
-                      {formatCurrency(r.total_earnings)}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Aucun parrainage sur la période</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-
-        {/* DEBUT - SYSTEME D'AJOUT D'ABONNEMENTS */}
-
-<div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-  <div className="flex items-center justify-between mb-4">
-    <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
-      Créer un abonnement
-    </h2>
-    <Crown className="text-yellow-500" size={20} />
-  </div>
-
-  <form
-    onSubmit={async (e) => {
-      e.preventDefault();
-      const form = e.currentTarget;
-      const formData = new FormData(form);
-      const userId = formData.get("userId") as string;
-      const plan = formData.get("plan") as PlanKey;
-      const startDate = formData.get("startDate") as string;
-      const endDate = formData.get("endDate") as string;
-
-      if (!userId || !plan || !startDate || !endDate) {
-        toast.error("Tous les champs sont obligatoires");
-        return;
-      }
-
-      try {
-        const { error } = await supabase.from("subscriptions").insert([
-          {
-            id: userId,
-            plan,
-            start_date: startDate,
-            end_date: endDate,
-          },
-        ]);
-        if (error) throw error;
-        toast.success("Abonnement créé !");
-        form.reset();
-      } catch (err: any) {
-        console.error(err);
-        toast.error("Erreur lors de la création");
-      }
-    }}
-    className="space-y-4"
-  >
-    <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        ID utilisateur
-      </label>
-      <input
-        type="text"
-        name="userId"
-        placeholder="uuid utilisateur"
-        className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-      />
-    </div>
-
-    <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        Plan
-      </label>
-      <select
-        name="plan"
-        className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-      >
-        <option value="free">Free</option>
-        <option value="trial">Trial</option>
-        <option value="pro">Pro</option>
-        <option value="excellence">Excellence</option>
-      </select>
-    </div>
-
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Date de début
-        </label>
-        <input
-          type="date"
-          name="startDate"
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Date de fin
-        </label>
-        <input
-          type="date"
-          name="endDate"
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
-      </div>
-    </div>
-
-    <button
-      type="submit"
-      className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md shadow-sm"
-    >
-      Créer l’abonnement
-    </button>
-  </form>
-</div>
-        {/* FIN - SYSTEME D'AJOUT D'ABONNEMENTS */}
-
-        {/* DEBUG INFO */}
-        {debugInfo && (
-          <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Debug Info</h2>
-              <button
-                onClick={() => setDebugInfo(null)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">Utilisateurs</h3>
-                <div className="space-y-1">
-                  <div>Total utilisateurs: <span className="font-mono text-blue-600 dark:text-blue-400">{debugInfo.usersAll}</span></div>
-                  <div>Nouveaux (période): <span className="font-mono text-green-600 dark:text-green-400">{debugInfo.usersRange}</span></div>
-                  <div>Admins: <span className="font-mono text-red-600 dark:text-red-400">{debugInfo.adminsCount}</span></div>
+                  )}
                 </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">Données</h3>
-                <div className="space-y-1">
-                  <div>Commandes: <span className="font-mono text-blue-600 dark:text-blue-400">{debugInfo.ordersCount}</span></div>
-                  <div>Factures: <span className="font-mono text-indigo-600 dark:text-indigo-400">{debugInfo.invoicesCount}</span></div>
-                  <div>Clients: <span className="font-mono text-teal-600 dark:text-teal-400">{debugInfo.clientsCount}</span></div>
-                  <div>Vues: <span className="font-mono text-purple-600 dark:text-purple-400">{debugInfo.viewsCount}</span></div>
-                  <div>Actifs: <span className="font-mono text-emerald-600 dark:text-emerald-400">{debugInfo.activeUsersCount}</span></div>
+
+              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                    Factures Récentes
+                  </h2>
+                  <CalendarIcon className="text-gray-400 dark:text-gray-500" size={20} />
+                </div>
+                <div className="space-y-3">
+                  {stats.recentInvoices.length ? (
+                    stats.recentInvoices.map((invoice) => (
+                      <div key={invoice.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xs font-semibold">
+                            {invoice.client_name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {invoice.number}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {invoice.client_name} • {formatDate(invoice.created_at)}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                            {formatCurrency(invoice.total)}
+                          </span>
+                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(invoice.status)}`}>
+                            {invoice.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Aucune facture récente
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-            {debugInfo.adminUsers && debugInfo.adminUsers.length > 0 && (
-              <div className="mt-4">
-                <h3 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">Admins détaillés</h3>
-                <div className="space-y-1">
-                  {debugInfo.adminUsers.map((admin: any, index: number) => (
-                    <div key={index} className="text-xs font-mono text-gray-600 dark:text-gray-400">
-                      {admin.email} ({admin.role}) - {new Date(admin.created_at).toLocaleDateString()}
+
+            {/* Top Referrers */}
+            {stats.topReferrers.length > 0 && (
+              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+                    Top Parrains (période)
+                  </h2>
+                  <TrendingUp className="text-gray-400 dark:text-gray-500" size={20} />
+                </div>
+                <div className="space-y-3">
+                  {stats.topReferrers.map((r, idx) => (
+                    <div key={r.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 flex items-center justify-center text-xs font-semibold">
+                          #{idx + 1}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {r.name || r.email || 'Referrer'}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {r.referral_count} filleul{r.referral_count > 1 ? 's' : ''}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-sm font-medium text-green-700 dark:text-green-300">
+                        {formatCurrency(r.total_earnings)}
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-            <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-              Période: {new Date(debugInfo.dateRange.start).toLocaleDateString()} → {new Date(debugInfo.dateRange.end).toLocaleDateString()}
+
+            {/* Gestion des Abonnements */}
+            <AdminSubscriptionManager startDate={startDate} endDate={endDate} />
+
+            {/* Footer Info */}
+            <div className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">
+              <p>
+                📊 Données synchronisées depuis Supabase • 
+                Période: {new Date(startISO).toLocaleDateString('fr-FR')} → {new Date(endISO).toLocaleDateString('fr-FR')} • 
+                Dernière mise à jour: {new Date().toLocaleTimeString('fr-FR')}
+              </p>
             </div>
-          </div>
+          </>
         )}
-
-        <div className="text-xs text-gray-500 dark:text-gray-400">
-          * Le calcul s'adapte à votre schéma : si une colonne/table est absente, elle est ignorée. Vous pouvez m'envoyer le schéma réel pour avoir des stats 100% précises (plans, revenus, etc.).
-        </div>
       </div>
-
-      {loading && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30">
-          <div className={`${cardClass} px-4 py-3 border border-gray-200 dark:border-slate-700 flex items-center gap-2`}>
-            <RefreshCw className="animate-spin" size={16} />
-            <span className="text-sm text-gray-800 dark:text-gray-200">Chargement…</span>
-          </div>
-        </div>
-      )}
     </Layout>
   );
 };

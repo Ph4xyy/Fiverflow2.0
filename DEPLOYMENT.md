@@ -92,3 +92,4 @@ En cas de problème de déploiement :
 2. Vérifier les variables d'environnement
 3. Tester la compilation locale
 4. Vérifier la configuration Supabase
+

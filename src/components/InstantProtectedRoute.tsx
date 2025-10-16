@@ -3,6 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useInstantAuth } from '../hooks/useInstantAuth';
 import { OptimizedLoadingScreen } from './OptimizedLoadingScreen';
 
+
 interface InstantProtectedRouteProps {
   children: React.ReactNode;
   /** Set to true if this route requires admin role */

@@ -38,3 +38,4 @@ docs/
 # Fichiers Supabase locaux (si pas utilisés en production)
 supabase/.branches
 supabase/.temp
+
