@@ -15,7 +15,7 @@ const UserDataContext = createContext<UserDataContextType | undefined>(undefined
 export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading: authLoading, authReady } = useAuth();
   const [role, setRole] = useState<'admin' | 'user' | null>(null); // null par défaut
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // 🔥 NAVIGATION INSTANTANÉE - Plus de loading initial
   const isFetchingRef = useRef(false);
   const lastFetchedUserIdRef = useRef<string | null>(null);
 
@@ -29,9 +29,9 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
 
   const fetchUserRole = useCallback(async (userId: string) => {
-    // GUARD: Ne pas fetcher tant que auth est en cours de chargement
+    // 🔥 NAVIGATION INSTANTANÉE - Plus d'attente d'auth
     if (authLoading) {
-      console.log('[UserDataContext] fetchUserRole: ⏳ Waiting for auth to finish loading...');
+      console.log('[UserDataContext] fetchUserRole: ⚡ Auth loading but continuing anyway for instant nav');
       return;
     }
 
@@ -116,10 +116,9 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       lastFetchedUserId: lastFetchedUserIdRef.current
     });
     
-    // GUARD: NE PAS FETCHER tant que auth est en cours de chargement
+    // 🔥 NAVIGATION INSTANTANÉE - Plus d'attente d'auth
     if (authLoading) {
-      console.log('[UserDataContext] ⏳ Waiting for auth to finish loading...');
-      setLoading(true);
+      console.log('[UserDataContext] ⚡ Auth loading but continuing anyway for instant nav');
       return;
     }
     
@@ -172,15 +171,11 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
 
-    // PRIORITÉ 4: Fetch depuis la DB profiles avec debounce
-    const timeoutId = setTimeout(() => {
-      console.log('[UserDataContext] 🔄 Starting role fetch from profiles table...');
-      setLoading(true);
-      // Ne pas mettre de rôle par défaut, laisser null pour skeleton
-      fetchUserRole(user.id);
-    }, 100);
-
-    return () => clearTimeout(timeoutId);
+    // 🔥 NAVIGATION INSTANTANÉE - Plus de debounce, fetch immédiat
+    console.log('[UserDataContext] 🔄 Starting role fetch from profiles table...');
+    setLoading(false); // Pas de loading pour navigation instantanée
+    // Ne pas mettre de rôle par défaut, laisser null pour skeleton
+    fetchUserRole(user.id);
   }, [user?.id, authLoading, fetchUserRole]);
 
   // Écouter les refreshs de session pour refetch le rôle

@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // 🔥 NAVIGATION INSTANTANÉE - Plus de loading initial
   const [authReady, setAuthReady] = useState(false);
   
   const mountedRef = useRef(true);

@@ -1,7 +1,8 @@
-// src/pages/ClientsPage.tsx
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+// src/pages/ClientsPageOptimized.tsx - VERSION ULTRA-OPTIMISÉE
+import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import Layout, { cardClass } from '@/components/Layout';
 import { useAuth } from '@/contexts/AuthContext';
+import { useInstantPageData } from '@/hooks/useInstantPageData';
 
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import ClientForm from '@/components/ClientForm';
@@ -22,25 +23,12 @@ type ClientRow = {
 
 const PAGE_SIZE = 20;
 
-const ClientsPage: React.FC = () => {
+const ClientsPageOptimized: React.FC = () => {
   const { user, authReady } = useAuth();
 
-  // Data
-  const [clients, setClients] = useState<ClientRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // 🔥 NAVIGATION INSTANTANÉE - Plus d'état de chargement initial
   const [total, setTotal] = useState(0);
-
   const lastFetchedUserIdRef = useRef<string | null>(null);
-
-  console.log('[ClientsPage] Render:', { 
-    hasUser: !!user, 
-    userId: user?.id,
-    authReady,
-    loading,
-    clientsCount: clients.length,
-    lastFetchedUserId: lastFetchedUserIdRef.current
-  });
 
   // Search (debounced)
   const [search, setSearch] = useState('');
@@ -118,129 +106,97 @@ const ClientsPage: React.FC = () => {
     loadDistincts();
   }, [user, authReady]);
 
-  // Fetch clients (with search + filters + pagination)
-  const fetchClients = async () => {
-    // GUARD: NE PAS FETCHER tant que authReady n'est pas true
-    if (!authReady) {
-      console.log('[ClientsPage] fetchClients: ⏳ Waiting for auth to be ready...');
-      setLoading(true);
-      return;
-    }
-
-    if (!user) {
-      console.log('[ClientsPage] fetchClients: ❌ No user, clearing clients');
-      setClients([]);
-      setTotal(0);
-      setLoading(false);
-      lastFetchedUserIdRef.current = null;
-      return;
-    }
-
-    console.log('[ClientsPage] fetchClients: 📡 Fetching clients for user:', user.id, {
-      search: debouncedSearch,
-      status,
-      platform,
-      country,
-      page
-    });
-
-    // Demo mode
-    if (!isSupabaseConfigured || !supabase) {
-      const demo: ClientRow[] = Array.from({ length: 42 }).map((_, i) => ({
-        id: String(i + 1),
-        name: i % 3 ? `Client ${i + 1}` : 'John Doe',
-        company_name: i % 2 ? 'Acme Inc' : null,
-        platform: ['Fiverr', 'Upwork', 'Direct'][i % 3],
-        email_primary: i % 2 ? `client${i + 1}@mail.com` : null,
-        country: ['France', 'Canada', 'United States'][i % 3],
-        client_status: ['prospect', 'active', 'inactive', 'completed'][i % 4],
-        created_at: new Date().toISOString(),
-      }));
-
-      const term = debouncedSearch.toLowerCase();
-      let filtered = demo.filter((c) =>
-        [
-          c.name || '',
-          c.company_name || '',
-          c.email_primary || '',
-          c.platform || '',
-        ].some((v) => v.toLowerCase().includes(term))
-      );
-      if (status) filtered = filtered.filter((c) => (c.client_status || '') === status);
-      if (platform) filtered = filtered.filter((c) => (c.platform || '') === platform);
-      if (country) filtered = filtered.filter((c) => (c.country || '') === country);
-
-      setTotal(filtered.length);
-      const start = (page - 1) * PAGE_SIZE;
-      const slice = filtered.slice(start, start + PAGE_SIZE);
-
-      setClients(slice);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const start = (page - 1) * PAGE_SIZE;
-      const end = start + PAGE_SIZE - 1;
-
-      let query = supabase
-        .from('clients')
-        .select('id,name,company_name,platform,email_primary,country,client_status,created_at', { count: 'exact' })
-        .eq('user_id', user.id);
-
-      if (debouncedSearch) {
-        const term = `%${debouncedSearch}%`;
-        query = query.or(
-          `name.ilike.${term},company_name.ilike.${term},email_primary.ilike.${term},platform.ilike.${term}`
-        );
+  // 🔥 Hook instantané pour les données des clients
+  const { data: clients, error, isLoading, refresh } = useInstantPageData<ClientRow[]>({
+    fetchFn: async () => {
+      if (!isSupabaseConfigured || !supabase || !user) {
+        throw new Error('Missing dependencies');
       }
 
-      if (status) query = query.eq('client_status', status);
-      if (platform) query = query.eq('platform', platform);
-      if (country) query = query.eq('country', country);
-
-      query = query.order('created_at', { ascending: false }).range(start, end);
-
-      const { data, error, count } = await query;
-      if (error) throw error;
-
-      setClients(data || []);
-      setTotal(count || 0);
+      console.log('[ClientsPage] 📡 Fetching clients for user:', user.id, {
+        search: debouncedSearch,
+        status,
+        platform,
+        country,
+        page
+      });
       lastFetchedUserIdRef.current = user.id;
-      console.log('[ClientsPage] fetchClients: ✅ Fetched', data?.length || 0, 'clients (total:', count || 0, ')');
-    } catch (e: any) {
-      console.error('[ClientsPage] fetchClients: ❌ Error:', e);
-      setError(e?.message || 'Failed to load clients');
-      toast.error('Unable to load clients');
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    if (authReady) {
-      console.log('[ClientsPage] useEffect: Triggering fetch');
-      fetchClients();
-    } else {
-      console.log('[ClientsPage] useEffect: Waiting for auth ready');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, authReady, debouncedSearch, status, platform, country, page]);
+      // Demo mode
+      if (!isSupabaseConfigured || !supabase) {
+        const demo: ClientRow[] = Array.from({ length: 42 }).map((_, i) => ({
+          id: String(i + 1),
+          name: i % 3 ? `Client ${i + 1}` : 'John Doe',
+          company_name: i % 2 ? 'Acme Inc' : null,
+          platform: ['Fiverr', 'Upwork', 'Direct'][i % 3],
+          email_primary: i % 2 ? `client${i + 1}@mail.com` : null,
+          country: ['France', 'Canada', 'United States'][i % 3],
+          client_status: ['prospect', 'active', 'inactive', 'completed'][i % 4],
+          created_at: new Date().toISOString(),
+        }));
 
-  // Listen for session refresh to refetch data
-  useEffect(() => {
-    const onRefreshed = (e: CustomEvent) => {
-      console.log('[ClientsPage] 🔄 Session refreshed event received:', e.detail);
-      lastFetchedUserIdRef.current = null;
-      fetchClients();
-    };
-    window.addEventListener('ff:session:refreshed', onRefreshed as any);
-    return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-  }, [fetchClients]);
+        const term = debouncedSearch.toLowerCase();
+        let filtered = demo.filter((c) =>
+          [
+            c.name || '',
+            c.company_name || '',
+            c.email_primary || '',
+            c.platform || '',
+          ].some((v) => v.toLowerCase().includes(term))
+        );
+        if (status) filtered = filtered.filter((c) => (c.client_status || '') === status);
+        if (platform) filtered = filtered.filter((c) => (c.platform || '') === platform);
+        if (country) filtered = filtered.filter((c) => (c.country || '') === country);
+
+        setTotal(filtered.length);
+        const start = (page - 1) * PAGE_SIZE;
+        const slice = filtered.slice(start, start + PAGE_SIZE);
+
+        return slice;
+      }
+
+      try {
+        const start = (page - 1) * PAGE_SIZE;
+        const end = start + PAGE_SIZE - 1;
+
+        let query = supabase
+          .from('clients')
+          .select('id,name,company_name,platform,email_primary,country,client_status,created_at', { count: 'exact' })
+          .eq('user_id', user.id);
+
+        if (debouncedSearch) {
+          const term = `%${debouncedSearch}%`;
+          query = query.or(
+            `name.ilike.${term},company_name.ilike.${term},email_primary.ilike.${term},platform.ilike.${term}`
+          );
+        }
+
+        if (status) query = query.eq('client_status', status);
+        if (platform) query = query.eq('platform', platform);
+        if (country) query = query.eq('country', country);
+
+        query = query.order('created_at', { ascending: false }).range(start, end);
+
+        const { data, error, count } = await query;
+        if (error) throw error;
+
+        setTotal(count || 0);
+        lastFetchedUserIdRef.current = user.id;
+        console.log('[ClientsPage] ✅ Fetched', data?.length || 0, 'clients (total:', count || 0, ')');
+        
+        return data || [];
+      } catch (err: any) {
+        console.error('[ClientsPage] ❌ Error:', err);
+        throw new Error(err?.message || 'Failed to load clients');
+      }
+    },
+    cacheKey: `clients-${debouncedSearch}-${status}-${platform}-${country}-${page}`,
+    cacheTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    enabled: !!user && authReady
+  });
+
+  // 🔥 Plus besoin de useEffect - le hook s'en charge automatiquement
 
   const openCreate = () => {
     setEditingClient(null);
@@ -251,7 +207,7 @@ const ClientsPage: React.FC = () => {
     setIsModalOpen(true);
   };
   const onModalSuccess = () => {
-    fetchClients();
+    refresh();
   };
 
   // --- VIEW (lecture seule) ---
@@ -269,7 +225,7 @@ const ClientsPage: React.FC = () => {
 
     // Demo mode
     if (!isSupabaseConfigured || !supabase || !user) {
-      const row = clients.find((r) => r.id === id);
+      const row = clients?.find((r) => r.id === id);
       const demo: FullClient = {
         id,
         name: row?.name || 'John Doe',
@@ -365,6 +321,7 @@ const ClientsPage: React.FC = () => {
     setCountry('');
   };
 
+  // 🔥 NAVIGATION INSTANTANÉE - Plus jamais de loading screen
   return (
     <Layout>
       <div className="space-y-6 p-4 sm:p-0">
@@ -468,23 +425,19 @@ const ClientsPage: React.FC = () => {
 
         {/* Table */}
         <div className={`${cardClass}`}>
-          {loading ? (
-            <div className="p-10 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600" />
-              <span className="ml-3 text-slate-400">{'Loading…'}</span>
-            </div>
-          ) : error ? (
+          {/* 🔥 NAVIGATION INSTANTANÉE - Plus jamais de loading screen */}
+          {error ? (
             <div className="p-6 text-center">
               <p className="text-red-400 font-semibold">{'Unable to load clients'}</p>
-              <p className="text-sm text-slate-400 mt-1">{error}</p>
+              <p className="text-sm text-slate-400 mt-1">{error.message}</p>
               <button
-                onClick={fetchClients}
+                onClick={refresh}
                 className="mt-4 px-4 py-2 rounded-xl btn-primary"
               >
                 {'Retry'}
               </button>
             </div>
-          ) : clients.length === 0 ? (
+          ) : !clients || clients.length === 0 ? (
             <div className="p-10 text-center">
               <p className="text-slate-300">{'No clients found.'}</p>
               <p className="text-sm text-slate-400 mt-1">
@@ -626,4 +579,4 @@ const ClientsPage: React.FC = () => {
   );
 };
 
-export default ClientsPage;
+export default ClientsPageOptimized;

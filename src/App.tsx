@@ -9,6 +9,7 @@ import InstantProtectedRoute from './components/InstantProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
+import { usePreloadData } from './hooks/usePreloadData';
 // import { GlobalLoadingManager } from './components/GlobalLoadingManager';
 import DiagnosticPanel from './components/DiagnosticPanel';
 import EnvironmentDiagnostic from './components/EnvironmentDiagnostic';
@@ -22,8 +23,8 @@ import LoadingDiagnostic from './components/LoadingDiagnostic';
 import RootRedirect from './components/RootRedirect';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
-import ClientsPage from './pages/ClientsPage';
+import DashboardPage from './pages/DashboardPageOptimized';
+import ClientsPage from './pages/ClientsPageOptimized';
 import OrdersPage from './pages/OrdersPage';
 import TemplatesPage from './pages/TemplatesPage';
 import StatsPage from './pages/StatsPage';
@@ -49,17 +50,14 @@ const InvoiceTemplatesPage = lazy(() => import('./pages/InvoiceTemplatesPage'));
 const InvoiceTemplateEditorPage = lazy(() => import('./pages/InvoiceTemplateEditorPage'));
 
 
-function App() {
+function AppContent() {
+  // 🔥 Préchargement des données en arrière-plan
+  usePreloadData();
+
   return (
-    <AppErrorBoundary>
-      <AuthProvider>
-        <Router>
-          <AnalyticsWrapper>
-            <LoadingProvider>
-              <CurrencyProvider>
-                <UserDataProvider>
-                <Suspense fallback={<div className="p-6"><div className="h-8 w-8 animate-spin rounded-full border-b-2 border-slate-500"></div></div>}>
-              <Routes>
+    <>
+      <Suspense fallback={null}>
+        <Routes>
               {/* Redirection racine intelligente */}
               <Route path="/" element={<RootRedirect />} />
               {/* Pages publiques */}
@@ -107,7 +105,7 @@ function App() {
               {/* Onboarding */}
               <Route path="/onboarding" element={<InstantProtectedRoute><OnboardingPage /></InstantProtectedRoute>} />
               </Routes>
-              </Suspense>
+      </Suspense>
                      {/* Composants de debug - seulement en développement */}
                      {import.meta.env.DEV && (
                        <>
@@ -118,8 +116,22 @@ function App() {
                          <SessionDiagnostic />
                        </>
                      )}
-                     {/* Loading Diagnostic - visible avec Ctrl+Shift+L */}
-                     <LoadingDiagnostic />
+        {/* Loading Diagnostic - visible avec Ctrl+Shift+L */}
+        <LoadingDiagnostic />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <AppErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <AnalyticsWrapper>
+            <LoadingProvider>
+              <CurrencyProvider>
+                <UserDataProvider>
+                  <AppContent />
                 </UserDataProvider>
               </CurrencyProvider>
             </LoadingProvider>

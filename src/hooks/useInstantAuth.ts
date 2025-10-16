@@ -20,31 +20,33 @@ export const useInstantAuth = (): InstantAuthState => {
   const [isReady, setIsReady] = useState(false);
   const hasInitializedRef = useRef(false);
 
-  // 🔥 Cache agressif pour éviter les rechargements
+  // 🔥 Cache ultra-agressif pour navigation instantanée
   const roleFromSessionCache = sessionStorage.getItem('role');
+  const roleFromLocalCache = localStorage.getItem('userRole');
   const roleFromMeta = user?.app_metadata?.role || user?.user_metadata?.role;
   const roleFromContext = userData?.role;
   
-  const effectiveRole = roleFromContext || roleFromMeta || roleFromSessionCache || null;
-  const roleLoading = Boolean(userData?.loading);
+  // Priorité absolue au cache pour navigation instantanée
+  const effectiveRole = roleFromContext || roleFromMeta || roleFromSessionCache || roleFromLocalCache || null;
+  const roleLoading = Boolean(userData?.loading) && !roleFromSessionCache && !roleFromLocalCache && !roleFromMeta;
 
-  // 🔥 Initialisation instantanée
+  // 🔥 Initialisation ultra-rapide
   useEffect(() => {
     if (!hasInitializedRef.current) {
       hasInitializedRef.current = true;
       
-      // Si on a déjà un rôle en cache ET un utilisateur, on est prêt immédiatement
-      if ((roleFromSessionCache || roleFromMeta) && user) {
+      // Navigation instantanée si on a un cache
+      if ((roleFromSessionCache || roleFromLocalCache || roleFromMeta) && user) {
         setIsReady(true);
         return;
       }
       
-      // Sinon, on attend que l'auth soit terminée
+      // Si pas de cache mais auth terminée, on est prêt
       if (!authLoading && user) {
         setIsReady(true);
       }
     }
-  }, [authLoading, user, roleFromSessionCache, roleFromMeta]);
+  }, [authLoading, user, roleFromSessionCache, roleFromLocalCache, roleFromMeta]);
 
   // 🔥 Marquer comme prêt dès que l'auth est terminée ET qu'on a un utilisateur
   useEffect(() => {
@@ -65,11 +67,12 @@ export const useInstantAuth = (): InstantAuthState => {
     roleFromContext
   });
 
+  // 🔥 NAVIGATION ULTRA-INSTANTANÉE - Toujours prêt, jamais de loading
   return {
     user,
-    loading: authLoading && !isReady, // Ne montrer loading que si pas encore prêt
+    loading: false, // 🔥 NAVIGATION INSTANTANÉE - Plus jamais de loading
     role: effectiveRole,
-    roleLoading: roleLoading && !isReady, // Ne montrer loading que si pas encore prêt
-    isReady
+    roleLoading: false, // 🔥 NAVIGATION INSTANTANÉE - Plus jamais de loading
+    isReady: true // 🔥 TOUJOURS PRÊT - Navigation instantanée
   };
 };

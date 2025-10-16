@@ -8,38 +8,19 @@ import { useAuth } from '../contexts/AuthContext';
  */
 const RootRedirect: React.FC = () => {
   const { user, loading } = useAuth();
-  const [forceRedirect, setForceRedirect] = useState(false);
 
-  // 🔥 Timeout de sécurité très court - 500ms max pour une authentification fluide
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      console.warn('🚨 RootRedirect: Force redirect after timeout');
-      setForceRedirect(true);
-    }, 500); // Réduit à 500ms pour éviter les blocages
+  // 🔥 SUPPRESSION COMPLÈTE DES TIMEOUTS - Navigation instantanée
+  // Plus de timeout, redirection immédiate
 
-    return () => clearTimeout(timeout);
-  }, []);
+  // 🔥 NAVIGATION ULTRA-INSTANTANÉE - Redirection immédiate sans délai
+  const target = user ? '/dashboard' : '/login';
+  console.log('🚀 RootRedirect: Instant redirect to', target, {
+    user: !!user,
+    loading
+  });
+  return <Navigate to={target} replace />;
 
-  // Redirection immédiate si timeout ou si auth terminé
-  if (forceRedirect || !loading) {
-    const target = user ? '/dashboard' : '/login';
-    console.log('🚀 RootRedirect: Redirecting to', target, {
-      user: !!user,
-      loading,
-      forceRedirect
-    });
-    return <Navigate to={target} replace />;
-  }
-
-  // Écran de chargement minimal
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900">
-      <div className="flex flex-col items-center space-y-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
-        <p className="text-white text-sm">Chargement...</p>
-      </div>
-    </div>
-  );
+  // 🔥 SUPPRESSION COMPLÈTE - Plus jamais d'écran de chargement
 };
 
 export default RootRedirect;

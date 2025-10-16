@@ -24,36 +24,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin 
     requireAdmin
   });
 
-  // 🔥 Timeout de sécurité réduit pour une authentification plus fluide
-  React.useEffect(() => {
-    const timeout = setTimeout(() => {
-      console.log('⏰ ProtectedRoute: Timeout reached');
-      setLoadingTimeout(true);
-    }, 3000); // Réduit de 8s à 3s
+  // 🔥 SUPPRESSION COMPLÈTE DES TIMEOUTS - Navigation instantanée
+  // Plus de timeout, navigation immédiate
 
-    return () => clearTimeout(timeout);
-  }, []);
-
-  // Show loading screen while authentication is in progress
-  if ((loading || roleLoading) && !loadingTimeout) {
-    console.log('⏳ ProtectedRoute: Showing loading screen');
-    return (
-      <OptimizedLoadingScreen 
-        message="Checking session..." 
-        showSpinner={true}
-      />
-    );
-  }
-
-  // 🔥 Si timeout, forcer la vérification
-  if (loadingTimeout && (loading || roleLoading)) {
-    console.warn('🚨 ProtectedRoute: Loading timeout, forcing check');
-    // Forcer la vérification en redirigeant vers login si pas d'utilisateur
-    if (!user) {
-      console.log('❌ ProtectedRoute: No user after timeout, redirecting to login');
-      return <Navigate to="/login" replace state={{ from: location }} />;
-    }
-  }
+  // 🔥 NAVIGATION ULTRA-INSTANTANÉE - Plus jamais de loading screen
+  console.log('⚡ ProtectedRoute: Instant check - no delays');
 
   if (!user) {
     console.log('❌ ProtectedRoute: No user, redirecting to login');

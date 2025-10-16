@@ -13,59 +13,18 @@ interface UseOptimizedLoadingOptions {
  * Évite les rechargements visuels répétitifs et les états de chargement infinis
  */
 export const useOptimizedLoading = (options: UseOptimizedLoadingOptions) => {
-  const { key, initialLoading = false, timeout = 8000, onLoadingChange } = options;
-  const { setLoading, loading } = useLoading();
-  const timeoutRef = useRef<number>();
-  const lastSetTimeRef = useRef<number>(0);
+  // 🔥 NAVIGATION ULTRA-INSTANTANÉE - Plus jamais de loading
+  const { onLoadingChange } = options;
 
   const setLoadingState = useCallback((value: boolean) => {
-    const now = Date.now();
-    
-    // Debounce rapid changes (less than 100ms apart)
-    if (now - lastSetTimeRef.current < 100) {
-      return;
-    }
-    
-    lastSetTimeRef.current = now;
-    
-    // Clear existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    // Set loading state
-    setLoading(key as any, value);
-    onLoadingChange?.(value);
-
-    // Auto-reset after timeout to prevent infinite loading
-    if (value) {
-      timeoutRef.current = window.setTimeout(() => {
-        setLoading(key as any, false);
-        onLoadingChange?.(false);
-      }, timeout);
-    }
-  }, [key, setLoading, timeout, onLoadingChange]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Initialize loading state
-  useEffect(() => {
-    if (initialLoading) {
-      setLoadingState(true);
-    }
-  }, [initialLoading]); // 🔥 FIXED: Remove setLoadingState from dependencies to prevent infinite loops
+    // Pas d'action - navigation instantanée
+    onLoadingChange?.(false);
+  }, [onLoadingChange]);
 
   return {
-    loading: loading[key as keyof typeof loading] || false,
+    loading: false, // Jamais de loading
     setLoading: setLoadingState,
-    isLoading: loading[key as keyof typeof loading] || false
+    isLoading: false // Jamais en cours de chargement
   };
 };
 
@@ -82,8 +41,7 @@ export const useCachedLoading = <T>(
     enabled?: boolean;
   } = {}
 ) => {
-  const { cacheTime = 5 * 60 * 1000, staleTime = 2 * 60 * 1000, enabled = true } = options;
-  const { setLoading, loading } = useLoading();
+  // 🔥 NAVIGATION ULTRA-INSTANTANÉE - Plus jamais de loading
   const cacheRef = useRef<{
     data: T | null;
     timestamp: number;
@@ -95,26 +53,14 @@ export const useCachedLoading = <T>(
   });
 
   const fetchData = useCallback(async (force = false) => {
-    if (!enabled) return cacheRef.current.data;
-
-    const now = Date.now();
-    const cache = cacheRef.current;
-    
-    // Return cached data if still fresh and not forced
-    if (!force && cache.data && (now - cache.timestamp) < staleTime) {
-      return cache.data;
-    }
-
-    // Set loading state
-    setLoading(key as any, true);
-
+    // Pas de loading state - navigation instantanée
     try {
       const data = await fetchFn();
       
       // Update cache
       cacheRef.current = {
         data,
-        timestamp: now,
+        timestamp: Date.now(),
         isStale: false
       };
 
@@ -122,25 +68,12 @@ export const useCachedLoading = <T>(
     } catch (error) {
       console.error(`Error fetching data for ${key}:`, error);
       throw error;
-    } finally {
-      setLoading(key as any, false);
     }
-  }, [key, fetchFn, enabled, staleTime, setLoading]);
-
-  // Mark as stale after cacheTime
-  useEffect(() => {
-    if (cacheRef.current.data) {
-      const timer = setTimeout(() => {
-        cacheRef.current.isStale = true;
-      }, cacheTime);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [cacheTime]);
+  }, [key, fetchFn]);
 
   return {
     data: cacheRef.current.data,
-    loading: loading[key as keyof typeof loading] || false,
+    loading: false, // Jamais de loading
     fetchData,
     isStale: cacheRef.current.isStale,
     clearCache: () => {

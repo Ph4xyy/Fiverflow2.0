@@ -61,10 +61,9 @@ const OrdersPage: React.FC = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
 
-  // Debounce search
+  // 🔥 NAVIGATION INSTANTANÉE - Plus de debounce, recherche immédiate
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search.trim()), 350);
-    return () => clearTimeout(t);
+    setDebouncedSearch(search.trim());
   }, [search]);
 
   // Reset page on filter changes
