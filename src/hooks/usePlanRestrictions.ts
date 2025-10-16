@@ -28,7 +28,7 @@ interface UsePlanRestrictionsReturn {
 }
 
 export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
-  const { user, authReady } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const userData = useUserData();
   const ctxRole = userData?.role; // Peut être 'admin', 'user' ou null
 
@@ -43,7 +43,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
   console.log('[usePlanRestrictions] State:', { 
     hasUser: !!user, 
     userId: user?.id,
-    authReady, 
+    authLoading, 
     roleLoading, 
     stripeLoading,
     role,
@@ -56,9 +56,9 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
     let isMounted = true;
 
     const fetchRole = async () => {
-      // GUARD: NE PAS FETCHER tant que authReady n'est pas true
-      if (!authReady) {
-        console.log('[usePlanRestrictions] fetchRole: ⏳ Waiting for auth to be ready...');
+      // GUARD: NE PAS FETCHER tant que auth est en cours de chargement
+      if (authLoading) {
+        console.log('[usePlanRestrictions] fetchRole: ⏳ Waiting for auth to finish loading...');
         setRoleLoading(true);
         return;
       }
@@ -163,7 +163,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
     return () => {
       isMounted = false;
     };
-  }, [user?.id, ctxRole, authReady]);
+  }, [user?.id, ctxRole, authLoading]);
 
   // Écouter les refreshs de session
   useEffect(() => {
@@ -177,8 +177,8 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
   }, []);
 
   useEffect(() => {
-    // GUARD: NE PAS CALCULER les restrictions tant que authReady n'est pas true
-    if (!authReady) {
+    // GUARD: NE PAS CALCULER les restrictions tant que auth est en cours de chargement
+    if (authLoading) {
       console.log('[usePlanRestrictions] Calculate: ⏳ Waiting for auth to be ready...');
       return;
     }
@@ -291,7 +291,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
     }, 50);
 
     return () => clearTimeout(timeoutId);
-  }, [user?.id, role, roleLoading, stripeSubscription, stripeLoading, authReady, restrictions]);
+  }, [user?.id, role, roleLoading, stripeSubscription, stripeLoading, authLoading, restrictions]);
 
   const checkAccess = (feature: FeatureKey) => {
     if (!restrictions) {
@@ -318,7 +318,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
 
   return {
     restrictions,
-    loading: stripeLoading || roleLoading || !authReady || role === null,
+    loading: stripeLoading || roleLoading || authLoading || role === null,
     error,
     checkAccess
   };

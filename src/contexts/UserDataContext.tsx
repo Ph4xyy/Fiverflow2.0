@@ -29,9 +29,9 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
 
   const fetchUserRole = useCallback(async (userId: string) => {
-    // GUARD: Ne pas fetcher tant que authReady n'est pas true
-    if (!authReady) {
-      console.log('[UserDataContext] fetchUserRole: ⏳ Waiting for auth to be ready...');
+    // GUARD: Ne pas fetcher tant que auth est en cours de chargement
+    if (authLoading) {
+      console.log('[UserDataContext] fetchUserRole: ⏳ Waiting for auth to finish loading...');
       return;
     }
 
@@ -116,14 +116,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       lastFetchedUserId: lastFetchedUserIdRef.current
     });
     
-    // GUARD: NE PAS FETCHER tant que authReady n'est pas true
-    if (!authReady) {
-      console.log('[UserDataContext] ⏳ Waiting for auth to be ready...');
-      setLoading(true);
-      return;
-    }
-
-    // Attendre que l'auth soit complètement chargé
+    // GUARD: NE PAS FETCHER tant que auth est en cours de chargement
     if (authLoading) {
       console.log('[UserDataContext] ⏳ Waiting for auth to finish loading...');
       setLoading(true);
@@ -188,13 +181,13 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [user?.id, authLoading, authReady, fetchUserRole]);
+  }, [user?.id, authLoading, fetchUserRole]);
 
   // Écouter les refreshs de session pour refetch le rôle
   useEffect(() => {
     const handleSessionRefreshed = () => {
       console.log('[UserDataContext] 🔄 Session refreshed, refetching role...');
-      if (user?.id && authReady) {
+      if (user?.id && !authLoading) {
         lastFetchedUserIdRef.current = null; // Force refetch
         fetchUserRole(user.id);
       }
@@ -202,17 +195,17 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     window.addEventListener('ff:session:refreshed', handleSessionRefreshed as any);
     return () => window.removeEventListener('ff:session:refreshed', handleSessionRefreshed as any);
-  }, [user?.id, authReady, fetchUserRole]);
+  }, [user?.id, authLoading, fetchUserRole]);
 
   const refreshUserRole = useCallback(async () => {
     console.log('[UserDataContext] refreshUserRole: Manual refresh requested');
-    if (user?.id && authReady) {
+    if (user?.id && !authLoading) {
       lastFetchedUserIdRef.current = null; // Force refetch
       await fetchUserRole(user.id);
     } else {
-      console.log('[UserDataContext] refreshUserRole: ❌ Cannot refresh - no user or auth not ready');
+      console.log('[UserDataContext] refreshUserRole: ❌ Cannot refresh - no user or auth still loading');
     }
-  }, [user?.id, authReady, fetchUserRole]);
+  }, [user?.id, authLoading, fetchUserRole]);
 
   return (
     <UserDataContext.Provider value={{ role, loading, refreshUserRole }}>
