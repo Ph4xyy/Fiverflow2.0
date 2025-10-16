@@ -365,12 +365,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // Timeout de sécurité
+    // Timeout de sécurité réduit
     initTimeout = window.setTimeout(() => {
-      console.warn('[AuthContext] ⏱️ Initialization timeout (10s), forcing completion');
+      console.warn('[AuthContext] ⏱️ Initialization timeout (5s), forcing completion');
       setLoadingSafe(false);
       setAuthReadySafe(true);
-    }, 10000);
+    }, 5000);
 
     init().finally(() => {
       if (initTimeout) {

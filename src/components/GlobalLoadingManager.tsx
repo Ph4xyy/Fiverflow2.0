@@ -29,11 +29,12 @@ export const GlobalLoadingManager: React.FC<GlobalLoadingManagerProps> = ({ chil
     const isAnyLoading = isLoading();
     setShowGlobalLoading(isAnyLoading);
     
-    // Auto-hide loading after 15 seconds to prevent infinite loading
+    // Auto-hide loading after 5 seconds to prevent infinite loading
     if (isAnyLoading) {
       const timeout = setTimeout(() => {
+        console.warn('🚨 GlobalLoadingManager: Force hiding loading after 5s timeout');
         setShowGlobalLoading(false);
-      }, 15000);
+      }, 5000);
       
       return () => clearTimeout(timeout);
     }
@@ -44,6 +45,7 @@ export const GlobalLoadingManager: React.FC<GlobalLoadingManagerProps> = ({ chil
       <OptimizedLoadingScreen 
         message="Loading application..." 
         showSpinner={true}
+        maxDuration={6000} // 6 secondes avant fallback
       />
     );
   }

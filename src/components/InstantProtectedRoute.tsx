@@ -29,11 +29,12 @@ const InstantProtectedRoute: React.FC<InstantProtectedRouteProps> = ({ children,
     requireAdmin
   });
 
-  // 🔥 Timeout plus long pour permettre à la session de se charger après login
+  // 🔥 Timeout réduit pour éviter de rester bloqué
   React.useEffect(() => {
     const timeout = setTimeout(() => {
+      console.warn('🚨 InstantProtectedRoute: Loading timeout after 2s, forcing check');
       setLoadingTimeout(true);
-    }, 3000); // Augmenté à 3s pour laisser le temps à la session de se charger
+    }, 2000); // Réduit à 2s pour éviter les blocages
 
     return () => clearTimeout(timeout);
   }, []);

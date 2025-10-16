@@ -10,12 +10,12 @@ const RootRedirect: React.FC = () => {
   const { user, loading } = useAuth();
   const [forceRedirect, setForceRedirect] = useState(false);
 
-  // 🔥 Timeout de sécurité réduit - 1 seconde max pour une authentification fluide
+  // 🔥 Timeout de sécurité très court - 500ms max pour une authentification fluide
   useEffect(() => {
     const timeout = setTimeout(() => {
       console.warn('🚨 RootRedirect: Force redirect after timeout');
       setForceRedirect(true);
-    }, 1000); // Réduit de 2s à 1s
+    }, 500); // Réduit à 500ms pour éviter les blocages
 
     return () => clearTimeout(timeout);
   }, []);
