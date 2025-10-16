@@ -10,15 +10,22 @@ interface InstantProtectedRouteProps {
 }
 
 /**
- * Version ultra-optimisée de ProtectedRoute pour une authentification instantanée
- * Évite complètement les loading loops
+ * Version optimisée de ProtectedRoute :
+ * - Navigation instantanée (pas de rechargement entre pages)
+ * - Vérifie la session sans bloquer le rendu
  */
 const InstantProtectedRoute: React.FC<InstantProtectedRouteProps> = ({ children, requireAdmin = false }) => {
   const { user, loading, role, roleLoading, isReady } = useInstantAuth();
   const location = useLocation();
   const [loadingTimeout, setLoadingTimeout] = React.useState(false);
 
-  // 🔥 Debug logging pour identifier le problème
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      setLoadingTimeout(true);
+    }, 3000); // 3s max d'attente avant de forcer la redirection
+    return () => clearTimeout(timeout);
+  }, []);
+
   console.log('⚡ InstantProtectedRoute:', {
     user: user?.id,
     loading,
@@ -29,57 +36,33 @@ const InstantProtectedRoute: React.FC<InstantProtectedRouteProps> = ({ children,
     requireAdmin
   });
 
-  // 🔥 Timeout plus long pour permettre à la session de se charger après login
-  React.useEffect(() => {
-    const timeout = setTimeout(() => {
-      setLoadingTimeout(true);
-    }, 3000); // Augmenté à 3s pour laisser le temps à la session de se charger
-
-    return () => clearTimeout(timeout);
-  }, []);
-
-  // 🔥 Si on a un cache, on peut rediriger immédiatement
-  if (isReady && !loading && !roleLoading) {
-    console.log('⚡ InstantProtectedRoute: Ready to check user');
-    if (!user) {
-      console.log('❌ InstantProtectedRoute: No user when ready, redirecting to login');
-      return <Navigate to="/login" replace state={{ from: location }} />;
-    }
-
+  // ✅ Si on a déjà un utilisateur connu, on affiche la page instantanément
+  if (user) {
     if (requireAdmin && role !== 'admin') {
-      console.log('❌ InstantProtectedRoute: User not admin, redirecting to not-authorized');
+      console.log('❌ InstantProtectedRoute: User not admin');
       return <Navigate to="/not-authorized" replace />;
     }
 
-    console.log('✅ InstantProtectedRoute: User authenticated, rendering children');
+    console.log('✅ InstantProtectedRoute: User authenticated');
     return <>{children}</>;
   }
 
-  // 🔥 Show loading screen seulement si vraiment nécessaire
-  if ((loading || roleLoading) && !loadingTimeout) {
-    console.log('⏳ InstantProtectedRoute: Showing loading screen');
-    return (
-      <OptimizedLoadingScreen 
-        message="Checking session..." 
-        showSpinner={true}
-      />
-    );
+  // ⚡ Si on est encore en train de vérifier, on ne montre rien (pas de reload)
+  if (loading && !loadingTimeout) {
+    console.log('⏳ InstantProtectedRoute: Waiting for auth check...');
+    return <></>;
   }
 
-  // 🔥 Si timeout, forcer la vérification
-  if (loadingTimeout && (loading || roleLoading)) {
-    console.warn('🚨 InstantProtectedRoute: Loading timeout, forcing check');
-    if (!user) {
-      return <Navigate to="/login" replace state={{ from: location }} />;
-    }
-  }
-
-  if (!user) {
+  // 🚨 Si après 3s toujours rien → login
+  if (!user && loadingTimeout) {
+    console.warn('🚨 InstantProtectedRoute: Timeout — redirecting to login');
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  if (requireAdmin && role !== 'admin') {
-    return <Navigate to="/not-authorized" replace />;
+  // Cas par défaut (si user null dès le départ)
+  if (!user) {
+    console.log('❌ InstantProtectedRoute: No user — redirecting to login');
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   return <>{children}</>;

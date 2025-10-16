@@ -10,7 +10,7 @@ import SmartProtectedRoute from './components/SmartProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
-import { GlobalLoadingManager } from './components/GlobalLoadingManager';
+// import { GlobalLoadingManager } from './components/GlobalLoadingManager';
 import DiagnosticPanel from './components/DiagnosticPanel';
 import EnvironmentDiagnostic from './components/EnvironmentDiagnostic';
 import SessionTest from './components/SessionTest';
@@ -18,7 +18,7 @@ import AuthDiagnostic from './components/AuthDiagnostic';
 import SessionDiagnostic from './components/SessionDiagnostic';
 import LoadingDiagnostic from './components/LoadingDiagnostic';
 import { usePlanRestrictions } from './hooks/usePlanRestrictions';
-import { useSessionManager } from './hooks/useSessionManager';
+//import { useSessionManager } from './hooks/useSessionManager';
 
 // Core pages
 import RootRedirect from './components/RootRedirect';
@@ -76,67 +76,9 @@ function App() {
             <LoadingProvider>
               <CurrencyProvider>
                 <UserDataProvider>
-                  <SessionManagerWrapper>
-                  <GlobalLoadingManager>
-              <Suspense fallback={
-                <div className="min-h-screen flex items-center justify-center bg-slate-900">
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
-                    <p className="text-white text-sm">Loading page...</p>
-                  </div>
-                </div>
-              }>
-              <Routes>
-              {/* Redirection racine intelligente - version optimisée */}
-              <Route path="/" element={<SmartRootRedirect />} />
-              {/* Pages publiques */}
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/support" element={<SupportPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-
-              {/* Dashboard - version optimisée pour éviter les flashs */}
-              <Route path="/dashboard" element={
-                <SmartProtectedRoute>
-                  <DashboardPage />
-                </SmartProtectedRoute>
-              } />
-
-              {/* Autres pages internes du dashboard - version optimisée */}
-              <Route path="/clients" element={<SmartProtectedRoute><ClientsPage /></SmartProtectedRoute>} />
-              <Route path="/orders" element={<SmartProtectedRoute><OrdersPage /></SmartProtectedRoute>} />
-              <Route path="/calendar" element={<SmartProtectedRoute><CalendarPage /></SmartProtectedRoute>} />
-              <Route path="/tasks" element={<SmartProtectedRoute><WorkboardPage /></SmartProtectedRoute>} />
-              <Route path="/templates" element={<SmartProtectedRoute><TemplatesPage /></SmartProtectedRoute>} />
-              <Route path="/stats" element={<SmartProtectedRoute><StatsPage /></SmartProtectedRoute>} />
-              <Route path="/profile" element={<SmartProtectedRoute><ProfilePage /></SmartProtectedRoute>} />
-              <Route path="/network" element={<SmartProtectedRoute><NetworkPage /></SmartProtectedRoute>} />
-              <Route path="/upgrade" element={<SmartProtectedRoute><UpgradePage /></SmartProtectedRoute>} />
-              <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-              <Route path="/success" element={<SmartProtectedRoute><SuccessPage /></SmartProtectedRoute>} />
-
-              {/* Old To-Do route removed; consolidated into /tasks (Workboard) */}
-
-              {/* Pages légales */}
-              <Route path="/terms-of-service" element={<TermsOfService />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/cookie-policy" element={<CookiePolicy />} />
-
-              {/* Invoices - version optimisée */}
-              <Route path="/invoices" element={<SmartProtectedRoute><InvoicesLayout /></SmartProtectedRoute>}>
-                <Route index element={<InvoicesPage />} />
-                <Route path="sent" element={<InvoicesPage />} />
-                <Route path="create" element={<InvoicesPage />} />
-                <Route path="templates" element={<InvoiceTemplatesPage />} />
-                <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
-              </Route>
-
-              {/* Onboarding - version optimisée */}
-              <Route path="/onboarding" element={<SmartProtectedRoute><OnboardingPage /></SmartProtectedRoute>} />
-              </Routes>
-              </Suspense>
-                </GlobalLoadingManager>
-                </SessionManagerWrapper>
+                <Suspense fallback={<div />}>
+  <Routes>...</Routes>
+</Suspense>
                      {/* Composants de debug - seulement en développement */}
                      {import.meta.env.DEV && (
                        <>
