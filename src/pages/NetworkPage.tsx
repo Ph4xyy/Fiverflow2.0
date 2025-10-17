@@ -61,9 +61,37 @@ export default function NetworkPage() {
   const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
   const [setupLoading, setSetupLoading] = useState(false);
 
-  const referralCode = (user as any)?.username || '';
-  const referralLink = referralCode ? `${window.location.origin}/app/${referralCode}` : '';
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [isGeneratingUsername, setIsGeneratingUsername] = useState(false);
+  
+  // Use local state for username to force updates
+  const referralCode = userProfile?.username || (user as any)?.username || '';
+  const referralLink = referralCode ? `${window.location.origin}/app/${referralCode}` : '';
+
+  // Load user profile on component mount
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('id, username, name, email')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) {
+          console.error('Error loading user profile:', error);
+        } else {
+          setUserProfile(data);
+        }
+      } catch (error) {
+        console.error('Error loading user profile:', error);
+      }
+    };
+    
+    loadUserProfile();
+  }, [user?.id]);
 
   // --------- UI helpers (dark theme)
   const card = 'bg-[#11151D] rounded-xl shadow-sm border border-zinc-800';
@@ -106,6 +134,7 @@ export default function NetworkPage() {
       
       if (existingUser.username) {
         toast.success('You already have a username: ' + existingUser.username);
+        setUserProfile(existingUser); // Update local state
         return;
       }
       
@@ -203,10 +232,8 @@ export default function NetworkPage() {
       } else {
         console.log('✅ Username updated successfully');
         toast.success('Username generated successfully: ' + newUsername);
-        // Refresh user data
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        // Update local state instead of reloading
+        setUserProfile(prev => ({ ...prev, username: newUsername }));
       }
     } catch (error) {
       console.error('💥 Unexpected error generating username:', error);
