@@ -82,16 +82,39 @@ export default function NetworkPage() {
   };
 
   const generateUsername = async () => {
-    if (!user) return;
+    if (!user) {
+      toast.error('User not found');
+      return;
+    }
     
     setIsGeneratingUsername(true);
     try {
+      console.log('🔄 Generating username for user:', user.id);
+      
+      // First, let's check if user already has a username
+      const { data: existingUser, error: fetchError } = await supabase
+        .from('users')
+        .select('username, name, email')
+        .eq('id', user.id)
+        .single();
+      
+      if (fetchError) {
+        console.error('Error fetching user data:', fetchError);
+        toast.error('Failed to fetch user data');
+        return;
+      }
+      
+      if (existingUser.username) {
+        toast.info('You already have a username: ' + existingUser.username);
+        return;
+      }
+      
       // Generate a username based on user's name or email
       let baseUsername = '';
-      if (user.user_metadata?.name) {
-        baseUsername = user.user_metadata.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-      } else if (user.email) {
-        baseUsername = user.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (existingUser.name) {
+        baseUsername = existingUser.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      } else if (existingUser.email) {
+        baseUsername = existingUser.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
       } else {
         baseUsername = 'user';
       }
@@ -101,27 +124,93 @@ export default function NetworkPage() {
         baseUsername = baseUsername + '123';
       }
       
-      // Add random suffix to ensure uniqueness
-      const randomSuffix = Math.floor(Math.random() * 10000);
-      const newUsername = baseUsername + randomSuffix;
+      // Try to generate a unique username
+      let newUsername = baseUsername;
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      while (attempts < maxAttempts) {
+        // Add random suffix to ensure uniqueness
+        const randomSuffix = Math.floor(Math.random() * 10000);
+        newUsername = baseUsername + randomSuffix;
+        
+        // Check if username is available
+        try {
+          const { data: isAvailable, error: checkError } = await supabase.rpc('is_username_available', {
+            username_to_check: newUsername
+          });
+          
+          if (checkError) {
+            console.warn('RPC function not available, using direct query:', checkError);
+            // Fallback: direct database query
+            const { data: existingUsers, error: directError } = await supabase
+              .from('users')
+              .select('username')
+              .eq('username', newUsername)
+              .limit(1);
+            
+            if (directError) {
+              console.error('Error checking username availability:', directError);
+              toast.error('Failed to check username availability');
+              return;
+            }
+            
+            if (!existingUsers || existingUsers.length === 0) {
+              break; // Username is available
+            }
+          } else if (isAvailable) {
+            break; // Username is available
+          }
+        } catch (rpcError) {
+          console.warn('RPC function not available, using direct query:', rpcError);
+          // Fallback: direct database query
+          const { data: existingUsers, error: directError } = await supabase
+            .from('users')
+            .select('username')
+            .eq('username', newUsername)
+            .limit(1);
+          
+          if (directError) {
+            console.error('Error checking username availability:', directError);
+            toast.error('Failed to check username availability');
+            return;
+          }
+          
+          if (!existingUsers || existingUsers.length === 0) {
+            break; // Username is available
+          }
+        }
+        
+        attempts++;
+      }
+      
+      if (attempts >= maxAttempts) {
+        // Fallback: use user ID
+        newUsername = 'user' + user.id.substring(0, 8).replace(/-/g, '');
+      }
+      
+      console.log('📝 Generated username:', newUsername);
       
       // Update user profile with new username
-      const { error } = await supabase
+      const { error: updateError } = await supabase
         .from('users')
         .update({ username: newUsername })
         .eq('id', user.id);
       
-      if (error) {
-        console.error('Error updating username:', error);
-        toast.error('Failed to generate username');
+      if (updateError) {
+        console.error('Error updating username:', updateError);
+        toast.error('Failed to update username: ' + updateError.message);
       } else {
-        toast.success('Username generated successfully!');
+        console.log('✅ Username updated successfully');
+        toast.success('Username generated successfully: ' + newUsername);
         // Refresh user data
-        window.location.reload();
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       }
     } catch (error) {
-      console.error('Error generating username:', error);
-      toast.error('An error occurred');
+      console.error('💥 Unexpected error generating username:', error);
+      toast.error('An unexpected error occurred: ' + (error as Error).message);
     } finally {
       setIsGeneratingUsername(false);
     }
