@@ -36,17 +36,13 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
   const lastUserIdRef = useRef<string | null>(null);
 
   const fetchSubscription = useCallback(async () => {
-    console.log('💳 Fetching Stripe subscription...');
-    
     if (!isSupabaseConfigured || !supabase) {
-      console.log('🎭 Supabase not configured, no subscription data');
       setSubscription(null);
       setLoading(false);
       return;
     }
 
     if (!user) {
-      console.log('❌ No user found for subscription');
       setSubscription(null);
       setLoading(false);
       return;
@@ -55,14 +51,12 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
     try {
       setError(null);
       
-      console.log('🔍 Querying user subscription...');
       const { data, error: subError } = await supabase
         .from('stripe_user_subscriptions')
         .select('*')
         .maybeSingle();
 
       if (subError) {
-        console.error('❌ Error fetching subscription:', subError);
         throw subError;
       }
 
@@ -75,14 +69,11 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
           product_description: product?.description
         };
         
-        console.log('✅ Subscription loaded:', enrichedSubscription);
         setSubscription(enrichedSubscription);
       } else {
-        console.log('ℹ️ No subscription found');
         setSubscription(null);
       }
     } catch (error) {
-      console.error('💥 Error fetching subscription:', error);
       setError(error instanceof Error ? error.message : 'Failed to fetch subscription');
       setSubscription(null);
     } finally {
@@ -91,7 +82,6 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
   }, [user?.id]); // Only depend on user.id
 
   const createCheckoutSession = useCallback(async (priceId: string, mode: 'subscription' | 'payment', trialDays?: number): Promise<string | null> => {
-    console.log('🛒 Creating checkout session...', { priceId, mode });
     
     if (!isSupabaseConfigured || !supabase) {
       toast.error('Payment system not configured');
@@ -141,12 +131,10 @@ export const useStripeSubscription = (): UseStripeSubscriptionReturn => {
       }
 
       const data = await response.json();
-      console.log('✅ Checkout session created:', data);
       
       toast.success('Redirecting to checkout...', { id: toastId });
       return data.url;
     } catch (error) {
-      console.error('💥 Error creating checkout session:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create checkout session');
       return null;
     }

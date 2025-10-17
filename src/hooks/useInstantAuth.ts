@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserData } from '../contexts/UserDataContext';
 
@@ -7,7 +7,7 @@ interface InstantAuthState {
   loading: boolean;
   role: string | null;
   roleLoading: boolean;
-  isReady: boolean; // Nouveau: indique si tout est prêt
+  isReady: boolean;
 }
 
 /**
@@ -17,7 +17,6 @@ interface InstantAuthState {
 export const useInstantAuth = (): InstantAuthState => {
   const { user, loading: authLoading } = useAuth();
   const userData = useUserData();
-  const [isReady, setIsReady] = useState(false);
   const hasInitializedRef = useRef(false);
 
   // 🔥 Cache ultra-agressif pour navigation instantanée
@@ -28,44 +27,15 @@ export const useInstantAuth = (): InstantAuthState => {
   
   // Priorité absolue au cache pour navigation instantanée
   const effectiveRole = roleFromContext || roleFromMeta || roleFromSessionCache || roleFromLocalCache || null;
-  const roleLoading = Boolean(userData?.loading) && !roleFromSessionCache && !roleFromLocalCache && !roleFromMeta;
 
-  // 🔥 Initialisation ultra-rapide
+  // Initialisation rapide
   useEffect(() => {
     if (!hasInitializedRef.current) {
       hasInitializedRef.current = true;
-      
-      // Navigation instantanée si on a un cache
-      if ((roleFromSessionCache || roleFromLocalCache || roleFromMeta) && user) {
-        setIsReady(true);
-        return;
-      }
-      
-      // Si pas de cache mais auth terminée, on est prêt
-      if (!authLoading && user) {
-        setIsReady(true);
-      }
     }
   }, [authLoading, user, roleFromSessionCache, roleFromLocalCache, roleFromMeta]);
 
-  // 🔥 Marquer comme prêt dès que l'auth est terminée ET qu'on a un utilisateur
-  useEffect(() => {
-    if (!authLoading && user) {
-      setIsReady(true);
-    }
-  }, [authLoading, user]);
-
-  // 🔥 Debug logging pour identifier le problème
-  console.log('⚡ useInstantAuth:', {
-    user: user?.id,
-    loading: authLoading,
-    roleLoading,
-    isReady,
-    effectiveRole,
-    roleFromSessionCache,
-    roleFromMeta,
-    roleFromContext
-  });
+  // Debug logging supprimé pour éviter le spam de console
 
   // 🔥 NAVIGATION ULTRA-INSTANTANÉE - Toujours prêt, jamais de loading
   return {
