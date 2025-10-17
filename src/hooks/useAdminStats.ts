@@ -38,7 +38,7 @@ export interface AdminStats {
     name: string | null;
     created_at: string;
     role: string | null;
-    is_pro: boolean;
+    current_plan: string;
   }>;
   recentOrders: Array<{
     id: string;
@@ -161,8 +161,8 @@ export const useAdminStats = (startDate: string, endDate: string) => {
           { data: usersAll, error: usersAllErr },
           { data: usersRange, error: usersRangeErr }
         ] = await Promise.all([
-          supabase.from('users').select('id, email, name, role, is_pro, created_at'),
-          supabase.from('users').select('id, email, name, role, is_pro, created_at')
+          supabase.from('users').select('id, email, name, role, current_plan, created_at'),
+          supabase.from('users').select('id, email, name, role, current_plan, created_at')
             .gte('created_at', startISO)
             .lte('created_at', endISO)
         ]);
@@ -178,13 +178,13 @@ export const useAdminStats = (startDate: string, endDate: string) => {
 
         // Répartition des plans (TOUS les utilisateurs, pas seulement la période)
         const allUsers = usersAll ?? [];
-        const freeUsers = allUsers.filter(u => !u.is_pro).length;
-        const proUsers = allUsers.filter(u => u.is_pro).length;
+        const freeUsers = allUsers.filter(u => u.current_plan === 'free').length;
+        const proUsers = allUsers.filter(u => u.current_plan === 'pro' || u.current_plan === 'excellence').length;
 
         // Utilisateurs récents (tous)
         const { data: recentUsersData, error: recentUsersErr } = await supabase
           .from('users')
-          .select('id, email, name, role, is_pro, created_at')
+          .select('id, email, name, role, current_plan, created_at')
           .order('created_at', { ascending: false })
           .limit(10);
 

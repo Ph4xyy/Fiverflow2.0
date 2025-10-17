@@ -505,11 +505,11 @@ const AdminDashboard: React.FC = () => {
                         </span>
                       )}
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        u.is_pro 
+                        u.current_plan === 'pro' || u.current_plan === 'excellence'
                           ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                           : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200'
                       }`}>
-                        {u.is_pro ? 'Pro' : 'Free'}
+                        {u.current_plan === 'pro' || u.current_plan === 'excellence' ? 'Pro' : 'Free'}
                       </span>
                     </div>
                   </div>

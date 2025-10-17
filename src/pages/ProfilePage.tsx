@@ -31,7 +31,7 @@ interface UserProfile {
   name: string | null;
   activity: string | null;
   country: string | null;
-  is_pro: boolean | null;
+  current_plan: string | null;
   referrer_id: string | null;
   role: string | null;
   created_at: string | null;
@@ -139,7 +139,7 @@ const ProfilePage: React.FC = () => {
     name: 'John Doe',
     activity: 'Web Development',
     country: 'France',
-    is_pro: false,
+    current_plan: 'free',
     referrer_id: null,
     role: 'user',
     created_at: new Date().toISOString()
@@ -239,7 +239,7 @@ const ProfilePage: React.FC = () => {
           name: null,
           activity: null,
           country: null,
-          is_pro: false,
+          current_plan: 'free',
           referrer_id: null,
           role: 'user',
           created_at: null
@@ -271,7 +271,7 @@ const ProfilePage: React.FC = () => {
         name: null,
         activity: null,
         country: null,
-        is_pro: false,
+        current_plan: 'free',
         referrer_id: null,
         role: 'user',
         created_at: null
@@ -1693,11 +1693,11 @@ const ProfilePage: React.FC = () => {
                   )}
                   <div className="flex items-center justify-center sm:justify-start space-x-2 mt-2">
                     <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                      profile.is_pro
+                      profile.current_plan === 'pro' || profile.current_plan === 'excellence'
                         ? 'bg-gradient-to-r from-purple-500/20 to-pink-600/20 text-purple-300 ring-1 ring-purple-500/30'
                         : 'bg-slate-800/50 text-slate-300 ring-1 ring-slate-700/50'
                     }`}>
-                      {profile.is_pro ? 'Pro' : 'Free'}
+                      {profile.current_plan === 'pro' || profile.current_plan === 'excellence' ? 'Pro' : 'Free'}
                     </span>
                     {profile.role === 'admin' && (
                       <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gradient-to-r from-red-500/20 to-orange-500/20 text-red-300 ring-1 ring-red-500/30">

@@ -46,7 +46,7 @@ export const useUserPermissions = () => {
           // Fallback: utiliser les données de base
           const { data: userData, error: userError } = await supabase
             .from('users')
-            .select('role, current_plan, is_pro')
+            .select('role, current_plan')
             .eq('id', user.id)
             .single();
 
@@ -54,15 +54,15 @@ export const useUserPermissions = () => {
 
           const fallbackPermissions: UserPermissions = {
             role: userData.role || 'user',
-            plan: userData.current_plan || (userData.is_pro ? 'pro' : 'free'),
+            plan: userData.current_plan || 'free',
             can_access_admin: userData.role === 'admin',
-            can_create_invoices: userData.is_pro || userData.current_plan === 'pro',
+            can_create_invoices: userData.current_plan === 'pro' || userData.current_plan === 'excellence',
             can_create_templates: true,
-            can_export_data: userData.is_pro || userData.current_plan === 'pro',
+            can_export_data: userData.current_plan === 'pro' || userData.current_plan === 'excellence',
             can_manage_clients: true,
             can_manage_tasks: true,
-            max_invoices_per_month: userData.is_pro || userData.current_plan === 'pro' ? 100 : 3,
-            max_clients: userData.is_pro || userData.current_plan === 'pro' ? 100 : 5
+            max_invoices_per_month: userData.current_plan === 'pro' || userData.current_plan === 'excellence' ? 100 : 3,
+            max_clients: userData.current_plan === 'pro' || userData.current_plan === 'excellence' ? 100 : 5
           };
 
           setPermissions(fallbackPermissions);
