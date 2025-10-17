@@ -78,14 +78,10 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         console.error('[UserDataContext] ❌ Error fetching user role:', result.error);
         // En cas d'erreur autre que JWT, fallback sur 'user'
         setRole('user');
-        sessionStorage.setItem('role', 'user');
-        localStorage.setItem('userRole', 'user');
       } else {
         const fetchedRole = result.data?.role === 'admin' ? 'admin' : 'user';
         console.log('[UserDataContext] ✅ Role fetched from DB:', fetchedRole);
         setRole(fetchedRole);
-        sessionStorage.setItem('role', fetchedRole);
-        localStorage.setItem('userRole', fetchedRole);
         lastFetchedUserIdRef.current = userId;
       }
     } catch (err: any) {
@@ -149,25 +145,8 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.log('[UserDataContext] ✅ Using user_metadata role:', userMetaRole);
       const resolvedRole = userMetaRole === 'admin' ? 'admin' : 'user';
       setRole(resolvedRole);
-      sessionStorage.setItem('role', resolvedRole);
-      localStorage.setItem('userRole', resolvedRole);
       setLoading(false);
       lastFetchedUserIdRef.current = user.id;
-      return;
-    }
-    
-    // PRIORITÉ 3: Check cache (sessionStorage first, then localStorage)
-    const sessionRole = sessionStorage.getItem('role');
-    const localRole = localStorage.getItem('userRole');
-    const cachedRole = sessionRole || localRole;
-    
-    if (cachedRole && lastFetchedUserIdRef.current === user.id) {
-      console.log('[UserDataContext] ✓ Using cached role:', cachedRole);
-      const resolvedRole = cachedRole === 'admin' ? 'admin' : 'user';
-      setRole(resolvedRole);
-      sessionStorage.setItem('role', resolvedRole);
-      localStorage.setItem('userRole', resolvedRole);
-      setLoading(false);
       return;
     }
 

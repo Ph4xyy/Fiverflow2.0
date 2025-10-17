@@ -1,7 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserData } from '../contexts/UserDataContext';
-import { authCache } from '../lib/authCache';
 
 interface OptimizedAuthState {
   user: any;
@@ -11,30 +9,20 @@ interface OptimizedAuthState {
 }
 
 /**
- * Hook optimisé qui combine AuthContext et UserDataContext
- * pour éviter les états de loading multiples et les rechargements inutiles
+ * Hook simplifié qui combine AuthContext et UserDataContext
+ * Navigation ultra-fluide sans cache
  */
 export const useOptimizedAuth = (): OptimizedAuthState => {
   const { user, loading: authLoading } = useAuth();
   const userData = useUserData();
   
   // Get role from multiple sources with fallback
-  const roleFromSessionCache = sessionStorage.getItem('role');
   const roleFromMeta = user?.app_metadata?.role || user?.user_metadata?.role;
   const roleFromContext = userData?.role;
   
-  const effectiveRole = roleFromContext || roleFromMeta || roleFromSessionCache || null;
+  const effectiveRole = roleFromContext || roleFromMeta || null;
   
   const roleLoading = Boolean(userData?.loading);
-  
-  // 🔥 Debug logging pour identifier le problème
-  console.log('🔍 useOptimizedAuth:', {
-    user: user?.id,
-    authLoading,
-    roleLoading,
-    effectiveRole,
-    userDataLoading: userData?.loading
-  });
   
   return {
     user,

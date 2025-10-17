@@ -550,7 +550,7 @@ const DashboardPage = () => {
 
         {/* Mini calendar + upcoming */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className={`lg:col-span-2 ${cardClass} relative overflow-hidden p-5`}>
+          <div className={`lg:col-span-1 ${cardClass} relative overflow-hidden p-5`}>
             <div className="absolute -left-10 -bottom-10 w-40 h-40 rounded-full opacity-10 blur-3xl bg-gradient-to-br from-accent-purple to-accent-blue" />
             <div className="flex items-center mb-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center mr-2 shadow-glow-purple">
@@ -612,7 +612,7 @@ const DashboardPage = () => {
             )}
           </div>
 
-          <div className={`${cardClass} p-5`}>
+          <div className={`lg:col-span-2 ${cardClass} p-5`}>
             <div className="flex items-center mb-3">
               <div className={`w-10 h-10 rounded-xl ${subtleBg} flex items-center justify-center mr-2`}>
                 <Clock size={18} className="text-white/90" />

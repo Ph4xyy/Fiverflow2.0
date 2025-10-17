@@ -81,17 +81,9 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
       if (userMetaRole) {
         setRole(String(userMetaRole));
         setRoleLoading(false);
-        sessionStorage.setItem('role', String(userMetaRole));
         return;
       }
 
-      // PRIORITÉ 3: Check cache
-      const cached = sessionStorage.getItem('role');
-      if (cached) {
-        setRole(String(cached));
-        setRoleLoading(false);
-        return;
-      }
 
       if (!isSupabaseConfigured || !supabase) {
         setRole(null); // Pas de Supabase = rôle inconnu
@@ -119,8 +111,7 @@ export const usePlanRestrictions = (): UsePlanRestrictionsReturn => {
             setRole(null);
           }
         } else {
-          setRole(data?.role ?? null);
-          if (data?.role) sessionStorage.setItem('role', String(data.role));
+        setRole(data?.role ?? null);
         }
       } catch (err: any) {
         if (!isMounted) return;

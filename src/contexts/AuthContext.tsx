@@ -102,8 +102,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const sessionUser = session?.user ?? null;
       if (!sessionUser) {
-        sessionStorage.removeItem('role');
-        localStorage.removeItem('userRole');
         return;
       }
 

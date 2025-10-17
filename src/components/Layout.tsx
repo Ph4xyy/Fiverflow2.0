@@ -46,25 +46,14 @@ const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
     user?.user_metadata?.role ||
     null;
 
-  // 🔥 Vérifier les deux caches (sessionStorage et localStorage)
-  const roleFromSessionCache = (typeof window !== 'undefined'
-    ? sessionStorage.getItem('role')
-    : null) as string | null;
-    
-  const roleFromLocalCache = (typeof window !== 'undefined'
-    ? localStorage.getItem('userRole')
-    : null) as string | null;
-
-  const effectiveRole = roleFromMeta || userRole || roleFromSessionCache || roleFromLocalCache;
+  const effectiveRole = roleFromMeta || userRole || null;
   const isAdmin = effectiveRole === 'admin';
   
   // 🔥 Debug pour voir si le rôle admin est détecté
   if (isAdmin && import.meta.env.DEV) {
     console.log('👑 Layout: Admin role detected from:', 
       roleFromMeta ? 'metadata' : 
-      userRole ? 'userRole prop' : 
-      roleFromSessionCache ? 'sessionStorage' : 
-      roleFromLocalCache ? 'localStorage' : 'unknown'
+      userRole ? 'userRole prop' : 'unknown'
     );
   }
   
@@ -114,15 +103,14 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       return;
     }
 
-    // Try to get role from cache or metadata first
-    const cachedRole = sessionStorage.getItem('role');
+    // Try to get role from metadata first
     const metaRole = user.app_metadata?.role || user.user_metadata?.role;
-    const effectiveRole = metaRole || cachedRole || 'user';
+    const effectiveRole = metaRole || 'user';
     
     setUserRole(effectiveRole);
     
-    // Only fetch from DB if no role found in cache/metadata
-    if (!cachedRole && !metaRole && isSupabaseConfigured && supabase) {
+    // Only fetch from DB if no role found in metadata
+    if (!metaRole && isSupabaseConfigured && supabase) {
       const fetchRole = async () => {
         try {
           const { data, error } = await supabase!
@@ -133,7 +121,6 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
           if (!error && data?.role) {
             setUserRole(data.role);
-            sessionStorage.setItem('role', data.role);
           }
         } catch (error) {
           console.error('Error checking user role:', error);
