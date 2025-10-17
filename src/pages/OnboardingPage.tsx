@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Briefcase, Globe, ArrowRight, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-
 import { supabase } from '../lib/supabase';
+import toast from 'react-hot-toast';
 
 const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, processPendingReferral } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
@@ -91,6 +91,20 @@ const OnboardingPage: React.FC = () => {
         .eq('id', user!.id);
 
       if (updateError) throw updateError;
+
+      // Process pending referral if exists
+      console.log('🔄 Processing pending referral...');
+      const referralResult = await processPendingReferral(user!.id);
+      
+      if (referralResult.success) {
+        if (referralResult.message) {
+          toast.success(referralResult.message);
+        }
+      } else if (referralResult.error) {
+        console.warn('⚠️ Referral processing failed:', referralResult.error);
+        // Don't fail onboarding if referral fails
+        toast.error(`Referral failed: ${referralResult.error}`);
+      }
 
       // Rediriger vers le dashboard
       navigate('/dashboard');

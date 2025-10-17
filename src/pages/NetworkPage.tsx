@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import PlanRestrictedPage from '../components/PlanRestrictedPage';
 import { useAuth } from '../contexts/AuthContext';
-
 import { useCurrency } from '../contexts/CurrencyContext';
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
+import { useReferrals } from '../hooks/useReferrals';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { usePayouts } from '../hooks/usePayouts';
 import PayoutModal from '../components/PayoutModal';
@@ -26,72 +26,6 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-interface ReferralData {
-  id: string;
-  referred_id: string;
-  subscription_status: string;
-  created_at: string;
-  referred_user: {
-    email: string;
-    name: string;
-  };
-}
-
-interface ReferralLog {
-  id: string;
-  amount_earned: number;
-  date: string;
-  referred_user: {
-    email: string;
-    name: string;
-  };
-}
-
-// Mock data for when Supabase is not configured
-const mockReferrals: ReferralData[] = [
-  {
-    id: '1',
-    referred_id: 'mock-referred-1',
-    subscription_status: 'paid',
-    created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    referred_user: { email: 'john.doe@example.com', name: 'John Doe' }
-  },
-  {
-    id: '2',
-    referred_id: 'mock-referred-2',
-    subscription_status: 'trial',
-    created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    referred_user: { email: 'jane.smith@example.com', name: 'Jane Smith' }
-  },
-  {
-    id: '3',
-    referred_id: 'mock-referred-3',
-    subscription_status: 'paid',
-    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    referred_user: { email: 'mike.johnson@example.com', name: 'Mike Johnson' }
-  }
-];
-
-const mockReferralLogs: ReferralLog[] = [
-  {
-    id: '1',
-    amount_earned: 22.0,
-    date: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-    referred_user: { email: 'john.doe@example.com', name: 'John Doe' }
-  },
-  {
-    id: '2',
-    amount_earned: 39.0,
-    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    referred_user: { email: 'mike.johnson@example.com', name: 'Mike Johnson' }
-  },
-  {
-    id: '3',
-    amount_earned: 22.0,
-    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    referred_user: { email: 'sarah.wilson@example.com', name: 'Sarah Wilson' }
-  }
-];
 
 export default function NetworkPage() {
   const { user } = useAuth();
@@ -99,6 +33,16 @@ export default function NetworkPage() {
 
   // 🔒 Plan access
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
+
+  // 🔗 Referral data
+  const { 
+    referrals, 
+    referralLogs, 
+    totalEarnings, 
+    loading: referralLoading, 
+    error: referralError,
+    refreshData: refreshReferralData 
+  } = useReferrals();
 
   const {
     payoutDetails,
@@ -109,14 +53,9 @@ export default function NetworkPage() {
     setupStripeAccount,
     checkAccountStatus,
     requestPayout,
-    refreshData
+    refreshData: refreshPayoutData
   } = usePayouts();
 
-  const [referrals, setReferrals] = useState<ReferralData[]>([]);
-  const [referralLogs, setReferralLogs] = useState<ReferralLog[]>([]);
-  const [totalEarnings, setTotalEarnings] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [pageError, setPageError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
   const [setupLoading, setSetupLoading] = useState(false);
@@ -135,90 +74,9 @@ export default function NetworkPage() {
   const tdMuted = 'text-sm text-zinc-400';
   const tdStrong = 'text-sm font-medium text-zinc-100';
 
-  useEffect(() => {
-    if (user) fetchReferralData();
-  }, [user]);
-
-  const fetchReferralData = async () => {
-    // If Supabase is not configured, use mock data
-    if (!isSupabaseConfigured || !supabase) {
-      setReferrals(mockReferrals);
-      setReferralLogs(mockReferralLogs);
-      setTotalEarnings(mockReferralLogs.reduce((s, l) => s + l.amount_earned, 0));
-      setLoading(false);
-      setPageError(null);
-      return;
-    }
-
-    if (!user) {
-      setReferrals([]);
-      setReferralLogs([]);
-      setTotalEarnings(0);
-      setLoading(false);
-      setPageError(null);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setPageError(null);
-
-      const { data: referralsData, error: referralsError } = await supabase
-        .from('referrals')
-        .select(
-          `
-          id,
-          referred_id,
-          subscription_status,
-          created_at,
-          referred_user:users!referrals_referred_id_fkey(email, name)
-        `
-        )
-        .eq('referrer_id', (user as any).id);
-
-      if (referralsError) throw referralsError;
-
-      const { data: logsData, error: logsError } = await supabase
-        .from('referral_logs')
-        .select(
-          `
-          id,
-          amount_earned,
-          date,
-          referred_user:users!referral_logs_referred_user_id_fkey(email, name)
-        `
-        )
-        .eq('referrer_id', (user as any).id)
-        .order('date', { ascending: false });
-
-      if (logsError) throw logsError;
-
-      setReferrals(referralsData || []);
-      setReferralLogs(logsData || []);
-      setTotalEarnings((logsData || []).reduce((sum, log) => sum + Number(log.amount_earned), 0));
-    } catch (error) {
-      setPageError(error instanceof Error ? error.message : 'Failed to load referral data');
-      setReferrals(mockReferrals);
-      setReferralLogs(mockReferralLogs);
-      setTotalEarnings(mockReferralLogs.reduce((s, l) => s + l.amount_earned, 0));
-      toast.error('Using demo data - connection to database failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Listen for session refresh to refetch data (placed after function definition)
-  useEffect(() => {
-    const onRefreshed = () => {
-      if (user) fetchReferralData();
-    };
-    window.addEventListener('ff:session:refreshed', onRefreshed as any);
-    return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
-  }, [user]); // 🔥 FIXED: Remove fetchReferralData from dependencies to prevent infinite loops
-
   const handleRetry = async () => {
-    await fetchReferralData();
-    await refreshData();
+    await refreshReferralData();
+    await refreshPayoutData();
   };
 
   const copyReferralLink = async () => {
@@ -245,11 +103,11 @@ export default function NetworkPage() {
 
   const handleCheckStatus = async () => {
     await checkAccountStatus();
-    await refreshData();
+    await refreshPayoutData();
   };
 
   const handlePayoutSuccess = () => {
-    refreshData();
+    refreshPayoutData();
     setIsPayoutModalOpen(false);
   };
 
@@ -316,7 +174,7 @@ export default function NetworkPage() {
   }
 
   // Loading state (data)
-    if ((loading && payoutLoading) || (loading && !pageError && !payoutError)) {
+    if ((referralLoading && payoutLoading) || (referralLoading && !referralError && !payoutError)) {
       return (
         <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
           <div className="text-center">
@@ -328,7 +186,7 @@ export default function NetworkPage() {
     }
 
   // Critical error state
-  if (pageError && payoutError) {
+  if (referralError && payoutError) {
     return (
       <div className="min-h-screen bg-zinc-900 flex items-center justify-center p-4">
         <div className={`${card} max-w-md w-full p-8 text-center`}>
@@ -338,7 +196,7 @@ export default function NetworkPage() {
             {'We\'re having trouble connecting to our services. Please check your internet connection and try again.'}
           </p>
           <div className="space-y-2 text-sm text-zinc-400 mb-6 text-left">
-            <p><strong>{'Referral Error:'}</strong> {pageError}</p>
+            <p><strong>{'Referral Error:'}</strong> {referralError}</p>
             <p><strong>{'Payout Error:'}</strong> {payoutError}</p>
           </div>
           <button
@@ -355,7 +213,7 @@ export default function NetworkPage() {
   return (
     <Layout>
       <div className="space-y-6 p-4 sm:p-0">
-        {(pageError || payoutError) && (
+        {(referralError || payoutError) && (
           <div className="mb-6 rounded-xl p-4 border border-blue-800 bg-blue-900/20">
             <div className="flex items-start space-x-3">
               <AlertCircle className="text-blue-400 mt-0.5 flex-shrink-0" size={20} />

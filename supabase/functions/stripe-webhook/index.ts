@@ -32,19 +32,42 @@ async function processReferralCommission(customerId: string, subscriptionAmount:
     
     const userId = customerData.user_id;
     
-    // Check if this user was referred
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('referrer_id')
-      .eq('id', userId)
+    // Check if this user was referred using the referrals table
+    const { data: referralData, error: referralError } = await supabase
+      .from('referrals')
+      .select('referrer_id, subscription_status')
+      .eq('referred_id', userId)
       .maybeSingle();
     
-    if (userError || !userData?.referrer_id) {
+    if (referralError) {
+      console.error('❌ Error checking referral:', referralError);
+      return;
+    }
+    
+    if (!referralData) {
       console.log('ℹ️ User has no referrer, skipping commission');
       return;
     }
     
-    const referrerId = userData.referrer_id;
+    const referrerId = referralData.referrer_id;
+    
+    // Check if commission already exists for this subscription
+    const { data: existingCommission, error: existingError } = await supabase
+      .from('referral_logs')
+      .select('id')
+      .eq('referrer_id', referrerId)
+      .eq('referred_user_id', userId)
+      .maybeSingle();
+    
+    if (existingError) {
+      console.error('❌ Error checking existing commission:', existingError);
+      return;
+    }
+    
+    if (existingCommission) {
+      console.log('ℹ️ Commission already exists for this referral, skipping');
+      return;
+    }
     
     // Update referral status to 'paid'
     const { error: referralUpdateError } = await supabase

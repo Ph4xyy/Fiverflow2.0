@@ -11,6 +11,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ user: User | null; error: AuthError | null }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: any) => Promise<{ error: PostgrestError | null }>;
+  processPendingReferral: (userId: string) => Promise<{ success: boolean; error?: string; message?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -410,14 +411,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const urlParams = new URLSearchParams(window.location.search);
       const referralCode = urlParams.get('ref');
 
+      // Store referral code for later processing
       if (referralCode) {
-        const { data: referrer } = await supabase
+        // Validate referral code exists
+        const { data: referrer, error: referrerError } = await supabase
           .from('users')
-          .select('id')
+          .select('id, referral_code')
           .eq('referral_code', referralCode)
           .maybeSingle();
-        if (referrer?.id) {
-          sessionStorage.setItem('referrerId', referrer.id);
+        
+        if (referrerError) {
+          console.error('[AuthContext] signUp: Error validating referral code:', referrerError);
+        } else if (referrer?.id) {
+          sessionStorage.setItem('referralCode', referralCode);
+          console.log('[AuthContext] signUp: Valid referral code found:', referralCode);
+        } else {
+          console.warn('[AuthContext] signUp: Invalid referral code:', referralCode);
+          // Don't fail registration, just log the warning
         }
       }
 
@@ -443,12 +453,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  // Function to process pending referral after user completes onboarding
+  const processPendingReferral = async (userId: string) => {
     if (!isSupabaseConfigured || !supabase) {
-      return { user: null, error: null as unknown as AuthError };
+      return { success: false, error: 'Supabase not configured' };
     }
+
     try {
-      console.log('[AuthContext] signIn: Attempting to sign in...');
+      const referralCode = sessionStorage.getItem('referralCode');
+      
+      if (!referralCode) {
+        console.log('[AuthContext] processPendingReferral: No referral code found');
+        return { success: true, message: 'No referral code to process' };
+      }
+
+      console.log('[AuthContext] processPendingReferral: Processing referral code:', referralCode);
+
+      // Call the Edge function to create referral relationship
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.access_token) {
+        throw new Error('Failed to get session token');
+      }
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-referral`;
+      const headers = {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      };
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          referrer_code: referralCode,
+          user_id: userId
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create referral relationship');
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('[AuthContext] processPendingReferral: Success:', result.message);
+        // Clean up session storage
+        sessionStorage.removeItem('referralCode');
+        return { success: true, message: result.message };
+      } else {
+        console.error('[AuthContext] processPendingReferral: Failed:', result.error);
+        return { success: false, error: result.error };
+      }
+
+    } catch (error) {
+      console.error('[AuthContext] processPendingReferral: Error:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  };
+
+  const signIn = async (email: string, password: string) => {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
@@ -529,7 +594,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, authReady, signUp, signIn, signOut, updateProfile }}>
+    <AuthContext.Provider value={{ user, loading, authReady, signUp, signIn, signOut, updateProfile, processPendingReferral }}>
       {children}
     </AuthContext.Provider>
   );
