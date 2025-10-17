@@ -609,7 +609,7 @@ const CalendarPage: React.FC = () => {
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 initialView={currentView}
                 headerToolbar={false}
-                height="auto"
+                height={600}
                 expandRows
                 stickyHeaderDates
                 dayMaxEvents={3}
