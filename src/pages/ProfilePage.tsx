@@ -23,6 +23,7 @@ import {
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import EnhancedTwoFactorAuthModal from '../components/EnhancedTwoFactorAuthModal';
 
 /* ---------- Types d'origine ---------- */
 interface UserProfile {
@@ -131,6 +132,9 @@ const ProfilePage: React.FC = () => {
   const [mfaQrCode, setMfaQrCode] = useState<string | null>(null);
   const [mfaSecret, setMfaSecret] = useState<string | null>(null);
   const [mfaVerificationCode, setMfaVerificationCode] = useState('');
+  
+  // 2FA Modal state
+  const [show2FAModal, setShow2FAModal] = useState(false);
 
   // Mock data si Supabase non configuré
   const mockProfile: UserProfile = {
@@ -429,18 +433,12 @@ const ProfilePage: React.FC = () => {
       return;
     }
 
-    // Utiliser le système de loading global
-    if (setGlobalLoading) {
-      setGlobalLoading('data', true);
-    }
+    // Éviter les conflits de loading - utiliser seulement l'état local
     setEmailChanging(true);
     const toastId = toast.loading('Updating email...');
     
     // Timeout de sécurité pour éviter le loading infini
     const timeoutId = setTimeout(() => {
-      if (setGlobalLoading) {
-        setGlobalLoading('data', false);
-      }
       setEmailChanging(false);
       toast.error('Timeout: Email update took too long. Please try again.', { id: toastId });
     }, 30000); // 30 secondes max
@@ -474,16 +472,19 @@ const ProfilePage: React.FC = () => {
       } else {
         // Likely requires email confirmation. Do NOT update app DB yet.
         setEmailChange({ newEmail: '', currentPassword: '' });
-        toast.success('Confirmation sent. Validate the link to finalize.', { id: toastId });
+        toast.success(
+          'Email de vérification envoyé ! Vérifiez votre boîte de réception et cliquez sur le lien pour finaliser le changement d\'adresse email.', 
+          { 
+            id: toastId,
+            duration: 8000 // Afficher plus longtemps pour que l'utilisateur puisse lire
+          }
+        );
       }
     } catch (e) {
       console.error('[Profile] handleChangeEmail error:', e);
       toast.error('Failed to update email', { id: toastId });
     } finally {
       clearTimeout(timeoutId);
-      if (setGlobalLoading) {
-        setGlobalLoading('data', false);
-      }
       setEmailChanging(false);
     }
   };
@@ -518,6 +519,18 @@ const ProfilePage: React.FC = () => {
     loadMfaStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
+
+  // Nouvelle fonction pour ouvrir le modal 2FA amélioré
+  const handleEnable2FA = () => {
+    setShow2FAModal(true);
+  };
+
+  // Fonction appelée quand le 2FA est activé avec succès
+  const handle2FASuccess = () => {
+    setMfaEnabled(true);
+    setShow2FAModal(false);
+    toast.success('2FA activé avec succès !');
+  };
 
   const startEnrollMfa = async () => {
     if (!isSupabaseConfigured || !supabase || !user) {
@@ -1252,7 +1265,7 @@ const ProfilePage: React.FC = () => {
                     </div>
                   ) : !mfaEnrolling ? (
                     <button
-                      onClick={startEnrollMfa}
+                      onClick={handleEnable2FA}
                       className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg"
                     >
                       {'Enable 2FA'}
@@ -1854,6 +1867,13 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Modal 2FA amélioré */}
+      <EnhancedTwoFactorAuthModal
+        isOpen={show2FAModal}
+        onClose={() => setShow2FAModal(false)}
+        onSuccess={handle2FASuccess}
+      />
     </Layout>
   );
 };
