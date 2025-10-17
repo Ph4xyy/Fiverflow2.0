@@ -562,12 +562,14 @@ const DashboardPage = () => {
             {restrictionsLoading ? (
               <p className="text-slate-400">{'Loading...'}</p>
             ) : checkAccess('calendar') ? (
-              <div className="rounded-xl overflow-hidden ring-1 ring-[#1C2230]">
+              <div className="rounded-xl overflow-hidden ring-1 ring-[#1C2230] min-h-[300px]">
                 <FullCalendar
                   plugins={[dayGridPlugin]}
                   initialView="dayGridMonth"
                   headerToolbar={false}
-                  height={300}
+                  height="auto"
+                  contentHeight="auto"
+                  aspectRatio={1.35}
                   dayMaxEvents={2}
                   eventDisplay="block"
                   events={calendarEvents}
