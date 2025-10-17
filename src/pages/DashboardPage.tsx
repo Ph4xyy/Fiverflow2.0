@@ -567,7 +567,7 @@ const DashboardPage = () => {
                   plugins={[dayGridPlugin]}
                   initialView="dayGridMonth"
                   headerToolbar={false}
-                  height="auto"
+                  height={300}
                   dayMaxEvents={2}
                   eventDisplay="block"
                   events={calendarEvents}
