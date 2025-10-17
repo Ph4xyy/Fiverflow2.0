@@ -23,9 +23,9 @@ import {
   Wallet,
   ArrowUpRight,
   Shield,
-  Ban as Bank
+  Ban as Bank,
+  Loader2
 } from 'lucide-react';
-import toast from 'react-hot-toast';
 
 
 export default function NetworkPage() {
@@ -105,7 +105,7 @@ export default function NetworkPage() {
       }
       
       if (existingUser.username) {
-        toast.info('You already have a username: ' + existingUser.username);
+        toast.success('You already have a username: ' + existingUser.username);
         return;
       }
       
