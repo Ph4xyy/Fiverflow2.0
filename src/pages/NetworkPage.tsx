@@ -9,6 +9,7 @@ import { useReferrals } from '../hooks/useReferrals';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { usePayouts } from '../hooks/usePayouts';
 import PayoutModal from '../components/PayoutModal';
+import { useReferralLink } from '../hooks/useReferralLink';
 import toast from 'react-hot-toast';
 import {
   Users,
@@ -64,9 +65,10 @@ export default function NetworkPage() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isGeneratingUsername, setIsGeneratingUsername] = useState(false);
   
-  // Use local state for username to force updates
-  const referralCode = userProfile?.username || (user as any)?.username || '';
-  const referralLink = referralCode ? `${window.location.origin}/app/${referralCode}` : '';
+  // Use referral link hook for centralized link generation
+  const { referralLink, referralCode, isReady } = useReferralLink({
+    username: userProfile?.username || (user as any)?.username
+  });
 
   // Load user profile on component mount
   useEffect(() => {

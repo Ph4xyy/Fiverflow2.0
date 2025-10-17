@@ -13,6 +13,7 @@ interface AuthContextType {
   updateProfile: (updates: any) => Promise<{ error: PostgrestError | null }>;
   processPendingReferral: (userId: string) => Promise<{ success: boolean; error?: string; message?: string }>;
   processPendingReferralByUsername: (userId: string) => Promise<{ success: boolean; error?: string; message?: string }>;
+  activatePendingReferral: (userId: string, email: string) => Promise<{ success: boolean; error?: string; message?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -574,6 +575,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Function to activate pending referral from landing page
+  const activatePendingReferral = async (userId: string, email: string) => {
+    if (!isSupabaseConfigured || !supabase) {
+      return { success: false, error: 'Supabase not configured' };
+    }
+
+    try {
+      console.log('[AuthContext] activatePendingReferral: Checking for pending referral for email:', email);
+
+      // Call the database function to activate pending referral
+      const { data, error } = await supabase.rpc('activate_pending_referral', {
+        user_email: email,
+        user_id: userId
+      });
+
+      if (error) {
+        console.error('[AuthContext] activatePendingReferral: Database error:', error);
+        return { success: false, error: 'Database error: ' + error.message };
+      }
+
+      if (data.success) {
+        console.log('[AuthContext] activatePendingReferral: Success:', data.message);
+        return { success: true, message: data.message };
+      } else {
+        console.log('[AuthContext] activatePendingReferral: No pending referral found');
+        return { success: true, message: data.message || 'No pending referral found' };
+      }
+
+    } catch (error) {
+      console.error('[AuthContext] activatePendingReferral: Error:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  };
+
   const signIn = async (email: string, password: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -656,7 +691,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, authReady, signUp, signIn, signOut, updateProfile, processPendingReferral, processPendingReferralByUsername }}>
+    <AuthContext.Provider value={{ user, loading, authReady, signUp, signIn, signOut, updateProfile, processPendingReferral, processPendingReferralByUsername, activatePendingReferral }}>
       {children}
     </AuthContext.Provider>
   );
