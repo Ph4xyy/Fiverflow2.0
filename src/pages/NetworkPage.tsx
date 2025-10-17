@@ -9,6 +9,7 @@ import { useReferrals } from '../hooks/useReferrals';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { usePayouts } from '../hooks/usePayouts';
 import PayoutModal from '../components/PayoutModal';
+import toast from 'react-hot-toast';
 import {
   Users,
   Copy,
@@ -61,7 +62,8 @@ export default function NetworkPage() {
   const [setupLoading, setSetupLoading] = useState(false);
 
   const referralCode = (user as any)?.username || '';
-  const referralLink = `${window.location.origin}/app/${referralCode}`;
+  const referralLink = referralCode ? `${window.location.origin}/app/${referralCode}` : '';
+  const [isGeneratingUsername, setIsGeneratingUsername] = useState(false);
 
   // --------- UI helpers (dark theme)
   const card = 'bg-[#11151D] rounded-xl shadow-sm border border-zinc-800';
@@ -77,6 +79,52 @@ export default function NetworkPage() {
   const handleRetry = async () => {
     await refreshReferralData();
     await refreshPayoutData();
+  };
+
+  const generateUsername = async () => {
+    if (!user) return;
+    
+    setIsGeneratingUsername(true);
+    try {
+      // Generate a username based on user's name or email
+      let baseUsername = '';
+      if (user.user_metadata?.name) {
+        baseUsername = user.user_metadata.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      } else if (user.email) {
+        baseUsername = user.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+      } else {
+        baseUsername = 'user';
+      }
+      
+      // Ensure minimum length
+      if (baseUsername.length < 3) {
+        baseUsername = baseUsername + '123';
+      }
+      
+      // Add random suffix to ensure uniqueness
+      const randomSuffix = Math.floor(Math.random() * 10000);
+      const newUsername = baseUsername + randomSuffix;
+      
+      // Update user profile with new username
+      const { error } = await supabase
+        .from('users')
+        .update({ username: newUsername })
+        .eq('id', user.id);
+      
+      if (error) {
+        console.error('Error updating username:', error);
+        toast.error('Failed to generate username');
+      } else {
+        toast.success('Username generated successfully!');
+        // Refresh user data
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error generating username:', error);
+      toast.error('An error occurred');
+    } finally {
+      setIsGeneratingUsername(false);
+    }
   };
 
   const copyReferralLink = async () => {
@@ -445,33 +493,72 @@ export default function NetworkPage() {
         {/* Referral Link */}
         <div className={`${card} p-6 mb-8`}>
           <h2 className={h2 + ' mb-4'}>{'Your Referral Link'}</h2>
-          <div className="flex items-center space-x-4">
-            <div className="flex-1">
-                <input
-                  type="text"
-                  value={referralLink}
-                  readOnly
-                  className="w-full px-4 py-2 border border-zinc-800 rounded-lg bg-zinc-900 text-zinc-200 placeholder-zinc-500"
-                />
+          
+          {!referralCode ? (
+            <div className="text-center py-8">
+              <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+              <p className="text-zinc-400 mb-4">You don't have a username yet. Generate one to create your referral link.</p>
+              <button
+                onClick={generateUsername}
+                disabled={isGeneratingUsername}
+                className="flex items-center px-6 py-3 bg-blue-600 text-zinc-100 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mx-auto"
+              >
+                {isGeneratingUsername ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {'Generating...'}
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    {'Generate Username'}
+                  </>
+                )}
+              </button>
             </div>
-            <button
-              onClick={copyReferralLink}
-              className="flex items-center px-4 py-2 bg-blue-600 text-zinc-100 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              {copied ? (
-                <>
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  {'Copied!'}
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4 mr-2" />
-                  {'Copy'}
-                </>
-              )}
-            </button>
-          </div>
-          <p className={pSub + ' text-sm mt-2'}>{'Share this link to earn 20% commission on each paid subscription'}</p>
+          ) : (
+            <>
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={referralLink}
+                    readOnly
+                    className="w-full px-4 py-2 border border-zinc-800 rounded-lg bg-zinc-900 text-zinc-200 placeholder-zinc-500"
+                  />
+                </div>
+                <button
+                  onClick={copyReferralLink}
+                  className="flex items-center px-4 py-2 bg-blue-600 text-zinc-100 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  {copied ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      {'Copied!'}
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 mr-2" />
+                      {'Copy'}
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={generateUsername}
+                  disabled={isGeneratingUsername}
+                  className="flex items-center px-4 py-2 bg-zinc-700 text-zinc-100 rounded-lg hover:bg-zinc-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Generate new username"
+                >
+                  {isGeneratingUsername ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+              <p className={pSub + ' text-sm mt-2'}>{'Share this link to earn 20% commission on each paid subscription'}</p>
+            </>
+          )}
         </div>
 
         {/* Referrals List */}
