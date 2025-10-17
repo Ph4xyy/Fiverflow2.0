@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useTwoFactorAuth } from '../hooks/useTwoFactorAuth';
+import { useSimpleTwoFactorAuth } from '../hooks/useSimpleTwoFactorAuth';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 
@@ -22,7 +22,7 @@ const EnhancedTwoFactorAuthModal: React.FC<EnhancedTwoFactorAuthModalProps> = ({
   onSuccess 
 }) => {
   const { user } = useAuth();
-  const { generateSecret, verifyAndEnable, loading: twoFactorLoading } = useTwoFactorAuth();
+  const { generateSecret, verifyAndEnable, loading: twoFactorLoading } = useSimpleTwoFactorAuth();
   const [currentStep, setCurrentStep] = useState<TwoFactorAuthStep['step']>('password');
   const [loading, setLoading] = useState(false);
   

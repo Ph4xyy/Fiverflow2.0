@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTwoFactorAuth } from '../hooks/useTwoFactorAuth';
+import { useSimpleTwoFactorAuth } from '../hooks/useSimpleTwoFactorAuth';
 import { toast } from 'react-hot-toast';
 
 interface Login2FAVerificationProps {
@@ -15,7 +15,7 @@ const Login2FAVerification: React.FC<Login2FAVerificationProps> = ({
   onSuccess,
   userEmail
 }) => {
-  const { verifyCode, loading } = useTwoFactorAuth();
+  const { verifyCode, loading } = useSimpleTwoFactorAuth();
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);

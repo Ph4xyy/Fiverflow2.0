@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useTwoFactorAuth } from './useTwoFactorAuth';
+import { useSimpleTwoFactorAuth } from './useSimpleTwoFactorAuth';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 
@@ -18,7 +18,7 @@ interface AuthWith2FAResult {
 
 export const useAuthWith2FA = () => {
   const { user } = useAuth();
-  const { verifyCode, isEnabled } = useTwoFactorAuth();
+  const { verifyCode, isEnabled } = useSimpleTwoFactorAuth();
   const [loading, setLoading] = useState(false);
   const [requires2FA, setRequires2FA] = useState(false);
   const [pendingUser, setPendingUser] = useState<any>(null);
