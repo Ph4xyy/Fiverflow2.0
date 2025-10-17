@@ -166,10 +166,15 @@ FOREIGN KEY (referrer_id) REFERENCES users(id) ON DELETE SET NULL;
 CREATE INDEX IF NOT EXISTS idx_users_referrer_id ON users(referrer_id);
 
 -- Update RLS policies for referrals table
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Users can read own referrals as referrer" ON referrals;
+DROP POLICY IF EXISTS "Users can read referrals where they are referred" ON referrals;
 DROP POLICY IF EXISTS "Users can insert referrals as referrer" ON referrals;
 DROP POLICY IF EXISTS "Users can update own referrals as referrer" ON referrals;
+DROP POLICY IF EXISTS "System can insert referrals" ON referrals;
+DROP POLICY IF EXISTS "System can update referrals" ON referrals;
 
--- More restrictive policies
+-- Create new restrictive policies
 CREATE POLICY "Users can read own referrals as referrer"
   ON referrals
   FOR SELECT
@@ -198,7 +203,23 @@ CREATE POLICY "System can update referrals"
   WITH CHECK (true);
 
 -- Update referral_logs policies to be more secure
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Users can read own referral earnings" ON referral_logs;
+DROP POLICY IF EXISTS "Users can read referral logs for their subscriptions" ON referral_logs;
 DROP POLICY IF EXISTS "System can insert referral logs" ON referral_logs;
+
+-- Create new policies
+CREATE POLICY "Users can read own referral earnings"
+  ON referral_logs
+  FOR SELECT
+  TO authenticated
+  USING (referrer_id = auth.uid());
+
+CREATE POLICY "Users can read referral logs for their subscriptions"
+  ON referral_logs
+  FOR SELECT
+  TO authenticated
+  USING (referred_user_id = auth.uid());
 
 CREATE POLICY "System can insert referral logs"
   ON referral_logs

@@ -12,6 +12,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   updateProfile: (updates: any) => Promise<{ error: PostgrestError | null }>;
   processPendingReferral: (userId: string) => Promise<{ success: boolean; error?: string; message?: string }>;
+  processPendingReferralByUsername: (userId: string) => Promise<{ success: boolean; error?: string; message?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -511,6 +512,68 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('[AuthContext] processPendingReferral: Error:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  };
+
+  // Function to process pending referral by username after user completes onboarding
+  const processPendingReferralByUsername = async (userId: string) => {
+    if (!isSupabaseConfigured || !supabase) {
+      return { success: false, error: 'Supabase not configured' };
+    }
+
+    try {
+      const referralUsername = sessionStorage.getItem('referralUsername');
+      
+      if (!referralUsername) {
+        console.log('[AuthContext] processPendingReferralByUsername: No referral username found');
+        return { success: true, message: 'No referral username to process' };
+      }
+
+      console.log('[AuthContext] processPendingReferralByUsername: Processing referral username:', referralUsername);
+
+      // Call the Edge function to create referral relationship
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.access_token) {
+        throw new Error('Failed to get session token');
+      }
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-referral-by-username`;
+      const headers = {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      };
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          referrer_username: referralUsername,
+          user_id: userId
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create referral relationship');
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('[AuthContext] processPendingReferralByUsername: Success:', result.message);
+        // Clean up session storage
+        sessionStorage.removeItem('referralUsername');
+        return { success: true, message: result.message };
+      } else {
+        console.error('[AuthContext] processPendingReferralByUsername: Failed:', result.error);
+        return { success: false, error: result.error };
+      }
+
+    } catch (error) {
+      console.error('[AuthContext] processPendingReferralByUsername: Error:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
@@ -594,7 +657,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, authReady, signUp, signIn, signOut, updateProfile, processPendingReferral }}>
+    <AuthContext.Provider value={{ user, loading, authReady, signUp, signIn, signOut, updateProfile, processPendingReferral, processPendingReferralByUsername }}>
       {children}
     </AuthContext.Provider>
   );

@@ -60,8 +60,8 @@ export default function NetworkPage() {
   const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
   const [setupLoading, setSetupLoading] = useState(false);
 
-  const referralCode = (user as any)?.referral_code || '';
-  const referralLink = `${window.location.origin}/register?ref=${referralCode}`;
+  const referralCode = (user as any)?.username || '';
+  const referralLink = `${window.location.origin}/app/${referralCode}`;
 
   // --------- UI helpers (dark theme)
   const card = 'bg-[#11151D] rounded-xl shadow-sm border border-zinc-800';
