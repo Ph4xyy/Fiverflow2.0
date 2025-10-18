@@ -7,60 +7,26 @@ import LogoImage from '../assets/LogoFiverFlow.png';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signIn, user, loading: authLoading } = useAuth();
+  // 🔥 AUTHENTIFICATION SUPPRIMÉE - Plus d'auth réelle
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [justSignedIn, setJustSignedIn] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
 
-  // 🔥 FIXED: Rediriger automatiquement si l'utilisateur est déjà connecté OU vient de se connecter
+  // 🔥 AUTHENTIFICATION SUPPRIMÉE - Redirection automatique vers le dashboard
   React.useEffect(() => {
-    // Rediriger si user existe ET (on vient de se connecter OU authLoading est terminé)
-    if (user && (justSignedIn || !authLoading)) {
-      console.log('🔄 LoginPage: User detected, redirecting to dashboard', { justSignedIn, authLoading });
-      navigate('/dashboard', { replace: true });
-    }
-  }, [user, justSignedIn, authLoading, navigate]);
+    console.log('🔄 LoginPage: Auth disabled - redirecting to dashboard');
+    navigate('/dashboard', { replace: true });
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Login form submitted with:', { email: formData.email, password: '***' });
-    
-    if (!formData.email.trim() || !formData.password.trim()) {
-      setError('Please enter both email and password');
-      return;
-    }
-    
-    setLoading(true);
-    setError('');
-    
-    console.log('Starting authentication process...');
-
-    try {
-      const { error } = await signIn(formData.email, formData.password);
-      
-      if (error) {
-        console.error('Authentication error:', error);
-        setError(error.message);
-        setLoading(false);
-        setJustSignedIn(false);
-      } else {
-        console.log('Authentication successful, waiting for user context to update...');
-        // 🔥 FIXED: Mark that we just signed in, the useEffect will handle the redirection
-        setJustSignedIn(true);
-        // Le loading reste true pour montrer que la connexion est en cours
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-      setError('An unexpected error occurred. Please try again.');
-      setLoading(false);
-      setJustSignedIn(false);
-    }
+    // 🔥 AUTHENTIFICATION SUPPRIMÉE - Redirection directe vers le dashboard
+    console.log('🔥 LoginPage: Auth disabled - redirecting to dashboard');
+    navigate('/dashboard', { replace: true });
   };
     
 
@@ -76,11 +42,7 @@ const LoginPage: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="bg-red-900/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
+          {/* 🔥 AUTHENTIFICATION SUPPRIMÉE - Plus d'affichage d'erreur */}
 
           <div>
             <label htmlFor="email" className="block text-sm sm:text-base font-medium text-slate-300 mb-2">

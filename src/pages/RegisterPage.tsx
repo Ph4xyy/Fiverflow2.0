@@ -4,15 +4,13 @@ import { useAuth } from '../contexts/AuthContext';
 import RegistrationForm from '../components/RegistrationForm';
 
 const RegisterPage: React.FC = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
+  // 🔥 AUTHENTIFICATION SUPPRIMÉE - Redirection automatique vers le dashboard
   React.useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
-    }
-  }, [user, navigate]);
+    console.log('🔄 RegisterPage: Auth disabled - redirecting to dashboard');
+    navigate('/dashboard', { replace: true });
+  }, [navigate]);
 
   return <RegistrationForm />;
 };
