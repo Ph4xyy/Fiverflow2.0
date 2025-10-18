@@ -15,7 +15,7 @@ export const DiagnosticPanel: React.FC = () => {
 
   useEffect(() => {
     setRenderCount(prev => prev + 1);
-  });
+  }, []); // 🔥 FIX: Ajout du tableau de dépendances vide pour éviter la boucle infinie
 
   useEffect(() => {
     const logEvent = (event: string) => {
