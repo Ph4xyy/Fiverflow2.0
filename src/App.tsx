@@ -1,7 +1,6 @@
 // src/App.tsx
 import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
 import { UserDataProvider } from './contexts/UserDataContext';
 import { LoadingProvider } from './contexts/LoadingContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
@@ -125,21 +124,19 @@ function AppContent() {
 function App() {
   return (
     <AppErrorBoundary>
-      <AuthProvider>
-        <Router>
-          <AnalyticsWrapper>
-            <LoadingProvider>
-              <CurrencyProvider>
-                <UserDataProvider>
-                  <AppContent />
-                </UserDataProvider>
-              </CurrencyProvider>
-            </LoadingProvider>
-          </AnalyticsWrapper>
-        </Router>
-        {/* EmergencyFallback temporairement désactivé pour debugging */}
-        {/* <EmergencyFallback /> */}
-      </AuthProvider>
+      <Router>
+        <AnalyticsWrapper>
+          <LoadingProvider>
+            <CurrencyProvider>
+              <UserDataProvider>
+                <AppContent />
+              </UserDataProvider>
+            </CurrencyProvider>
+          </LoadingProvider>
+        </AnalyticsWrapper>
+      </Router>
+      {/* EmergencyFallback temporairement désactivé pour debugging */}
+      {/* <EmergencyFallback /> */}
     </AppErrorBoundary>
   );
 }

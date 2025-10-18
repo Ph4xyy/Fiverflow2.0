@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 
 // Import logo
 import LogoImage from '../assets/LogoFiverFlow.png';
@@ -8,8 +7,7 @@ import LogoImage from '../assets/LogoFiverFlow.png';
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import NotificationsDropdown from './NotificationsDropdown';
 import CentralizedSearchBar from './CentralizedSearchBar';
-import AuthDebugPanel from './AuthDebugPanel';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+// 🔥 AUTHENTIFICATION SUPPRIMÉE - Imports auth supprimés
 
 import { 
   Menu, 
@@ -41,21 +39,8 @@ export const subtleBg    = 'bg-[#141922]';
 
 /* ---------- Helper: détecte admin ---------- */
 const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
-  const roleFromMeta =
-    user?.app_metadata?.role ||
-    user?.user_metadata?.role ||
-    null;
-
-  const effectiveRole = roleFromMeta || userRole || null;
-  const isAdmin = effectiveRole === 'admin';
-  
-  // 🔥 Debug pour voir si le rôle admin est détecté
-  if (isAdmin && import.meta.env.DEV) {
-    console.log('👑 Layout: Admin role detected from:', 
-      roleFromMeta ? 'metadata' : 
-      userRole ? 'userRole prop' : 'unknown'
-    );
-  }
+  // 🔥 AUTHENTIFICATION SUPPRIMÉE - Plus d'admin par défaut
+  const isAdmin = false; // Plus d'authentification, donc plus d'admin
   
   return isAdmin;
 };
@@ -94,42 +79,16 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut, user } = useAuth();
+  // 🔥 AUTHENTIFICATION SUPPRIMÉE - Plus de signOut ni user
+  const signOut = () => {
+    console.log('🔓 Sign out disabled - auth system removed');
+  };
+  const user = null; // Plus d'utilisateur connecté
   const { restrictions, checkAccess } = usePlanRestrictions();
   useEffect(() => {
-    // Use cached role first, then fallback to user metadata
-    if (!user) {
-      setUserRole('user');
-      return;
-    }
-
-    // Try to get role from metadata first
-    const metaRole = user.app_metadata?.role || user.user_metadata?.role;
-    const effectiveRole = metaRole || 'user';
-    
-    setUserRole(effectiveRole);
-    
-    // Only fetch from DB if no role found in metadata
-    if (!metaRole && isSupabaseConfigured && supabase) {
-      const fetchRole = async () => {
-        try {
-          const { data, error } = await supabase!
-            .from('users')
-            .select('role')
-          .eq('id', user.id)
-            .maybeSingle();
-
-          if (!error && data?.role) {
-            setUserRole(data.role);
-          }
-        } catch (error) {
-          console.error('Error checking user role:', error);
-        }
-      };
-      
-      fetchRole();
-    }
-  }, [user?.id]); // 🔥 FIXED: Only depend on user.id to prevent infinite loops
+    // 🔥 AUTHENTIFICATION SUPPRIMÉE - Rôle par défaut
+    setUserRole('user');
+  }, []); // Plus de dépendance sur user
 
   const isAdmin = useIsAdminFromEverywhere(user, userRole);
 
@@ -596,8 +555,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
         </div>
       )}
       
-      {/* Debug Panel (development only) */}
-      <AuthDebugPanel />
+      {/* 🔥 AUTHENTIFICATION SUPPRIMÉE - Debug panel supprimé */}
     </div>
   );
 };

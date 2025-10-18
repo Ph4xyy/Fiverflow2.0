@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../contexts/AuthContext';
+// 🔥 AUTHENTIFICATION SUPPRIMÉE - Hook factice pour éviter les erreurs de compilation
+
+import { useState } from 'react';
 
 export interface UserPermissions {
   role: string;
@@ -17,100 +17,15 @@ export interface UserPermissions {
 
 export const useUserPermissions = () => {
   const [permissions, setPermissions] = useState<UserPermissions | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
 
-  useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    const loadPermissions = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        console.log('🔍 Loading user permissions for:', user.id);
-
-        // Utiliser la nouvelle fonction de permissions
-        const { data, error: permError } = await supabase
-          .rpc('get_user_permissions', {
-            target_user_id: user.id
-          });
-
-        if (permError) {
-          console.warn('Permissions function not available, using fallback:', permError);
-          
-          // Fallback: utiliser les données de base
-          const { data: userData, error: userError } = await supabase
-            .from('users')
-            .select('role, current_plan')
-            .eq('id', user.id)
-            .single();
-
-          if (userError) throw userError;
-
-          const fallbackPermissions: UserPermissions = {
-            role: userData.role || 'user',
-            plan: userData.current_plan || 'free',
-            can_access_admin: userData.role === 'admin',
-            can_create_invoices: userData.current_plan === 'pro' || userData.current_plan === 'excellence',
-            can_create_templates: true,
-            can_export_data: userData.current_plan === 'pro' || userData.current_plan === 'excellence',
-            can_manage_clients: true,
-            can_manage_tasks: true,
-            max_invoices_per_month: userData.current_plan === 'pro' || userData.current_plan === 'excellence' ? 100 : 3,
-            max_clients: userData.current_plan === 'pro' || userData.current_plan === 'excellence' ? 100 : 5
-          };
-
-          setPermissions(fallbackPermissions);
-          return;
-        }
-
-        if (data) {
-          console.log('📊 User permissions loaded:', data);
-          setPermissions(data);
-        }
-
-      } catch (err: any) {
-        console.error('❌ Error loading user permissions:', err);
-        setError(err.message || 'Erreur lors du chargement des permissions');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadPermissions();
-  }, [user]);
-
-  const hasPlan = (requiredPlan: string): boolean => {
-    if (!permissions) return false;
-    
-    const planHierarchy = ['free', 'trial', 'pro', 'excellence'];
-    const userPlanIndex = planHierarchy.indexOf(permissions.plan);
-    const requiredPlanIndex = planHierarchy.indexOf(requiredPlan);
-    
-    return userPlanIndex >= requiredPlanIndex;
-  };
-
-  const canAccess = (permission: keyof UserPermissions): boolean => {
-    if (!permissions) return false;
-    return permissions[permission] as boolean;
-  };
-
-  const getMaxLimit = (limitType: 'invoices' | 'clients'): number => {
-    if (!permissions) return 0;
-    return limitType === 'invoices' ? permissions.max_invoices_per_month : permissions.max_clients;
-  };
-
-  return { 
-    permissions, 
-    loading, 
-    error, 
-    hasPlan, 
-    canAccess, 
-    getMaxLimit 
+  return {
+    permissions,
+    loading,
+    error,
+    hasPlan: (requiredPlan: string) => true,
+    canAccess: (permission: keyof UserPermissions) => true,
+    getMaxLimit: (limitType: 'invoices' | 'clients') => 100
   };
 };
