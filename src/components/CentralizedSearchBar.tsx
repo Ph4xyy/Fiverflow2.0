@@ -206,7 +206,7 @@ const CentralizedSearchBar: React.FC = () => {
       {/* Barre de recherche */}
       <div className="relative">
         <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
-          <Search className="h-4 w-4 text-slate-400" />
+          <Search className="h-4 w-4 text-gray-400" />
         </div>
         
         <input
@@ -217,9 +217,9 @@ const CentralizedSearchBar: React.FC = () => {
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={'Search...'}
-          className="w-full pl-10 pr-20 py-2.5 rounded-xl border border-[#1C2230] 
-                     bg-[#11151D]/95 text-slate-100 placeholder-slate-400
-                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+          className="w-full pl-10 pr-20 py-2.5 rounded-lg border border-[#35414e] 
+                     bg-[#1e2938] text-white placeholder-gray-400
+                     focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-transparent
                      transition-all duration-200"
         />
 
@@ -227,8 +227,8 @@ const CentralizedSearchBar: React.FC = () => {
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#1C2230] hover:bg-[#2A3347] 
-                       text-slate-300 hover:text-white transition-colors text-sm"
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] 
+                       text-gray-300 hover:text-white transition-colors text-sm"
           >
             <span className="text-xs">
               {categories.find(c => c.value === selectedCategory)?.icon}
@@ -239,7 +239,7 @@ const CentralizedSearchBar: React.FC = () => {
           {searchTerm && (
             <button
               onClick={clearSearch}
-              className="p-1 rounded-lg hover:bg-[#2A3347] text-slate-400 hover:text-white transition-colors"
+              className="p-1 rounded-lg hover:bg-[#3d4a57] text-gray-400 hover:text-white transition-colors"
             >
               <X className="h-3 w-3" />
             </button>

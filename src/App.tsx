@@ -24,6 +24,7 @@ import RootRedirect from './components/RootRedirect';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPageOptimized';
+import DashboardExample from './pages/DashboardExample';
 import ClientsPage from './pages/ClientsPageOptimized';
 import OrdersPage from './pages/OrdersPage';
 import TemplatesPage from './pages/TemplatesPage';
@@ -69,7 +70,7 @@ function AppContent() {
               {/* Dashboard */}
               <Route path="/dashboard" element={
                 <InstantProtectedRoute>
-                  <DashboardPage />
+                  <DashboardExample />
                 </InstantProtectedRoute>
               } />
 

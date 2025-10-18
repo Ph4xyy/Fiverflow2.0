@@ -32,10 +32,12 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-/* ---------- Thème visuel partagé (Dark-only) ---------- */
-export const pageBgClass = 'bg-[#0B0E14] text-slate-100';
-export const cardClass   = 'rounded-2xl border border-[#1C2230] bg-[#11151D]/95 shadow-lg';
-export const subtleBg    = 'bg-[#141922]';
+/* ---------- Nouveau thème visuel professionnel ---------- */
+export const pageBgClass = 'bg-[#111726] text-white';
+export const cardClass   = 'rounded-xl border border-[#1e2938] bg-[#1e2938] shadow-lg';
+export const subtleBg    = 'bg-[#1e2938]';
+export const buttonClass = 'bg-[#35414e] hover:bg-[#3d4a57] text-white';
+export const gradientClass = 'bg-gradient-to-r from-[#9c68f2] to-[#422ca5]';
 
 /* ---------- Helper: détecte admin ---------- */
 const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
@@ -213,41 +215,10 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
         : (location.pathname === item.path ||
           (item.path?.startsWith?.('/admin') && location.pathname.startsWith('/admin')));
 
-    // ✅ Build-safe classes
-    const rowClass =
-      isUpgrade
-        ? 'text-white bg-gradient-to-r from-amber-500 to-yellow-500 shadow-glow-orange hover:shadow-lg hover:-translate-y-0.5'
-        : isRestricted
-        ? 'text-slate-500/70 cursor-pointer'
-        : isActive
-        ? 'text-white bg-[#121722] ring-1 ring-inset ring-[#2A3347] shadow-glow-sm'
-        : 'text-slate-300 hover:text-white hover:bg-[#11161F] ring-1 ring-inset ring-transparent hover:ring-[#21293C]';
-
-    // Get glow effect based on color
-    const getGlowEffect = (color: string) => {
-      const glowMap: Record<string, string> = {
-        blue: 'shadow-blue-500/30',
-        purple: 'shadow-purple-500/30',
-        emerald: 'shadow-emerald-500/30',
-        orange: 'shadow-orange-500/30',
-        green: 'shadow-green-500/30',
-        yellow: 'shadow-yellow-500/30',
-        pink: 'shadow-pink-500/30',
-        violet: 'shadow-violet-500/30',
-        slate: 'shadow-slate-500/30',
-        red: 'shadow-red-500/30',
-        amber: 'shadow-amber-500/30'
-      };
-      return glowMap[color] || 'shadow-slate-500/30';
-    };
-
-    const iconClassBase = 'size-9 rounded-xl grid place-items-center text-white/90 transition-all duration-300 ease-out';
-    const iconClass =
-      isRestricted
-        ? `${iconClassBase} bg-[#151A22] ring-1 ring-inset ring-[#202839] opacity-50`
-        : isActive
-        ? `${iconClassBase} bg-gradient-to-br ${item.tone} shadow-xl ${getGlowEffect(item.color)} ring-1 ring-inset ring-white/10 transform scale-105`
-        : `${iconClassBase} bg-gradient-to-br ${item.tone} ring-1 ring-inset ring-white/5 shadow-md ${getGlowEffect(item.color)} group-hover:shadow-lg group-hover:scale-105`;
+    // 🎨 Nouveau style professionnel
+    const rowClass = isActive
+      ? 'text-white bg-[#1e2938] relative'
+      : 'text-gray-300 hover:text-white hover:bg-[#1e2938] transition-all duration-200';
 
     return (
       <Link
@@ -262,28 +233,30 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           }
           setIsSidebarOpen(false);
         }}
-        className={`group relative flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${rowClass}`}
+        className={`group relative flex items-center gap-3 px-4 py-3 mx-2 rounded-lg text-sm font-medium transition-all duration-200 ${rowClass}`}
       >
-        <div className={iconClass}>
-          <Icon size={16} />
+        {/* Indicateur actif - forme arrondie à droite */}
+        {isActive && (
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-[#9c68f2] to-[#422ca5] rounded-l-full" />
+        )}
+
+        {/* Icône simple et blanche */}
+        <div className="flex items-center justify-center w-5 h-5">
+          <Icon size={18} className="text-white" />
         </div>
 
-        <span className="truncate">{item.label}</span>
+        <span className="truncate font-medium">{item.label}</span>
 
         {isRestricted && 'requiredPlan' in item && (
-          <span className="ml-auto text-[10px] px-2 py-1 rounded-full bg-[#121722] text-slate-300 ring-1 ring-inset ring-[#202839]">
+          <span className="ml-auto text-xs px-2 py-1 rounded-full bg-[#35414e] text-gray-300">
             {(item as any).requiredPlan}
           </span>
         )}
 
         {isUpgrade && (
           <div className="ml-auto">
-            <div className="w-2 h-2 bg-white rounded-full animate-pulse-slow" />
+            <div className="w-2 h-2 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full animate-pulse" />
           </div>
-        )}
-
-        {isActive && (
-          <span className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-slate-400/10 shadow-[0_0_20px_rgba(100,116,139,0.12)]" />
         )}
       </Link>
     );
@@ -291,14 +264,14 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className={`min-h-screen ${pageBgClass} transition-colors duration-300`}>
-      {/* Topbar (dark-only) */}
-      <header className="bg-[#0D1117]/80 backdrop-blur-xl border-b border-[#1C2230] shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] fixed w-full top-0 z-50">
+      {/* Topbar - Nouveau style professionnel */}
+      <header className="bg-[#1e2938] backdrop-blur-xl border-b border-[#35414e] shadow-lg fixed w-full top-0 z-50">
         <div className="flex items-center justify-between px-3 sm:px-4 py-3">
           {/* Left section - Logo and mobile menu */}
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#141922] transition-all duration-200"
+              className="lg:hidden p-2 rounded-lg text-gray-300 hover:text-white hover:bg-[#35414e] transition-all duration-200"
             >
               {isSidebarOpen ? <X size={40} /> : <Menu size={20} />}
             </button>
@@ -317,14 +290,14 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           {/* Right section - Notifications, logout */}
           <div className="flex items-center gap-2 sm:gap-3">
             <LocalErrorBoundary>
-              <div className="size-10 rounded-xl grid place-items-center text-slate-300 hover:text-white bg-[#121722] hover:bg-[#141A26] ring-1 ring-inset ring-[#202839] hover:ring-[#2A3347] transition-all duration-200">
+              <div className="size-10 rounded-lg grid place-items-center text-gray-300 hover:text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200">
                 <NotificationsDropdown />
               </div>
             </LocalErrorBoundary>
 
             <button 
               onClick={handleSignOut}
-              className="size-10 rounded-xl grid place-items-center text-slate-300 hover:text-white bg-[#121722] hover:bg-[#141A26] ring-1 ring-inset ring-[#202839] hover:ring-[#2A3347] transition-all duration-200"
+              className="size-10 rounded-lg grid place-items-center text-gray-300 hover:text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200"
             >
               <LogOut size={18} />
             </button>
@@ -333,13 +306,13 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       </header>
 
       <div className="flex pt-16">
-        {/* Sidebar */}
+        {/* Sidebar - Nouveau style professionnel */}
         <aside
           className={`
             fixed inset-y-0 left-0 z-40 w-72
-            bg-[#0D1117]/85 backdrop-blur-xl
-            border-r border-[#1C2230]
-            shadow-[20px_0_40px_-30px_rgba(0,0,0,0.6)]
+            bg-[#1e2938] backdrop-blur-xl
+            border-r border-[#35414e]
+            shadow-xl
             transform transition-transform duration-300 ease-in-out
             ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
             pt-16 lg:pt-16
@@ -348,8 +321,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           <nav className="h-full px-3 sm:px-4 py-5 space-y-2 overflow-y-auto scrollbar-hide">
             <LocalErrorBoundary>
               {/* -------- Section: Overview -------- */}
-              <div className="px-3 sm:px-4">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Overview</span>
+              <div className="px-3 sm:px-4 mb-2">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Overview</span>
               </div>
               <div className="space-y-1">
                 {overviewItems.map((item) => (
@@ -358,18 +331,18 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               </div>
 
               {/* -------- Section: AI -------- */}
-              <div className="px-3 sm:px-4 pt-4">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">AI</span>
+              <div className="px-3 sm:px-4 pt-4 mb-2">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">AI</span>
               </div>
               <div className="mx-3 sm:mx-4 mt-2">
-                <div className="text-xs text-slate-400 px-3 py-2 rounded-xl bg-[#0E121A] ring-1 ring-inset ring-[#1C2230]">
+                <div className="text-xs text-gray-400 px-3 py-2 rounded-lg bg-[#35414e]">
                   Coming soon!
                 </div>
               </div>
 
               {/* -------- Section: Workspace -------- */}
-              <div className="px-3 sm:px-4 pt-4">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Workspace</span>
+              <div className="px-3 sm:px-4 pt-4 mb-2">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Workspace</span>
               </div>
               <div className="space-y-1">
                 {workspaceItems.map((item) => (
@@ -378,9 +351,9 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               </div>
 
               {/* -------- Section: More (collée avec les autres) -------- */}
-              <div className="pt-4 mt-2 border-t border-[#1C2230]">
+              <div className="pt-4 mt-2 border-t border-[#35414e]">
                 <div className="px-3 sm:px-4 mb-2">
-                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">More</span>
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">More</span>
                 </div>
                 <div className="space-y-1">
                   {bottomItems.map((item) => (
