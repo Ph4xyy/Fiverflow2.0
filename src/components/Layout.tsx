@@ -12,20 +12,20 @@ import CentralizedSearchBar from './CentralizedSearchBar';
 import { 
   Menu, 
   X, 
-  Home, 
+  LayoutDashboard, 
   Users, 
-  ShoppingCart, 
+  Package, 
   Calendar as CalendarIcon,
-  CheckSquare,
-  BarChart3, 
+  ClipboardList,
+  TrendingUp, 
   Crown,
   User,
   LogOut,
-  Share2,
+  Network,
   Lock,
   CheckCircle2,
   Shield,
-  FileText,
+  Receipt,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -100,36 +100,28 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     { 
       path: '/dashboard', 
       label: 'Dashboard', 
-      icon: Home, 
-      tone: 'from-blue-500 to-indigo-600',
-      color: 'blue'
+      icon: LayoutDashboard
     },
     { 
       path: '/calendar', 
       label: 'Calendar', 
       icon: CalendarIcon,
       restricted: !checkAccess('calendar') && !restrictions?.isAdmin,
-      requiredPlan: 'Pro' as const,
-      tone: 'from-purple-500 to-pink-600',
-      color: 'purple'
+      requiredPlan: 'Pro' as const
     },
     { 
       path: '/stats', 
       label: 'Statistics', 
-      icon: BarChart3,
+      icon: TrendingUp,
       restricted: !checkAccess('stats') && !restrictions?.isAdmin,
-      requiredPlan: 'Excellence' as const,
-      tone: 'from-emerald-500 to-teal-600',
-      color: 'emerald'
+      requiredPlan: 'Excellence' as const
     },
     { 
       path: '/network', 
       label: 'Referrals', 
-      icon: Share2,
+      icon: Network,
       restricted: !checkAccess('referrals') && !restrictions?.isAdmin,
-      requiredPlan: 'Pro' as const,
-      tone: 'from-orange-500 to-red-600',
-      color: 'orange'
+      requiredPlan: 'Pro' as const
     },
   ];
 
@@ -141,34 +133,26 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     { 
       path: '/clients', 
       label: 'Clients', 
-      icon: Users, 
-      tone: 'from-green-500 to-emerald-600',
-      color: 'green'
+      icon: Users
     },
     { 
       path: '/orders',  
       label: 'Orders',  
-      icon: ShoppingCart, 
-      tone: 'from-yellow-500 to-amber-600',
-      color: 'yellow'
+      icon: Package
     },
     { 
       path: '/invoices',
       label: 'Invoices',
-      icon: FileText,
+      icon: Receipt,
       restricted: !(restrictions?.isAdmin || checkAccess('invoices')),
-      requiredPlan: 'Excellence' as const,
-      tone: 'from-pink-500 to-rose-600',
-      color: 'pink'
+      requiredPlan: 'Excellence' as const
     },
     { 
       path: '/tasks', 
       label: 'Workboard', 
-      icon: CheckSquare,
+      icon: ClipboardList,
       restricted: !checkAccess('tasks') && !restrictions?.isAdmin,
-      requiredPlan: 'Pro' as const,
-      tone: 'from-violet-500 to-purple-600',
-      color: 'violet'
+      requiredPlan: 'Pro' as const
     },
   ];
 
@@ -177,23 +161,17 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     { 
       path: '/profile', 
       label: 'Profile', 
-      icon: User, 
-      tone: 'from-slate-500 to-gray-600',
-      color: 'slate'
+      icon: User
     },
     ...(isAdmin ? [{
       path: '/admin/dashboard',
       label: 'Admin',
-      icon: Shield,
-      tone: 'from-red-500 to-rose-600',
-      color: 'red'
+      icon: Shield
     }] as const : []),
     { 
       path: '/upgrade', 
       label: 'Upgrade', 
-      icon: Crown, 
-      tone: 'from-amber-500 to-yellow-500', 
-      color: 'amber',
+      icon: Crown,
       special: 'upgrade' as const 
     },
   ];
@@ -217,8 +195,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
     // 🎨 Nouveau style professionnel
     const rowClass = isActive
-      ? 'text-white bg-[#1e2938] relative'
-      : 'text-gray-300 hover:text-white hover:bg-[#1e2938] transition-all duration-200';
+      ? 'text-white bg-[#35414e] rounded-lg'
+      : 'text-gray-300 hover:text-white hover:bg-[#35414e] transition-all duration-200';
 
     return (
       <Link
@@ -233,13 +211,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           }
           setIsSidebarOpen(false);
         }}
-        className={`group relative flex items-center gap-3 px-4 py-3 mx-2 rounded-lg text-sm font-medium transition-all duration-200 ${rowClass}`}
+        className={`group relative flex items-center gap-3 px-4 py-3 mx-2 text-sm font-medium transition-all duration-200 ${rowClass}`}
       >
-        {/* Indicateur actif - forme arrondie à droite */}
-        {isActive && (
-          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-[#9c68f2] to-[#422ca5] rounded-l-full" />
-        )}
-
         {/* Icône simple et blanche */}
         <div className="flex items-center justify-center w-5 h-5">
           <Icon size={18} className="text-white" />
@@ -290,14 +263,14 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           {/* Right section - Notifications, logout */}
           <div className="flex items-center gap-2 sm:gap-3">
             <LocalErrorBoundary>
-              <div className="size-10 rounded-lg grid place-items-center text-gray-300 hover:text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200">
+              <div className="size-10 rounded-lg grid place-items-center text-white bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] transition-all duration-200 shadow-lg">
                 <NotificationsDropdown />
               </div>
             </LocalErrorBoundary>
 
             <button 
               onClick={handleSignOut}
-              className="size-10 rounded-lg grid place-items-center text-gray-300 hover:text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200"
+              className="size-10 rounded-lg grid place-items-center text-white bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] transition-all duration-200 shadow-lg"
             >
               <LogOut size={18} />
             </button>
@@ -309,7 +282,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
         {/* Sidebar - Nouveau style professionnel */}
         <aside
           className={`
-            fixed inset-y-0 left-0 z-40 w-72
+            fixed inset-y-0 left-0 z-40 w-64
             bg-[#1e2938] backdrop-blur-xl
             border-r border-[#35414e]
             shadow-xl
@@ -382,7 +355,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           />
         )}
 
-        <main className="flex-1 lg:ml-72 min-h-screen">
+        <main className="flex-1 lg:ml-64 min-h-screen">
           <div className={`p-0 sm:p-6 min-h-screen transition-colors duration-300`}>
             <LocalErrorBoundary>{children}</LocalErrorBoundary>
           </div>

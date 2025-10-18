@@ -227,8 +227,8 @@ const CentralizedSearchBar: React.FC = () => {
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] 
-                       text-gray-300 hover:text-white transition-colors text-sm"
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] 
+                       text-white transition-all duration-200 text-sm shadow-lg"
           >
             <span className="text-xs">
               {categories.find(c => c.value === selectedCategory)?.icon}
@@ -239,7 +239,7 @@ const CentralizedSearchBar: React.FC = () => {
           {searchTerm && (
             <button
               onClick={clearSearch}
-              className="p-1 rounded-lg hover:bg-[#3d4a57] text-gray-400 hover:text-white transition-colors"
+              className="p-1 rounded-lg bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] text-white transition-all duration-200 shadow-lg"
             >
               <X className="h-3 w-3" />
             </button>

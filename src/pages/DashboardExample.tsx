@@ -1,9 +1,10 @@
 import React from 'react';
 import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
+import ModernButton from '../components/ModernButton';
 import { 
   Users, 
-  ShoppingCart, 
+  Package, 
   DollarSign, 
   Calendar,
   TrendingUp,
@@ -17,16 +18,26 @@ const DashboardExample: React.FC = () => {
     <Layout>
       <div className="p-6 space-y-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-          <p className="text-gray-400">Bienvenue sur votre tableau de bord professionnel</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
+            <p className="text-gray-400">Bienvenue sur votre tableau de bord professionnel</p>
+          </div>
+          <div className="flex gap-3">
+            <ModernButton variant="outline" size="sm">
+              Exporter
+            </ModernButton>
+            <ModernButton size="sm">
+              Nouveau
+            </ModernButton>
+          </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <ModernCard 
             title="Total Clients" 
-            icon={<Users size={20} />}
+            icon={<Users size={20} className="text-white" />}
             gradient
           >
             <div className="text-3xl font-bold text-white mb-2">1,234</div>
@@ -38,7 +49,7 @@ const DashboardExample: React.FC = () => {
 
           <ModernCard 
             title="Commandes" 
-            icon={<ShoppingCart size={20} />}
+            icon={<Package size={20} className="text-white" />}
           >
             <div className="text-3xl font-bold text-white mb-2">89</div>
             <div className="flex items-center text-blue-400 text-sm">
@@ -49,7 +60,7 @@ const DashboardExample: React.FC = () => {
 
           <ModernCard 
             title="Revenus" 
-            icon={<DollarSign size={20} />}
+            icon={<DollarSign size={20} className="text-white" />}
             gradient
           >
             <div className="text-3xl font-bold text-white mb-2">€12,456</div>
@@ -61,7 +72,7 @@ const DashboardExample: React.FC = () => {
 
           <ModernCard 
             title="Événements" 
-            icon={<Calendar size={20} />}
+            icon={<Calendar size={20} className="text-white" />}
           >
             <div className="text-3xl font-bold text-white mb-2">24</div>
             <div className="flex items-center text-purple-400 text-sm">
@@ -75,7 +86,7 @@ const DashboardExample: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ModernCard 
             title="Ventes Mensuelles" 
-            icon={<BarChart3 size={20} />}
+            icon={<BarChart3 size={20} className="text-white" />}
           >
             <div className="h-64 flex items-center justify-center text-gray-400">
               <div className="text-center">
@@ -87,7 +98,7 @@ const DashboardExample: React.FC = () => {
 
           <ModernCard 
             title="Répartition des Clients" 
-            icon={<PieChart size={20} />}
+            icon={<PieChart size={20} className="text-white" />}
           >
             <div className="h-64 flex items-center justify-center text-gray-400">
               <div className="text-center">
@@ -101,7 +112,7 @@ const DashboardExample: React.FC = () => {
         {/* Recent Activity */}
         <ModernCard 
           title="Activité Récente" 
-          icon={<Activity size={20} />}
+          icon={<Activity size={20} className="text-white" />}
         >
           <div className="space-y-4">
             {[
