@@ -28,6 +28,13 @@ interface UserProfile {
   is_active: boolean;
   created_at: string;
   email?: string;
+  // Nouvelles propriétés pour la gestion avancée
+  subscription_plan?: 'launch' | 'boost' | 'scale' | 'free';
+  user_role?: 'user' | 'moderator' | 'admin' | 'super_admin';
+  permissions?: string[];
+  last_login?: string;
+  total_orders?: number;
+  total_revenue?: number;
 }
 
 interface AdminStats {
@@ -35,6 +42,12 @@ interface AdminStats {
   activeUsers: number;
   adminUsers: number;
   newUsersToday: number;
+  // Statistiques d'abonnements
+  totalSubscriptions: number;
+  totalRevenue: number;
+  launchSubscriptions: number;
+  boostSubscriptions: number;
+  scaleSubscriptions: number;
 }
 
 const AdminDashboard: React.FC = () => {
@@ -44,7 +57,12 @@ const AdminDashboard: React.FC = () => {
     totalUsers: 0,
     activeUsers: 0,
     adminUsers: 0,
-    newUsersToday: 0
+    newUsersToday: 0,
+    totalSubscriptions: 0,
+    totalRevenue: 0,
+    launchSubscriptions: 0,
+    boostSubscriptions: 0,
+    scaleSubscriptions: 0
   });
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
@@ -112,7 +130,18 @@ const AdminDashboard: React.FC = () => {
         return;
       }
 
-      setUsers(data || []);
+      // Ajouter des données simulées pour les nouveaux champs
+      const usersWithSimulatedData = (data || []).map((user, index) => ({
+        ...user,
+        subscription_plan: ['launch', 'boost', 'scale', 'free'][index % 4] as any,
+        user_role: user.is_admin ? 'admin' : ['user', 'moderator'][index % 2] as any,
+        permissions: user.is_admin ? ['admin', 'manage_users', 'view_analytics'] : ['user'],
+        last_login: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+        total_orders: Math.floor(Math.random() * 50),
+        total_revenue: Math.floor(Math.random() * 5000)
+      }));
+
+      setUsers(usersWithSimulatedData);
     } catch (error) {
       console.error('Erreur lors du chargement des utilisateurs:', error);
     } finally {
@@ -142,7 +171,13 @@ const AdminDashboard: React.FC = () => {
         totalUsers: allUsers?.length || 0,
         activeUsers: allUsers?.filter(u => u.is_active).length || 0,
         adminUsers: allUsers?.filter(u => u.is_admin).length || 0,
-        newUsersToday
+        newUsersToday,
+        // Données simulées pour les abonnements (à remplacer par de vraies données)
+        totalSubscriptions: 156,
+        totalRevenue: 12450.00,
+        launchSubscriptions: 89,
+        boostSubscriptions: 45,
+        scaleSubscriptions: 22
       });
     } catch (error) {
       console.error('Erreur lors du chargement des stats:', error);
@@ -236,7 +271,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Utilisateurs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <ModernCard>
             <div className="flex items-center justify-between">
@@ -279,6 +314,65 @@ const AdminDashboard: React.FC = () => {
           </ModernCard>
         </div>
 
+        {/* Stats Cards - Abonnements */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <ModernCard>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-white">{stats.totalSubscriptions}</p>
+                <p className="text-sm text-gray-400">Abonnements Total</p>
+              </div>
+              <Crown size={24} className="text-yellow-500" />
+            </div>
+          </ModernCard>
+
+          <ModernCard>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-white">${stats.totalRevenue.toLocaleString()}</p>
+                <p className="text-sm text-gray-400">Revenus Total</p>
+              </div>
+              <TrendingUp size={24} className="text-green-500" />
+            </div>
+          </ModernCard>
+
+          <ModernCard>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-white">{stats.launchSubscriptions}</p>
+                <p className="text-sm text-gray-400">Launch</p>
+              </div>
+              <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded flex items-center justify-center">
+                <span className="text-white text-xs font-bold">L</span>
+              </div>
+            </div>
+          </ModernCard>
+
+          <ModernCard>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-white">{stats.boostSubscriptions}</p>
+                <p className="text-sm text-gray-400">Boost</p>
+              </div>
+              <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-purple-600 rounded flex items-center justify-center">
+                <span className="text-white text-xs font-bold">B</span>
+              </div>
+            </div>
+          </ModernCard>
+
+          <ModernCard>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-white">{stats.scaleSubscriptions}</p>
+                <p className="text-sm text-gray-400">Scale</p>
+              </div>
+              <div className="w-6 h-6 bg-gradient-to-r from-orange-500 to-orange-600 rounded flex items-center justify-center">
+                <span className="text-white text-xs font-bold">S</span>
+              </div>
+            </div>
+          </ModernCard>
+        </div>
+
         {/* Users Table */}
         <ModernCard>
           <div className="flex items-center justify-between mb-6">
@@ -300,6 +394,8 @@ const AdminDashboard: React.FC = () => {
                   <tr className="border-b border-[#35414e]">
                     <th className="text-left py-3 px-4 text-gray-400 font-medium">Utilisateur</th>
                     <th className="text-left py-3 px-4 text-gray-400 font-medium">Email</th>
+                    <th className="text-left py-3 px-4 text-gray-400 font-medium">Abonnement</th>
+                    <th className="text-left py-3 px-4 text-gray-400 font-medium">Rôle</th>
                     <th className="text-left py-3 px-4 text-gray-400 font-medium">Statut</th>
                     <th className="text-left py-3 px-4 text-gray-400 font-medium">Admin</th>
                     <th className="text-left py-3 px-4 text-gray-400 font-medium">Inscription</th>
@@ -323,6 +419,36 @@ const AdminDashboard: React.FC = () => {
                       </td>
                       <td className="py-3 px-4 text-gray-300">
                         {userProfile.email || 'N/A'}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                          userProfile.subscription_plan === 'scale' 
+                            ? 'bg-orange-500/20 text-orange-400'
+                            : userProfile.subscription_plan === 'boost'
+                            ? 'bg-purple-500/20 text-purple-400'
+                            : userProfile.subscription_plan === 'launch'
+                            ? 'bg-blue-500/20 text-blue-400'
+                            : 'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {userProfile.subscription_plan === 'scale' ? 'Scale' :
+                           userProfile.subscription_plan === 'boost' ? 'Boost' :
+                           userProfile.subscription_plan === 'launch' ? 'Launch' : 'Free'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                          userProfile.user_role === 'super_admin' 
+                            ? 'bg-red-500/20 text-red-400'
+                            : userProfile.user_role === 'admin'
+                            ? 'bg-blue-500/20 text-blue-400'
+                            : userProfile.user_role === 'moderator'
+                            ? 'bg-yellow-500/20 text-yellow-400'
+                            : 'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {userProfile.user_role === 'super_admin' ? 'Super Admin' :
+                           userProfile.user_role === 'admin' ? 'Admin' :
+                           userProfile.user_role === 'moderator' ? 'Moderator' : 'User'}
+                        </span>
                       </td>
                       <td className="py-3 px-4">
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
