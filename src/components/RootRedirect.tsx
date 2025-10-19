@@ -1,26 +1,41 @@
-import React, { useEffect, useState } from 'react';
+/**
+ * RootRedirect - Redirection intelligente basée sur l'état d'authentification
+ * 
+ * Fonctionnalités :
+ * - Redirection automatique vers /dashboard si connecté
+ * - Redirection vers /login si non connecté
+ * - Gestion des états de chargement
+ * - Interface de chargement élégante
+ */
+
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-/**
- * Composant de redirection racine ULTRA-SIMPLE
- * Ne dépend que de l'AuthContext pour éviter les loops
- */
 const RootRedirect: React.FC = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, authReady } = useAuth();
 
-  // 🔥 SUPPRESSION COMPLÈTE DES TIMEOUTS - Navigation instantanée
-  // Plus de timeout, redirection immédiate
+  // Afficher le loading pendant l'initialisation
+  if (!authReady || loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-blue-600 rounded-xl mx-auto mb-4 flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2">FiverFlow</h2>
+          <p className="text-slate-400">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
 
-  // 🔥 NAVIGATION ULTRA-INSTANTANÉE - Redirection immédiate sans délai
-  const target = user ? '/dashboard' : '/login';
-  console.log('🚀 RootRedirect: Instant redirect to', target, {
-    user: !!user,
-    loading
-  });
-  return <Navigate to={target} replace />;
-
-  // 🔥 SUPPRESSION COMPLÈTE - Plus jamais d'écran de chargement
+  // Redirection basée sur l'état d'authentification
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  } else {
+    return <Navigate to="/login" replace />;
+  }
 };
 
 export default RootRedirect;
