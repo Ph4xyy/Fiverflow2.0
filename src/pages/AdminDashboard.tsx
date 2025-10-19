@@ -117,6 +117,8 @@ const AdminDashboard: React.FC = () => {
 
   const loadUsers = async () => {
     try {
+      console.log('🔍 AdminDashboard: Chargement des utilisateurs...');
+      
       const { data, error } = await supabase
         .from('user_profiles')
         .select(`
@@ -125,10 +127,14 @@ const AdminDashboard: React.FC = () => {
         `)
         .order('created_at', { ascending: false });
 
+      console.log('🔍 AdminDashboard: Résultat requête utilisateurs:', { data, error });
+
       if (error) {
         console.error('Erreur lors du chargement des utilisateurs:', error);
         return;
       }
+
+      console.log('🔍 AdminDashboard: Nombre d\'utilisateurs trouvés:', data?.length || 0);
 
       // Ajouter des données simulées pour les nouveaux champs
       const usersWithSimulatedData = (data || []).map((user, index) => ({
@@ -141,6 +147,7 @@ const AdminDashboard: React.FC = () => {
         total_revenue: Math.floor(Math.random() * 5000)
       }));
 
+      console.log('🔍 AdminDashboard: Utilisateurs avec données simulées:', usersWithSimulatedData);
       setUsers(usersWithSimulatedData);
     } catch (error) {
       console.error('Erreur lors du chargement des utilisateurs:', error);
@@ -151,9 +158,13 @@ const AdminDashboard: React.FC = () => {
 
   const loadStats = async () => {
     try {
+      console.log('🔍 AdminDashboard: Chargement des statistiques...');
+      
       const { data: allUsers, error: usersError } = await supabase
         .from('user_profiles')
         .select('is_admin, is_active, created_at');
+
+      console.log('🔍 AdminDashboard: Résultat requête stats:', { allUsers, usersError });
 
       if (usersError) {
         console.error('Erreur lors du chargement des stats:', usersError);
@@ -167,7 +178,7 @@ const AdminDashboard: React.FC = () => {
         new Date(user.created_at) >= today
       ).length || 0;
 
-      setStats({
+      const statsData = {
         totalUsers: allUsers?.length || 0,
         activeUsers: allUsers?.filter(u => u.is_active).length || 0,
         adminUsers: allUsers?.filter(u => u.is_admin).length || 0,
@@ -178,7 +189,10 @@ const AdminDashboard: React.FC = () => {
         launchSubscriptions: 89,
         boostSubscriptions: 45,
         scaleSubscriptions: 22
-      });
+      };
+
+      console.log('🔍 AdminDashboard: Statistiques calculées:', statsData);
+      setStats(statsData);
     } catch (error) {
       console.error('Erreur lors du chargement des stats:', error);
     }
