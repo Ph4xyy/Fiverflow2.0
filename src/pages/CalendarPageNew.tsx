@@ -287,11 +287,6 @@ const CalendarPageNew: React.FC = () => {
           </ModernCard>
         )}
 
-        {/* Subscription Management Section */}
-        <div className="mb-6">
-          <SubscriptionManager />
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Calendrier principal */}
           <div className="lg:col-span-3">
@@ -424,6 +419,11 @@ const CalendarPageNew: React.FC = () => {
               </div>
             </ModernCard>
           </div>
+        </div>
+
+        {/* Subscription Management Section */}
+        <div className="mt-6">
+          <SubscriptionManager />
         </div>
       </div>
     </Layout>

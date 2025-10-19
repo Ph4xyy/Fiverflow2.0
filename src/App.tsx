@@ -102,9 +102,9 @@ function AppContent() {
 
               {/* Invoices */}
               <Route path="/invoices" element={<InstantProtectedRoute><InvoicesLayout /></InstantProtectedRoute>}>
-                <Route index element={<InvoicesPageNew />} />
-                <Route path="sent" element={<InvoicesPageNew />} />
-                <Route path="create" element={<InvoicesPageNew />} />
+                <Route index element={<InvoicesPage />} />
+                <Route path="sent" element={<InvoicesPage />} />
+                <Route path="create" element={<InvoicesPage />} />
                 <Route path="templates" element={<InvoiceTemplatesPage />} />
                 <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
               </Route>
