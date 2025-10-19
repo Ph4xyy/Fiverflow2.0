@@ -32,8 +32,8 @@ const WorkboardPageNew: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([
     {
       id: '1',
-      title: 'Refonte du design de la page d\'accueil',
-      description: 'Moderniser l\'interface utilisateur selon les nouvelles directives',
+      title: 'Homepage design overhaul',
+      description: 'Modernize the user interface according to new guidelines',
       status: 'in_progress',
       priority: 'high',
       assignee: 'Marie Dubois',
@@ -43,8 +43,8 @@ const WorkboardPageNew: React.FC = () => {
     },
     {
       id: '2',
-      title: 'Optimisation des performances',
-      description: 'Réduire le temps de chargement des pages',
+      title: 'Performance optimization',
+      description: 'Reduce page loading times',
       status: 'todo',
       priority: 'medium',
       assignee: 'Pierre Martin',
@@ -54,8 +54,8 @@ const WorkboardPageNew: React.FC = () => {
     },
     {
       id: '3',
-      title: 'Tests d\'intégration',
-      description: 'Valider le fonctionnement des nouvelles fonctionnalités',
+      title: 'Integration tests',
+      description: 'Validate the functionality of new features',
       status: 'review',
       priority: 'high',
       assignee: 'Sophie Leroy',
@@ -65,8 +65,8 @@ const WorkboardPageNew: React.FC = () => {
     },
     {
       id: '4',
-      title: 'Documentation API',
-      description: 'Mettre à jour la documentation des endpoints',
+      title: 'API Documentation',
+      description: 'Update endpoint documentation',
       status: 'done',
       priority: 'low',
       assignee: 'Alexandre Petit',
@@ -88,10 +88,10 @@ const WorkboardPageNew: React.FC = () => {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'todo': return 'À faire';
-      case 'in_progress': return 'En cours';
-      case 'review': return 'En révision';
-      case 'done': return 'Terminé';
+      case 'todo': return 'To Do';
+      case 'in_progress': return 'In Progress';
+      case 'review': return 'In Review';
+      case 'done': return 'Done';
       default: return status;
     }
   };
@@ -117,10 +117,10 @@ const WorkboardPageNew: React.FC = () => {
   };
 
   const columns = [
-    { id: 'todo', title: 'À faire', color: 'border-gray-500' },
-    { id: 'in_progress', title: 'En cours', color: 'border-blue-500' },
-    { id: 'review', title: 'En révision', color: 'border-yellow-500' },
-    { id: 'done', title: 'Terminé', color: 'border-green-500' }
+    { id: 'todo', title: 'To Do', color: 'border-gray-500' },
+    { id: 'in_progress', title: 'In Progress', color: 'border-blue-500' },
+    { id: 'review', title: 'In Review', color: 'border-yellow-500' },
+    { id: 'done', title: 'Done', color: 'border-green-500' }
   ];
 
   const getTasksByStatus = (status: string) => {
@@ -129,7 +129,7 @@ const WorkboardPageNew: React.FC = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', { 
+    return date.toLocaleDateString('en-US', { 
       day: 'numeric', 
       month: 'short' 
     });
@@ -142,16 +142,16 @@ const WorkboardPageNew: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Workboard</h1>
-            <p className="text-gray-400">Gérez vos tâches et projets efficacement</p>
+            <p className="text-gray-400">Manage your tasks and projects efficiently</p>
           </div>
           <div className="flex gap-3">
             <ModernButton variant="outline" size="sm">
               <Filter size={16} className="mr-2" />
-              Filtres
+              Filters
             </ModernButton>
             <ModernButton size="sm">
               <Plus size={16} className="mr-2" />
-              Nouvelle Tâche
+              New Task
             </ModernButton>
           </div>
         </div>
@@ -180,7 +180,7 @@ const WorkboardPageNew: React.FC = () => {
         </div>
 
         {/* Kanban Board */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
           {columns.map(column => (
             <div key={column.id} className="space-y-4">
               <div className="flex items-center justify-between">

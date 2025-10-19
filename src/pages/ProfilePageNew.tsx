@@ -361,7 +361,10 @@ const ProfilePageNew: React.FC = () => {
 
         {/* Edit Profile Menu */}
         {isEditMenuOpen && isOwnProfile && (
-          <ModernCard>
+          <>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={() => setIsEditMenuOpen(false)}></div>
+            <div className="relative z-50">
+              <ModernCard>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-white">Edit profile</h3>
               <button 
@@ -477,12 +480,17 @@ const ProfilePageNew: React.FC = () => {
                 Save
               </ModernButton>
             </div>
-          </ModernCard>
+              </ModernCard>
+            </div>
+          </>
         )}
 
         {/* Settings Menu */}
         {isSettingsMenuOpen && isOwnProfile && (
-          <ModernCard>
+          <>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={() => setIsSettingsMenuOpen(false)}></div>
+            <div className="relative z-50">
+              <ModernCard>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-white">Profile settings</h3>
               <button 
@@ -662,7 +670,9 @@ const ProfilePageNew: React.FC = () => {
                 Save
               </ModernButton>
             </div>
-          </ModernCard>
+              </ModernCard>
+            </div>
+          </>
         )}
 
         {/* Messaging System */}
@@ -707,9 +717,9 @@ const ProfilePageNew: React.FC = () => {
             <ModernCard>
               <div className="flex gap-1 mb-6">
                 {[
-                  { id: 'overview', label: 'Aperçu' },
-                  { id: 'projects', label: 'Projets' },
-                  { id: 'activity', label: 'Activité' }
+                  { id: 'overview', label: 'Overview' },
+                  { id: 'projects', label: 'Projects' },
+                  { id: 'activity', label: 'Activity' }
                 ].map(tab => (
                   <button
                     key={tab.id}
@@ -730,16 +740,16 @@ const ProfilePageNew: React.FC = () => {
                 <div className="space-y-6">
                   {/* About */}
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-3">À propos</h3>
+                    <h3 className="text-lg font-semibold text-white mb-3">About</h3>
                     <p className="text-gray-400 leading-relaxed">
-                      Designer passionné avec plus de 5 ans d'expérience dans la création d'interfaces utilisateur modernes et intuitives. 
-                      Spécialisé dans le design d'applications mobiles et web, je mets mon expertise au service de projets innovants.
+                      Passionate designer with over 5 years of experience in creating modern and intuitive user interfaces. 
+                      Specialized in mobile and web application design, I put my expertise at the service of innovative projects.
                     </p>
                   </div>
 
                   {/* Skills */}
                   <div>
-                    <h3 className="text-lg font-semibold text-white mb-3">Compétences</h3>
+                    <h3 className="text-lg font-semibold text-white mb-3">Skills</h3>
                     <div className="flex flex-wrap gap-2">
                       {['UI/UX Design', 'Figma', 'Adobe Creative Suite', 'React', 'TypeScript', 'Web Design', 'Mobile Design', 'Prototyping'].map(skill => (
                         <span key={skill} className="px-3 py-1 bg-[#35414e] text-white rounded-full text-sm">

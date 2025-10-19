@@ -32,7 +32,7 @@ const CalendarPageNew: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([
     {
       id: '1',
-      title: 'Réunion client - Projet Alpha',
+      title: 'Client meeting - Alpha Project',
       date: '2024-01-15',
       time: '14:00',
       type: 'meeting',
@@ -41,7 +41,7 @@ const CalendarPageNew: React.FC = () => {
     },
     {
       id: '2',
-      title: 'Deadline - Livraison Beta',
+      title: 'Deadline - Beta Delivery',
       date: '2024-01-18',
       time: '17:00',
       type: 'deadline',
@@ -49,7 +49,7 @@ const CalendarPageNew: React.FC = () => {
     },
     {
       id: '3',
-      title: 'Rappel - Facturation mensuelle',
+      title: 'Reminder - Monthly billing',
       date: '2024-01-20',
       time: '09:00',
       type: 'reminder',
@@ -67,19 +67,19 @@ const CalendarPageNew: React.FC = () => {
 
     const days = [];
     
-    // Jours du mois précédent
+    // Previous month days
     for (let i = startingDayOfWeek - 1; i >= 0; i--) {
       const day = new Date(year, month, -i);
       days.push({ date: day, isCurrentMonth: false });
     }
     
-    // Jours du mois actuel
+    // Current month days
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       days.push({ date, isCurrentMonth: true });
     }
     
-    // Jours du mois suivant
+    // Next month days
     const remainingDays = 42 - days.length;
     for (let day = 1; day <= remainingDays; day++) {
       const date = new Date(year, month + 1, day);
@@ -125,7 +125,7 @@ const CalendarPageNew: React.FC = () => {
   };
 
   const formatMonthYear = (date: Date) => {
-    return date.toLocaleDateString('fr-FR', { 
+    return date.toLocaleDateString('en-US', { 
       month: 'long', 
       year: 'numeric' 
     }).replace(/^\w/, c => c.toUpperCase());
@@ -139,17 +139,17 @@ const CalendarPageNew: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Calendrier</h1>
-            <p className="text-gray-400">Gérez vos événements et rendez-vous</p>
+            <h1 className="text-3xl font-bold text-white mb-2">Calendar</h1>
+            <p className="text-gray-400">Manage your events and appointments</p>
           </div>
           <div className="flex gap-3">
             <ModernButton variant="outline" size="sm">
               <Filter size={16} className="mr-2" />
-              Filtres
+              Filters
             </ModernButton>
             <ModernButton size="sm">
               <Plus size={16} className="mr-2" />
-              Nouvel Événement
+              New Event
             </ModernButton>
           </div>
         </div>
@@ -157,7 +157,7 @@ const CalendarPageNew: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Calendrier principal */}
           <div className="lg:col-span-3">
-            <ModernCard title="Calendrier" icon={<CalendarIcon size={20} className="text-white" />}>
+            <ModernCard title="Calendar" icon={<CalendarIcon size={20} className="text-white" />}>
               {/* Navigation du calendrier */}
               <div className="flex items-center justify-between mb-6">
                 <button
@@ -222,7 +222,7 @@ const CalendarPageNew: React.FC = () => {
                         ))}
                         {dayEvents.length > 2 && (
                           <div className="text-xs text-gray-400">
-                            +{dayEvents.length - 2} autres
+                            +{dayEvents.length - 2} more
                           </div>
                         )}
                       </div>
@@ -236,7 +236,7 @@ const CalendarPageNew: React.FC = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Événements d'aujourd'hui */}
-            <ModernCard title="Aujourd'hui" icon={<Clock size={20} className="text-white" />}>
+            <ModernCard title="Today" icon={<Clock size={20} className="text-white" />}>
               <div className="space-y-3">
                 {getEventsForDate(new Date()).map(event => (
                   <div key={event.id} className="p-3 bg-[#35414e] rounded-lg">
@@ -258,21 +258,21 @@ const CalendarPageNew: React.FC = () => {
                 {getEventsForDate(new Date()).length === 0 && (
                   <div className="text-center text-gray-400 py-4">
                     <CalendarIcon size={32} className="mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">Aucun événement aujourd'hui</p>
+                    <p className="text-sm">No events today</p>
                   </div>
                 )}
               </div>
             </ModernCard>
 
             {/* Statistiques rapides */}
-            <ModernCard title="Statistiques" icon={<Users size={20} className="text-white" />}>
+            <ModernCard title="Statistics" icon={<Users size={20} className="text-white" />}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Événements ce mois</span>
+                  <span className="text-sm text-gray-400">Events this month</span>
                   <span className="text-lg font-semibold text-white">24</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Réunions</span>
+                  <span className="text-sm text-gray-400">Meetings</span>
                   <span className="text-lg font-semibold text-white">12</span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -280,7 +280,7 @@ const CalendarPageNew: React.FC = () => {
                   <span className="text-lg font-semibold text-white">8</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Rappels</span>
+                  <span className="text-sm text-gray-400">Reminders</span>
                   <span className="text-lg font-semibold text-white">4</span>
                 </div>
               </div>

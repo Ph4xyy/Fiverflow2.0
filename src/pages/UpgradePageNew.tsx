@@ -263,11 +263,9 @@ const UpgradePageNew: React.FC = () => {
               }`} />
             </button>
             <span className={`text-sm ${isYearly ? 'text-white' : 'text-gray-400'}`}>Yearly</span>
-            {isYearly && (
-              <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
-                -20% savings
-              </span>
-            )}
+            <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
+              -20% savings
+            </span>
           </div>
         </div>
 
