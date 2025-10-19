@@ -7,9 +7,13 @@ export const useAnalytics = () => {
   const { user } = useAuth();
   const location = useLocation();
 
-  // Fonction pour tracker une vue de page
+  // Fonction pour tracker une vue de page (DÉSACTIVÉE - table page_views n'existe pas)
   const trackPageView = useCallback(async (pagePath: string, pageTitle?: string) => {
     if (!user || !supabase) return;
+
+    // Désactivé temporairement car la table page_views n'existe pas
+    console.log('📊 Analytics: Page view tracking désactivé (table page_views manquante)');
+    return;
 
     try {
       await supabase.from('page_views').insert({
@@ -24,9 +28,13 @@ export const useAnalytics = () => {
     }
   }, [user]);
 
-  // Fonction pour démarrer une session
+  // Fonction pour démarrer une session (DÉSACTIVÉE - table user_sessions n'existe pas)
   const startSession = useCallback(async () => {
     if (!user || !supabase) return;
+
+    // Désactivé temporairement car la table user_sessions n'existe pas
+    console.log('📊 Analytics: Session tracking désactivé (table user_sessions manquante)');
+    return;
 
     try {
       // Terminer les sessions actives existantes
@@ -47,9 +55,13 @@ export const useAnalytics = () => {
     }
   }, [user]);
 
-  // Fonction pour mettre à jour l'activité
+  // Fonction pour mettre à jour l'activité (DÉSACTIVÉE - table user_sessions n'existe pas)
   const updateActivity = useCallback(async () => {
     if (!user || !supabase) return;
+
+    // Désactivé temporairement car la table user_sessions n'existe pas
+    console.log('📊 Analytics: Activity tracking désactivé (table user_sessions manquante)');
+    return;
 
     try {
       await supabase
@@ -62,9 +74,13 @@ export const useAnalytics = () => {
     }
   }, [user]);
 
-  // Fonction pour terminer la session
+  // Fonction pour terminer la session (DÉSACTIVÉE - table user_sessions n'existe pas)
   const endSession = useCallback(async () => {
     if (!user || !supabase) return;
+
+    // Désactivé temporairement car la table user_sessions n'existe pas
+    console.log('📊 Analytics: Session end tracking désactivé (table user_sessions manquante)');
+    return;
 
     try {
       await supabase
