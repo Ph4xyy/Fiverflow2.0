@@ -47,6 +47,7 @@ interface Plan {
 
 const UpgradePageNew: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState<string>('boost');
+  const [isYearly, setIsYearly] = useState(false);
 
   const plans: Plan[] = [
     {
@@ -88,8 +89,8 @@ const UpgradePageNew: React.FC = () => {
       id: 'boost',
       name: 'Boost',
       subtitle: 'Pour les freelances actifs',
-      price: '24',
-      period: 'mois',
+      price: isYearly ? '240' : '24',
+      period: isYearly ? 'an' : 'mois',
       description: 'Augmentez votre productivité avec des outils avancés et plus de capacité.',
       features: [
         {
@@ -133,8 +134,8 @@ const UpgradePageNew: React.FC = () => {
       id: 'scale',
       name: 'Scale',
       subtitle: 'Pour les entreprises',
-      price: '59',
-      period: 'mois',
+      price: isYearly ? '590' : '59',
+      period: isYearly ? 'an' : 'mois',
       description: 'La solution complète pour faire évoluer votre entreprise vers de nouveaux sommets.',
       features: [
         {
@@ -247,6 +248,27 @@ const UpgradePageNew: React.FC = () => {
             <div className="w-2 h-2 bg-green-400 rounded-full"></div>
             Plan actuel : Lunch
           </div>
+
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center gap-4 mb-8">
+            <span className={`text-sm ${!isYearly ? 'text-white' : 'text-gray-400'}`}>Mensuel</span>
+            <button
+              onClick={() => setIsYearly(!isYearly)}
+              className={`relative w-12 h-6 rounded-full transition-colors ${
+                isYearly ? 'bg-[#9c68f2]' : 'bg-[#35414e]'
+              }`}
+            >
+              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                isYearly ? 'translate-x-6' : 'translate-x-1'
+              }`} />
+            </button>
+            <span className={`text-sm ${isYearly ? 'text-white' : 'text-gray-400'}`}>Annuel</span>
+            {isYearly && (
+              <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
+                -20% d'économie
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Plans */}
@@ -254,18 +276,18 @@ const UpgradePageNew: React.FC = () => {
           {plans.map((plan) => (
             <div key={plan.id} className="relative">
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                  <div className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] text-white px-6 py-2 rounded-full text-sm font-medium flex items-center gap-2">
-                    <Star size={16} />
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                  <div className="bg-[#9c68f2] text-white px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5">
+                    <Star size={12} />
                     Le plus populaire
                   </div>
                 </div>
               )}
               
               {plan.current && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                  <div className="bg-green-500 text-white px-6 py-2 rounded-full text-sm font-medium flex items-center gap-2">
-                    <Check size={16} />
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                  <div className="bg-green-500 text-white px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5">
+                    <Check size={12} />
                     Plan actuel
                   </div>
                 </div>
@@ -279,16 +301,14 @@ const UpgradePageNew: React.FC = () => {
                 gradient={plan.gradient}
               >
                 <div className="text-center mb-6">
-                  <div className={`flex items-center justify-center w-20 h-20 rounded-2xl mx-auto mb-4 ${
-                    plan.gradient ? 'bg-white/20' : 'bg-[#35414e]'
-                  }`}>
+                  <div className="flex items-center justify-center w-20 h-20 rounded-2xl mx-auto mb-4 bg-[#35414e]">
                     {plan.icon}
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
                   <p className="text-gray-400 mb-4">{plan.subtitle}</p>
                   <div className="mb-4">
                     <span className="text-5xl font-bold text-white">
-                      {plan.price === '0' ? 'Gratuit' : `€${plan.price}`}
+                      {plan.price === '0' ? 'Gratuit' : `$${plan.price}`}
                     </span>
                     {plan.price !== '0' && (
                       <span className="text-gray-400 ml-2">/{plan.period}</span>
@@ -350,8 +370,8 @@ const UpgradePageNew: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {benefits.map((benefit, index) => (
               <ModernCard key={index} className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <div className="text-white">
+                <div className="w-16 h-16 bg-[#35414e] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="text-[#9c68f2]">
                     {benefit.icon}
                   </div>
                 </div>

@@ -362,11 +362,9 @@ const OrdersPage: React.FC = () => {
       <div className="space-y-6 p-4 sm:p-0">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Orders</h1>
-              <p className="text-gray-400">Track, filter and manage all your client orders.</p>
-            </div>
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Orders</h1>
+            <p className="text-gray-400">Track, filter and manage all your client orders.</p>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">

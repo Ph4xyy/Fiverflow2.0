@@ -52,6 +52,7 @@ import TermsOfService from "./components/TermsOfService";
 // Lazy invoices
 const InvoicesLayout = lazy(() => import('./pages/InvoicesLayout'));
 const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
+const InvoicesPageNew = lazy(() => import('./pages/InvoicesPageNew'));
 const InvoiceTemplatesPage = lazy(() => import('./pages/InvoiceTemplatesPage'));
 const InvoiceTemplateEditorPage = lazy(() => import('./pages/InvoiceTemplateEditorPage'));
 
@@ -101,9 +102,9 @@ function AppContent() {
 
               {/* Invoices */}
               <Route path="/invoices" element={<InstantProtectedRoute><InvoicesLayout /></InstantProtectedRoute>}>
-                <Route index element={<InvoicesPage />} />
-                <Route path="sent" element={<InvoicesPage />} />
-                <Route path="create" element={<InvoicesPage />} />
+                <Route index element={<InvoicesPageNew />} />
+                <Route path="sent" element={<InvoicesPageNew />} />
+                <Route path="create" element={<InvoicesPageNew />} />
                 <Route path="templates" element={<InvoiceTemplatesPage />} />
                 <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
               </Route>
