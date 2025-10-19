@@ -59,9 +59,12 @@ const AdminDashboard: React.FC = () => {
 
   const checkAdminStatus = async () => {
     if (!user) {
+      console.log('🔍 AdminDashboard: Pas d\'utilisateur connecté');
       setAdminCheckLoading(false);
       return;
     }
+
+    console.log('🔍 AdminDashboard: Vérification admin pour user:', user.id);
 
     try {
       const { data, error } = await supabase
@@ -70,10 +73,13 @@ const AdminDashboard: React.FC = () => {
         .eq('user_id', user.id)
         .single();
 
+      console.log('🔍 AdminDashboard: Résultat vérification:', { data, error });
+
       if (error) {
         console.error('Erreur lors de la vérification admin:', error);
         setIsAdmin(false);
       } else {
+        console.log('🔍 AdminDashboard: is_admin =', data?.is_admin);
         setIsAdmin(data?.is_admin || false);
       }
     } catch (error) {

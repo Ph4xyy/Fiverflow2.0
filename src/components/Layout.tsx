@@ -48,10 +48,13 @@ const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user) {
+        console.log('🔍 Layout: Pas d\'utilisateur connecté');
         setIsAdmin(false);
         setAdminCheckLoading(false);
         return;
       }
+
+      console.log('🔍 Layout: Vérification admin pour user:', user.id);
 
       try {
         const { data, error } = await supabase
@@ -60,10 +63,13 @@ const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
           .eq('user_id', user.id)
           .single();
 
+        console.log('🔍 Layout: Résultat vérification:', { data, error });
+
         if (error) {
           console.error('Erreur lors de la vérification admin:', error);
           setIsAdmin(false);
         } else {
+          console.log('🔍 Layout: is_admin =', data?.is_admin);
           setIsAdmin(data?.is_admin || false);
         }
       } catch (error) {
