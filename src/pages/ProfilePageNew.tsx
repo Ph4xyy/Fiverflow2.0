@@ -97,7 +97,7 @@ const ProfilePageNew: React.FC = () => {
   
   // Profile data - utilise les vraies données de l'utilisateur
   const [profileData, setProfileData] = useState<ProfileData>({
-    name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Utilisateur',
+    name: 'Utilisateur', // Valeur par défaut, sera mise à jour
     title: 'UI/UX Designer & Frontend Developer',
     location: 'Paris, France',
     memberSince: 'Jan 2019',
@@ -106,6 +106,56 @@ const ProfilePageNew: React.FC = () => {
     email: user?.email || 'john@example.com',
     phone: '+33 6 12 34 56 78'
   });
+
+  // Charger les données du profil depuis la base de données
+  useEffect(() => {
+    const loadProfileData = async () => {
+      if (!user) {
+        console.log('🔍 ProfilePage: Pas d\'utilisateur connecté');
+        return;
+      }
+
+      console.log('🔍 ProfilePage: Chargement du profil pour user:', user.id, 'email:', user.email);
+
+      try {
+        // Récupérer les données du profil depuis user_profiles
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('full_name, email')
+          .eq('user_id', user.id)
+          .single();
+
+        console.log('🔍 ProfilePage: Données du profil:', { data, error });
+
+        if (error) {
+          console.error('Erreur lors du chargement du profil:', error);
+          // Utiliser les données de l'utilisateur auth comme fallback
+          setProfileData(prev => ({
+            ...prev,
+            name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur',
+            email: user.email || 'john@example.com'
+          }));
+        } else if (data) {
+          // Utiliser les données de la base de données
+          setProfileData(prev => ({
+            ...prev,
+            name: data.full_name || user.email?.split('@')[0] || 'Utilisateur',
+            email: data.email || user.email || 'john@example.com'
+          }));
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement du profil:', error);
+        // Fallback vers les données auth
+        setProfileData(prev => ({
+          ...prev,
+          name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur',
+          email: user.email || 'john@example.com'
+        }));
+      }
+    };
+
+    loadProfileData();
+  }, [user]);
 
   // Vérifier le statut admin
   useEffect(() => {
