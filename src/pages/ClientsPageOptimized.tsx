@@ -10,7 +10,7 @@ import ClientForm from '@/components/ClientForm';
 import ClientViewModal, { FullClient } from '@/components/ClientViewModal';
 import { Plus, Search, X, ChevronLeft, ChevronRight, Filter, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
-import OptimizedSubscriptionLimits from '@/components/OptimizedSubscriptionLimits';
+import SubscriptionLimits from '@/components/SubscriptionLimits';
 
 type ClientRow = {
   id: string;
@@ -334,7 +334,7 @@ const ClientsPageOptimized: React.FC = () => {
             <p className="text-gray-400">Search, filter and manage your clients</p>
             {/* Limites d'abonnement */}
             <div className="mt-2">
-              <OptimizedSubscriptionLimits 
+              <SubscriptionLimits 
                 resource="clients" 
                 currentCount={clients?.length || 0}
                 onUpgrade={() => window.location.href = '/upgrade'}
