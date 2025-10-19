@@ -298,11 +298,13 @@ const UpgradePageNew: React.FC = () => {
                   plan.popular ? 'ring-2 ring-[#9c68f2] scale-105' : 
                   plan.current ? 'ring-2 ring-green-500' : ''
                 } ${selectedPlan === plan.id ? 'ring-2 ring-[#9c68f2]' : ''}`}
-                gradient={plan.gradient}
               >
                 <div className="text-center mb-6">
-                  <div className="flex items-center justify-center w-20 h-20 rounded-2xl mx-auto mb-4 bg-[#35414e]">
-                    {plan.icon}
+                  <div className="flex items-center justify-center w-20 h-20 rounded-2xl mx-auto mb-4 bg-[#35414e] relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#9c68f2]/20 to-[#422ca5]/20"></div>
+                    <div className="relative z-10 text-[#9c68f2]">
+                      {plan.icon}
+                    </div>
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
                   <p className="text-gray-400 mb-4">{plan.subtitle}</p>
@@ -321,8 +323,11 @@ const UpgradePageNew: React.FC = () => {
                   <div className="space-y-4">
                     {plan.features.map((feature, index) => (
                       <div key={index} className="flex items-start gap-3 p-3 bg-[#35414e]/50 rounded-lg">
-                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#9c68f2]/20 text-[#9c68f2] flex-shrink-0">
-                          {feature.icon}
+                        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#35414e] relative overflow-hidden flex-shrink-0">
+                          <div className="absolute inset-0 bg-gradient-to-br from-[#9c68f2]/30 to-[#422ca5]/30"></div>
+                          <div className="relative z-10 text-[#9c68f2]">
+                            {feature.icon}
+                          </div>
                         </div>
                         <div>
                           <h4 className="text-sm font-semibold text-white mb-1">{feature.title}</h4>
@@ -335,7 +340,7 @@ const UpgradePageNew: React.FC = () => {
 
                 <ModernButton 
                   variant={plan.buttonVariant}
-                  className="w-full"
+                  className={`w-full ${plan.gradient && !plan.current ? 'bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590]' : ''}`}
                   size="lg"
                   disabled={plan.current}
                 >
@@ -453,23 +458,26 @@ const UpgradePageNew: React.FC = () => {
 
         {/* CTA Final */}
         <div className="text-center max-w-4xl mx-auto">
-          <ModernCard gradient className="p-12">
-            <Crown size={48} className="text-white mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Prêt à transformer votre activité ?
-            </h2>
-            <p className="text-xl text-white/80 mb-8">
-              Rejoignez des milliers de freelances qui ont déjà fait le pas vers le succès
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <ModernButton size="lg" variant="secondary">
-                <Rocket size={20} className="mr-2" />
-                Essayer gratuitement
-              </ModernButton>
-              <ModernButton size="lg" variant="outline">
-                <Headphones size={20} className="mr-2" />
-                Parler à un expert
-              </ModernButton>
+          <ModernCard className="p-12 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#9c68f2]/10 to-[#422ca5]/10"></div>
+            <div className="relative z-10">
+              <Crown size={48} className="text-white mx-auto mb-6" />
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Prêt à transformer votre activité ?
+              </h2>
+              <p className="text-xl text-white/80 mb-8">
+                Rejoignez des milliers de freelances qui ont déjà fait le pas vers le succès
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <ModernButton size="lg" variant="secondary">
+                  <Rocket size={20} className="mr-2" />
+                  Essayer gratuitement
+                </ModernButton>
+                <ModernButton size="lg" variant="outline">
+                  <Headphones size={20} className="mr-2" />
+                  Parler à un expert
+                </ModernButton>
+              </div>
             </div>
           </ModernCard>
         </div>
