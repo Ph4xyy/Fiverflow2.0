@@ -109,7 +109,7 @@ const toDateOnly = (d: Date | null): string | null => {
 const CalendarPage: React.FC = () => {
   const { user } = useAuth();
   const { restrictions, loading: restrictionsLoading, checkAccess } = usePlanRestrictions();
-  const { subscriptions, loading: subscriptionsLoading } = useSubscriptions();
+  const { subscriptions, loading: subscriptionsLoading, markAsPaid } = useSubscriptions();
 
   // View + UI
   const [currentView, setCurrentView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay'>('dayGridMonth');
@@ -272,23 +272,68 @@ const CalendarPage: React.FC = () => {
 
     const subscriptionEvents = filteredSubscriptions
       .filter((s: any) => !!s.next_renewal_date)
-      .map((s: any) => {
+      .flatMap((s: any) => {
         const color = s.color || '#8b5cf6';
         const style = {
           bar: color,
           chipBg: `${color}20`,
           text: '#e5e7eb'
         };
-        return {
-          id: `subscription_${s.id}`,
-          title: s.name,
-          start: s.next_renewal_date,
-          allDay: true,
-          backgroundColor: 'transparent',
-          borderColor: 'transparent',
-          textColor: style.text,
-          extendedProps: { kind: 'subscription', subscription: s, style }
-        };
+        
+        // Generate recurring events based on billing cycle
+        const events = [];
+        const startDate = new Date(s.next_renewal_date);
+        const today = new Date();
+        const endDate = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate()); // Show 1 year ahead
+        
+        // Generate events for the next 12 months based on billing cycle
+        let currentDate = new Date(startDate);
+        let eventCount = 0;
+        const maxEvents = 12; // Limit to 12 events to avoid performance issues
+        
+        while (currentDate <= endDate && eventCount < maxEvents) {
+          events.push({
+            id: `subscription_${s.id}_${currentDate.toISOString().split('T')[0]}`,
+            title: `${s.name} - ${new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: s.currency,
+            }).format(s.amount)}`,
+            start: currentDate.toISOString().split('T')[0],
+            allDay: true,
+            backgroundColor: 'transparent',
+            borderColor: 'transparent',
+            textColor: style.text,
+            extendedProps: { 
+              kind: 'subscription', 
+              subscription: s, 
+              style,
+              isRecurring: true,
+              originalDate: s.next_renewal_date
+            }
+          });
+          
+          // Calculate next renewal date based on billing cycle
+          switch (s.billing_cycle) {
+            case 'monthly':
+              currentDate.setMonth(currentDate.getMonth() + 1);
+              break;
+            case 'yearly':
+              currentDate.setFullYear(currentDate.getFullYear() + 1);
+              break;
+            case 'weekly':
+              currentDate.setDate(currentDate.getDate() + 7);
+              break;
+            case 'quarterly':
+              currentDate.setMonth(currentDate.getMonth() + 3);
+              break;
+            default:
+              currentDate.setMonth(currentDate.getMonth() + 1);
+          }
+          
+          eventCount++;
+        }
+        
+        return events;
       });
 
     setEvents([...orderEvents, ...taskEvents, ...subscriptionEvents]);
@@ -322,7 +367,8 @@ const CalendarPage: React.FC = () => {
 
     const idStr = String(info.event.id);
     const isTask = idStr.startsWith('task_');
-    const rawId = idStr.replace(/^task_|^order_/, '');
+    const isSubscription = idStr.startsWith('subscription_');
+    const rawId = idStr.replace(/^task_|^order_|^subscription_/, '');
 
     try {
       if (!isSupabaseConfigured || !supabase) throw new Error('DB non configurée');
@@ -331,6 +377,12 @@ const CalendarPage: React.FC = () => {
         setTasks(prev => prev.map(t => t.id === rawId ? { ...t, due_date: newDate } : t));
         const { error } = await supabase.from('tasks').update({ due_date: newDate }).eq('id', rawId);
         if (error) throw error;
+      } else if (isSubscription) {
+        // For subscriptions, update the next_renewal_date
+        const { error } = await supabase.from('subscriptions').update({ next_renewal_date: newDate }).eq('id', rawId);
+        if (error) throw error;
+        // Refresh subscriptions to update the calendar
+        window.dispatchEvent(new CustomEvent('ff:session:refreshed'));
       } else {
         setOrders(prev => prev.map(o => o.id === rawId ? { ...o, deadline: newDate } : o));
         const { error } = await supabase.from('orders').update({ deadline: newDate }).eq('id', rawId);
@@ -340,7 +392,7 @@ const CalendarPage: React.FC = () => {
       toast.success('Date mise à jour');
     } catch (e: any) {
       console.error('[onEventDrop]', e);
-      toast.error(`Impossible d’enregistrer: ${e?.message || 'erreur inconnue'}`);
+      toast.error(`Impossible d'enregistrer: ${e?.message || 'erreur inconnue'}`);
       info.revert();
     }
   }, [user]);
@@ -379,6 +431,7 @@ const CalendarPage: React.FC = () => {
     const kind: 'order' | 'task' | 'subscription' | undefined = (arg.event.extendedProps as any)?.kind;
     const order: OrderRow | undefined = (arg.event.extendedProps as any)?.order;
     const subscription: any = (arg.event.extendedProps as any)?.subscription;
+    const isRecurring: boolean = (arg.event.extendedProps as any)?.isRecurring || false;
 
     const subtitle = kind === 'order' 
       ? (order?.clients?.platform || order?.clients?.name || null)
@@ -392,7 +445,12 @@ const CalendarPage: React.FC = () => {
         style={{ background: style.chipBg, borderLeft: `3px solid ${style.bar}` }}
       >
         {kind === 'task' && <ListChecks size={12} className="opacity-80" />}
-        {kind === 'subscription' && <CreditCard size={12} className="opacity-80" />}
+        {kind === 'subscription' && (
+          <div className="flex items-center gap-1">
+            <CreditCard size={12} className="opacity-80" />
+            {isRecurring && <div className="w-1 h-1 rounded-full bg-white/60" />}
+          </div>
+        )}
         <span className="truncate font-medium">{arg.event.title}</span>
         {subtitle && <span className="text-[11px] opacity-80 truncate">{subtitle}</span>}
       </div>
@@ -421,7 +479,9 @@ const CalendarPage: React.FC = () => {
         amount: s.amount,
         currency: s.currency,
         billing_cycle: s.billing_cycle
-      }));
+      }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 5); // Limit to 5 upcoming subscriptions
 
     return [...oItems, ...tItems, ...sItems]
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
@@ -685,7 +745,7 @@ const CalendarPage: React.FC = () => {
                                 {new Intl.NumberFormat('en-US', {
                                   style: 'currency',
                                   currency: it.currency,
-                                }).format(it.amount)} - {it.billing_cycle === 'monthly' ? 'Monthly' : it.billing_cycle === 'yearly' ? 'Yearly' : it.billing_cycle}
+                                }).format(it.amount)} - {it.billing_cycle === 'monthly' ? 'Monthly' : it.billing_cycle === 'yearly' ? 'Yearly' : it.billing_cycle === 'weekly' ? 'Weekly' : it.billing_cycle === 'quarterly' ? 'Quarterly' : it.billing_cycle}
                               </div>
                             )}
                           </div>
@@ -720,6 +780,7 @@ const CalendarPage: React.FC = () => {
             setIsPreviewOpen(false);
             setPreviewEvent(null);
           }}
+          onMarkAsPaid={markAsPaid}
         />
       </div>
     </Layout>

@@ -35,9 +35,10 @@ interface EventPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   onEdit?: (event: EventData) => void;
+  onMarkAsPaid?: (subscriptionId: string) => void;
 }
 
-const EventPreviewModal: React.FC<EventPreviewModalProps> = ({ event, isOpen, onClose, onEdit }) => {
+const EventPreviewModal: React.FC<EventPreviewModalProps> = ({ event, isOpen, onClose, onEdit, onMarkAsPaid }) => {
   if (!isOpen || !event) return null;
 
   // Handle different event types
@@ -73,6 +74,7 @@ const EventPreviewModal: React.FC<EventPreviewModalProps> = ({ event, isOpen, on
         onEdit={onEdit ? () => onEdit(event) : undefined}
         onDelete={undefined}
         onToggle={undefined}
+        onMarkAsPaid={onMarkAsPaid ? () => onMarkAsPaid(event.subscription.id) : undefined}
       />
     );
   }

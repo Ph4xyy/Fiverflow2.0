@@ -128,6 +128,59 @@ export const useSubscriptions = () => {
     return await updateSubscription(id, { is_active: !subscription.is_active });
   }, [subscriptions, updateSubscription]);
 
+  const markAsPaid = useCallback(async (id: string): Promise<boolean> => {
+    const subscription = subscriptions.find(sub => sub.id === id);
+    if (!subscription) return false;
+
+    if (!isSupabaseConfigured || !supabase || !user) {
+      toast.error('Database not configured');
+      return false;
+    }
+
+    try {
+      // Calculate next renewal date based on billing cycle
+      const currentDate = new Date(subscription.next_renewal_date);
+      let nextDate = new Date(currentDate);
+
+      switch (subscription.billing_cycle) {
+        case 'monthly':
+          nextDate.setMonth(nextDate.getMonth() + 1);
+          break;
+        case 'yearly':
+          nextDate.setFullYear(nextDate.getFullYear() + 1);
+          break;
+        case 'weekly':
+          nextDate.setDate(nextDate.getDate() + 7);
+          break;
+        case 'quarterly':
+          nextDate.setMonth(nextDate.getMonth() + 3);
+          break;
+        default:
+          nextDate.setMonth(nextDate.getMonth() + 1);
+      }
+
+      const { error } = await supabase
+        .from('subscriptions')
+        .update({ next_renewal_date: nextDate.toISOString().split('T')[0] })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setSubscriptions(prev => 
+        prev.map(sub => sub.id === id ? { ...sub, next_renewal_date: nextDate.toISOString().split('T')[0] } : sub)
+      );
+
+      toast.success('Subscription marked as paid! Next renewal updated.');
+      return true;
+    } catch (err: any) {
+      console.error('Error marking subscription as paid:', err);
+      toast.error(err?.message || 'Failed to mark subscription as paid');
+      return false;
+    }
+  }, [subscriptions, user]);
+
   // 🔥 Auto-fetch on mount and when user changes - éviter les loops
   useEffect(() => {
     if (user) {
@@ -149,5 +202,6 @@ export const useSubscriptions = () => {
     updateSubscription,
     deleteSubscription,
     toggleSubscription,
+    markAsPaid,
   };
 };

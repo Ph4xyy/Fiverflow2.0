@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreditCard, Edit2, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { CreditCard, Edit2, Trash2, CheckCircle, XCircle, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogFooter } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
 import { formatDateSafe } from '@/utils/dateUtils';
@@ -12,6 +12,7 @@ interface SubscriptionPreviewModalProps {
   onEdit?: () => void;
   onDelete?: () => void;
   onToggle?: () => void;
+  onMarkAsPaid?: () => void;
 }
 
 const SubscriptionPreviewModal: React.FC<SubscriptionPreviewModalProps> = ({ 
@@ -20,7 +21,8 @@ const SubscriptionPreviewModal: React.FC<SubscriptionPreviewModalProps> = ({
   onClose, 
   onEdit, 
   onDelete, 
-  onToggle 
+  onToggle,
+  onMarkAsPaid
 }) => {
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('en-US', {
@@ -154,6 +156,16 @@ const SubscriptionPreviewModal: React.FC<SubscriptionPreviewModalProps> = ({
         <DialogFooter className="!border-[#1C2230]">
           <div className="flex justify-between w-full">
             <div className="flex gap-2">
+              {onMarkAsPaid && subscription.is_active && (
+                <Button
+                  type="button"
+                  onClick={onMarkAsPaid}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Check size={16} className="mr-2" />
+                  Mark as Paid
+                </Button>
+              )}
               {onToggle && (
                 <Button
                   type="button"
