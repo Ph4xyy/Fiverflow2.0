@@ -656,6 +656,11 @@ const CalendarPage: React.FC = () => {
           </div>
         )}
 
+        {/* Subscription Management Section */}
+        <div className="mb-6">
+          <SubscriptionManager />
+        </div>
+
         {/* Content */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Calendar */}
@@ -765,11 +770,6 @@ const CalendarPage: React.FC = () => {
               )}
             </div>
           </aside>
-        </div>
-
-        {/* Subscription Management Section */}
-        <div className="mt-6">
-          <SubscriptionManager />
         </div>
 
         {/* Event Preview Modal */}
