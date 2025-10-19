@@ -48,6 +48,7 @@ export interface PagePermissions {
 export const useSubscriptionPermissions = () => {
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [limits, setLimits] = useState<SubscriptionLimits>({
     maxClients: 5,
     maxOrders: 10,
@@ -80,6 +81,17 @@ export const useSubscriptionPermissions = () => {
     if (!user) return;
 
     try {
+      // Vérifier le statut admin en premier
+      const { data: adminData, error: adminError } = await supabase
+        .from('user_profiles')
+        .select('is_admin')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!adminError && adminData) {
+        setIsAdmin(adminData.is_admin);
+      }
+
       // Récupérer l'abonnement actuel
       const { data: subscriptionData, error: subscriptionError } = await supabase
         .rpc('get_user_current_subscription', { user_uuid: user.id });
@@ -93,12 +105,23 @@ export const useSubscriptionPermissions = () => {
         const currentSubscription = subscriptionData[0];
         setSubscription(currentSubscription);
         
-        // Définir les limites selon le plan
+        // Définir les limites selon le plan (illimitées pour les admins)
         const newLimits = getLimitsForPlan(currentSubscription.plan_name);
-        setLimits(newLimits);
+        if (adminData?.is_admin) {
+          // Les admins ont des limites illimitées
+          setLimits({
+            maxClients: -1,
+            maxOrders: -1,
+            maxProjects: -1,
+            maxStorage: -1,
+            maxTeamMembers: -1
+          });
+        } else {
+          setLimits(newLimits);
+        }
         
-        // Définir les permissions selon le plan
-        const newPermissions = getPermissionsForPlan(currentSubscription.plan_name);
+        // Définir les permissions selon le plan et le statut admin
+        const newPermissions = getPermissionsForPlan(currentSubscription.plan_name, adminData?.is_admin);
         setPermissions(newPermissions);
       }
     } catch (error) {
@@ -145,7 +168,22 @@ export const useSubscriptionPermissions = () => {
     }
   };
 
-  const getPermissionsForPlan = (planName: string): PagePermissions => {
+  const getPermissionsForPlan = (planName: string, isAdmin: boolean = false): PagePermissions => {
+    // Les admins ont accès à tout, peu importe leur abonnement
+    if (isAdmin) {
+      return {
+        dashboard: true,
+        clients: true,
+        orders: true,
+        calendar: true,
+        referrals: true,
+        workboard: true,
+        stats: true,
+        invoices: true,
+        admin: true
+      };
+    }
+
     const basePermissions = {
       dashboard: true,
       clients: true,
@@ -220,6 +258,7 @@ export const useSubscriptionPermissions = () => {
 
   return {
     subscription,
+    isAdmin,
     limits,
     permissions,
     loading,

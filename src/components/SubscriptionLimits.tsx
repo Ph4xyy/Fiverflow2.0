@@ -14,7 +14,7 @@ const SubscriptionLimits: React.FC<SubscriptionLimitsProps> = ({
   currentCount,
   onUpgrade
 }) => {
-  const { subscription, limits, isWithinLimit, getRemainingLimit } = useSubscriptionPermissions();
+  const { subscription, isAdmin, limits, isWithinLimit, getRemainingLimit } = useSubscriptionPermissions();
 
   const resourceLabels = {
     clients: 'Clients',
@@ -23,6 +23,16 @@ const SubscriptionLimits: React.FC<SubscriptionLimitsProps> = ({
     storage: 'Stockage (GB)',
     teamMembers: 'Membres d\'équipe'
   };
+
+  // Les admins n'ont pas de limites
+  if (isAdmin) {
+    return (
+      <div className="flex items-center gap-2 text-green-400">
+        <CheckCircle size={16} />
+        <span className="text-sm">Administrateur - Accès illimité</span>
+      </div>
+    );
+  }
 
   const limitKey = `max${resource.charAt(0).toUpperCase() + resource.slice(1)}` as keyof typeof limits;
   const limit = limits[limitKey];

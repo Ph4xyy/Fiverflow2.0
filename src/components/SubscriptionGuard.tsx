@@ -16,7 +16,7 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
   pageName,
   description
 }) => {
-  const { subscription, canAccessPage, loading } = useSubscriptionPermissions();
+  const { subscription, isAdmin, canAccessPage, loading } = useSubscriptionPermissions();
 
   if (loading) {
     return (
@@ -28,6 +28,11 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
 
   // Vérifier si l'utilisateur a accès à cette page
   const hasAccess = canAccessPage(pageName as any);
+
+  // Les admins ont toujours accès à tout
+  if (isAdmin) {
+    return <>{children}</>;
+  }
 
   if (!hasAccess) {
     return (
