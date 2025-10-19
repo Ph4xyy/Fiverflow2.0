@@ -378,7 +378,7 @@ export default function NetworkPage() {
 
   return (
     <Layout>
-      <div className="space-y-6 p-4 sm:p-0">
+      <div className="p-6 space-y-6">
         {(referralError || payoutError) && (
           <div className="mb-6 rounded-xl p-4 border border-blue-800 bg-blue-900/20">
             <div className="flex items-start space-x-3">
@@ -400,8 +400,8 @@ export default function NetworkPage() {
         )}
 
         <div className="mb-8">
-          <h1 className={h1}>{'Referral Network'}</h1>
-          <p className={pSub}>{'Share your referral link and earn commissions'}</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Referral Network</h1>
+          <p className="text-gray-400">Share your referral link and earn commissions</p>
         </div>
 
         {/* Stats Cards */}

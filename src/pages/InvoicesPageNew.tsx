@@ -37,7 +37,7 @@ interface Invoice {
 const InvoicesPageNew: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [sortBy, setSortBy] = useState('date');
+  const [sortBy, setSortBy] = useState('createdDate');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const invoices: Invoice[] = [
@@ -85,52 +85,34 @@ const InvoicesPageNew: React.FC = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'paid':
-        return <CheckCircle size={16} className="text-green-500" />;
-      case 'sent':
-        return <Send size={16} className="text-blue-500" />;
-      case 'overdue':
-        return <AlertCircle size={16} className="text-red-500" />;
-      case 'draft':
-        return <FileText size={16} className="text-gray-500" />;
-      case 'cancelled':
-        return <XCircle size={16} className="text-gray-500" />;
-      default:
-        return <Clock size={16} className="text-gray-500" />;
+      case 'paid': return <CheckCircle size={16} />;
+      case 'sent': return <Send size={16} />;
+      case 'overdue': return <AlertCircle size={16} />;
+      case 'draft': return <FileText size={16} />;
+      case 'cancelled': return <XCircle size={16} />;
+      default: return <Clock size={16} />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'paid':
-        return 'bg-green-500/20 text-green-400 border-green-500/30';
-      case 'sent':
-        return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'overdue':
-        return 'bg-red-500/20 text-red-400 border-red-500/30';
-      case 'draft':
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-      case 'cancelled':
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-      default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+      case 'paid': return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'sent': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      case 'overdue': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      case 'draft': return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+      case 'cancelled': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'paid':
-        return 'Paid';
-      case 'sent':
-        return 'Sent';
-      case 'overdue':
-        return 'Overdue';
-      case 'draft':
-        return 'Draft';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return status;
+      case 'paid': return 'Paid';
+      case 'sent': return 'Sent';
+      case 'overdue': return 'Overdue';
+      case 'draft': return 'Draft';
+      case 'cancelled': return 'Cancelled';
+      default: return status;
     }
   };
 
@@ -148,7 +130,7 @@ const InvoicesPageNew: React.FC = () => {
 
   return (
     <Layout>
-      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -163,7 +145,7 @@ const InvoicesPageNew: React.FC = () => {
             </ModernButton>
             <ModernButton size="sm">
               <Plus size={16} className="mr-2" />
-              New invoice
+              New Invoice
             </ModernButton>
           </div>
         </div>
@@ -174,7 +156,7 @@ const InvoicesPageNew: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold text-white">{filteredInvoices.length}</p>
-                <p className="text-sm text-gray-400">Total invoices</p>
+                <p className="text-sm text-gray-400">Total Invoices</p>
               </div>
               <div className="text-gray-400 opacity-50">
                 <FileText size={20} />
@@ -186,7 +168,7 @@ const InvoicesPageNew: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold text-white">${totalAmount.toLocaleString()}</p>
-                <p className="text-sm text-gray-400">Total amount</p>
+                <p className="text-sm text-gray-400">Total Amount</p>
               </div>
               <div className="text-gray-400 opacity-50">
                 <DollarSign size={20} />
@@ -198,7 +180,7 @@ const InvoicesPageNew: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold text-white">${paidAmount.toLocaleString()}</p>
-                <p className="text-sm text-gray-400">Amount paid</p>
+                <p className="text-sm text-gray-400">Amount Paid</p>
               </div>
               <div className="text-gray-400 opacity-50">
                 <CheckCircle size={20} />
@@ -221,8 +203,7 @@ const InvoicesPageNew: React.FC = () => {
 
         {/* Filters and Search */}
         <ModernCard>
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -235,15 +216,14 @@ const InvoicesPageNew: React.FC = () => {
                 />
               </div>
             </div>
-
-            {/* Status Filter */}
-            <div className="flex items-center gap-3">
+            
+            <div className="flex gap-3">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
               >
-                <option value="">All statuses</option>
+                <option value="">All Statuses</option>
                 <option value="draft">Draft</option>
                 <option value="sent">Sent</option>
                 <option value="paid">Paid</option>
@@ -300,7 +280,7 @@ const InvoicesPageNew: React.FC = () => {
                       }}
                       className="flex items-center gap-2 hover:text-white transition-colors"
                     >
-                      Due date
+                      Due Date
                       <ArrowUpDown size={14} />
                     </button>
                   </th>
@@ -320,13 +300,13 @@ const InvoicesPageNew: React.FC = () => {
                       <div className="font-medium text-white">{invoice.client}</div>
                     </td>
                     <td className="py-4 px-4">
-                      <div className="text-gray-300 max-w-xs truncate">{invoice.description}</div>
+                      <div className="text-gray-300">{invoice.description}</div>
                     </td>
                     <td className="py-4 px-4">
                       <div className="font-semibold text-white">${invoice.amount.toLocaleString()}</div>
                     </td>
                     <td className="py-4 px-4">
-                      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(invoice.status)}`}>
+                      <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(invoice.status)}`}>
                         {getStatusIcon(invoice.status)}
                         {getStatusText(invoice.status)}
                       </div>
@@ -344,40 +324,38 @@ const InvoicesPageNew: React.FC = () => {
                         <ModernButton size="sm" variant="outline">
                           <Edit size={14} />
                         </ModernButton>
-                        {invoice.status === 'sent' && (
-                          <ModernButton size="sm" variant="outline">
-                            <Send size={14} />
-                          </ModernButton>
-                        )}
                         <ModernButton size="sm" variant="outline">
-                          <MoreVertical size={14} />
+                          <Send size={14} />
                         </ModernButton>
+                        <button className="p-1 hover:bg-[#35414e] rounded">
+                          <MoreVertical size={14} className="text-gray-400" />
+                        </button>
                       </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
 
-          {filteredInvoices.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-[#35414e] rounded-full flex items-center justify-center mx-auto mb-4">
-                <FileText size={24} className="text-gray-400" />
+            {filteredInvoices.length === 0 && (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-[#35414e] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText size={24} className="text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">No invoices found</h3>
+                <p className="text-gray-400 mb-4">
+                  {searchTerm || statusFilter 
+                    ? 'No invoices match your search criteria'
+                    : 'Start by creating your first invoice'
+                  }
+                </p>
+                <ModernButton>
+                  <Plus size={16} className="mr-2" />
+                  Create Invoice
+                </ModernButton>
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">No invoices found</h3>
-              <p className="text-gray-400 mb-4">
-                {searchTerm || statusFilter 
-                  ? 'No invoices match your search criteria'
-                  : 'Start by creating your first invoice'
-                }
-              </p>
-              <ModernButton>
-                <Plus size={16} className="mr-2" />
-                Create invoice
-              </ModernButton>
-            </div>
-          )}
+            )}
+          </div>
         </ModernCard>
       </div>
     </Layout>

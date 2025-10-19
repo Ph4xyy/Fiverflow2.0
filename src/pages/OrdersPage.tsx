@@ -359,12 +359,12 @@ const OrdersPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="space-y-6 p-4 sm:p-0">
+      <div className="p-6 space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Orders</h1>
-            <p className="text-gray-400">Track, filter and manage all your client orders.</p>
+            <p className="text-gray-400">Track, filter and manage all your client orders</p>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -403,40 +403,40 @@ const OrdersPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#1C2230]">
             {/* Total Revenue */}
             <div className="p-4 sm:p-5 flex items-center gap-4 min-h-[84px]">
-              <div className="w-11 h-11 rounded-xl grid place-items-center text-white bg-gradient-to-br from-emerald-500 to-teal-600">
-                <DollarSign className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="text-[11px] uppercase tracking-wider text-slate-400">Total Revenue</div>
                 <div className="text-2xl font-semibold text-white truncate">
                   {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(kpis.totalRevenue)}
                 </div>
               </div>
+              <div className="text-gray-400 opacity-50">
+                <DollarSign size={20} />
+              </div>
             </div>
 
             {/* Pending Revenue */}
             <div className="p-4 sm:p-5 flex items-center gap-4 min-h-[84px]">
-              <div className="w-11 h-11 rounded-xl grid place-items-center text-white bg-gradient-to-br from-amber-500 to-orange-600">
-                <Layers className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="text-[11px] uppercase tracking-wider text-slate-400">Pending Revenue</div>
                 <div className="text-2xl font-semibold text-white truncate">
                   {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(kpis.pendingRevenue)}
                 </div>
               </div>
+              <div className="text-gray-400 opacity-50">
+                <Layers size={20} />
+              </div>
             </div>
 
             {/* In Progress */}
             <div className="p-4 sm:p-5 flex items-center gap-4 min-h-[84px]">
-              <div className="w-11 h-11 rounded-xl grid place-items-center text-white bg-gradient-to-br from-indigo-500 to-blue-600">
-                <Calendar className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="text-[11px] uppercase tracking-wider text-slate-400">In Progress</div>
                 <div className="text-2xl font-semibold text-white truncate">
                   {kpis.inProgress}
                 </div>
+              </div>
+              <div className="text-gray-400 opacity-50">
+                <Calendar size={20} />
               </div>
             </div>
           </div>

@@ -12,7 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
-  Search
+  Search,
+  X
 } from 'lucide-react';
 
 interface Event {
@@ -29,6 +30,9 @@ interface Event {
 const CalendarPageNew: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterType, setFilterType] = useState<string>('');
+  const [filterPriority, setFilterPriority] = useState<string>('');
   const [events, setEvents] = useState<Event[]>([
     {
       id: '1',
@@ -91,7 +95,17 @@ const CalendarPageNew: React.FC = () => {
 
   const getEventsForDate = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
-    return events.filter(event => event.date === dateStr);
+    let filteredEvents = events.filter(event => event.date === dateStr);
+    
+    // Apply filters
+    if (filterType) {
+      filteredEvents = filteredEvents.filter(event => event.type === filterType);
+    }
+    if (filterPriority) {
+      filteredEvents = filteredEvents.filter(event => event.priority === filterPriority);
+    }
+    
+    return filteredEvents;
   };
 
   const getPriorityColor = (priority: string) => {
@@ -143,7 +157,11 @@ const CalendarPageNew: React.FC = () => {
             <p className="text-gray-400">Manage your events and appointments</p>
           </div>
           <div className="flex gap-3">
-            <ModernButton variant="outline" size="sm">
+            <ModernButton 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+            >
               <Filter size={16} className="mr-2" />
               Filters
             </ModernButton>
@@ -153,6 +171,67 @@ const CalendarPageNew: React.FC = () => {
             </ModernButton>
           </div>
         </div>
+
+        {/* Filters Panel */}
+        {showFilters && (
+          <ModernCard>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">Event Filters</h3>
+              <button 
+                onClick={() => setShowFilters(false)}
+                className="p-1 hover:bg-[#35414e] rounded"
+              >
+                <X size={16} className="text-gray-400" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Event Type</label>
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                >
+                  <option value="">All Types</option>
+                  <option value="meeting">Meeting</option>
+                  <option value="deadline">Deadline</option>
+                  <option value="reminder">Reminder</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Priority</label>
+                <select
+                  value={filterPriority}
+                  onChange={(e) => setFilterPriority(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                >
+                  <option value="">All Priorities</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-4">
+              <ModernButton 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  setFilterType('');
+                  setFilterPriority('');
+                }}
+              >
+                Clear Filters
+              </ModernButton>
+              <ModernButton 
+                size="sm"
+                onClick={() => setShowFilters(false)}
+              >
+                Apply Filters
+              </ModernButton>
+            </div>
+          </ModernCard>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Calendrier principal */}
