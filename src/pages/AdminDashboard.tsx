@@ -160,6 +160,7 @@ const AdminDashboard: React.FC = () => {
       }
 
       console.log('🔍 AdminDashboard: Nombre d\'utilisateurs trouvés:', data?.length || 0);
+      console.log('🔍 AdminDashboard: Utilisateurs trouvés:', data?.map(u => ({ name: u.full_name, email: u.email, id: u.id })));
 
       // Récupérer les vraies données d'abonnement pour chaque utilisateur
       const usersWithRealData = await Promise.all((data || []).map(async (user, index) => {
@@ -234,26 +235,57 @@ const AdminDashboard: React.FC = () => {
 
   const toggleAdminStatus = async (userId: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({ is_admin: !currentStatus })
-        .eq('user_id', userId);
+      console.log('🔍 AdminDashboard: Changement de statut admin pour user:', userId, 'actuel:', currentStatus);
+      
+      if (currentStatus) {
+        // Rétrograder admin vers user
+        const { data, error } = await supabase
+          .rpc('demote_admin_to_user', {
+            target_user_id: userId,
+            admin_user_id: user?.id // ID de l'admin qui fait le changement
+          });
 
-      if (error) {
-        console.error('Erreur lors de la modification du statut admin:', error);
-        return;
+        if (error) {
+          console.error('Erreur lors de la rétrogradation admin:', error);
+          alert('Erreur lors de la rétrogradation: ' + error.message);
+          return;
+        }
+
+        console.log('🔍 AdminDashboard: Admin rétrogradé avec succès:', data);
+        alert('✅ Utilisateur rétrogradé en utilisateur normal avec succès!');
+      } else {
+        // Promouvoir user vers admin
+        const { data, error } = await supabase
+          .rpc('promote_user_to_admin', {
+            target_user_id: userId,
+            admin_user_id: user?.id // ID de l'admin qui fait le changement
+          });
+
+        if (error) {
+          console.error('Erreur lors de la promotion admin:', error);
+          alert('Erreur lors de la promotion: ' + error.message);
+          return;
+        }
+
+        console.log('🔍 AdminDashboard: Utilisateur promu admin avec succès:', data);
+        alert('✅ Utilisateur promu administrateur avec succès!');
       }
 
-      // Recharger les données
-      loadUsers();
-      loadStats();
+      // Recharger les données pour voir le changement
+      setLoading(true);
+      await loadUsers();
+      await loadStats();
+      setOpenMenuId(null);
     } catch (error) {
       console.error('Erreur lors de la modification du statut admin:', error);
+      alert('❌ Erreur lors de la modification du statut admin: ' + error.message);
     }
   };
 
   const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
+      console.log('🔍 AdminDashboard: Changement de statut utilisateur pour user:', userId, 'actuel:', currentStatus);
+      
       const { error } = await supabase
         .from('user_profiles')
         .update({ is_active: !currentStatus })
@@ -261,14 +293,21 @@ const AdminDashboard: React.FC = () => {
 
       if (error) {
         console.error('Erreur lors de la modification du statut utilisateur:', error);
+        alert('Erreur lors de la modification du statut: ' + error.message);
         return;
       }
 
-      // Recharger les données
-      loadUsers();
-      loadStats();
+      console.log('🔍 AdminDashboard: Statut utilisateur modifié avec succès');
+      alert(`✅ Utilisateur ${!currentStatus ? 'activé' : 'désactivé'} avec succès!`);
+
+      // Recharger les données pour voir le changement
+      setLoading(true);
+      await loadUsers();
+      await loadStats();
+      setOpenMenuId(null);
     } catch (error) {
       console.error('Erreur lors de la modification du statut utilisateur:', error);
+      alert('❌ Erreur lors de la modification du statut utilisateur: ' + error.message);
     }
   };
 
@@ -653,7 +692,10 @@ const AdminDashboard: React.FC = () => {
                       <td className="py-3 px-4">
                         <div className="relative menu-container">
                           <button
-                            onClick={() => setOpenMenuId(openMenuId === userProfile.id ? null : userProfile.id)}
+                            onClick={() => {
+                              console.log('🔍 AdminDashboard: Clic sur menu pour user:', userProfile.full_name, 'ID:', userProfile.id, 'Email:', userProfile.email);
+                              setOpenMenuId(openMenuId === userProfile.id ? null : userProfile.id);
+                            }}
                             className="p-2 rounded-lg hover:bg-[#35414e] transition-colors"
                           >
                             <MoreVertical size={16} className="text-gray-400" />
@@ -663,6 +705,9 @@ const AdminDashboard: React.FC = () => {
                             <div className="fixed inset-0 z-40 flex items-center justify-center" onClick={() => setOpenMenuId(null)}>
                               <div className="w-96 bg-[#1e2938] border border-[#35414e] rounded-xl shadow-2xl z-50 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                                 <div className="p-4">
+                                  {/* Debug info */}
+                                  {console.log('🔍 AdminDashboard: Menu ouvert pour user:', userProfile.full_name, 'ID:', userProfile.id, 'Email:', userProfile.email)}
+                                  
                                   {/* Header du menu */}
                                   <div className="flex items-center justify-between mb-4">
                                     <h3 className="text-lg font-semibold text-white">
