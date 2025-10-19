@@ -128,7 +128,13 @@ const ProfilePageNew: React.FC = () => {
         console.log('🔍 ProfilePage: Données du profil:', { data, error });
 
         if (error) {
-          console.error('Erreur lors du chargement du profil:', error);
+          console.error('❌ Erreur lors du chargement du profil:', error);
+          console.error('❌ Détails de l\'erreur:', error.message, error.status, error.statusText);
+          
+          // Vérifier spécifiquement l'erreur 406
+          if (error.status === 406) {
+            console.error('❌ ERREUR 406 DÉTECTÉE - Problème avec les en-têtes de requête');
+          }
           // Utiliser les données de l'utilisateur auth comme fallback
           setProfileData(prev => ({
             ...prev,

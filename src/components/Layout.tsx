@@ -66,8 +66,34 @@ const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
         console.log('🔍 Layout: Résultat vérification:', { data, error });
 
         if (error) {
-          console.error('Erreur lors de la vérification admin:', error);
-          setIsAdmin(false);
+          console.error('❌ Erreur lors de la vérification admin:', error);
+          console.error('❌ Détails de l\'erreur:', error.message, error.status, error.statusText);
+          
+          // Vérifier spécifiquement l'erreur 406
+          if (error.status === 406) {
+            console.error('❌ ERREUR 406 DÉTECTÉE DANS LAYOUT - Tentative de contournement...');
+            
+            // Solution de contournement: utiliser une requête alternative
+            try {
+              const { data: fallbackData, error: fallbackError } = await supabase
+                .from('user_profiles')
+                .select('is_admin')
+                .eq('user_id', user.id);
+              
+              if (fallbackError) {
+                console.error('❌ Erreur de contournement aussi:', fallbackError);
+                setIsAdmin(false);
+              } else {
+                console.log('✅ Contournement réussi:', fallbackData);
+                setIsAdmin(fallbackData?.[0]?.is_admin || false);
+              }
+            } catch (fallbackErr) {
+              console.error('❌ Erreur dans le contournement:', fallbackErr);
+              setIsAdmin(false);
+            }
+          } else {
+            setIsAdmin(false);
+          }
         } else {
           console.log('🔍 Layout: is_admin =', data?.is_admin);
           setIsAdmin(data?.is_admin || false);

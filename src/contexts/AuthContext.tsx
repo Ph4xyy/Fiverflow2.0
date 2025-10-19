@@ -53,6 +53,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
+          console.error('❌ Erreur 406 détectée lors de la récupération de session:', error);
+          console.error('❌ Détails de l\'erreur:', error.message, error.status, error.statusText);
+        }
+        
+        if (error) {
           console.error('❌ Erreur lors de la récupération de la session:', error);
         } else {
           console.log('🔐 AuthContext: Session récupérée:', session?.user?.id, 'email:', session?.user?.email);
