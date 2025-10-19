@@ -17,7 +17,16 @@ import {
   Clock,
   TrendingUp,
   Database,
-  Activity
+  Activity,
+  MoreVertical,
+  Edit,
+  Key,
+  CreditCard,
+  Ban,
+  UserPlus,
+  Mail,
+  Eye,
+  Trash2
 } from 'lucide-react';
 
 interface UserProfile {
@@ -66,6 +75,7 @@ const AdminDashboard: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   // Vérifier si l'utilisateur est admin
   const [isAdmin, setIsAdmin] = useState(false);
@@ -115,19 +125,34 @@ const AdminDashboard: React.FC = () => {
     }
   }, [isAdmin]);
 
+  // Fermer le menu quand on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openMenuId && !(event.target as Element).closest('.menu-container')) {
+        setOpenMenuId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openMenuId]);
+
   const loadUsers = async () => {
     try {
       console.log('🔍 AdminDashboard: Chargement des utilisateurs...');
       
+      // Essayer d'abord une requête simple
       const { data, error } = await supabase
         .from('user_profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('id, user_id, full_name, is_admin, is_active, created_at');
 
       console.log('🔍 AdminDashboard: Résultat requête utilisateurs:', { data, error });
 
       if (error) {
         console.error('Erreur lors du chargement des utilisateurs:', error);
+        console.error('Détails de l\'erreur:', error.message, error.details, error.hint);
         return;
       }
 
@@ -233,6 +258,80 @@ const AdminDashboard: React.FC = () => {
       loadStats();
     } catch (error) {
       console.error('Erreur lors de la modification du statut utilisateur:', error);
+    }
+  };
+
+  // Nouvelles fonctions de gestion
+  const updateUserRole = async (userId: string, newRole: string) => {
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ user_role: newRole })
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Erreur lors de la modification du rôle:', error);
+        return;
+      }
+
+      loadUsers();
+      setOpenMenuId(null);
+    } catch (error) {
+      console.error('Erreur lors de la modification du rôle:', error);
+    }
+  };
+
+  const updateSubscription = async (userId: string, newPlan: string) => {
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ subscription_plan: newPlan })
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Erreur lors de la modification de l\'abonnement:', error);
+        return;
+      }
+
+      loadUsers();
+      setOpenMenuId(null);
+    } catch (error) {
+      console.error('Erreur lors de la modification de l\'abonnement:', error);
+    }
+  };
+
+  const sendEmailToUser = (userEmail: string) => {
+    // Ouvrir le client email par défaut
+    window.open(`mailto:${userEmail}?subject=Message from FiverFlow Admin`);
+    setOpenMenuId(null);
+  };
+
+  const viewUserDetails = (user: UserProfile) => {
+    setSelectedUser(user);
+    setOpenMenuId(null);
+  };
+
+  const deleteUser = async (userId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .delete()
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Erreur lors de la suppression:', error);
+        return;
+      }
+
+      loadUsers();
+      loadStats();
+      setOpenMenuId(null);
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
     }
   };
 
@@ -501,43 +600,141 @@ const AdminDashboard: React.FC = () => {
                         {new Date(userProfile.created_at).toLocaleDateString('fr-FR')}
                       </td>
                       <td className="py-3 px-4">
-                        <div className="flex gap-2">
-                          <ModernButton
-                            size="sm"
-                            variant="outline"
-                            onClick={() => toggleAdminStatus(userProfile.user_id, userProfile.is_admin)}
-                            className={userProfile.is_admin ? 'text-red-400 hover:text-red-300' : 'text-blue-400 hover:text-blue-300'}
+                        <div className="relative menu-container">
+                          <button
+                            onClick={() => setOpenMenuId(openMenuId === userProfile.id ? null : userProfile.id)}
+                            className="p-2 rounded-lg hover:bg-[#35414e] transition-colors"
                           >
-                            {userProfile.is_admin ? (
-                              <>
-                                <UserX size={14} className="mr-1" />
-                                Retirer Admin
-                              </>
-                            ) : (
-                              <>
-                                <Crown size={14} className="mr-1" />
-                                Promouvoir Admin
-                              </>
-                            )}
-                          </ModernButton>
-                          <ModernButton
-                            size="sm"
-                            variant="outline"
-                            onClick={() => toggleUserStatus(userProfile.user_id, userProfile.is_active)}
-                            className={userProfile.is_active ? 'text-red-400 hover:text-red-300' : 'text-green-400 hover:text-green-300'}
-                          >
-                            {userProfile.is_active ? (
-                              <>
-                                <UserX size={14} className="mr-1" />
-                                Désactiver
-                              </>
-                            ) : (
-                              <>
-                                <UserCheck size={14} className="mr-1" />
-                                Activer
-                              </>
-                            )}
-                          </ModernButton>
+                            <MoreVertical size={16} className="text-gray-400" />
+                          </button>
+
+                          {openMenuId === userProfile.id && (
+                            <div className="absolute right-0 top-full mt-1 w-64 bg-[#1e2938] border border-[#35414e] rounded-lg shadow-lg z-50">
+                              <div className="p-2">
+                                {/* Actions rapides */}
+                                <div className="space-y-1">
+                                  <button
+                                    onClick={() => viewUserDetails(userProfile)}
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-[#35414e] rounded-lg transition-colors"
+                                  >
+                                    <Eye size={14} />
+                                    Voir les détails
+                                  </button>
+
+                                  <button
+                                    onClick={() => sendEmailToUser(userProfile.email || '')}
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-[#35414e] rounded-lg transition-colors"
+                                  >
+                                    <Mail size={14} />
+                                    Envoyer un email
+                                  </button>
+                                </div>
+
+                                <div className="border-t border-[#35414e] my-2"></div>
+
+                                {/* Gestion des rôles */}
+                                <div className="mb-2">
+                                  <p className="text-xs text-gray-400 px-3 py-1">Changer le rôle</p>
+                                  <div className="space-y-1">
+                                    {['user', 'moderator', 'admin', 'super_admin'].map(role => (
+                                      <button
+                                        key={role}
+                                        onClick={() => updateUserRole(userProfile.user_id, role)}
+                                        className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                                          userProfile.user_role === role
+                                            ? 'bg-blue-500/20 text-blue-400'
+                                            : 'text-gray-300 hover:bg-[#35414e]'
+                                        }`}
+                                      >
+                                        <Key size={14} />
+                                        {role === 'super_admin' ? 'Super Admin' :
+                                         role === 'admin' ? 'Admin' :
+                                         role === 'moderator' ? 'Moderator' : 'User'}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Gestion des abonnements */}
+                                <div className="mb-2">
+                                  <p className="text-xs text-gray-400 px-3 py-1">Changer l'abonnement</p>
+                                  <div className="space-y-1">
+                                    {['free', 'launch', 'boost', 'scale'].map(plan => (
+                                      <button
+                                        key={plan}
+                                        onClick={() => updateSubscription(userProfile.user_id, plan)}
+                                        className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                                          userProfile.subscription_plan === plan
+                                            ? 'bg-purple-500/20 text-purple-400'
+                                            : 'text-gray-300 hover:bg-[#35414e]'
+                                        }`}
+                                      >
+                                        <CreditCard size={14} />
+                                        {plan === 'scale' ? 'Scale' :
+                                         plan === 'boost' ? 'Boost' :
+                                         plan === 'launch' ? 'Launch' : 'Free'}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <div className="border-t border-[#35414e] my-2"></div>
+
+                                {/* Actions d'administration */}
+                                <div className="space-y-1">
+                                  <button
+                                    onClick={() => toggleAdminStatus(userProfile.user_id, userProfile.is_admin)}
+                                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                                      userProfile.is_admin 
+                                        ? 'text-red-400 hover:bg-red-500/20' 
+                                        : 'text-blue-400 hover:bg-blue-500/20'
+                                    }`}
+                                  >
+                                    {userProfile.is_admin ? (
+                                      <>
+                                        <UserX size={14} />
+                                        Retirer Admin
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Crown size={14} />
+                                        Promouvoir Admin
+                                      </>
+                                    )}
+                                  </button>
+
+                                  <button
+                                    onClick={() => toggleUserStatus(userProfile.user_id, userProfile.is_active)}
+                                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
+                                      userProfile.is_active 
+                                        ? 'text-red-400 hover:bg-red-500/20' 
+                                        : 'text-green-400 hover:bg-green-500/20'
+                                    }`}
+                                  >
+                                    {userProfile.is_active ? (
+                                      <>
+                                        <Ban size={14} />
+                                        Désactiver
+                                      </>
+                                    ) : (
+                                      <>
+                                        <UserCheck size={14} />
+                                        Activer
+                                      </>
+                                    )}
+                                  </button>
+
+                                  <button
+                                    onClick={() => deleteUser(userProfile.user_id)}
+                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                                  >
+                                    <Trash2 size={14} />
+                                    Supprimer
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </td>
                     </tr>
