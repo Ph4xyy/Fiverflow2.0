@@ -77,6 +77,7 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [showUserDetails, setShowUserDetails] = useState(false);
 
   // Vérifier si l'utilisateur est admin
   const [isAdmin, setIsAdmin] = useState(false);
@@ -144,10 +145,11 @@ const AdminDashboard: React.FC = () => {
     try {
       console.log('🔍 AdminDashboard: Chargement des utilisateurs...');
       
-      // Essayer d'abord une requête simple
+      // Utiliser la vue qui inclut les emails
       const { data, error } = await supabase
-        .from('user_profiles')
-        .select('id, user_id, full_name, is_admin, is_active, created_at');
+        .from('user_emails_view')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       console.log('🔍 AdminDashboard: Résultat requête utilisateurs:', { data, error });
 
@@ -159,30 +161,10 @@ const AdminDashboard: React.FC = () => {
 
       console.log('🔍 AdminDashboard: Nombre d\'utilisateurs trouvés:', data?.length || 0);
 
-      // Récupérer les vrais emails depuis auth.users
-      const userIds = (data || []).map(user => user.user_id);
-      let userEmails: { [key: string]: string } = {};
-      
-      if (userIds.length > 0) {
-        try {
-          // Utiliser une requête SQL directe pour récupérer les emails
-          const { data: emailData, error: emailError } = await supabase
-            .rpc('get_user_emails', { user_ids: userIds });
-          
-          if (!emailError && emailData) {
-            emailData.forEach((item: any) => {
-              userEmails[item.id] = item.email;
-            });
-          }
-        } catch (emailError) {
-          console.log('Erreur lors de la récupération des emails:', emailError);
-        }
-      }
-
       // Ajouter des données simulées pour les nouveaux champs
       const usersWithSimulatedData = (data || []).map((user, index) => ({
         ...user,
-        email: userEmails[user.user_id] || `user${index + 1}@example.com`, // Vrai email ou fallback
+        email: user.email || `user${index + 1}@example.com`, // Email de la vue ou fallback
         subscription_plan: ['launch', 'boost', 'scale', 'free'][index % 4] as any,
         user_role: user.is_admin ? 'admin' : ['user', 'moderator'][index % 2] as any,
         permissions: user.is_admin ? ['admin', 'manage_users', 'view_analytics'] : ['user'],
@@ -329,6 +311,7 @@ const AdminDashboard: React.FC = () => {
 
   const viewUserDetails = (user: UserProfile) => {
     setSelectedUser(user);
+    setShowUserDetails(true);
     setOpenMenuId(null);
   };
 
@@ -509,7 +492,15 @@ const AdminDashboard: React.FC = () => {
         <ModernCard>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-white">Gestion des Utilisateurs</h2>
-            <ModernButton onClick={loadUsers} variant="outline" size="sm">
+            <ModernButton 
+              onClick={() => {
+                setLoading(true);
+                loadUsers();
+                loadStats();
+              }} 
+              variant="outline" 
+              size="sm"
+            >
               <Database size={16} className="mr-2" />
               Actualiser
             </ModernButton>
@@ -630,8 +621,8 @@ const AdminDashboard: React.FC = () => {
                           </button>
 
                           {openMenuId === userProfile.id && (
-                            <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)}>
-                              <div className="absolute right-4 top-16 w-80 bg-[#1e2938] border border-[#35414e] rounded-xl shadow-2xl z-50 max-h-96 overflow-y-auto">
+                            <div className="fixed inset-0 z-40 flex items-center justify-center" onClick={() => setOpenMenuId(null)}>
+                              <div className="w-96 bg-[#1e2938] border border-[#35414e] rounded-xl shadow-2xl z-50 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                                 <div className="p-4">
                                   {/* Header du menu */}
                                   <div className="flex items-center justify-between mb-4">
@@ -684,7 +675,7 @@ const AdminDashboard: React.FC = () => {
                                 <div className="mb-4">
                                   <h4 className="text-sm font-semibold text-white mb-2">Rôle & Permissions</h4>
                                   <div className="space-y-1">
-                                    {['user', 'moderator', 'admin', 'super_admin'].map(role => (
+                                    {['user', 'admin'].map(role => (
                                       <button
                                         key={role}
                                         onClick={() => updateUserRole(userProfile.user_id, role)}
@@ -695,9 +686,7 @@ const AdminDashboard: React.FC = () => {
                                         }`}
                                       >
                                         <Key size={14} />
-                                        {role === 'super_admin' ? 'Super Admin' :
-                                         role === 'admin' ? 'Admin' :
-                                         role === 'moderator' ? 'Moderator' : 'User'}
+                                        {role === 'admin' ? 'Admin' : 'User'}
                                       </button>
                                     ))}
                                   </div>
@@ -796,6 +785,157 @@ const AdminDashboard: React.FC = () => {
             </div>
           )}
         </ModernCard>
+
+        {/* Modal de détails utilisateur */}
+        {showUserDetails && selectedUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#1e2938] border border-[#35414e] rounded-xl shadow-2xl">
+              <div className="p-6">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-white">Détails de l'Utilisateur</h2>
+                  <button
+                    onClick={() => setShowUserDetails(false)}
+                    className="p-2 rounded-lg hover:bg-[#35414e] transition-colors"
+                  >
+                    <X size={20} className="text-gray-400" />
+                  </button>
+                </div>
+
+                {/* Informations utilisateur */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Informations de base */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white mb-3">Informations de Base</h3>
+                    
+                    <div className="bg-[#35414e] rounded-lg p-4">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-16 h-16 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                          {(selectedUser.full_name || 'U').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <h4 className="text-xl font-semibold text-white">{selectedUser.full_name || 'Utilisateur'}</h4>
+                          <p className="text-gray-400">{selectedUser.email}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">ID Utilisateur:</span>
+                        <span className="text-white font-mono text-sm">{selectedUser.user_id}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">ID Profil:</span>
+                        <span className="text-white font-mono text-sm">{selectedUser.id}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Date d'inscription:</span>
+                        <span className="text-white">{new Date(selectedUser.created_at).toLocaleDateString('fr-FR')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Statut et permissions */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white mb-3">Statut & Permissions</h3>
+                    
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400">Statut:</span>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          selectedUser.is_active 
+                            ? 'bg-green-500/20 text-green-400' 
+                            : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {selectedUser.is_active ? 'Actif' : 'Inactif'}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400">Rôle:</span>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          selectedUser.user_role === 'admin' 
+                            ? 'bg-blue-500/20 text-blue-400' 
+                            : 'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {selectedUser.user_role === 'admin' ? 'Admin' : 'User'}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400">Admin:</span>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          selectedUser.is_admin 
+                            ? 'bg-blue-500/20 text-blue-400' 
+                            : 'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {selectedUser.is_admin ? 'Oui' : 'Non'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Abonnement */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white mb-3">Abonnement</h3>
+                    
+                    <div className="bg-[#35414e] rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400">Plan actuel:</span>
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          selectedUser.subscription_plan === 'scale' 
+                            ? 'bg-orange-500/20 text-orange-400'
+                            : selectedUser.subscription_plan === 'boost'
+                            ? 'bg-purple-500/20 text-purple-400'
+                            : selectedUser.subscription_plan === 'launch'
+                            ? 'bg-blue-500/20 text-blue-400'
+                            : 'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {selectedUser.subscription_plan === 'scale' ? 'Scale' :
+                           selectedUser.subscription_plan === 'boost' ? 'Boost' :
+                           selectedUser.subscription_plan === 'launch' ? 'Launch' : 'Free'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Statistiques */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white mb-3">Statistiques</h3>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-[#35414e] rounded-lg p-3 text-center">
+                        <p className="text-2xl font-bold text-white">{selectedUser.total_orders || 0}</p>
+                        <p className="text-sm text-gray-400">Commandes</p>
+                      </div>
+                      <div className="bg-[#35414e] rounded-lg p-3 text-center">
+                        <p className="text-2xl font-bold text-white">${selectedUser.total_revenue || 0}</p>
+                        <p className="text-sm text-gray-400">Revenus</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-[#35414e]">
+                  <ModernButton
+                    variant="outline"
+                    onClick={() => setShowUserDetails(false)}
+                  >
+                    Fermer
+                  </ModernButton>
+                  <ModernButton
+                    onClick={() => sendEmailToUser(selectedUser.email || '')}
+                  >
+                    <Mail size={16} className="mr-2" />
+                    Envoyer un Email
+                  </ModernButton>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
