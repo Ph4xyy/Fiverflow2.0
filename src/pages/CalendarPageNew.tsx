@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
+import SubscriptionManager from '../components/SubscriptionManager';
 import { 
   Calendar as CalendarIcon, 
   Plus, 
@@ -285,6 +286,11 @@ const CalendarPageNew: React.FC = () => {
             </div>
           </ModernCard>
         )}
+
+        {/* Subscription Management Section */}
+        <div className="mb-6">
+          <SubscriptionManager />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Calendrier principal */}
