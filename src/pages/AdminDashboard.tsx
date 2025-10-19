@@ -78,6 +78,7 @@ const AdminDashboard: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [showUserDetails, setShowUserDetails] = useState(false);
+  const [menuUser, setMenuUser] = useState<UserProfile | null>(null);
 
   // Vérifier si l'utilisateur est admin
   const [isAdmin, setIsAdmin] = useState(false);
@@ -694,27 +695,42 @@ const AdminDashboard: React.FC = () => {
                           <button
                             onClick={() => {
                               console.log('🔍 AdminDashboard: Clic sur menu pour user:', userProfile.full_name, 'ID:', userProfile.id, 'Email:', userProfile.email);
-                              setOpenMenuId(openMenuId === userProfile.id ? null : userProfile.id);
+                              if (openMenuId === userProfile.id) {
+                                setOpenMenuId(null);
+             setMenuUser(null);
+                                setMenuUser(null);
+                              } else {
+                                setOpenMenuId(userProfile.id);
+                                setMenuUser(userProfile);
+                              }
                             }}
                             className="p-2 rounded-lg hover:bg-[#35414e] transition-colors"
                           >
                             <MoreVertical size={16} className="text-gray-400" />
                           </button>
 
-                          {openMenuId === userProfile.id && (
-                            <div className="fixed inset-0 z-40 flex items-center justify-center" onClick={() => setOpenMenuId(null)}>
+                          {openMenuId === userProfile.id && menuUser && (
+                            <div className="fixed inset-0 z-40 flex items-center justify-center" onClick={() => {
+                              setOpenMenuId(null);
+             setMenuUser(null);
+                              setMenuUser(null);
+                            }}>
                               <div className="w-96 bg-[#1e2938] border border-[#35414e] rounded-xl shadow-2xl z-50 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                                 <div className="p-4">
                                   {/* Debug info */}
-                                  {console.log('🔍 AdminDashboard: Menu ouvert pour user:', userProfile.full_name, 'ID:', userProfile.id, 'Email:', userProfile.email)}
+                                  {console.log('🔍 AdminDashboard: Menu ouvert pour user:', menuUser.full_name, 'ID:', menuUser.id, 'Email:', menuUser.email)}
                                   
                                   {/* Header du menu */}
                                   <div className="flex items-center justify-between mb-4">
                                     <h3 className="text-lg font-semibold text-white">
-                                      Gérer {userProfile.full_name || 'Utilisateur'}
+                                      Gérer {menuUser.full_name || 'Utilisateur'}
                                     </h3>
                                     <button
-                                      onClick={() => setOpenMenuId(null)}
+                                      onClick={() => {
+                                        setOpenMenuId(null);
+             setMenuUser(null);
+                                        setMenuUser(null);
+                                      }}
                                       className="p-1 rounded-lg hover:bg-[#35414e] transition-colors"
                                     >
                                       <X size={16} className="text-gray-400" />
@@ -725,11 +741,11 @@ const AdminDashboard: React.FC = () => {
                                   <div className="bg-[#35414e] rounded-lg p-3 mb-4">
                                     <div className="flex items-center gap-3">
                                       <div className="w-10 h-10 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center text-white text-sm font-bold">
-                                        {(userProfile.full_name || 'U').charAt(0).toUpperCase()}
+                                        {(menuUser.full_name || 'U').charAt(0).toUpperCase()}
                                       </div>
                                       <div>
-                                        <p className="text-white font-medium">{userProfile.full_name || 'Utilisateur'}</p>
-                                        <p className="text-gray-400 text-sm">{userProfile.email}</p>
+                                        <p className="text-white font-medium">{menuUser.full_name || 'Utilisateur'}</p>
+                                        <p className="text-gray-400 text-sm">{menuUser.email}</p>
                                       </div>
                                     </div>
                                   </div>
@@ -737,7 +753,7 @@ const AdminDashboard: React.FC = () => {
                                 {/* Actions rapides */}
                                 <div className="space-y-1">
                                   <button
-                                    onClick={() => viewUserDetails(userProfile)}
+                                    onClick={() => viewUserDetails(menuUser)}
                                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-[#35414e] rounded-lg transition-colors"
                                   >
                                     <Eye size={14} />
@@ -745,7 +761,7 @@ const AdminDashboard: React.FC = () => {
                                   </button>
 
                                   <button
-                                    onClick={() => sendEmailToUser(userProfile.email || '')}
+                                    onClick={() => sendEmailToUser(menuUser.email || '')}
                                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-[#35414e] rounded-lg transition-colors"
                                   >
                                     <Mail size={14} />
@@ -762,9 +778,9 @@ const AdminDashboard: React.FC = () => {
                                     {['user', 'admin'].map(role => (
                                       <button
                                         key={role}
-                                        onClick={() => updateUserRole(userProfile.user_id, role)}
+                                        onClick={() => updateUserRole(menuUser.user_id, role)}
                                         className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                          userProfile.user_role === role
+                                          menuUser.user_role === role
                                             ? 'bg-blue-500/20 text-blue-400'
                                             : 'text-gray-300 hover:bg-[#35414e]'
                                         }`}
@@ -783,9 +799,9 @@ const AdminDashboard: React.FC = () => {
                                     {['launch', 'boost', 'scale'].map(plan => (
                                       <button
                                         key={plan}
-                                        onClick={() => updateSubscription(userProfile.user_id, plan)}
+                                        onClick={() => updateSubscription(menuUser.user_id, plan)}
                                         className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                          userProfile.subscription_plan === plan
+                                          menuUser.subscription_plan === plan
                                             ? 'bg-purple-500/20 text-purple-400'
                                             : 'text-gray-300 hover:bg-[#35414e]'
                                         }`}
@@ -806,14 +822,14 @@ const AdminDashboard: React.FC = () => {
                                   <h4 className="text-sm font-semibold text-white mb-2">Administration</h4>
                                   <div className="space-y-1">
                                   <button
-                                    onClick={() => toggleAdminStatus(userProfile.user_id, userProfile.is_admin)}
+                                    onClick={() => toggleAdminStatus(menuUser.user_id, menuUser.is_admin)}
                                     className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                      userProfile.is_admin 
+                                      menuUser.is_admin 
                                         ? 'text-red-400 hover:bg-red-500/20' 
                                         : 'text-blue-400 hover:bg-blue-500/20'
                                     }`}
                                   >
-                                    {userProfile.is_admin ? (
+                                    {menuUser.is_admin ? (
                                       <>
                                         <UserX size={14} />
                                         Retirer Admin
@@ -827,14 +843,14 @@ const AdminDashboard: React.FC = () => {
                                   </button>
 
                                   <button
-                                    onClick={() => toggleUserStatus(userProfile.user_id, userProfile.is_active)}
+                                    onClick={() => toggleUserStatus(menuUser.user_id, menuUser.is_active)}
                                     className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                      userProfile.is_active 
+                                      menuUser.is_active 
                                         ? 'text-red-400 hover:bg-red-500/20' 
                                         : 'text-green-400 hover:bg-green-500/20'
                                     }`}
                                   >
-                                    {userProfile.is_active ? (
+                                    {menuUser.is_active ? (
                                       <>
                                         <Ban size={14} />
                                         Désactiver
@@ -848,7 +864,7 @@ const AdminDashboard: React.FC = () => {
                                   </button>
 
                                   <button
-                                    onClick={() => deleteUser(userProfile.user_id)}
+                                    onClick={() => deleteUser(menuUser.user_id)}
                                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
                                   >
                                     <Trash2 size={14} />
