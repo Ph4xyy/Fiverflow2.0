@@ -393,7 +393,7 @@ const OrdersPage: React.FC = () => {
 
             <ModernButton onClick={handleAddOrder} size="sm">
               <Plus className="h-4 w-4 mr-2" />
-              Nouvelle Commande
+              New Order
             </ModernButton>
           </div>
         </div>
@@ -485,14 +485,14 @@ const OrdersPage: React.FC = () => {
           {loading ? (
             <div className="p-10 flex items-center justify-center">
               <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600" />
-              <span className="ml-3 text-slate-400">Chargement…</span>
+              <span className="ml-3 text-slate-400">Loading…</span>
             </div>
           ) : error ? (
             <div className="p-6 text-center">
-              <p className="text-red-400 font-semibold">Impossible de charger les commandes</p>
+              <p className="text-red-400 font-semibold">Unable to load orders</p>
               <p className="text-sm text-slate-400 mt-1">{error}</p>
               <ModernButton onClick={fetchOrders} className="mt-4">
-                Réessayer
+                Retry
               </ModernButton>
             </div>
           ) : orders.length === 0 ? (

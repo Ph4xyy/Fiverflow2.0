@@ -49,7 +49,7 @@ const InvoicesPageNew: React.FC = () => {
       status: 'paid',
       dueDate: '2024-01-15',
       createdDate: '2024-01-01',
-      description: 'Développement site web'
+      description: 'Website development'
     },
     {
       id: '2',
@@ -59,7 +59,7 @@ const InvoicesPageNew: React.FC = () => {
       status: 'sent',
       dueDate: '2024-01-20',
       createdDate: '2024-01-05',
-      description: 'Design UI/UX'
+      description: 'UI/UX Design'
     },
     {
       id: '3',
@@ -69,7 +69,7 @@ const InvoicesPageNew: React.FC = () => {
       status: 'overdue',
       dueDate: '2024-01-10',
       createdDate: '2023-12-20',
-      description: 'Application mobile'
+      description: 'Mobile application'
     },
     {
       id: '4',
@@ -79,7 +79,7 @@ const InvoicesPageNew: React.FC = () => {
       status: 'draft',
       dueDate: '2024-02-01',
       createdDate: '2024-01-10',
-      description: 'Consultation technique'
+      description: 'Technical consultation'
     }
   ];
 
@@ -120,15 +120,15 @@ const InvoicesPageNew: React.FC = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'paid':
-        return 'Payée';
+        return 'Paid';
       case 'sent':
-        return 'Envoyée';
+        return 'Sent';
       case 'overdue':
-        return 'En retard';
+        return 'Overdue';
       case 'draft':
-        return 'Brouillon';
+        return 'Draft';
       case 'cancelled':
-        return 'Annulée';
+        return 'Cancelled';
       default:
         return status;
     }
@@ -152,18 +152,18 @@ const InvoicesPageNew: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Factures</h1>
-            <p className="text-gray-400">Gérez vos factures et suivez les paiements</p>
+            <h1 className="text-3xl font-bold text-white mb-2">Invoices</h1>
+            <p className="text-gray-400">Manage your invoices and track payments</p>
           </div>
           
           <div className="flex items-center gap-3">
             <ModernButton variant="outline" size="sm">
               <Download size={16} className="mr-2" />
-              Exporter
+              Export
             </ModernButton>
             <ModernButton size="sm">
               <Plus size={16} className="mr-2" />
-              Nouvelle facture
+              New invoice
             </ModernButton>
           </div>
         </div>
@@ -174,7 +174,7 @@ const InvoicesPageNew: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold text-white">{filteredInvoices.length}</p>
-                <p className="text-sm text-gray-400">Total factures</p>
+                <p className="text-sm text-gray-400">Total invoices</p>
               </div>
               <div className="text-gray-400 opacity-50">
                 <FileText size={20} />
@@ -186,7 +186,7 @@ const InvoicesPageNew: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold text-white">${totalAmount.toLocaleString()}</p>
-                <p className="text-sm text-gray-400">Montant total</p>
+                <p className="text-sm text-gray-400">Total amount</p>
               </div>
               <div className="text-gray-400 opacity-50">
                 <DollarSign size={20} />
@@ -198,7 +198,7 @@ const InvoicesPageNew: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold text-white">${paidAmount.toLocaleString()}</p>
-                <p className="text-sm text-gray-400">Montant payé</p>
+                <p className="text-sm text-gray-400">Amount paid</p>
               </div>
               <div className="text-gray-400 opacity-50">
                 <CheckCircle size={20} />
@@ -210,7 +210,7 @@ const InvoicesPageNew: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold text-white">${(totalAmount - paidAmount).toLocaleString()}</p>
-                <p className="text-sm text-gray-400">En attente</p>
+                <p className="text-sm text-gray-400">Pending</p>
               </div>
               <div className="text-gray-400 opacity-50">
                 <Clock size={20} />
@@ -228,7 +228,7 @@ const InvoicesPageNew: React.FC = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Rechercher par client ou numéro..."
+                  placeholder="Search by client or number..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
@@ -243,17 +243,17 @@ const InvoicesPageNew: React.FC = () => {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
               >
-                <option value="">Tous les statuts</option>
-                <option value="draft">Brouillon</option>
-                <option value="sent">Envoyée</option>
-                <option value="paid">Payée</option>
-                <option value="overdue">En retard</option>
-                <option value="cancelled">Annulée</option>
+                <option value="">All statuses</option>
+                <option value="draft">Draft</option>
+                <option value="sent">Sent</option>
+                <option value="paid">Paid</option>
+                <option value="overdue">Overdue</option>
+                <option value="cancelled">Cancelled</option>
               </select>
 
               <ModernButton variant="outline" size="sm">
                 <Filter size={16} className="mr-2" />
-                Filtres
+                Filters
               </ModernButton>
             </div>
           </div>
@@ -273,7 +273,7 @@ const InvoicesPageNew: React.FC = () => {
                       }}
                       className="flex items-center gap-2 hover:text-white transition-colors"
                     >
-                      Numéro
+                      Number
                       <ArrowUpDown size={14} />
                     </button>
                   </th>
@@ -287,11 +287,11 @@ const InvoicesPageNew: React.FC = () => {
                       }}
                       className="flex items-center gap-2 hover:text-white transition-colors"
                     >
-                      Montant
+                      Amount
                       <ArrowUpDown size={14} />
                     </button>
                   </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-300">Statut</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-300">Status</th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-gray-300">
                     <button
                       onClick={() => {
@@ -300,7 +300,7 @@ const InvoicesPageNew: React.FC = () => {
                       }}
                       className="flex items-center gap-2 hover:text-white transition-colors"
                     >
-                      Échéance
+                      Due date
                       <ArrowUpDown size={14} />
                     </button>
                   </th>
@@ -313,7 +313,7 @@ const InvoicesPageNew: React.FC = () => {
                     <td className="py-4 px-4">
                       <div className="font-medium text-white">{invoice.number}</div>
                       <div className="text-sm text-gray-400">
-                        Créée le {new Date(invoice.createdDate).toLocaleDateString('fr-FR')}
+                        Created on {new Date(invoice.createdDate).toLocaleDateString('en-US')}
                       </div>
                     </td>
                     <td className="py-4 px-4">
@@ -333,7 +333,7 @@ const InvoicesPageNew: React.FC = () => {
                     </td>
                     <td className="py-4 px-4">
                       <div className="text-gray-300">
-                        {new Date(invoice.dueDate).toLocaleDateString('fr-FR')}
+                        {new Date(invoice.dueDate).toLocaleDateString('en-US')}
                       </div>
                     </td>
                     <td className="py-4 px-4">
@@ -365,16 +365,16 @@ const InvoicesPageNew: React.FC = () => {
               <div className="w-16 h-16 bg-[#35414e] rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileText size={24} className="text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">Aucune facture trouvée</h3>
+              <h3 className="text-lg font-semibold text-white mb-2">No invoices found</h3>
               <p className="text-gray-400 mb-4">
                 {searchTerm || statusFilter 
-                  ? 'Aucune facture ne correspond à vos critères de recherche'
-                  : 'Commencez par créer votre première facture'
+                  ? 'No invoices match your search criteria'
+                  : 'Start by creating your first invoice'
                 }
               </p>
               <ModernButton>
                 <Plus size={16} className="mr-2" />
-                Créer une facture
+                Create invoice
               </ModernButton>
             </div>
           )}

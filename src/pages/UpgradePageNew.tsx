@@ -53,130 +53,130 @@ const UpgradePageNew: React.FC = () => {
     {
       id: 'lunch',
       name: 'Lunch',
-      subtitle: 'Parfait pour débuter',
+      subtitle: 'Perfect for beginners',
       price: '0',
-      period: 'gratuit',
-      description: 'Toutes les fonctionnalités essentielles pour commencer votre activité freelance.',
+      period: 'free',
+      description: 'All essential features to start your freelance business.',
       features: [
         {
           icon: <Users size={20} />,
-          title: 'Jusqu\'à 5 clients',
-          description: 'Gérez vos premiers clients facilement'
+          title: 'Up to 5 clients',
+          description: 'Manage your first clients easily'
         },
         {
           icon: <FileText size={20} />,
-          title: '10 commandes par mois',
-          description: 'Suivez vos premières commandes'
+          title: '10 orders per month',
+          description: 'Track your first orders'
         },
         {
           icon: <Calendar size={20} />,
-          title: 'Calendrier de base',
-          description: 'Organisez votre emploi du temps'
+          title: 'Basic calendar',
+          description: 'Organize your schedule'
         },
         {
           icon: <Shield size={20} />,
-          title: 'Support par email',
-          description: 'Assistance par email uniquement'
+          title: 'Email support',
+          description: 'Email assistance only'
         }
       ],
       icon: <Users size={24} />,
       gradient: false,
       current: true,
-      buttonText: 'Plan actuel',
+      buttonText: 'Current plan',
       buttonVariant: 'outline'
     },
     {
       id: 'boost',
       name: 'Boost',
-      subtitle: 'Pour les freelances actifs',
+      subtitle: 'For active freelancers',
       price: isYearly ? '240' : '24',
-      period: isYearly ? 'an' : 'mois',
-      description: 'Augmentez votre productivité avec des outils avancés et plus de capacité.',
+      period: isYearly ? 'year' : 'month',
+      description: 'Increase your productivity with advanced tools and more capacity.',
       features: [
         {
           icon: <Users size={20} />,
-          title: 'Clients illimités',
-          description: 'Gérez autant de clients que nécessaire'
+          title: 'Unlimited clients',
+          description: 'Manage as many clients as needed'
         },
         {
           icon: <FileText size={20} />,
-          title: 'Commandes illimitées',
-          description: 'Aucune limite sur vos commandes'
+          title: 'Unlimited orders',
+          description: 'No limits on your orders'
         },
         {
           icon: <BarChart3 size={20} />,
-          title: 'Statistiques avancées',
-          description: 'Analyses détaillées de vos performances'
+          title: 'Advanced statistics',
+          description: 'Detailed analysis of your performance'
         },
         {
           icon: <Calendar size={20} />,
-          title: 'Calendrier intelligent',
-          description: 'Planification automatique et rappels'
+          title: 'Smart calendar',
+          description: 'Automatic planning and reminders'
         },
         {
           icon: <Network size={20} />,
-          title: 'Réseau de partenaires',
-          description: 'Connectez-vous avec d\'autres freelances'
+          title: 'Partner network',
+          description: 'Connect with other freelancers'
         },
         {
           icon: <Headphones size={20} />,
-          title: 'Support prioritaire',
-          description: 'Assistance rapide par chat et email'
+          title: 'Priority support',
+          description: 'Fast assistance via chat and email'
         }
       ],
       icon: <Zap size={24} />,
       gradient: true,
       popular: true,
-      buttonText: 'Passer à Boost',
+      buttonText: 'Upgrade to Boost',
       buttonVariant: 'primary'
     },
     {
       id: 'scale',
       name: 'Scale',
-      subtitle: 'Pour les entreprises',
+      subtitle: 'For businesses',
       price: isYearly ? '590' : '59',
-      period: isYearly ? 'an' : 'mois',
-      description: 'La solution complète pour faire évoluer votre entreprise vers de nouveaux sommets.',
+      period: isYearly ? 'year' : 'month',
+      description: 'The complete solution to scale your business to new heights.',
       features: [
         {
           icon: <Crown size={20} />,
-          title: 'Tout de Boost',
-          description: 'Toutes les fonctionnalités Boost incluses'
+          title: 'Everything from Boost',
+          description: 'All Boost features included'
         },
         {
           icon: <Users size={20} />,
-          title: 'Gestion d\'équipe',
-          description: 'Collaborez avec votre équipe'
+          title: 'Team management',
+          description: 'Collaborate with your team'
         },
         {
           icon: <Shield size={20} />,
-          title: 'API complète',
-          description: 'Intégrations personnalisées'
+          title: 'Complete API',
+          description: 'Custom integrations'
         },
         {
           icon: <BarChart3 size={20} />,
-          title: 'Rapports avancés',
-          description: 'Analytics et insights détaillés'
+          title: 'Advanced reports',
+          description: 'Detailed analytics and insights'
         },
         {
           icon: <Headphones size={20} />,
-          title: 'Support 24/7',
-          description: 'Assistance disponible 24h/24'
+          title: '24/7 support',
+          description: 'Assistance available 24/7'
         },
         {
           icon: <Award size={20} />,
-          title: 'Formation personnalisée',
-          description: 'Sessions de formation dédiées'
+          title: 'Custom training',
+          description: 'Dedicated training sessions'
         },
         {
           icon: <Sparkles size={20} />,
-          title: 'Fonctionnalités premium',
-          description: 'Accès aux nouveautés en avant-première'
+          title: 'Premium features',
+          description: 'Early access to new features'
         }
       ],
       icon: <Rocket size={24} />,
       gradient: true,
-      buttonText: 'Choisir Scale',
+      buttonText: 'Choose Scale',
       buttonVariant: 'primary'
     }
   ];
@@ -184,46 +184,46 @@ const UpgradePageNew: React.FC = () => {
   const benefits = [
     {
       icon: <Clock size={24} />,
-      title: 'Gain de temps',
-      description: 'Automatisez vos tâches répétitives et concentrez-vous sur l\'essentiel'
+      title: 'Time saving',
+      description: 'Automate your repetitive tasks and focus on what matters'
     },
     {
       icon: <BarChart3 size={24} />,
-      title: 'Croissance accélérée',
-      description: 'Développez votre activité avec des outils professionnels'
+      title: 'Accelerated growth',
+      description: 'Develop your business with professional tools'
     },
     {
       icon: <Shield size={24} />,
-      title: 'Sécurité garantie',
-      description: 'Vos données sont protégées avec un chiffrement de niveau bancaire'
+      title: 'Guaranteed security',
+      description: 'Your data is protected with bank-level encryption'
     },
     {
       icon: <Users size={24} />,
-      title: 'Communauté active',
-      description: 'Rejoignez une communauté de freelances passionnés'
+      title: 'Active community',
+      description: 'Join a community of passionate freelancers'
     }
   ];
 
   const testimonials = [
     {
       name: 'Marie Dubois',
-      role: 'Designer UI/UX',
+      role: 'UI/UX Designer',
       avatar: 'MD',
-      text: 'Boost m\'a permis de doubler mes revenus en 3 mois. Les outils d\'analytics sont incroyables !',
+      text: 'Boost allowed me to double my revenue in 3 months. The analytics tools are incredible!',
       plan: 'Boost'
     },
     {
       name: 'Pierre Martin',
-      role: 'Développeur Full-Stack',
+      role: 'Full-Stack Developer',
       avatar: 'PM',
-      text: 'Scale est parfait pour mon équipe. La gestion collaborative change tout !',
+      text: 'Scale is perfect for my team. Collaborative management changes everything!',
       plan: 'Scale'
     },
     {
       name: 'Sophie Leroy',
-      role: 'Marketing Digital',
+      role: 'Digital Marketing',
       avatar: 'SL',
-      text: 'Passer de Lunch à Boost était la meilleure décision de ma carrière freelance.',
+      text: 'Upgrading from Lunch to Boost was the best decision of my freelance career.',
       plan: 'Boost'
     }
   ];
@@ -236,22 +236,22 @@ const UpgradePageNew: React.FC = () => {
           <div className="flex items-center justify-center gap-2 mb-6">
             <Crown className="text-[#9c68f2]" size={32} />
             <h1 className="text-4xl font-bold text-white">
-              Passez au niveau supérieur
+              Take it to the next level
             </h1>
           </div>
           <p className="text-xl text-gray-400 mb-8">
-            Débloquez tout le potentiel de votre activité freelance avec nos plans premium
+            Unlock the full potential of your freelance business with our premium plans
           </p>
           
           {/* Current Plan Indicator */}
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#35414e] rounded-full text-sm text-gray-300 mb-8">
             <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-            Plan actuel : Lunch
+            Current plan: Lunch
           </div>
 
           {/* Billing Toggle */}
           <div className="flex items-center justify-center gap-4 mb-8">
-            <span className={`text-sm ${!isYearly ? 'text-white' : 'text-gray-400'}`}>Mensuel</span>
+            <span className={`text-sm ${!isYearly ? 'text-white' : 'text-gray-400'}`}>Monthly</span>
             <button
               onClick={() => setIsYearly(!isYearly)}
               className={`relative w-12 h-6 rounded-full transition-colors ${
@@ -262,10 +262,10 @@ const UpgradePageNew: React.FC = () => {
                 isYearly ? 'translate-x-6' : 'translate-x-1'
               }`} />
             </button>
-            <span className={`text-sm ${isYearly ? 'text-white' : 'text-gray-400'}`}>Annuel</span>
+            <span className={`text-sm ${isYearly ? 'text-white' : 'text-gray-400'}`}>Yearly</span>
             {isYearly && (
               <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
-                -20% d'économie
+                -20% savings
               </span>
             )}
           </div>
@@ -279,7 +279,7 @@ const UpgradePageNew: React.FC = () => {
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
                   <div className="bg-[#9c68f2] text-white px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5">
                     <Star size={12} />
-                    Le plus populaire
+                    Most popular
                   </div>
                 </div>
               )}
@@ -288,7 +288,7 @@ const UpgradePageNew: React.FC = () => {
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
                   <div className="bg-green-500 text-white px-4 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5">
                     <Check size={12} />
-                    Plan actuel
+                    Current plan
                   </div>
                 </div>
               )}
@@ -310,7 +310,7 @@ const UpgradePageNew: React.FC = () => {
                   <p className="text-gray-400 mb-4">{plan.subtitle}</p>
                   <div className="mb-4">
                     <span className="text-5xl font-bold text-white">
-                      {plan.price === '0' ? 'Gratuit' : `$${plan.price}`}
+                      {plan.price === '0' ? 'Free' : `$${plan.price}`}
                     </span>
                     {plan.price !== '0' && (
                       <span className="text-gray-400 ml-2">/{plan.period}</span>
@@ -365,10 +365,10 @@ const UpgradePageNew: React.FC = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-white mb-4">
-              Pourquoi upgrader ?
+              Why upgrade?
             </h2>
             <p className="text-gray-400">
-              Découvrez les avantages qui feront la différence dans votre activité
+              Discover the benefits that will make the difference in your business
             </p>
           </div>
 
@@ -391,10 +391,10 @@ const UpgradePageNew: React.FC = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-white mb-4">
-              Ils ont fait le pas
+              They made the leap
             </h2>
             <p className="text-gray-400">
-              Découvrez les témoignages de nos utilisateurs premium
+              Discover testimonials from our premium users
             </p>
           </div>
 
@@ -425,27 +425,27 @@ const UpgradePageNew: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-white mb-4">
-              Questions fréquentes
+              Frequently asked questions
             </h2>
           </div>
 
           <div className="space-y-6">
             {[
               {
-                question: "Puis-je changer de plan à tout moment ?",
-                answer: "Oui, vous pouvez upgrader ou downgrader votre plan à tout moment. Les changements prennent effet immédiatement et vous ne payez que la différence."
+                question: "Can I change my plan at any time?",
+                answer: "Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately and you only pay the difference."
               },
               {
-                question: "Y a-t-il des frais de configuration ?",
-                answer: "Non, il n'y a aucun frais de configuration caché. Vous payez seulement votre abonnement mensuel."
+                question: "Are there any setup fees?",
+                answer: "No, there are no hidden setup fees. You only pay your monthly subscription."
               },
               {
-                question: "Que se passe-t-il si j'annule mon abonnement ?",
-                answer: "Vous gardez accès à toutes les fonctionnalités premium jusqu'à la fin de votre période de facturation. Après cela, vous revenez au plan Lunch."
+                question: "What happens if I cancel my subscription?",
+                answer: "You keep access to all premium features until the end of your billing period. After that, you return to the Lunch plan."
               },
               {
-                question: "Proposez-vous un essai gratuit ?",
-                answer: "Oui ! Nous offrons un essai gratuit de 14 jours pour tous nos plans premium. Aucune carte bancaire requise."
+                question: "Do you offer a free trial?",
+                answer: "Yes! We offer a 14-day free trial for all our premium plans. No credit card required."
               }
             ].map((faq, index) => (
               <ModernCard key={index}>
@@ -463,19 +463,19 @@ const UpgradePageNew: React.FC = () => {
             <div className="relative z-10">
               <Crown size={48} className="text-white mx-auto mb-6" />
               <h2 className="text-3xl font-bold text-white mb-4">
-                Prêt à transformer votre activité ?
+                Ready to transform your business?
               </h2>
               <p className="text-xl text-white/80 mb-8">
-                Rejoignez des milliers de freelances qui ont déjà fait le pas vers le succès
+                Join thousands of freelancers who have already taken the step towards success
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <ModernButton size="lg" variant="secondary">
                   <Rocket size={20} className="mr-2" />
-                  Essayer gratuitement
+                  Try for free
                 </ModernButton>
                 <ModernButton size="lg" variant="outline">
                   <Headphones size={20} className="mr-2" />
-                  Parler à un expert
+                  Talk to an expert
                 </ModernButton>
               </div>
             </div>

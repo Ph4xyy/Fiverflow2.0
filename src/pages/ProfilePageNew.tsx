@@ -97,7 +97,7 @@ const ProfilePageNew: React.FC = () => {
     title: 'UI/UX Designer & Frontend Developer',
     location: 'Paris, France',
     memberSince: 'Jan 2019',
-    bio: 'Passionné par le design et le développement, je crée des expériences utilisateur exceptionnelles depuis 5 ans.',
+    bio: 'Passionate about design and development, I create exceptional user experiences for 5 years.',
     website: 'https://johndoe.design',
     email: 'john@example.com',
     phone: '+33 6 12 34 56 78'
@@ -108,7 +108,7 @@ const ProfilePageNew: React.FC = () => {
     {
       id: 'boost_subscriber',
       name: 'Boost Subscriber',
-      description: 'Abonné Boost depuis 2 ans',
+      description: 'Boost subscriber for 2 years',
       icon: '/badges/boost-badge.png',
       rarity: 'epic'
     }
@@ -302,11 +302,11 @@ const ProfilePageNew: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar size={16} />
-                        Membre depuis {profileData.memberSince}
+                        Member since {profileData.memberSince}
                       </div>
                       <div className="flex items-center gap-1">
                         <Coffee size={16} />
-                        Disponible
+                        Available
                       </div>
                     </div>
                   </div>
@@ -322,7 +322,7 @@ const ProfilePageNew: React.FC = () => {
                         onClick={() => setIsEditMenuOpen(!isEditMenuOpen)}
                       >
                         <Edit3 size={16} className="mr-2" />
-                        Modifier le profil
+                        Edit profile
                       </ModernButton>
                       <ModernButton 
                         variant="outline" 
@@ -330,7 +330,7 @@ const ProfilePageNew: React.FC = () => {
                         onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
                       >
                         <Settings size={16} className="mr-2" />
-                        Paramètres
+                        Settings
                       </ModernButton>
                     </>
                   ) : (
@@ -345,11 +345,11 @@ const ProfilePageNew: React.FC = () => {
                       </ModernButton>
                       <ModernButton variant="outline" size="sm">
                         <Share2 size={16} className="mr-2" />
-                        Partager
+                        Share
                       </ModernButton>
                       <ModernButton size="sm">
                         <Plus size={16} className="mr-2" />
-                        Suivre
+                        Follow
                       </ModernButton>
                     </>
                   )}
@@ -363,7 +363,7 @@ const ProfilePageNew: React.FC = () => {
         {isEditMenuOpen && isOwnProfile && (
           <ModernCard>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">Modifier le profil</h3>
+              <h3 className="text-xl font-semibold text-white">Edit profile</h3>
               <button 
                 onClick={() => setIsEditMenuOpen(false)}
                 className="p-2 hover:bg-[#35414e] rounded-lg transition-colors"
@@ -377,7 +377,7 @@ const ProfilePageNew: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Nom complet
+                    Full name
                   </label>
                   <input
                     type="text"
@@ -389,7 +389,7 @@ const ProfilePageNew: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Titre professionnel
+                    Professional title
                   </label>
                   <input
                     type="text"
@@ -401,7 +401,7 @@ const ProfilePageNew: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Localisation
+                    Location
                   </label>
                   <input
                     type="text"
@@ -413,7 +413,7 @@ const ProfilePageNew: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Site web
+                    Website
                   </label>
                   <input
                     type="url"
@@ -440,7 +440,7 @@ const ProfilePageNew: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Téléphone
+                    Phone
                   </label>
                   <input
                     type="tel"
@@ -470,11 +470,11 @@ const ProfilePageNew: React.FC = () => {
                 variant="outline" 
                 onClick={() => setIsEditMenuOpen(false)}
               >
-                Annuler
+                Cancel
               </ModernButton>
               <ModernButton>
                 <Save size={16} className="mr-2" />
-                Sauvegarder
+                Save
               </ModernButton>
             </div>
           </ModernCard>
@@ -484,7 +484,7 @@ const ProfilePageNew: React.FC = () => {
         {isSettingsMenuOpen && isOwnProfile && (
           <ModernCard>
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">Paramètres du profil</h3>
+              <h3 className="text-xl font-semibold text-white">Profile settings</h3>
               <button 
                 onClick={() => setIsSettingsMenuOpen(false)}
                 className="p-2 hover:bg-[#35414e] rounded-lg transition-colors"
@@ -496,11 +496,11 @@ const ProfilePageNew: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column - Profile Settings */}
               <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-white mb-4">Informations de base</h4>
+                <h4 className="text-lg font-semibold text-white mb-4">Basic information</h4>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Nom complet
+                    Full name
                   </label>
                   <input
                     type="text"
@@ -512,7 +512,7 @@ const ProfilePageNew: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Titre professionnel
+                    Professional title
                   </label>
                   <input
                     type="text"
@@ -524,7 +524,7 @@ const ProfilePageNew: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Localisation
+                    Location
                   </label>
                   <input
                     type="text"
@@ -549,7 +549,7 @@ const ProfilePageNew: React.FC = () => {
 
               {/* Right Column - Social Networks */}
               <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-white mb-4">Réseaux sociaux</h4>
+                <h4 className="text-lg font-semibold text-white mb-4">Social networks</h4>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -635,7 +635,7 @@ const ProfilePageNew: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     <div className="flex items-center gap-2">
                       <Globe size={16} className="text-[#9c68f2]" />
-                      Site web
+                      Website
                     </div>
                   </label>
                   <input
@@ -655,11 +655,11 @@ const ProfilePageNew: React.FC = () => {
                 variant="outline" 
                 onClick={() => setIsSettingsMenuOpen(false)}
               >
-                Annuler
+                Cancel
               </ModernButton>
               <ModernButton>
                 <Save size={16} className="mr-2" />
-                Sauvegarder
+                Save
               </ModernButton>
             </div>
           </ModernCard>
@@ -812,7 +812,7 @@ const ProfilePageNew: React.FC = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Social Links */}
-            <ModernCard title="Réseaux sociaux" icon={<Globe size={20} className="text-white" />}>
+            <ModernCard title="Social networks" icon={<Globe size={20} className="text-white" />}>
               <div className="space-y-3">
                 {socialLinks.map(link => (
                   <div key={link.platform} className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg">

@@ -42,7 +42,7 @@ const MessagingSystem: React.FC = () => {
       id: '1',
       name: 'Marie Dubois',
       avatar: 'MD',
-      lastMessage: 'Salut ! J\'ai une nouvelle proposition pour toi',
+      lastMessage: 'Hi! I have a new proposal for you',
       timestamp: '14:32',
       unread: 2,
       online: true
@@ -51,7 +51,7 @@ const MessagingSystem: React.FC = () => {
       id: '2',
       name: 'Pierre Martin',
       avatar: 'PM',
-      lastMessage: 'Le projet avance bien, merci !',
+      lastMessage: 'The project is going well, thanks!',
       timestamp: '12:15',
       unread: 0,
       online: false
@@ -60,7 +60,7 @@ const MessagingSystem: React.FC = () => {
       id: '3',
       name: 'Sophie Leroy',
       avatar: 'SL',
-      lastMessage: 'Peux-tu m\'envoyer les fichiers ?',
+      lastMessage: 'Can you send me the files?',
       timestamp: '10:45',
       unread: 1,
       online: true
@@ -70,21 +70,21 @@ const MessagingSystem: React.FC = () => {
   const messages: Message[] = [
     {
       id: '1',
-      content: 'Salut ! Comment ça va ?',
+      content: 'Hi! How are you?',
       sender: 'other',
       timestamp: '14:30',
       status: 'read'
     },
     {
       id: '2',
-      content: 'Ça va très bien merci ! Et toi ?',
+      content: 'I\'m doing very well, thank you! And you?',
       sender: 'me',
       timestamp: '14:31',
       status: 'read'
     },
     {
       id: '3',
-      content: 'J\'ai une nouvelle proposition pour toi',
+      content: 'I have a new proposal for you',
       sender: 'other',
       timestamp: '14:32',
       status: 'delivered'
@@ -123,7 +123,7 @@ const MessagingSystem: React.FC = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Rechercher une conversation..."
+              placeholder="Search a conversation..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
@@ -192,7 +192,7 @@ const MessagingSystem: React.FC = () => {
                 <div>
                   <h4 className="text-white font-semibold">{selectedConv?.name}</h4>
                   <p className="text-xs text-gray-400">
-                    {selectedConv?.online ? 'En ligne' : 'Hors ligne'}
+                    {selectedConv?.online ? 'Online' : 'Offline'}
                   </p>
                 </div>
               </div>
@@ -254,7 +254,7 @@ const MessagingSystem: React.FC = () => {
                 <div className="flex-1 relative">
                   <input
                     type="text"
-                    placeholder="Tapez votre message..."
+                    placeholder="Type your message..."
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -278,8 +278,8 @@ const MessagingSystem: React.FC = () => {
               <div className="w-16 h-16 bg-[#35414e] rounded-full flex items-center justify-center mx-auto mb-4">
                 <Send size={24} className="text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">Sélectionnez une conversation</h3>
-              <p className="text-gray-400">Choisissez une conversation pour commencer à discuter</p>
+              <h3 className="text-lg font-semibold text-white mb-2">Select a conversation</h3>
+              <p className="text-gray-400">Choose a conversation to start chatting</p>
             </div>
           </div>
         )}
