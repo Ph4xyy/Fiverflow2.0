@@ -38,7 +38,6 @@ const DashboardExample: React.FC = () => {
           <ModernCard 
             title="Total Clients" 
             icon={<Users size={20} className="text-white" />}
-            gradient
           >
             <div className="text-3xl font-bold text-white mb-2">1,234</div>
             <div className="flex items-center text-green-400 text-sm">
@@ -61,7 +60,6 @@ const DashboardExample: React.FC = () => {
           <ModernCard 
             title="Revenus" 
             icon={<DollarSign size={20} className="text-white" />}
-            gradient
           >
             <div className="text-3xl font-bold text-white mb-2">€12,456</div>
             <div className="flex items-center text-green-400 text-sm">

@@ -196,7 +196,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     // 🎨 Nouveau style professionnel
     const rowClass = isActive
       ? 'text-white bg-[#35414e] rounded-lg'
-      : 'text-gray-300 hover:text-white hover:bg-[#35414e] transition-all duration-200';
+      : 'text-gray-300 hover:text-white hover:bg-[#35414e] hover:rounded-lg transition-all duration-200';
 
     return (
       <Link
@@ -263,14 +263,14 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           {/* Right section - Notifications, logout */}
           <div className="flex items-center gap-2 sm:gap-3">
             <LocalErrorBoundary>
-              <div className="size-10 rounded-lg grid place-items-center text-white bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] transition-all duration-200 shadow-lg">
+              <div className="size-10 rounded-lg grid place-items-center text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200">
                 <NotificationsDropdown />
               </div>
             </LocalErrorBoundary>
 
             <button 
               onClick={handleSignOut}
-              className="size-10 rounded-lg grid place-items-center text-white bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] transition-all duration-200 shadow-lg"
+              className="size-10 rounded-lg grid place-items-center text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200"
             >
               <LogOut size={18} />
             </button>

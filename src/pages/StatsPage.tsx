@@ -437,7 +437,7 @@ const StatsPage: React.FC = () => {
                       // trigger refresh
                       fetchStatsData();
                     }}
-                    className="inline-flex items-center px-3 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition"
+                    className="inline-flex items-center px-3 py-2 rounded-lg text-white bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] transition"
                   >
                     {'Apply'}
                   </button>
@@ -446,7 +446,7 @@ const StatsPage: React.FC = () => {
             </div>
             <button
               onClick={fetchStatsData}
-              className="inline-flex items-center px-3 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition"
+              className="inline-flex items-center px-3 py-2 rounded-lg text-white bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] transition"
             >
               <RefreshCw className={`mr-2 ${refreshing ? 'animate-spin' : ''}`} size={16} />
               {'Refresh'}

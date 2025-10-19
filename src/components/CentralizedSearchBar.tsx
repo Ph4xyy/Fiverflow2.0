@@ -227,8 +227,8 @@ const CentralizedSearchBar: React.FC = () => {
         <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] 
-                       text-white transition-all duration-200 text-sm shadow-lg"
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] 
+                       text-white transition-all duration-200 text-sm"
           >
             <span className="text-xs">
               {categories.find(c => c.value === selectedCategory)?.icon}
@@ -239,7 +239,7 @@ const CentralizedSearchBar: React.FC = () => {
           {searchTerm && (
             <button
               onClick={clearSearch}
-              className="p-1 rounded-lg bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] text-white transition-all duration-200 shadow-lg"
+              className="p-1 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] text-white transition-all duration-200"
             >
               <X className="h-3 w-3" />
             </button>
@@ -249,11 +249,11 @@ const CentralizedSearchBar: React.FC = () => {
 
       {/* Dropdown des catégories */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-[#0F141C] border border-[#1C2230] 
+        <div className="absolute top-full left-0 right-0 mt-2 bg-[#1e2938] border border-[#35414e] 
                         rounded-xl shadow-xl z-50 overflow-hidden">
           {/* Liste des catégories */}
-          <div className="p-2 border-b border-[#1C2230]">
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+          <div className="p-2 border-b border-[#35414e]">
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
               {'Filter'}
             </div>
             <div className="grid grid-cols-2 gap-1">
@@ -266,8 +266,8 @@ const CentralizedSearchBar: React.FC = () => {
                   }}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
                     selectedCategory === category.value
-                      ? 'bg-blue-600 text-white'
-                      : 'text-slate-300 hover:bg-[#1C2230] hover:text-white'
+                      ? 'bg-[#9c68f2] text-white'
+                      : 'text-gray-300 hover:bg-[#35414e] hover:text-white'
                   }`}
                 >
                   <span>{category.icon}</span>

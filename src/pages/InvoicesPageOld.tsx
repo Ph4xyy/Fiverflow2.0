@@ -265,7 +265,7 @@ const InvoicesPage: React.FC = () => {
           go("/invoices/create");
         }}
         className={`inline-flex items-center px-4 py-2 rounded-lg ${
-          hasAccess ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"
+          hasAccess ? "bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] text-white" : "bg-gray-300 text-gray-600 cursor-not-allowed"
         }`}
         disabled={!hasAccess}
       >
@@ -467,7 +467,7 @@ const InvoicesPage: React.FC = () => {
           </p>
           <Link
             to="/upgrade"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            className="px-4 py-2 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] text-white rounded-lg transition"
           >
             Passer à Excellence
           </Link>
