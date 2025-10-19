@@ -25,6 +25,10 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPageOptimized';
 import DashboardExample from './pages/DashboardExample';
+import CalendarPageNew from './pages/CalendarPageNew';
+import PricingPageNew from './pages/PricingPageNew';
+import WorkboardPageNew from './pages/WorkboardPageNew';
+import ProfilePageNew from './pages/ProfilePageNew';
 import ClientsPage from './pages/ClientsPageOptimized';
 import OrdersPage from './pages/OrdersPage';
 import TemplatesPage from './pages/TemplatesPage';
@@ -62,7 +66,7 @@ function AppContent() {
               {/* Redirection racine intelligente */}
               <Route path="/" element={<RootRedirect />} />
               {/* Pages publiques */}
-              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/pricing" element={<PricingPageNew />} />
               <Route path="/support" element={<SupportPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
@@ -77,11 +81,11 @@ function AppContent() {
               {/* Autres pages internes du dashboard */}
               <Route path="/clients" element={<InstantProtectedRoute><ClientsPage /></InstantProtectedRoute>} />
               <Route path="/orders" element={<InstantProtectedRoute><OrdersPage /></InstantProtectedRoute>} />
-              <Route path="/calendar" element={<InstantProtectedRoute><CalendarPage /></InstantProtectedRoute>} />
-              <Route path="/tasks" element={<InstantProtectedRoute><WorkboardPage /></InstantProtectedRoute>} />
+              <Route path="/calendar" element={<InstantProtectedRoute><CalendarPageNew /></InstantProtectedRoute>} />
+              <Route path="/tasks" element={<InstantProtectedRoute><WorkboardPageNew /></InstantProtectedRoute>} />
               <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
               <Route path="/stats" element={<InstantProtectedRoute><StatsPage /></InstantProtectedRoute>} />
-              <Route path="/profile" element={<InstantProtectedRoute><ProfilePage /></InstantProtectedRoute>} />
+              <Route path="/profile" element={<InstantProtectedRoute><ProfilePageNew /></InstantProtectedRoute>} />
               <Route path="/network" element={<InstantProtectedRoute><NetworkPage /></InstantProtectedRoute>} />
               <Route path="/upgrade" element={<InstantProtectedRoute><UpgradePage /></InstantProtectedRoute>} />
               <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />

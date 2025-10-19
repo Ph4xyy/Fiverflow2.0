@@ -457,45 +457,53 @@ const StatsPage: React.FC = () => {
         {/* KPI CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <div className={`${cardClass} p-4`}>
-            <div className="flex items-center justify-between">
+            <div className="relative">
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-400">{'Total Revenue'}</p>
                 <p className="text-2xl font-bold text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(totalRevenue)}</p>
               </div>
-              <DollarSign className="text-green-400" />
+              <div className="absolute top-0 right-0 opacity-30">
+                <DollarSign size={32} className="text-green-400" />
+              </div>
             </div>
             <p className="mt-2 text-xs text-slate-400">{'Avg. order value:'} {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(averageOrderValue)}</p>
           </div>
 
           <div className={`${cardClass} p-4`}>
-            <div className="flex items-center justify-between">
+            <div className="relative">
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-400">{'Pending Revenue'}</p>
                 <p className="text-2xl font-bold text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(pendingRevenue)}</p>
               </div>
-              <ShoppingCart className="text-amber-400" />
+              <div className="absolute top-0 right-0 opacity-30">
+                <ShoppingCart size={32} className="text-amber-400" />
+              </div>
             </div>
             <p className="mt-2 text-xs text-slate-400">{'Open orders:'} {pendingOrders.length}</p>
           </div>
 
           <div className={`${cardClass} p-4`}>
-            <div className="flex items-center justify-between">
+            <div className="relative">
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-400">{'Avg. Delivery Time'}</p>
                 <p className="text-2xl font-bold text-white">{averageDeliveryTime.toFixed(1)} {'days'}</p>
               </div>
-              <Clock className="text-sky-400" />
+              <div className="absolute top-0 right-0 opacity-30">
+                <Clock size={32} className="text-sky-400" />
+              </div>
             </div>
             <p className="mt-2 text-xs text-slate-400">{'Based on completed orders'}</p>
           </div>
 
           <div className={`${cardClass} p-4`}>
-            <div className="flex items-center justify-between">
+            <div className="relative">
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-400">{'Completion Rate'}</p>
                 <p className="text-2xl font-bold text-white">{completionRate}%</p>
               </div>
-              <Target className="text-purple-400" />
+              <div className="absolute top-0 right-0 opacity-30">
+                <Target size={32} className="text-purple-400" />
+              </div>
             </div>
             <p className="mt-2 text-xs text-slate-400">{'Total orders:'} {orderVolume}</p>
           </div>

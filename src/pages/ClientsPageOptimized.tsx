@@ -1,6 +1,7 @@
 // src/pages/ClientsPageOptimized.tsx - VERSION ULTRA-OPTIMISÉE
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import Layout, { cardClass } from '@/components/Layout';
+import ModernButton from '@/components/ModernButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useInstantPageData } from '@/hooks/useInstantPageData';
 
@@ -327,14 +328,10 @@ const ClientsPageOptimized: React.FC = () => {
       <div className="space-y-6 p-4 sm:p-0">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center gap-3">
-            {/* Icône dans carré arrondi avec même tone que la nav (emerald -> teal) */}
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 grid place-items-center text-white shadow-glow-sm">
-              <Users size={18} />
-            </div>
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-extrabold text-white">{'Clients'}</h1>
-              <p className="text-sm text-slate-400">{'Search, filter and manage your clients.'}</p>
+              <h1 className="text-3xl font-bold text-white mb-2">{'Clients'}</h1>
+              <p className="text-gray-400">{'Search, filter and manage your clients.'}</p>
             </div>
           </div>
 
@@ -363,13 +360,10 @@ const ClientsPageOptimized: React.FC = () => {
               )}
             </div>
 
-            <button
-              onClick={openCreate}
-              className="inline-flex items-center px-4 py-2.5 rounded-xl btn-primary"
-            >
+            <ModernButton onClick={openCreate} size="sm">
               <Plus className="h-4 w-4 mr-2" />
-{'New client'}
-            </button>
+              Nouveau Client
+            </ModernButton>
           </div>
         </div>
 

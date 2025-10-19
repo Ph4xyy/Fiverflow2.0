@@ -24,9 +24,6 @@ const DashboardExample: React.FC = () => {
             <p className="text-gray-400">Bienvenue sur votre tableau de bord professionnel</p>
           </div>
           <div className="flex gap-3">
-            <ModernButton variant="outline" size="sm">
-              Exporter
-            </ModernButton>
             <ModernButton size="sm">
               Nouveau
             </ModernButton>
@@ -36,46 +33,62 @@ const DashboardExample: React.FC = () => {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <ModernCard 
-            title="Total Clients" 
-            icon={<Users size={20} className="text-white" />}
+            title="Total Clients"
           >
-            <div className="text-3xl font-bold text-white mb-2">1,234</div>
-            <div className="flex items-center text-green-400 text-sm">
-              <TrendingUp size={16} className="mr-1" />
-              +12% ce mois
+            <div className="relative">
+              <div className="text-3xl font-bold text-white mb-2">1,234</div>
+              <div className="flex items-center text-green-400 text-sm">
+                <TrendingUp size={16} className="mr-1" />
+                +12% ce mois
+              </div>
+              <div className="absolute top-0 right-0 opacity-30">
+                <Users size={32} className="text-green-400" />
+              </div>
             </div>
           </ModernCard>
 
           <ModernCard 
-            title="Commandes" 
-            icon={<Package size={20} className="text-white" />}
+            title="Commandes"
           >
-            <div className="text-3xl font-bold text-white mb-2">89</div>
-            <div className="flex items-center text-blue-400 text-sm">
-              <Activity size={16} className="mr-1" />
-              +5% cette semaine
+            <div className="relative">
+              <div className="text-3xl font-bold text-white mb-2">89</div>
+              <div className="flex items-center text-blue-400 text-sm">
+                <Activity size={16} className="mr-1" />
+                +5% cette semaine
+              </div>
+              <div className="absolute top-0 right-0 opacity-30">
+                <Package size={32} className="text-blue-400" />
+              </div>
             </div>
           </ModernCard>
 
           <ModernCard 
-            title="Revenus" 
-            icon={<DollarSign size={20} className="text-white" />}
+            title="Revenus"
           >
-            <div className="text-3xl font-bold text-white mb-2">€12,456</div>
-            <div className="flex items-center text-green-400 text-sm">
-              <TrendingUp size={16} className="mr-1" />
-              +8% ce mois
+            <div className="relative">
+              <div className="text-3xl font-bold text-white mb-2">€12,456</div>
+              <div className="flex items-center text-green-400 text-sm">
+                <TrendingUp size={16} className="mr-1" />
+                +8% ce mois
+              </div>
+              <div className="absolute top-0 right-0 opacity-30">
+                <DollarSign size={32} className="text-green-400" />
+              </div>
             </div>
           </ModernCard>
 
           <ModernCard 
-            title="Événements" 
-            icon={<Calendar size={20} className="text-white" />}
+            title="Événements"
           >
-            <div className="text-3xl font-bold text-white mb-2">24</div>
-            <div className="flex items-center text-purple-400 text-sm">
-              <Calendar size={16} className="mr-1" />
-              Cette semaine
+            <div className="relative">
+              <div className="text-3xl font-bold text-white mb-2">24</div>
+              <div className="flex items-center text-purple-400 text-sm">
+                <Calendar size={16} className="mr-1" />
+                Cette semaine
+              </div>
+              <div className="absolute top-0 right-0 opacity-30">
+                <Calendar size={32} className="text-purple-400" />
+              </div>
             </div>
           </ModernCard>
         </div>
