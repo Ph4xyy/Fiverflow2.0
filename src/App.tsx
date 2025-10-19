@@ -34,6 +34,7 @@ import OrdersPage from './pages/OrdersPage';
 import TemplatesPage from './pages/TemplatesPage';
 import StatsPage from './pages/StatsPage';
 import UpgradePage from './pages/UpgradePage';
+import UpgradePageNew from './pages/UpgradePageNew';
 import ProfilePage from './pages/ProfilePage';
 import OnboardingPage from './pages/OnboardingPage';
 import PricingPage from './pages/PricingPage';
@@ -87,7 +88,7 @@ function AppContent() {
               <Route path="/stats" element={<InstantProtectedRoute><StatsPage /></InstantProtectedRoute>} />
               <Route path="/profile" element={<InstantProtectedRoute><ProfilePageNew /></InstantProtectedRoute>} />
               <Route path="/network" element={<InstantProtectedRoute><NetworkPage /></InstantProtectedRoute>} />
-              <Route path="/upgrade" element={<InstantProtectedRoute><UpgradePage /></InstantProtectedRoute>} />
+                <Route path="/upgrade" element={<InstantProtectedRoute><UpgradePageNew /></InstantProtectedRoute>} />
               <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
 

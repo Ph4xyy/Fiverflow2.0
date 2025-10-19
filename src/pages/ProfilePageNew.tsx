@@ -29,7 +29,13 @@ import {
   TrendingUp,
   Target,
   Coffee,
-  ExternalLink
+  ExternalLink,
+  Crown,
+  ChevronDown,
+  User,
+  Palette,
+  Save,
+  X
 } from 'lucide-react';
 
 interface SocialLink {
@@ -37,6 +43,25 @@ interface SocialLink {
   url: string;
   followers: number;
   icon: React.ReactNode;
+}
+
+interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+}
+
+interface ProfileData {
+  name: string;
+  title: string;
+  location: string;
+  memberSince: string;
+  bio: string;
+  website: string;
+  email: string;
+  phone: string;
 }
 
 interface Project {
@@ -60,6 +85,31 @@ interface Achievement {
 
 const ProfilePageNew: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'activity'>('overview');
+  const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
+  const [isOwnProfile, setIsOwnProfile] = useState(true); // Simulate if it's the user's own profile
+  
+  // Profile data
+  const [profileData, setProfileData] = useState<ProfileData>({
+    name: 'John Doe',
+    title: 'UI/UX Designer & Frontend Developer',
+    location: 'Paris, France',
+    memberSince: 'Jan 2019',
+    bio: 'Passionné par le design et le développement, je crée des expériences utilisateur exceptionnelles depuis 5 ans.',
+    website: 'https://johndoe.design',
+    email: 'john@example.com',
+    phone: '+33 6 12 34 56 78'
+  });
+
+  // Badges data
+  const badges: Badge[] = [
+    {
+      id: 'boost_subscriber',
+      name: 'Boost Subscriber',
+      description: 'Abonné Boost depuis 2 ans',
+      icon: '/badges/boost-badge.png',
+      rarity: 'epic'
+    }
+  ];
 
   const socialLinks: SocialLink[] = [
     {
@@ -211,16 +261,36 @@ const ProfilePageNew: React.FC = () => {
 
                   {/* Basic Info */}
                   <div className="pb-4">
-                    <h1 className="text-3xl font-bold text-white mb-2">John Doe</h1>
-                    <p className="text-lg text-gray-400 mb-2">UI/UX Designer & Frontend Developer</p>
+                    <div className="flex items-center gap-3 mb-2">
+                      <h1 className="text-3xl font-bold text-white">{profileData.name}</h1>
+                      {/* Badges */}
+                      <div className="flex items-center gap-2">
+                        {badges.map((badge) => (
+                          <div key={badge.id} className="relative group">
+                            <div className="w-8 h-8 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center cursor-pointer">
+                              <Crown size={16} className="text-white" />
+                            </div>
+                            {/* Tooltip */}
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                              <div className="bg-gray-900 text-white text-sm rounded-lg px-3 py-2 whitespace-nowrap shadow-lg border border-gray-700">
+                                <div className="font-semibold">{badge.name}</div>
+                                <div className="text-gray-300 text-xs">{badge.description}</div>
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-lg text-gray-400 mb-2">{profileData.title}</p>
                     <div className="flex items-center gap-4 text-sm text-gray-400">
                       <div className="flex items-center gap-1">
                         <MapPin size={16} />
-                        Paris, France
+                        {profileData.location}
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar size={16} />
-                        Membre depuis Jan 2019
+                        Membre depuis {profileData.memberSince}
                       </div>
                       <div className="flex items-center gap-1">
                         <Coffee size={16} />
@@ -232,23 +302,163 @@ const ProfilePageNew: React.FC = () => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-3 pb-4">
-                  <ModernButton variant="outline" size="sm">
-                    <MessageSquare size={16} className="mr-2" />
-                    Message
-                  </ModernButton>
-                  <ModernButton variant="outline" size="sm">
-                    <Share2 size={16} className="mr-2" />
-                    Partager
-                  </ModernButton>
-                  <ModernButton size="sm">
-                    <Plus size={16} className="mr-2" />
-                    Suivre
-                  </ModernButton>
+                  {isOwnProfile ? (
+                    <>
+                      <ModernButton 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setIsEditMenuOpen(!isEditMenuOpen)}
+                      >
+                        <Edit3 size={16} className="mr-2" />
+                        Modifier le profil
+                      </ModernButton>
+                      <ModernButton variant="outline" size="sm">
+                        <Settings size={16} className="mr-2" />
+                        Paramètres
+                      </ModernButton>
+                    </>
+                  ) : (
+                    <>
+                      <ModernButton variant="outline" size="sm">
+                        <MessageSquare size={16} className="mr-2" />
+                        Message
+                      </ModernButton>
+                      <ModernButton variant="outline" size="sm">
+                        <Share2 size={16} className="mr-2" />
+                        Partager
+                      </ModernButton>
+                      <ModernButton size="sm">
+                        <Plus size={16} className="mr-2" />
+                        Suivre
+                      </ModernButton>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </ModernCard>
+
+        {/* Edit Profile Menu */}
+        {isEditMenuOpen && isOwnProfile && (
+          <ModernCard>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-white">Modifier le profil</h3>
+              <button 
+                onClick={() => setIsEditMenuOpen(false)}
+                className="p-2 hover:bg-[#35414e] rounded-lg transition-colors"
+              >
+                <X size={20} className="text-gray-400" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Nom complet
+                  </label>
+                  <input
+                    type="text"
+                    value={profileData.name}
+                    onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Titre professionnel
+                  </label>
+                  <input
+                    type="text"
+                    value={profileData.title}
+                    onChange={(e) => setProfileData({...profileData, title: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Localisation
+                  </label>
+                  <input
+                    type="text"
+                    value={profileData.location}
+                    onChange={(e) => setProfileData({...profileData, location: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Site web
+                  </label>
+                  <input
+                    type="url"
+                    value={profileData.website}
+                    onChange={(e) => setProfileData({...profileData, website: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={profileData.email}
+                    onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Téléphone
+                  </label>
+                  <input
+                    type="tel"
+                    value={profileData.phone}
+                    onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Bio
+                  </label>
+                  <textarea
+                    value={profileData.bio}
+                    onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
+                    rows={4}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2] resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-[#35414e]">
+              <ModernButton 
+                variant="outline" 
+                onClick={() => setIsEditMenuOpen(false)}
+              >
+                Annuler
+              </ModernButton>
+              <ModernButton>
+                <Save size={16} className="mr-2" />
+                Sauvegarder
+              </ModernButton>
+            </div>
+          </ModernCard>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
