@@ -161,20 +161,28 @@ const AdminDashboard: React.FC = () => {
 
       console.log('🔍 AdminDashboard: Nombre d\'utilisateurs trouvés:', data?.length || 0);
 
-      // Ajouter des données simulées pour les nouveaux champs
-      const usersWithSimulatedData = (data || []).map((user, index) => ({
-        ...user,
-        email: user.email || `user${index + 1}@example.com`, // Email de la vue ou fallback
-        subscription_plan: ['launch', 'boost', 'scale', 'free'][index % 4] as any,
-        user_role: user.is_admin ? 'admin' : ['user', 'moderator'][index % 2] as any,
-        permissions: user.is_admin ? ['admin', 'manage_users', 'view_analytics'] : ['user'],
-        last_login: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-        total_orders: Math.floor(Math.random() * 50),
-        total_revenue: Math.floor(Math.random() * 5000)
+      // Récupérer les vraies données d'abonnement pour chaque utilisateur
+      const usersWithRealData = await Promise.all((data || []).map(async (user, index) => {
+        // Récupérer l'abonnement réel de l'utilisateur
+        const { data: subscriptionData } = await supabase
+          .rpc('get_user_current_subscription', { user_uuid: user.user_id });
+
+        const currentSubscription = subscriptionData && subscriptionData.length > 0 ? subscriptionData[0] : null;
+
+        return {
+          ...user,
+          email: user.email || `user${index + 1}@example.com`,
+          subscription_plan: currentSubscription?.plan_name || 'launch', // Utiliser le vrai plan
+          user_role: user.is_admin ? 'admin' : 'user',
+          permissions: user.is_admin ? ['admin', 'manage_users', 'view_analytics'] : ['user'],
+          last_login: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+          total_orders: Math.floor(Math.random() * 50),
+          total_revenue: Math.floor(Math.random() * 5000)
+        };
       }));
 
-      console.log('🔍 AdminDashboard: Utilisateurs avec données simulées:', usersWithSimulatedData);
-      setUsers(usersWithSimulatedData);
+      console.log('🔍 AdminDashboard: Utilisateurs avec vraies données:', usersWithRealData);
+      setUsers(usersWithRealData);
     } catch (error) {
       console.error('Erreur lors du chargement des utilisateurs:', error);
     } finally {
@@ -267,20 +275,33 @@ const AdminDashboard: React.FC = () => {
   // Nouvelles fonctions de gestion
   const updateUserRole = async (userId: string, newRole: string) => {
     try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({ user_role: newRole })
-        .eq('user_id', userId);
+      console.log('🔍 AdminDashboard: Changement de rôle pour user:', userId, 'vers rôle:', newRole);
+      
+      // Utiliser la fonction SQL pour changer le rôle
+      const { data, error } = await supabase
+        .rpc('change_user_role', {
+          user_uuid: userId,
+          new_role_name: newRole,
+          admin_user_id: user?.id // ID de l'admin qui fait le changement
+        });
 
       if (error) {
         console.error('Erreur lors de la modification du rôle:', error);
+        alert('Erreur lors de la modification du rôle: ' + error.message);
         return;
       }
 
-      loadUsers();
+      console.log('🔍 AdminDashboard: Rôle changé avec succès:', data);
+      alert(`✅ Rôle changé vers ${newRole === 'admin' ? 'Admin' : 'User'} avec succès!`);
+
+      // Recharger les données pour voir le changement
+      setLoading(true);
+      await loadUsers();
+      await loadStats();
       setOpenMenuId(null);
     } catch (error) {
       console.error('Erreur lors de la modification du rôle:', error);
+      alert('❌ Erreur lors de la modification du rôle: ' + error.message);
     }
   };
 
@@ -303,14 +324,21 @@ const AdminDashboard: React.FC = () => {
       }
 
       console.log('🔍 AdminDashboard: Abonnement changé avec succès:', data);
-      alert(`Abonnement changé vers ${newPlan} avec succès!`);
       
-      loadUsers();
-      loadStats();
+      // Afficher un message de succès plus informatif
+      const planDisplayName = newPlan === 'scale' ? 'Scale (59€/mois)' :
+                             newPlan === 'boost' ? 'Boost (24€/mois)' :
+                             'Launch (Gratuit)';
+      alert(`✅ Abonnement changé vers ${planDisplayName} avec succès!`);
+
+      // Recharger les données pour voir le changement
+      setLoading(true);
+      await loadUsers();
+      await loadStats();
       setOpenMenuId(null);
     } catch (error) {
       console.error('Erreur lors de la modification de l\'abonnement:', error);
-      alert('Erreur lors de la modification de l\'abonnement');
+      alert('❌ Erreur lors de la modification de l\'abonnement: ' + error.message);
     }
   };
 
