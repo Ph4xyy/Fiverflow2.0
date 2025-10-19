@@ -75,25 +75,20 @@ SELECT demote_admin_to_user('user-uuid', 'admin-uuid');
 
 ## 📊 Plans d'Abonnement Disponibles
 
-### **🆓 Free**
+### **🚀 Launch (GRATUIT)**
 - **Prix** : 0€/mois
 - **Limites** : 1 projet, 5 clients, 1GB stockage, 1 membre équipe
 - **Fonctionnalités** : Support basique, Templates standards
 
-### **🚀 Launch**
-- **Prix** : 29€/mois (290€/an)
+### **⚡ Boost**
+- **Prix** : 24€/mois (240€/an)
 - **Limites** : 5 projets, 25 clients, 10GB stockage, 1 membre équipe
 - **Fonctionnalités** : Support prioritaire, Templates premium, Analytics, Branding personnalisé
 
-### **⚡ Boost**
-- **Prix** : 79€/mois (790€/an)
-- **Limites** : 15 projets, 100 clients, 50GB stockage, 5 membres équipe
-- **Fonctionnalités** : Tout de Launch + Collaboration équipe, Automatisation avancée
-
 ### **📈 Scale**
-- **Prix** : 199€/mois (1990€/an)
-- **Limites** : 50 projets, 500 clients, 200GB stockage, 20 membres équipe
-- **Fonctionnalités** : Tout de Boost + Support dédié, API, White label
+- **Prix** : 59€/mois (590€/an)
+- **Limites** : 15 projets, 100 clients, 50GB stockage, 5 membres équipe
+- **Fonctionnalités** : Tout de Boost + Collaboration équipe, Automatisation avancée, API
 
 ## 👥 Rôles Système
 

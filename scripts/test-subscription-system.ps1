@@ -4,10 +4,9 @@ Write-Host "Test du Systeme d'Abonnements et de Roles" -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan
 
 Write-Host "`nPlans d'abonnement disponibles:" -ForegroundColor Yellow
-Write-Host "- Free: 0 EUR/mois (1 projet, 5 clients, 1GB)" -ForegroundColor White
-Write-Host "- Launch: 29 EUR/mois (5 projets, 25 clients, 10GB)" -ForegroundColor White
-Write-Host "- Boost: 79 EUR/mois (15 projets, 100 clients, 50GB)" -ForegroundColor White
-Write-Host "- Scale: 199 EUR/mois (50 projets, 500 clients, 200GB)" -ForegroundColor White
+Write-Host "- Launch: 0 EUR/mois (1 projet, 5 clients, 1GB) - GRATUIT" -ForegroundColor White
+Write-Host "- Boost: 24 EUR/mois (5 projets, 25 clients, 10GB)" -ForegroundColor White
+Write-Host "- Scale: 59 EUR/mois (15 projets, 100 clients, 50GB)" -ForegroundColor White
 
 Write-Host "`nRoles systeme disponibles:" -ForegroundColor Yellow
 Write-Host "- User: Utilisateur standard" -ForegroundColor White

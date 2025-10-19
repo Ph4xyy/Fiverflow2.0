@@ -23,6 +23,7 @@ import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
 import LoadingDiagnostic from './components/LoadingDiagnostic';
+import SubscriptionGuard from './components/SubscriptionGuard';
 
 // Hook pour le préchargement des données
 import { usePreloadData } from './hooks/usePreloadData';
@@ -81,22 +82,60 @@ function AppContent() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* Dashboard principal */}
+          {/* Dashboard principal - Accessible à tous les abonnements */}
           <Route path="/dashboard" element={
             <ProtectedRoute>
-              <DashboardExample />
+              <SubscriptionGuard requiredPlan="launch" pageName="dashboard">
+                <DashboardExample />
+              </SubscriptionGuard>
             </ProtectedRoute>
           } />
 
-          {/* Pages internes du dashboard (toutes protégées) */}
-          <Route path="/clients" element={<InstantProtectedRoute><ClientsPage /></InstantProtectedRoute>} />
-          <Route path="/orders" element={<InstantProtectedRoute><OrdersPage /></InstantProtectedRoute>} />
-          <Route path="/calendar" element={<InstantProtectedRoute><CalendarPageNew /></InstantProtectedRoute>} />
-          <Route path="/tasks" element={<InstantProtectedRoute><WorkboardPageNew /></InstantProtectedRoute>} />
+          {/* Pages internes du dashboard avec protection par abonnement */}
+          <Route path="/clients" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="launch" pageName="clients" description="Gestion des clients (max 5 avec Launch)">
+                <ClientsPage />
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
+          <Route path="/orders" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="launch" pageName="orders" description="Gestion des commandes (max 10 avec Launch)">
+                <OrdersPage />
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
+          <Route path="/calendar" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="boost" pageName="calendar" description="Calendrier disponible avec Boost">
+                <CalendarPageNew />
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
+          <Route path="/tasks" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="boost" pageName="workboard" description="Tableau de travail disponible avec Boost">
+                <WorkboardPageNew />
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
           <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
-          <Route path="/stats" element={<InstantProtectedRoute><StatsPage /></InstantProtectedRoute>} />
+          <Route path="/stats" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="scale" pageName="stats" description="Statistiques avancées disponibles avec Scale">
+                <StatsPage />
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
           <Route path="/profile" element={<InstantProtectedRoute><ProfilePageNew /></InstantProtectedRoute>} />
-          <Route path="/network" element={<InstantProtectedRoute><NetworkPage /></InstantProtectedRoute>} />
+          <Route path="/network" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="boost" pageName="referrals" description="Système de parrainage disponible avec Boost">
+                <NetworkPage />
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
           <Route path="/upgrade" element={<InstantProtectedRoute><UpgradePageNew /></InstantProtectedRoute>} />
           <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
 
@@ -108,8 +147,14 @@ function AppContent() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/cookie-policy" element={<CookiePolicy />} />
 
-          {/* Système de facturation (lazy loaded) */}
-          <Route path="/invoices" element={<InstantProtectedRoute><InvoicesLayout /></InstantProtectedRoute>}>
+          {/* Système de facturation (lazy loaded) - Scale uniquement */}
+          <Route path="/invoices" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="scale" pageName="invoices" description="Système de facturation disponible avec Scale">
+                <InvoicesLayout />
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          }>
             <Route index element={<InvoicesPage />} />
             <Route path="sent" element={<InvoicesPage />} />
             <Route path="create" element={<InvoicesPage />} />

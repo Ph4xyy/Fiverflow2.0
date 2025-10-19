@@ -286,20 +286,31 @@ const AdminDashboard: React.FC = () => {
 
   const updateSubscription = async (userId: string, newPlan: string) => {
     try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({ subscription_plan: newPlan })
-        .eq('user_id', userId);
+      console.log('🔍 AdminDashboard: Changement d\'abonnement pour user:', userId, 'vers plan:', newPlan);
+      
+      // Utiliser la fonction SQL pour changer l'abonnement
+      const { data, error } = await supabase
+        .rpc('change_user_subscription', {
+          user_uuid: userId,
+          new_plan_name: newPlan,
+          billing_cycle_param: 'monthly'
+        });
 
       if (error) {
         console.error('Erreur lors de la modification de l\'abonnement:', error);
+        alert('Erreur lors de la modification de l\'abonnement: ' + error.message);
         return;
       }
 
+      console.log('🔍 AdminDashboard: Abonnement changé avec succès:', data);
+      alert(`Abonnement changé vers ${newPlan} avec succès!`);
+      
       loadUsers();
+      loadStats();
       setOpenMenuId(null);
     } catch (error) {
       console.error('Erreur lors de la modification de l\'abonnement:', error);
+      alert('Erreur lors de la modification de l\'abonnement');
     }
   };
 
@@ -696,7 +707,7 @@ const AdminDashboard: React.FC = () => {
                                 <div className="mb-4">
                                   <h4 className="text-sm font-semibold text-white mb-2">Abonnement</h4>
                                   <div className="space-y-1">
-                                    {['free', 'launch', 'boost', 'scale'].map(plan => (
+                                    {['launch', 'boost', 'scale'].map(plan => (
                                       <button
                                         key={plan}
                                         onClick={() => updateSubscription(userProfile.user_id, plan)}
@@ -707,9 +718,9 @@ const AdminDashboard: React.FC = () => {
                                         }`}
                                       >
                                         <CreditCard size={14} />
-                                        {plan === 'scale' ? 'Scale' :
-                                         plan === 'boost' ? 'Boost' :
-                                         plan === 'launch' ? 'Launch' : 'Free'}
+                                        {plan === 'scale' ? 'Scale (59€/mois)' :
+                                         plan === 'boost' ? 'Boost (24€/mois)' :
+                                         'Launch (Gratuit)'}
                                       </button>
                                     ))}
                                   </div>
