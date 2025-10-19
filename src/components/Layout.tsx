@@ -7,7 +7,7 @@ import LogoImage from '../assets/LogoFiverFlow.png';
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import NotificationsDropdown from './NotificationsDropdown';
 import CentralizedSearchBar from './CentralizedSearchBar';
-// 🔥 AUTHENTIFICATION SUPPRIMÉE - Imports auth supprimés
+import { useAuth } from '../contexts/AuthContext';
 
 import { 
   Menu, 
@@ -81,16 +81,16 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  // 🔥 AUTHENTIFICATION SUPPRIMÉE - Plus de signOut ni user
-  const signOut = () => {
-    console.log('🔓 Sign out disabled - auth system removed');
-  };
-  const user = null; // Plus d'utilisateur connecté
+  const { user, signOut } = useAuth();
   const { restrictions, checkAccess } = usePlanRestrictions();
   useEffect(() => {
-    // 🔥 AUTHENTIFICATION SUPPRIMÉE - Rôle par défaut
-    setUserRole('user');
-  }, []); // Plus de dépendance sur user
+    // Définir le rôle utilisateur basé sur l'authentification
+    if (user) {
+      setUserRole('user');
+    } else {
+      setUserRole(null);
+    }
+  }, [user]);
 
   const isAdmin = useIsAdminFromEverywhere(user, userRole);
 
@@ -178,6 +178,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
   const handleSignOut = async () => {
     await signOut();
+    navigate('/login');
   };
 
   const LinkRow: React.FC<{
