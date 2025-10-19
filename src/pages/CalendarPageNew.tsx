@@ -13,7 +13,8 @@ import {
   ChevronRight,
   Filter,
   Search,
-  X
+  X,
+  AlertTriangle
 } from 'lucide-react';
 
 interface Event {
@@ -33,6 +34,7 @@ const CalendarPageNew: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [filterType, setFilterType] = useState<string>('');
   const [filterPriority, setFilterPriority] = useState<string>('');
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [events, setEvents] = useState<Event[]>([
     {
       id: '1',
@@ -157,14 +159,65 @@ const CalendarPageNew: React.FC = () => {
             <p className="text-gray-400">Manage your events and appointments</p>
           </div>
           <div className="flex gap-3">
-            <ModernButton 
-              variant="outline" 
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter size={16} className="mr-2" />
-              Filters
-            </ModernButton>
+            <div className="relative">
+              <ModernButton 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+              >
+                <Filter size={16} className="mr-2" />
+                Filters
+              </ModernButton>
+              
+              {/* Dropdown Menu */}
+              {showFilterDropdown && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-[#1e2938] border border-[#35414e] rounded-lg shadow-lg z-50">
+                  <div className="py-2">
+                    <button 
+                      onClick={() => {
+                        setShowFilters(true);
+                        setShowFilterDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2"
+                    >
+                      <Filter size={16} />
+                      Advanced Filters
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setFilterType('meeting');
+                        setShowFilterDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2"
+                    >
+                      <Clock size={16} />
+                      Meetings Only
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setFilterType('deadline');
+                        setShowFilterDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2"
+                    >
+                      <AlertTriangle size={16} />
+                      Deadlines Only
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setFilterType('');
+                        setFilterPriority('');
+                        setShowFilterDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2"
+                    >
+                      <X size={16} />
+                      Clear All
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
             <ModernButton size="sm">
               <Plus size={16} className="mr-2" />
               New Event

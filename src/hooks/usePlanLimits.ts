@@ -150,9 +150,9 @@ export const usePlanLimits = (): UsePlanLimitsReturn => {
       }
     });
     
-    // Redirect to pricing page after a short delay
+    // Redirect to upgrade page after a short delay
     setTimeout(() => {
-      navigate('/pricing');
+      navigate('/upgrade');
     }, 2000);
   };
 

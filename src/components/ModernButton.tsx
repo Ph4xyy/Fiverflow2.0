@@ -19,7 +19,7 @@ const ModernButton: React.FC<ModernButtonProps> = ({
   size = 'md',
   className = ''
 }) => {
-  const baseClasses = 'font-medium rounded-lg transition-all duration-200 focus:outline-none active:scale-95 flex items-center justify-center';
+  const baseClasses = 'font-medium rounded-lg transition-all duration-200 focus:outline-none active:scale-95 flex items-center justify-center gap-2';
   
   const sizeClasses = {
     sm: 'px-3 py-1.5 text-sm',

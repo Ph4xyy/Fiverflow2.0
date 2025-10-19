@@ -406,54 +406,54 @@ export default function NetworkPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className={`${card} p-6`}>
-              <div className="flex items-center">
-                <div className="p-3 rounded-full bg-blue-900/30">
-                  <Users className="h-6 w-6 text-blue-400" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-zinc-400">{'Total Referrals'}</p>
-                  <p className="text-2xl font-bold text-zinc-100">{referrals.length}</p>
-                </div>
+          <div className="bg-[#1e2938] border border-[#35414e] rounded-xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-white">{referrals.length}</p>
+                <p className="text-sm text-gray-400">Total Referrals</p>
               </div>
-            </div>
-
-          <div className={`${card} p-6`}>
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-900/30">
-                <TrendingUp className="h-6 w-6 text-green-400" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-zinc-400">{'Paid Referrals'}</p>
-                <p className="text-2xl font-bold text-zinc-100">
-                  {referrals.filter((r) => r.subscription_status === 'paid').length}
-                </p>
+              <div className="text-gray-400 opacity-50">
+                <Users size={20} />
               </div>
             </div>
           </div>
 
-          <div className={`${card} p-6`}>
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-900/30">
-                <DollarSign className="h-6 w-6 text-blue-400" />
+          <div className="bg-[#1e2938] border border-[#35414e] rounded-xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-white">
+                  {referrals.filter((r) => r.subscription_status === 'paid').length}
+                </p>
+                <p className="text-sm text-gray-400">Paid Referrals</p>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-zinc-400">{'Total Earnings'}</p>
-                <p className="text-2xl font-bold text-zinc-100">{formatCurrency(totalEarnings)}</p>
+              <div className="text-gray-400 opacity-50">
+                <TrendingUp size={20} />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-[#1e2938] border border-[#35414e] rounded-xl p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-white">{formatCurrency(totalEarnings)}</p>
+                <p className="text-sm text-gray-400">Total Earnings</p>
+              </div>
+              <div className="text-gray-400 opacity-50">
+                <DollarSign size={20} />
               </div>
             </div>
           </div>
         </div>
 
         {/* Payout Section */}
-        <div className={`${card} p-6 mb-8`}>
+        <div className="bg-[#1e2938] border border-[#35414e] rounded-xl p-6 mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-            <h2 className={h2 + ' flex items-center'}>
+            <h2 className="text-xl font-semibold text-white flex items-center">
               <Wallet className="mr-2 text-green-400" size={24} />
-              {'Payout Management'}
+              Payout Management
             </h2>
-              <p className={pSub + ' mt-1'}>{'Manage your earnings and request payouts'}</p>
+              <p className="text-gray-400 mt-1">Manage your earnings and request payouts</p>
             </div>
             <button
               onClick={handleCheckStatus}
@@ -564,7 +564,7 @@ export default function NetworkPage() {
 
         {/* Payout History */}
         {payoutRequests.length > 0 && (
-          <div className={`${card} p-6 mb-8`}>
+          <div className="bg-[#1e2938] border border-[#35414e] rounded-xl p-6 mb-8">
               <h2 className={h2 + ' mb-4'}>{'Payout History'}</h2>
               <div className={tableWrap}>
                 <table className="min-w-full divide-y divide-zinc-800">
@@ -609,7 +609,7 @@ export default function NetworkPage() {
         )}
 
         {/* Referral Link */}
-        <div className={`${card} p-6 mb-8`}>
+        <div className="bg-[#1e2938] border border-[#35414e] rounded-xl p-6 mb-8">
           <h2 className={h2 + ' mb-4'}>{'Your Referral Link'}</h2>
           
           {!referralCode ? (
@@ -680,7 +680,7 @@ export default function NetworkPage() {
         </div>
 
         {/* Referrals List */}
-        <div className={`${card} p-6 mb-8`}>
+        <div className="bg-[#1e2938] border border-[#35414e] rounded-xl p-6 mb-8">
           <h2 className={h2 + ' mb-4'}>{'My Referrals'}</h2>
           {referrals.length === 0 ? (
             <div className="text-center py-8">
@@ -728,7 +728,7 @@ export default function NetworkPage() {
         </div>
 
         {/* Earnings History */}
-        <div className={`${card} p-6`}>
+        <div className="bg-[#1e2938] border border-[#35414e] rounded-xl p-6">
           <h2 className={h2 + ' mb-4'}>{'Earnings History'}</h2>
           {referralLogs.length === 0 ? (
             <div className="text-center py-8">

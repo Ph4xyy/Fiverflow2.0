@@ -362,9 +362,10 @@ const ProfilePageNew: React.FC = () => {
         {/* Edit Profile Menu */}
         {isEditMenuOpen && isOwnProfile && (
           <>
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={() => setIsEditMenuOpen(false)}></div>
-            <div className="relative z-50">
-              <ModernCard>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setIsEditMenuOpen(false)}></div>
+            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+              <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <ModernCard>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-white">Edit profile</h3>
               <button 
@@ -480,7 +481,8 @@ const ProfilePageNew: React.FC = () => {
                 Save
               </ModernButton>
             </div>
-              </ModernCard>
+                </ModernCard>
+              </div>
             </div>
           </>
         )}
@@ -488,9 +490,10 @@ const ProfilePageNew: React.FC = () => {
         {/* Settings Menu */}
         {isSettingsMenuOpen && isOwnProfile && (
           <>
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={() => setIsSettingsMenuOpen(false)}></div>
-            <div className="relative z-50">
-              <ModernCard>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setIsSettingsMenuOpen(false)}></div>
+            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+              <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <ModernCard>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-white">Profile settings</h3>
               <button 
@@ -670,7 +673,8 @@ const ProfilePageNew: React.FC = () => {
                 Save
               </ModernButton>
             </div>
-              </ModernCard>
+                </ModernCard>
+              </div>
             </div>
           </>
         )}

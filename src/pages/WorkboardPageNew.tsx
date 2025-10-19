@@ -180,7 +180,7 @@ const WorkboardPageNew: React.FC = () => {
         </div>
 
         {/* Kanban Board */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {columns.map(column => (
             <div key={column.id} className="space-y-4">
               <div className="flex items-center justify-between">
