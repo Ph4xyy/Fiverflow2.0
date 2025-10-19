@@ -26,7 +26,8 @@ import {
   UserPlus,
   Mail,
   Eye,
-  Trash2
+  Trash2,
+  X
 } from 'lucide-react';
 
 interface UserProfile {
@@ -158,10 +159,30 @@ const AdminDashboard: React.FC = () => {
 
       console.log('🔍 AdminDashboard: Nombre d\'utilisateurs trouvés:', data?.length || 0);
 
+      // Récupérer les vrais emails depuis auth.users
+      const userIds = (data || []).map(user => user.user_id);
+      let userEmails: { [key: string]: string } = {};
+      
+      if (userIds.length > 0) {
+        try {
+          // Utiliser une requête SQL directe pour récupérer les emails
+          const { data: emailData, error: emailError } = await supabase
+            .rpc('get_user_emails', { user_ids: userIds });
+          
+          if (!emailError && emailData) {
+            emailData.forEach((item: any) => {
+              userEmails[item.id] = item.email;
+            });
+          }
+        } catch (emailError) {
+          console.log('Erreur lors de la récupération des emails:', emailError);
+        }
+      }
+
       // Ajouter des données simulées pour les nouveaux champs
       const usersWithSimulatedData = (data || []).map((user, index) => ({
         ...user,
-        email: `user${index + 1}@example.com`, // Email simulé pour l'instant
+        email: userEmails[user.user_id] || `user${index + 1}@example.com`, // Vrai email ou fallback
         subscription_plan: ['launch', 'boost', 'scale', 'free'][index % 4] as any,
         user_role: user.is_admin ? 'admin' : ['user', 'moderator'][index % 2] as any,
         permissions: user.is_admin ? ['admin', 'manage_users', 'view_analytics'] : ['user'],
@@ -609,8 +630,35 @@ const AdminDashboard: React.FC = () => {
                           </button>
 
                           {openMenuId === userProfile.id && (
-                            <div className="absolute right-0 top-full mt-1 w-64 bg-[#1e2938] border border-[#35414e] rounded-lg shadow-lg z-50">
-                              <div className="p-2">
+                            <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)}>
+                              <div className="absolute right-4 top-16 w-80 bg-[#1e2938] border border-[#35414e] rounded-xl shadow-2xl z-50 max-h-96 overflow-y-auto">
+                                <div className="p-4">
+                                  {/* Header du menu */}
+                                  <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold text-white">
+                                      Gérer {userProfile.full_name || 'Utilisateur'}
+                                    </h3>
+                                    <button
+                                      onClick={() => setOpenMenuId(null)}
+                                      className="p-1 rounded-lg hover:bg-[#35414e] transition-colors"
+                                    >
+                                      <X size={16} className="text-gray-400" />
+                                    </button>
+                                  </div>
+
+                                  {/* Informations utilisateur */}
+                                  <div className="bg-[#35414e] rounded-lg p-3 mb-4">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center text-white text-sm font-bold">
+                                        {(userProfile.full_name || 'U').charAt(0).toUpperCase()}
+                                      </div>
+                                      <div>
+                                        <p className="text-white font-medium">{userProfile.full_name || 'Utilisateur'}</p>
+                                        <p className="text-gray-400 text-sm">{userProfile.email}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+
                                 {/* Actions rapides */}
                                 <div className="space-y-1">
                                   <button
@@ -630,11 +678,11 @@ const AdminDashboard: React.FC = () => {
                                   </button>
                                 </div>
 
-                                <div className="border-t border-[#35414e] my-2"></div>
+                                <div className="border-t border-[#35414e] my-3"></div>
 
                                 {/* Gestion des rôles */}
-                                <div className="mb-2">
-                                  <p className="text-xs text-gray-400 px-3 py-1">Changer le rôle</p>
+                                <div className="mb-4">
+                                  <h4 className="text-sm font-semibold text-white mb-2">Rôle & Permissions</h4>
                                   <div className="space-y-1">
                                     {['user', 'moderator', 'admin', 'super_admin'].map(role => (
                                       <button
@@ -656,8 +704,8 @@ const AdminDashboard: React.FC = () => {
                                 </div>
 
                                 {/* Gestion des abonnements */}
-                                <div className="mb-2">
-                                  <p className="text-xs text-gray-400 px-3 py-1">Changer l'abonnement</p>
+                                <div className="mb-4">
+                                  <h4 className="text-sm font-semibold text-white mb-2">Abonnement</h4>
                                   <div className="space-y-1">
                                     {['free', 'launch', 'boost', 'scale'].map(plan => (
                                       <button
@@ -678,10 +726,12 @@ const AdminDashboard: React.FC = () => {
                                   </div>
                                 </div>
 
-                                <div className="border-t border-[#35414e] my-2"></div>
+                                <div className="border-t border-[#35414e] my-3"></div>
 
                                 {/* Actions d'administration */}
-                                <div className="space-y-1">
+                                <div className="mb-4">
+                                  <h4 className="text-sm font-semibold text-white mb-2">Administration</h4>
+                                  <div className="space-y-1">
                                   <button
                                     onClick={() => toggleAdminStatus(userProfile.user_id, userProfile.is_admin)}
                                     className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
@@ -731,6 +781,8 @@ const AdminDashboard: React.FC = () => {
                                     <Trash2 size={14} />
                                     Supprimer
                                   </button>
+                                  </div>
+                                </div>
                                 </div>
                               </div>
                             </div>
