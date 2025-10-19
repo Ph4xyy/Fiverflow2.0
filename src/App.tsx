@@ -44,7 +44,7 @@ import StatsPage from './pages/StatsPage';
 import UpgradePageNew from './pages/UpgradePageNew';
 import OnboardingPage from './pages/OnboardingPage';
 import NetworkPage from './pages/NetworkPage';
-import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
 

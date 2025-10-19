@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import MessagingSystem from '../components/MessagingSystem';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 import { 
   Edit3, 
   Camera, 
@@ -92,6 +93,7 @@ const ProfilePageNew: React.FC = () => {
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const [isOwnProfile, setIsOwnProfile] = useState(true); // Simulate if it's the user's own profile
+  const [isAdmin, setIsAdmin] = useState(false);
   
   // Profile data - utilise les vraies données de l'utilisateur
   const [profileData, setProfileData] = useState<ProfileData>({
@@ -104,6 +106,29 @@ const ProfilePageNew: React.FC = () => {
     email: user?.email || 'john@example.com',
     phone: '+33 6 12 34 56 78'
   });
+
+  // Vérifier le statut admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('is_admin')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!error && data) {
+          setIsAdmin(data.is_admin);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du statut admin:', error);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   // Badges data
   const badges: Badge[] = [
@@ -279,6 +304,24 @@ const ProfilePageNew: React.FC = () => {
                       <h1 className="text-3xl font-bold text-white">{profileData.name}</h1>
                       {/* Badges */}
                       <div className="flex items-center gap-2">
+                        {/* Badge Administrateur */}
+                        {isAdmin && (
+                          <div className="relative group">
+                            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center cursor-pointer">
+                              <Shield size={16} className="text-white" />
+                            </div>
+                            {/* Tooltip */}
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                              <div className="bg-gray-900 text-white text-sm rounded-lg px-3 py-2 whitespace-nowrap shadow-lg border border-gray-700">
+                                <div className="font-semibold">Administrateur</div>
+                                <div className="text-gray-300 text-xs">Accès complet au système</div>
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Badge Abonnement */}
                         {badges.map((badge) => (
                           <div key={badge.id} className="relative group">
                             <div className="w-8 h-8 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center cursor-pointer">

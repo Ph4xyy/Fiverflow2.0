@@ -8,6 +8,7 @@ import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import NotificationsDropdown from './NotificationsDropdown';
 import CentralizedSearchBar from './CentralizedSearchBar';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
 import { 
   Menu, 
@@ -41,9 +42,41 @@ export const gradientClass = 'bg-gradient-to-r from-[#9c68f2] to-[#422ca5]';
 
 /* ---------- Helper: détecte admin ---------- */
 const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
-  // 🔥 AUTHENTIFICATION SUPPRIMÉE - Plus d'admin par défaut
-  const isAdmin = false; // Plus d'authentification, donc plus d'admin
-  
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminCheckLoading, setAdminCheckLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        setAdminCheckLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('is_admin')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Erreur lors de la vérification admin:', error);
+          setIsAdmin(false);
+        } else {
+          setIsAdmin(data?.is_admin || false);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification admin:', error);
+        setIsAdmin(false);
+      } finally {
+        setAdminCheckLoading(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
+
   return isAdmin;
 };
 
