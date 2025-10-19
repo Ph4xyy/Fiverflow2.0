@@ -31,7 +31,7 @@ import { usePreloadData } from './hooks/usePreloadData';
 import RootRedirect from './components/RootRedirect';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
+import DashboardExample from './pages/DashboardExample';
 import ProtectedRoute from './components/ProtectedRoute';
 import CalendarPageNew from './pages/CalendarPageNew';
 import PricingPageNew from './pages/PricingPageNew';
@@ -84,7 +84,7 @@ function AppContent() {
           {/* Dashboard principal */}
           <Route path="/dashboard" element={
             <ProtectedRoute>
-              <DashboardPage />
+              <DashboardExample />
             </ProtectedRoute>
           } />
 
