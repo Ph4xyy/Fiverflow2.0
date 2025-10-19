@@ -1,6 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+
+// Cache global pour éviter les re-vérifications
+const permissionCache = new Map<string, {
+  data: any;
+  timestamp: number;
+  expiresIn: number;
+}>();
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export interface SubscriptionPlan {
   name: string;
@@ -68,19 +77,39 @@ export const useSubscriptionPermissions = () => {
     admin: false
   });
   const [loading, setLoading] = useState(true);
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
-    if (user) {
+    if (user && !isInitializedRef.current) {
       loadSubscriptionData();
-    } else {
+    } else if (!user) {
       setLoading(false);
+      isInitializedRef.current = false;
     }
   }, [user]);
 
   const loadSubscriptionData = async () => {
-    if (!user) return;
+    if (!user || isInitializedRef.current) return;
+
+    const cacheKey = `permissions_${user.id}`;
+    const now = Date.now();
+
+    // Vérifier le cache d'abord
+    const cached = permissionCache.get(cacheKey);
+    if (cached && (now - cached.timestamp) < cached.expiresIn) {
+      console.log('🚀 useSubscriptionPermissions: Utilisation du cache pour', user.id);
+      setSubscription(cached.data.subscription);
+      setIsAdmin(cached.data.isAdmin);
+      setLimits(cached.data.limits);
+      setPermissions(cached.data.permissions);
+      setLoading(false);
+      isInitializedRef.current = true;
+      return;
+    }
 
     try {
+      console.log('🔄 useSubscriptionPermissions: Chargement des permissions pour', user.id);
+      
       // Vérifier le statut admin en premier
       const { data: adminData, error: adminError } = await supabase
         .from('user_profiles')
@@ -101,33 +130,46 @@ export const useSubscriptionPermissions = () => {
         return;
       }
 
+      let currentSubscription: UserSubscription | null = null;
       if (subscriptionData && subscriptionData.length > 0) {
-        const currentSubscription = subscriptionData[0];
+        currentSubscription = subscriptionData[0];
         setSubscription(currentSubscription);
-        
-        // Définir les limites selon le plan (illimitées pour les admins)
-        const newLimits = getLimitsForPlan(currentSubscription.plan_name);
-        if (adminData?.is_admin) {
-          // Les admins ont des limites illimitées
-          setLimits({
-            maxClients: -1,
-            maxOrders: -1,
-            maxProjects: -1,
-            maxStorage: -1,
-            maxTeamMembers: -1
-          });
-        } else {
-          setLimits(newLimits);
-        }
-        
-        // Définir les permissions selon le plan et le statut admin
-        const newPermissions = getPermissionsForPlan(currentSubscription.plan_name, adminData?.is_admin);
-        setPermissions(newPermissions);
       }
+
+      // Définir les limites selon le plan (illimitées pour les admins)
+      const planName = currentSubscription?.plan_name || 'launch';
+      const newLimits = getLimitsForPlan(planName);
+      const finalLimits = adminData?.is_admin ? {
+        maxClients: -1,
+        maxOrders: -1,
+        maxProjects: -1,
+        maxStorage: -1,
+        maxTeamMembers: -1
+      } : newLimits;
+      setLimits(finalLimits);
+      
+      // Définir les permissions selon le plan et le statut admin
+      const newPermissions = getPermissionsForPlan(planName, adminData?.is_admin);
+      setPermissions(newPermissions);
+
+      // Mettre en cache
+      permissionCache.set(cacheKey, {
+        data: {
+          subscription: currentSubscription,
+          isAdmin: adminData?.is_admin || false,
+          limits: finalLimits,
+          permissions: newPermissions
+        },
+        timestamp: now,
+        expiresIn: CACHE_DURATION
+      });
+
+      console.log('✅ useSubscriptionPermissions: Permissions mises en cache pour', user.id);
     } catch (error) {
       console.error('Erreur lors du chargement des données d\'abonnement:', error);
     } finally {
       setLoading(false);
+      isInitializedRef.current = true;
     }
   };
 
@@ -252,8 +294,17 @@ export const useSubscriptionPermissions = () => {
 
   const refreshSubscription = () => {
     if (user) {
+      // Vider le cache et recharger
+      const cacheKey = `permissions_${user.id}`;
+      permissionCache.delete(cacheKey);
+      isInitializedRef.current = false;
       loadSubscriptionData();
     }
+  };
+
+  const clearCache = () => {
+    permissionCache.clear();
+    isInitializedRef.current = false;
   };
 
   return {
@@ -266,6 +317,7 @@ export const useSubscriptionPermissions = () => {
     canAccessPage,
     isWithinLimit,
     getRemainingLimit,
-    refreshSubscription
+    refreshSubscription,
+    clearCache
   };
 };

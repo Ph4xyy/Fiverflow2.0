@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSubscriptionPermissions } from '../hooks/useSubscriptionPermissions';
 import { Lock, Crown, Zap, TrendingUp } from 'lucide-react';
 import ModernButton from './ModernButton';
@@ -17,24 +17,26 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
   description
 }) => {
   const { subscription, isAdmin, canAccessPage, loading } = useSubscriptionPermissions();
+  const [showLockScreen, setShowLockScreen] = useState(false);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#9c68f2]"></div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    // Ne pas bloquer l'affichage, vérifier en arrière-plan
+    if (!loading) {
+      const hasAccess = canAccessPage(pageName as any);
+      
+      // Les admins ont toujours accès
+      if (isAdmin) {
+        setShowLockScreen(false);
+        return;
+      }
 
-  // Vérifier si l'utilisateur a accès à cette page
-  const hasAccess = canAccessPage(pageName as any);
+      // Afficher l'écran de verrouillage seulement si pas d'accès
+      setShowLockScreen(!hasAccess);
+    }
+  }, [loading, canAccessPage, pageName, isAdmin]);
 
-  // Les admins ont toujours accès à tout
-  if (isAdmin) {
-    return <>{children}</>;
-  }
-
-  if (!hasAccess) {
+  // Afficher l'écran de verrouillage seulement si nécessaire
+  if (showLockScreen) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155] flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-[#1e2938] border border-[#35414e] rounded-xl shadow-2xl p-8 text-center">
@@ -131,6 +133,7 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
     );
   }
 
+  // Afficher le contenu immédiatement (pas de loader bloquant)
   return <>{children}</>;
 };
 
