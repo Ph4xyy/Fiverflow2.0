@@ -14,7 +14,7 @@ import {
   DollarSign, Calendar, ShoppingCart, Layers
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import SubscriptionLimits from '@/components/SubscriptionLimits';
+import OptimizedSubscriptionLimits from '@/components/OptimizedSubscriptionLimits';
 
 type OrderRow = {
   id: string;
@@ -368,7 +368,7 @@ const OrdersPage: React.FC = () => {
             <p className="text-gray-400">Track, filter and manage all your client orders</p>
             {/* Limites d'abonnement */}
             <div className="mt-2">
-              <SubscriptionLimits 
+              <OptimizedSubscriptionLimits 
                 resource="orders" 
                 currentCount={orders?.length || 0}
                 onUpgrade={() => window.location.href = '/upgrade'}

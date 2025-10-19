@@ -16,6 +16,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { UserDataProvider } from './contexts/UserDataContext';
 import { LoadingProvider } from './contexts/LoadingContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
+import { PermissionProvider } from './contexts/PermissionContext';
 
 // Composants de protection et d'interface
 import InstantProtectedRoute from './components/InstantProtectedRoute';
@@ -23,7 +24,8 @@ import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
 import LoadingDiagnostic from './components/LoadingDiagnostic';
-import SubscriptionGuard from './components/SubscriptionGuard';
+import OptimizedRoute from './components/OptimizedRoute';
+import OptimizedSubscriptionGuard from './components/OptimizedSubscriptionGuard';
 
 // Hook pour le préchargement des données
 import { usePreloadData } from './hooks/usePreloadData';
@@ -84,63 +86,85 @@ function AppContent() {
 
           {/* Dashboard principal - Accessible à tous les abonnements */}
           <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <SubscriptionGuard requiredPlan="launch" pageName="dashboard">
+            <OptimizedRoute requiredPermission="dashboard">
+              <OptimizedSubscriptionGuard requiredPlan="launch" pageName="dashboard">
                 <DashboardExample />
-              </SubscriptionGuard>
-            </ProtectedRoute>
+              </OptimizedSubscriptionGuard>
+            </OptimizedRoute>
           } />
 
           {/* Pages internes du dashboard avec protection par abonnement */}
           <Route path="/clients" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="launch" pageName="clients" description="Gestion des clients (max 5 avec Launch)">
+            <OptimizedRoute requiredPermission="clients">
+              <OptimizedSubscriptionGuard requiredPlan="launch" pageName="clients" description="Gestion des clients (max 5 avec Launch)">
                 <ClientsPage />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
+              </OptimizedSubscriptionGuard>
+            </OptimizedRoute>
           } />
           <Route path="/orders" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="launch" pageName="orders" description="Gestion des commandes (max 10 avec Launch)">
+            <OptimizedRoute requiredPermission="orders">
+              <OptimizedSubscriptionGuard requiredPlan="launch" pageName="orders" description="Gestion des commandes (max 10 avec Launch)">
                 <OrdersPage />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
+              </OptimizedSubscriptionGuard>
+            </OptimizedRoute>
           } />
           <Route path="/calendar" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="boost" pageName="calendar" description="Calendrier disponible avec Boost">
+            <OptimizedRoute requiredPermission="calendar">
+              <OptimizedSubscriptionGuard requiredPlan="boost" pageName="calendar" description="Calendrier disponible avec Boost">
                 <CalendarPageNew />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
+              </OptimizedSubscriptionGuard>
+            </OptimizedRoute>
           } />
           <Route path="/tasks" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="boost" pageName="workboard" description="Tableau de travail disponible avec Boost">
+            <OptimizedRoute requiredPermission="workboard">
+              <OptimizedSubscriptionGuard requiredPlan="boost" pageName="workboard" description="Tableau de travail disponible avec Boost">
                 <WorkboardPageNew />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
+              </OptimizedSubscriptionGuard>
+            </OptimizedRoute>
           } />
-          <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
+          <Route path="/templates" element={
+            <OptimizedRoute>
+              <TemplatesPage />
+            </OptimizedRoute>
+          } />
           <Route path="/stats" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="scale" pageName="stats" description="Statistiques avancées disponibles avec Scale">
+            <OptimizedRoute requiredPermission="stats">
+              <OptimizedSubscriptionGuard requiredPlan="scale" pageName="stats" description="Statistiques avancées disponibles avec Scale">
                 <StatsPage />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
+              </OptimizedSubscriptionGuard>
+            </OptimizedRoute>
           } />
-          <Route path="/profile" element={<InstantProtectedRoute><ProfilePageNew /></InstantProtectedRoute>} />
+          <Route path="/profile" element={
+            <OptimizedRoute>
+              <ProfilePageNew />
+            </OptimizedRoute>
+          } />
           <Route path="/network" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="boost" pageName="referrals" description="Système de parrainage disponible avec Boost">
+            <OptimizedRoute requiredPermission="referrals">
+              <OptimizedSubscriptionGuard requiredPlan="boost" pageName="referrals" description="Système de parrainage disponible avec Boost">
                 <NetworkPage />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
+              </OptimizedSubscriptionGuard>
+            </OptimizedRoute>
           } />
-          <Route path="/upgrade" element={<InstantProtectedRoute><UpgradePageNew /></InstantProtectedRoute>} />
-          <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
+          <Route path="/upgrade" element={
+            <OptimizedRoute>
+              <UpgradePageNew />
+            </OptimizedRoute>
+          } />
+          <Route path="/success" element={
+            <OptimizedRoute>
+              <SuccessPage />
+            </OptimizedRoute>
+          } />
 
           {/* Administration */}
-          <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+          <Route path="/admin/dashboard" element={
+            <OptimizedRoute requiredPermission="admin">
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            </OptimizedRoute>
+          } />
 
           {/* Pages légales */}
           <Route path="/terms-of-service" element={<TermsOfService />} />
@@ -149,11 +173,11 @@ function AppContent() {
 
           {/* Système de facturation (lazy loaded) - Scale uniquement */}
           <Route path="/invoices" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="scale" pageName="invoices" description="Système de facturation disponible avec Scale">
+            <OptimizedRoute requiredPermission="invoices">
+              <OptimizedSubscriptionGuard requiredPlan="scale" pageName="invoices" description="Système de facturation disponible avec Scale">
                 <InvoicesLayout />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
+              </OptimizedSubscriptionGuard>
+            </OptimizedRoute>
           }>
             <Route index element={<InvoicesPage />} />
             <Route path="sent" element={<InvoicesPage />} />
@@ -163,7 +187,11 @@ function AppContent() {
           </Route>
 
           {/* Onboarding pour nouveaux utilisateurs */}
-          <Route path="/onboarding" element={<InstantProtectedRoute><OnboardingPage /></InstantProtectedRoute>} />
+          <Route path="/onboarding" element={
+            <OptimizedRoute>
+              <OnboardingPage />
+            </OptimizedRoute>
+          } />
         </Routes>
       </Suspense>
       
@@ -188,17 +216,19 @@ function App() {
   return (
     <AppErrorBoundary>
       <AuthProvider>
-        <Router>
-          <AnalyticsWrapper>
-            <LoadingProvider>
-              <CurrencyProvider>
-                <UserDataProvider>
-                  <AppContent />
-                </UserDataProvider>
-              </CurrencyProvider>
-            </LoadingProvider>
-          </AnalyticsWrapper>
-        </Router>
+        <PermissionProvider>
+          <Router>
+            <AnalyticsWrapper>
+              <LoadingProvider>
+                <CurrencyProvider>
+                  <UserDataProvider>
+                    <AppContent />
+                  </UserDataProvider>
+                </CurrencyProvider>
+              </LoadingProvider>
+            </AnalyticsWrapper>
+          </Router>
+        </PermissionProvider>
       </AuthProvider>
     </AppErrorBoundary>
   );
