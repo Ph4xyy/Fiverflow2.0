@@ -184,14 +184,9 @@ export const useSubscriptions = () => {
   // 🔥 Auto-fetch on mount and when user changes - éviter les loops
   useEffect(() => {
     if (user) {
-      // 🔥 Debounce minimal pour une authentification fluide
-      const timeoutId = setTimeout(() => {
-        fetchSubscriptions();
-      }, 50); // Réduit de 200ms à 50ms
-      
-      return () => clearTimeout(timeoutId);
+      fetchSubscriptions();
     }
-  }, [user?.id]); // 🔥 Retirer fetchSubscriptions des dépendances pour éviter les loops
+  }, [user?.id, fetchSubscriptions]);
 
   return {
     subscriptions,
