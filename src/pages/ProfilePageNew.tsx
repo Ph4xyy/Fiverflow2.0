@@ -3,6 +3,7 @@ import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import MessagingSystem from '../components/MessagingSystem';
+import { useAuth } from '../contexts/AuthContext';
 import { 
   Edit3, 
   Camera, 
@@ -85,21 +86,22 @@ interface Achievement {
 }
 
 const ProfilePageNew: React.FC = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'activity'>('overview');
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const [isOwnProfile, setIsOwnProfile] = useState(true); // Simulate if it's the user's own profile
   
-  // Profile data
+  // Profile data - utilise les vraies données de l'utilisateur
   const [profileData, setProfileData] = useState<ProfileData>({
-    name: 'John Doe',
+    name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Utilisateur',
     title: 'UI/UX Designer & Frontend Developer',
     location: 'Paris, France',
     memberSince: 'Jan 2019',
     bio: 'Passionate about design and development, I create exceptional user experiences for 5 years.',
     website: 'https://johndoe.design',
-    email: 'john@example.com',
+    email: user?.email || 'john@example.com',
     phone: '+33 6 12 34 56 78'
   });
 
@@ -264,7 +266,7 @@ const ProfilePageNew: React.FC = () => {
                   {/* Profile Picture */}
                   <div className="relative">
                     <div className="w-32 h-32 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center text-white text-4xl font-bold">
-                      JD
+                      {profileData.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                     </div>
                     <button className="absolute bottom-2 right-2 p-2 bg-[#35414e] rounded-full hover:bg-[#3d4a57] transition-colors">
                       <Camera size={16} className="text-white" />
