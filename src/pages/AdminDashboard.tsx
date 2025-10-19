@@ -121,10 +121,7 @@ const AdminDashboard: React.FC = () => {
       
       const { data, error } = await supabase
         .from('user_profiles')
-        .select(`
-          *,
-          auth_users:user_id(email)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       console.log('🔍 AdminDashboard: Résultat requête utilisateurs:', { data, error });
@@ -139,6 +136,7 @@ const AdminDashboard: React.FC = () => {
       // Ajouter des données simulées pour les nouveaux champs
       const usersWithSimulatedData = (data || []).map((user, index) => ({
         ...user,
+        email: `user${index + 1}@example.com`, // Email simulé pour l'instant
         subscription_plan: ['launch', 'boost', 'scale', 'free'][index % 4] as any,
         user_role: user.is_admin ? 'admin' : ['user', 'moderator'][index % 2] as any,
         permissions: user.is_admin ? ['admin', 'manage_users', 'view_analytics'] : ['user'],
