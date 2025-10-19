@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cardClass } from "@/components/Layout";
+import ModernButton from "@/components/ModernButton";
 import InvoiceForm from "@/components/InvoiceForm";
 import InvoiceViewModal from "@/components/InvoiceViewModal";
 import { useAuth } from "@/contexts/AuthContext";
@@ -183,23 +184,23 @@ const InvoicesPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-           <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-             Invoices
+           <h1 className="text-3xl font-bold text-white mb-2">
+             Factures
            </h1>
-           <p className="text-gray-600 dark:text-gray-400">
-             Manage your invoices and track payments
+           <p className="text-gray-400">
+             Gérez vos factures et suivez les paiements
            </p>
         </div>
-        <button
+        <ModernButton
           onClick={() => {
             setEditingInvoice(null);
             setFormOpen(true);
           }}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-         >
+          size="sm"
+        >
            <Plus className="w-4 h-4 mr-2" />
-           New Invoice
-         </button>
+           Nouvelle Facture
+        </ModernButton>
       </div>
 
       {/* Filters */}

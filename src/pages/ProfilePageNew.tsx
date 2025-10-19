@@ -28,7 +28,8 @@ import {
   Zap,
   TrendingUp,
   Target,
-  Coffee
+  Coffee,
+  ExternalLink
 } from 'lucide-react';
 
 interface SocialLink {
@@ -258,7 +259,7 @@ const ProfilePageNew: React.FC = () => {
                   <p className="text-2xl font-bold text-white">{stat.value}</p>
                   <p className="text-sm text-gray-400">{stat.label}</p>
                 </div>
-                <div className="absolute top-0 right-0 opacity-30">
+                <div className="absolute top-0 right-0 opacity-50">
                   <div className="text-gray-400">
                     {stat.icon}
                   </div>

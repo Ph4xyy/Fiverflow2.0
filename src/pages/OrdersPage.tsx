@@ -1,6 +1,7 @@
 // src/pages/OrdersPage.tsx
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Layout, { cardClass } from '@/components/Layout';
+import ModernButton from '@/components/ModernButton';
 import OrderForm from '@/components/OrderForm';
 import OrderDetailModal from '@/components/OrderDetailModal';
 import { useAuth } from '@/contexts/AuthContext';
@@ -361,13 +362,10 @@ const OrdersPage: React.FC = () => {
       <div className="space-y-6 p-4 sm:p-0">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 grid place-items-center text-white shadow-glow-sm">
-              <ShoppingCart size={18} />
-            </div>
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-extrabold text-white">Orders</h1>
-              <p className="text-sm text-slate-400">Track, filter and manage all your client orders.</p>
+              <h1 className="text-3xl font-bold text-white mb-2">Orders</h1>
+              <p className="text-gray-400">Track, filter and manage all your client orders.</p>
             </div>
           </div>
 
@@ -395,13 +393,10 @@ const OrdersPage: React.FC = () => {
               )}
             </div>
 
-            <button
-              onClick={handleAddOrder}
-              className="inline-flex items-center px-4 py-2.5 rounded-xl btn-primary"
-            >
+            <ModernButton onClick={handleAddOrder} size="sm">
               <Plus className="h-4 w-4 mr-2" />
-              Create Order
-            </button>
+              Nouvelle Commande
+            </ModernButton>
           </div>
         </div>
 
@@ -498,12 +493,9 @@ const OrdersPage: React.FC = () => {
             <div className="p-6 text-center">
               <p className="text-red-400 font-semibold">Impossible de charger les commandes</p>
               <p className="text-sm text-slate-400 mt-1">{error}</p>
-              <button
-                onClick={fetchOrders}
-                className="mt-4 px-4 py-2 rounded-xl btn-primary"
-              >
+              <ModernButton onClick={fetchOrders} className="mt-4">
                 Réessayer
-              </button>
+              </ModernButton>
             </div>
           ) : orders.length === 0 ? (
             <div className="text-center py-12">

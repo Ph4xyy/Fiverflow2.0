@@ -386,8 +386,7 @@ const StatsPage: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2">
-              <TrendingUp className="text-sky-400" size={22} />
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">
               {'Analytics & Insights'}
             </h1>
             <p className="text-sm text-slate-400">
@@ -462,8 +461,8 @@ const StatsPage: React.FC = () => {
                 <p className="text-xs uppercase tracking-wide text-slate-400">{'Total Revenue'}</p>
                 <p className="text-2xl font-bold text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(totalRevenue)}</p>
               </div>
-              <div className="absolute top-0 right-0 opacity-30">
-                <DollarSign size={32} className="text-green-400" />
+              <div className="absolute top-0 right-0 opacity-50">
+                <DollarSign size={20} className="text-gray-400" />
               </div>
             </div>
             <p className="mt-2 text-xs text-slate-400">{'Avg. order value:'} {new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(averageOrderValue)}</p>
@@ -475,8 +474,8 @@ const StatsPage: React.FC = () => {
                 <p className="text-xs uppercase tracking-wide text-slate-400">{'Pending Revenue'}</p>
                 <p className="text-2xl font-bold text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(pendingRevenue)}</p>
               </div>
-              <div className="absolute top-0 right-0 opacity-30">
-                <ShoppingCart size={32} className="text-amber-400" />
+              <div className="absolute top-0 right-0 opacity-50">
+                <ShoppingCart size={20} className="text-gray-400" />
               </div>
             </div>
             <p className="mt-2 text-xs text-slate-400">{'Open orders:'} {pendingOrders.length}</p>
@@ -488,8 +487,8 @@ const StatsPage: React.FC = () => {
                 <p className="text-xs uppercase tracking-wide text-slate-400">{'Avg. Delivery Time'}</p>
                 <p className="text-2xl font-bold text-white">{averageDeliveryTime.toFixed(1)} {'days'}</p>
               </div>
-              <div className="absolute top-0 right-0 opacity-30">
-                <Clock size={32} className="text-sky-400" />
+              <div className="absolute top-0 right-0 opacity-50">
+                <Clock size={20} className="text-gray-400" />
               </div>
             </div>
             <p className="mt-2 text-xs text-slate-400">{'Based on completed orders'}</p>
@@ -501,8 +500,8 @@ const StatsPage: React.FC = () => {
                 <p className="text-xs uppercase tracking-wide text-slate-400">{'Completion Rate'}</p>
                 <p className="text-2xl font-bold text-white">{completionRate}%</p>
               </div>
-              <div className="absolute top-0 right-0 opacity-30">
-                <Target size={32} className="text-purple-400" />
+              <div className="absolute top-0 right-0 opacity-50">
+                <Target size={20} className="text-gray-400" />
               </div>
             </div>
             <p className="mt-2 text-xs text-slate-400">{'Total orders:'} {orderVolume}</p>

@@ -167,11 +167,11 @@ const WorkboardPageNew: React.FC = () => {
                     <p className="text-sm text-gray-400">{column.title}</p>
                     <p className="text-2xl font-bold text-white">{taskCount}</p>
                   </div>
-                  <div className="absolute top-0 right-0 opacity-30">
-                    {column.id === 'todo' && <Clock size={32} className="text-gray-400" />}
-                    {column.id === 'in_progress' && <Clock size={32} className="text-blue-400" />}
-                    {column.id === 'review' && <AlertTriangle size={32} className="text-yellow-400" />}
-                    {column.id === 'done' && <CheckCircle2 size={32} className="text-green-400" />}
+                  <div className="absolute top-0 right-0 opacity-50">
+                    {column.id === 'todo' && <Clock size={20} className="text-gray-400" />}
+                    {column.id === 'in_progress' && <Clock size={20} className="text-gray-400" />}
+                    {column.id === 'review' && <AlertTriangle size={20} className="text-gray-400" />}
+                    {column.id === 'done' && <CheckCircle2 size={20} className="text-gray-400" />}
                   </div>
                 </div>
               </ModernCard>

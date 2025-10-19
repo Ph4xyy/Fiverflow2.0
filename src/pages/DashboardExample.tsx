@@ -41,8 +41,8 @@ const DashboardExample: React.FC = () => {
                 <TrendingUp size={16} className="mr-1" />
                 +12% ce mois
               </div>
-              <div className="absolute top-0 right-0 opacity-30">
-                <Users size={32} className="text-green-400" />
+              <div className="absolute top-0 right-0 opacity-50">
+                <Users size={20} className="text-gray-400" />
               </div>
             </div>
           </ModernCard>
@@ -56,8 +56,8 @@ const DashboardExample: React.FC = () => {
                 <Activity size={16} className="mr-1" />
                 +5% cette semaine
               </div>
-              <div className="absolute top-0 right-0 opacity-30">
-                <Package size={32} className="text-blue-400" />
+              <div className="absolute top-0 right-0 opacity-50">
+                <Package size={20} className="text-gray-400" />
               </div>
             </div>
           </ModernCard>
@@ -71,8 +71,8 @@ const DashboardExample: React.FC = () => {
                 <TrendingUp size={16} className="mr-1" />
                 +8% ce mois
               </div>
-              <div className="absolute top-0 right-0 opacity-30">
-                <DollarSign size={32} className="text-green-400" />
+              <div className="absolute top-0 right-0 opacity-50">
+                <DollarSign size={20} className="text-gray-400" />
               </div>
             </div>
           </ModernCard>
@@ -86,8 +86,8 @@ const DashboardExample: React.FC = () => {
                 <Calendar size={16} className="mr-1" />
                 Cette semaine
               </div>
-              <div className="absolute top-0 right-0 opacity-30">
-                <Calendar size={32} className="text-purple-400" />
+              <div className="absolute top-0 right-0 opacity-50">
+                <Calendar size={20} className="text-gray-400" />
               </div>
             </div>
           </ModernCard>
