@@ -57,46 +57,32 @@ const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
       console.log('🔍 Layout: Vérification admin pour user:', user.id);
 
       try {
+        if (!supabase) {
+          console.error('❌ Supabase client non initialisé');
+          setIsAdmin(false);
+          return;
+        }
+
+        // Utiliser une requête sans .single() pour éviter l'erreur PGRST116
         const { data, error } = await supabase
           .from('user_profiles')
           .select('is_admin')
-          .eq('user_id', user.id)
-          .single();
+          .eq('user_id', user.id);
 
         console.log('🔍 Layout: Résultat vérification:', { data, error });
 
         if (error) {
           console.error('❌ Erreur lors de la vérification admin:', error);
-          console.error('❌ Détails de l\'erreur:', error.message, error.status, error.statusText);
-          
-          // Vérifier spécifiquement l'erreur 406
-          if (error.status === 406) {
-            console.error('❌ ERREUR 406 DÉTECTÉE DANS LAYOUT - Tentative de contournement...');
-            
-            // Solution de contournement: utiliser une requête alternative
-            try {
-              const { data: fallbackData, error: fallbackError } = await supabase
-                .from('user_profiles')
-                .select('is_admin')
-                .eq('user_id', user.id);
-              
-              if (fallbackError) {
-                console.error('❌ Erreur de contournement aussi:', fallbackError);
-                setIsAdmin(false);
-              } else {
-                console.log('✅ Contournement réussi:', fallbackData);
-                setIsAdmin(fallbackData?.[0]?.is_admin || false);
-              }
-            } catch (fallbackErr) {
-              console.error('❌ Erreur dans le contournement:', fallbackErr);
-              setIsAdmin(false);
-            }
-          } else {
-            setIsAdmin(false);
-          }
+          console.error('❌ Détails de l\'erreur:', error.message, error.details, error.hint);
+          setIsAdmin(false);
+        } else if (data && data.length > 0) {
+          // Utilisateur trouvé dans user_profiles
+          console.log('🔍 Layout: is_admin =', data[0]?.is_admin);
+          setIsAdmin(data[0]?.is_admin || false);
         } else {
-          console.log('🔍 Layout: is_admin =', data?.is_admin);
-          setIsAdmin(data?.is_admin || false);
+          // Utilisateur non trouvé dans user_profiles - pas admin par défaut
+          console.log('🔍 Layout: Utilisateur non trouvé dans user_profiles - pas admin');
+          setIsAdmin(false);
         }
       } catch (error) {
         console.error('Erreur lors de la vérification admin:', error);
