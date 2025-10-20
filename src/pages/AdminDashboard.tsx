@@ -153,9 +153,51 @@ const AdminDashboard: React.FC = () => {
         console.log('🔍 AdminDashboard: is_admin =', data[0]?.is_admin);
         setIsAdmin(data[0]?.is_admin || false);
       } else {
-        // Utilisateur non trouvé dans user_profiles - pas admin par défaut
-        console.log('🔍 AdminDashboard: Utilisateur non trouvé dans user_profiles - pas admin');
-        setIsAdmin(false);
+        // Utilisateur non trouvé dans user_profiles - essayer de créer le profil
+        console.log('🔍 AdminDashboard: Utilisateur non trouvé dans user_profiles - création du profil...');
+        
+        try {
+          // Créer le profil utilisateur automatiquement
+          const { data: createData, error: createError } = await supabase
+            .rpc('ensure_user_profile', {
+              user_uuid: user.id,
+              user_email: user.email,
+              user_name: user.user_metadata?.full_name || user.email?.split('@')[0]
+            });
+
+          if (createError) {
+            console.error('❌ Erreur lors de la création du profil:', createError);
+            setIsAdmin(false);
+          } else if (createData) {
+            console.log('✅ Profil utilisateur créé avec succès:', createData);
+            // Vérifier le statut admin du profil créé
+            setIsAdmin(createData.is_admin || false);
+          } else {
+            // Fallback: créer manuellement le profil
+            const { data: manualCreate, error: manualError } = await supabase
+              .from('user_profiles')
+              .insert({
+                user_id: user.id,
+                full_name: user.user_metadata?.full_name || user.email?.split('@')[0],
+                email: user.email,
+                is_admin: false, // Pas admin par défaut
+                is_active: true
+              })
+              .select()
+              .single();
+
+            if (manualError) {
+              console.error('❌ Erreur lors de la création manuelle du profil:', manualError);
+              setIsAdmin(false);
+            } else {
+              console.log('✅ Profil créé manuellement:', manualCreate);
+              setIsAdmin(manualCreate?.is_admin || false);
+            }
+          }
+        } catch (profileError) {
+          console.error('❌ Erreur lors de la création du profil:', profileError);
+          setIsAdmin(false);
+        }
       }
     } catch (error) {
       console.error('❌ Erreur lors de la vérification admin:', error);

@@ -138,3 +138,4 @@ Write-Host "`n🎯 La correction devrait résoudre l'erreur 406!" -ForegroundCol
 Write-Host "L'erreur 406 était causée par les politiques RLS qui bloquaient" -ForegroundColor White
 Write-Host "l'accès à la table user_profiles. Les fonctions RPC contournent" -ForegroundColor White
 Write-Host "cette restriction en s'exécutant avec les privilèges du créateur." -ForegroundColor White
+

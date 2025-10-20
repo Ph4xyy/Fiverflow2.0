@@ -102,3 +102,4 @@ $$;
 
 -- Vérifier que les fonctions ont été créées
 SELECT 'Fonctions RPC pour la vérification admin créées avec succès!' as status;
+
