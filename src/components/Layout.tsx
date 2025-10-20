@@ -9,6 +9,7 @@ import NotificationsDropdown from './NotificationsDropdown';
 import CentralizedSearchBar from './CentralizedSearchBar';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import UserProfileManager from '../utils/userProfileManager';
 
 import { 
   Menu, 
@@ -63,101 +64,9 @@ const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
           return;
         }
 
-        // Solution pour éviter l'erreur 406 : utiliser une fonction RPC
-        console.log('🔍 Layout: Tentative de vérification admin via RPC...');
-        
-        try {
-          // Essayer d'abord avec une fonction RPC si elle existe
-          const { data: rpcData, error: rpcError } = await supabase
-            .rpc('get_user_admin_status', { user_uuid: user.id });
-
-          if (!rpcError && rpcData !== null) {
-            console.log('🔍 Layout: RPC réussi:', rpcData);
-            setIsAdmin(rpcData === true);
-            return;
-          }
-        } catch (rpcErr) {
-          console.log('🔍 Layout: RPC non disponible, tentative directe...');
-        }
-
-        // Fallback: requête directe avec gestion d'erreur 406
-        console.log('🔍 Layout: Tentative de requête directe...');
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('is_admin')
-          .eq('user_id', user.id);
-
-        console.log('🔍 Layout: Résultat vérification:', { data, error });
-
-        if (error) {
-          console.error('❌ Erreur lors de la vérification admin:', error);
-          console.error('❌ Détails de l\'erreur:', error.message, error.details, error.hint);
-          
-          // Gestion spécifique de l'erreur 406
-          if (error.message?.includes('406') || error.status === 406) {
-            console.log('🔍 Layout: Erreur 406 détectée - tentative de contournement...');
-            
-            // Contournement: vérifier via les métadonnées utilisateur
-            const userMetadata = user.user_metadata;
-            if (userMetadata?.is_admin === true) {
-              console.log('🔍 Layout: Admin détecté via métadonnées');
-              setIsAdmin(true);
-              return;
-            }
-          }
-          
-          setIsAdmin(false);
-        } else if (data && data.length > 0) {
-          // Utilisateur trouvé dans user_profiles
-          console.log('🔍 Layout: is_admin =', data[0]?.is_admin);
-          setIsAdmin(data[0]?.is_admin || false);
-        } else {
-          // Utilisateur non trouvé dans user_profiles - essayer de créer le profil
-          console.log('🔍 Layout: Utilisateur non trouvé dans user_profiles - création du profil...');
-          
-          try {
-            // Créer le profil utilisateur automatiquement
-            const { data: createData, error: createError } = await supabase
-              .rpc('ensure_user_profile', {
-                user_uuid: user.id,
-                user_email: user.email,
-                user_name: user.user_metadata?.full_name || user.email?.split('@')[0]
-              });
-
-            if (createError) {
-              console.error('❌ Erreur lors de la création du profil:', createError);
-              setIsAdmin(false);
-            } else if (createData) {
-              console.log('✅ Profil utilisateur créé avec succès:', createData);
-              // Vérifier le statut admin du profil créé
-              setIsAdmin(createData.is_admin || false);
-            } else {
-              // Fallback: créer manuellement le profil
-              const { data: manualCreate, error: manualError } = await supabase
-                .from('user_profiles')
-                .insert({
-                  user_id: user.id,
-                  full_name: user.user_metadata?.full_name || user.email?.split('@')[0],
-                  email: user.email,
-                  is_admin: false, // Pas admin par défaut
-                  is_active: true
-                })
-                .select()
-                .single();
-
-              if (manualError) {
-                console.error('❌ Erreur lors de la création manuelle du profil:', manualError);
-                setIsAdmin(false);
-              } else {
-                console.log('✅ Profil créé manuellement:', manualCreate);
-                setIsAdmin(manualCreate?.is_admin || false);
-              }
-            }
-          } catch (profileError) {
-            console.error('❌ Erreur lors de la création du profil:', profileError);
-            setIsAdmin(false);
-          }
-        }
+        // Utiliser la nouvelle classe utilitaire sans RPC
+        const isAdmin = await UserProfileManager.checkAdminStatus(user);
+        setIsAdmin(isAdmin);
       } catch (error) {
         console.error('Erreur lors de la vérification admin:', error);
         setIsAdmin(false);
