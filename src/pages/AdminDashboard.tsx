@@ -98,35 +98,23 @@ const AdminDashboard: React.FC = () => {
     console.log('🔍 AdminDashboard: Vérification admin pour user:', user.id);
 
     try {
-      if (!supabase) {
-        console.error('❌ Supabase client non initialisé');
-        setIsAdmin(false);
-        return;
-      }
-
-      // Utiliser une requête sans .single() pour éviter l'erreur PGRST116
       const { data, error } = await supabase
         .from('user_profiles')
         .select('is_admin')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .single();
 
       console.log('🔍 AdminDashboard: Résultat vérification:', { data, error });
 
       if (error) {
-        console.error('❌ Erreur lors de la vérification admin:', error);
-        console.error('❌ Détails de l\'erreur:', error.message, error.details, error.hint);
+        console.error('Erreur lors de la vérification admin:', error);
         setIsAdmin(false);
-      } else if (data && data.length > 0) {
-        // Utilisateur trouvé dans user_profiles
-        console.log('🔍 AdminDashboard: is_admin =', data[0]?.is_admin);
-        setIsAdmin(data[0]?.is_admin || false);
       } else {
-        // Utilisateur non trouvé dans user_profiles - pas admin par défaut
-        console.log('🔍 AdminDashboard: Utilisateur non trouvé dans user_profiles - pas admin');
-        setIsAdmin(false);
+        console.log('🔍 AdminDashboard: is_admin =', data?.is_admin);
+        setIsAdmin(data?.is_admin || false);
       }
     } catch (error) {
-      console.error('❌ Erreur lors de la vérification admin:', error);
+      console.error('Erreur lors de la vérification admin:', error);
       setIsAdmin(false);
     } finally {
       setAdminCheckLoading(false);
