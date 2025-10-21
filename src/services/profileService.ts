@@ -16,6 +16,9 @@ export interface ProfileData {
   discord_username?: string;
   twitter_url?: string;
   linkedin_url?: string;
+  // Champs de contact séparés
+  contact_email?: string;
+  contact_phone?: string;
 }
 
 export interface PrivacySettings {

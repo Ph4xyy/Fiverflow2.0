@@ -534,20 +534,13 @@ const ProfilePageNew: React.FC = () => {
                         <Calendar size={16} />
                         Membre depuis {new Date().getFullYear()}
                       </div>
-                      {isOwnProfile ? (
-                        <StatusSelector
-                          currentStatus={profileData.status || 'available'}
-                          onStatusChange={handleStatusChange}
-                        />
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          <Coffee size={16} />
-                          {profileData.status === 'available' && 'Disponible'}
-                          {profileData.status === 'busy' && 'Occupé'}
-                          {profileData.status === 'away' && 'Absent'}
-                          {profileData.status === 'do_not_disturb' && 'Ne pas déranger'}
-                        </div>
-                      )}
+                      <div className="flex items-center gap-1">
+                        <Coffee size={16} />
+                        {profileData.status === 'available' && 'Disponible'}
+                        {profileData.status === 'busy' && 'Occupé'}
+                        {profileData.status === 'away' && 'Absent'}
+                        {profileData.status === 'do_not_disturb' && 'Ne pas déranger'}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -708,6 +701,16 @@ const ProfilePageNew: React.FC = () => {
                     placeholder="Parlez-nous de vous..."
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Statut
+                  </label>
+                  <StatusSelector
+                    currentStatus={profileData.status || 'available'}
+                    onStatusChange={handleStatusChange}
+                  />
+                </div>
               </div>
             </div>
 
@@ -750,20 +753,20 @@ const ProfilePageNew: React.FC = () => {
             <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
               <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 <ModernCard>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">Profile settings</h3>
-              <button 
-                onClick={() => setIsSettingsMenuOpen(false)}
-                className="p-2 hover:bg-[#35414e] rounded-lg transition-colors"
-              >
-                <X size={20} className="text-gray-400" />
-              </button>
-            </div>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-semibold text-white">Profile settings</h3>
+                    <button 
+                      onClick={() => setIsSettingsMenuOpen(false)}
+                      className="p-2 hover:bg-[#35414e] rounded-lg transition-colors"
+                    >
+                      <X size={20} className="text-gray-400" />
+                    </button>
+                  </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Left Column - Profile Settings */}
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-white mb-4">Informations de base</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Left Column - Profile Settings */}
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold text-white mb-4">Informations de base</h4>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -861,11 +864,52 @@ const ProfilePageNew: React.FC = () => {
                 </div>
               </div>
 
-              {/* Right Column - Social Networks */}
-              <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-white mb-4">Réseaux sociaux</h4>
-                
+              {/* Right Column - Contact & Social Networks */}
+              <div className="space-y-6">
+                {/* Contact Section */}
                 <div>
+                  <h4 className="text-lg font-semibold text-white mb-4">Informations de contact</h4>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Email de contact
+                      </label>
+                      <input
+                        type="email"
+                        value={profileData.contact_email || ''}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, contact_email: e.target.value})}
+                        className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                        placeholder="contact@example.com"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Email professionnel pour les clients
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Téléphone de contact
+                      </label>
+                      <input
+                        type="tel"
+                        value={profileData.contact_phone || ''}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, contact_phone: e.target.value})}
+                        className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                        placeholder="+33 6 12 34 56 78"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Numéro professionnel pour les clients
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Social Networks Section */}
+                <div>
+                  <h4 className="text-lg font-semibold text-white mb-4">Réseaux sociaux</h4>
+                  
+                  <div className="space-y-4">
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 bg-gray-800 rounded flex items-center justify-center">
@@ -959,6 +1003,8 @@ const ProfilePageNew: React.FC = () => {
                     onChange={(e) => setSocialNetworks({...socialNetworks, website: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
+                </div>
+                  </div>
                 </div>
               </div>
 
@@ -1067,8 +1113,7 @@ const ProfilePageNew: React.FC = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-white mb-3">About</h3>
                     <p className="text-gray-400 leading-relaxed">
-                      Passionate designer with over 5 years of experience in creating modern and intuitive user interfaces. 
-                      Specialized in mobile and web application design, I put my expertise at the service of innovative projects.
+                      {profileData.bio || 'Aucune bio disponible.'}
                     </p>
                   </div>
 
@@ -1189,16 +1234,16 @@ const ProfilePageNew: React.FC = () => {
             {/* Contact */}
             <ModernCard title="Contact" icon={<Mail size={20} className="text-white" />}>
               <div className="space-y-3">
-                {profileData.show_email && profileData.email && (
+                {profileData.contact_email && (
                   <div className="flex items-center gap-3">
                     <Mail size={16} className="text-gray-400" />
-                    <span className="text-sm text-gray-300">{profileData.email}</span>
+                    <span className="text-sm text-gray-300">{profileData.contact_email}</span>
                   </div>
                 )}
-                {profileData.show_phone && profileData.phone && (
+                {profileData.contact_phone && (
                   <div className="flex items-center gap-3">
                     <Phone size={16} className="text-gray-400" />
-                    <span className="text-sm text-gray-300">{profileData.phone}</span>
+                    <span className="text-sm text-gray-300">{profileData.contact_phone}</span>
                   </div>
                 )}
                 {profileData.website && (
