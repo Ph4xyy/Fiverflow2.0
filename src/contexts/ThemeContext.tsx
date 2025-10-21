@@ -40,9 +40,14 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Apply the new theme
     html.classList.add(theme);
     
+    // Also set data attribute for more specific targeting
+    html.setAttribute('data-theme', theme);
+    
     // Update state
     setCurrentTheme(theme);
     setIsDarkMode(theme === 'dark' || theme === 'halloween');
+    
+    console.log('🎨 Theme applied:', theme, 'Classes:', html.className);
   };
 
   // Load theme preference from Supabase or localStorage
