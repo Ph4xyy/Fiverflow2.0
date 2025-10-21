@@ -8,6 +8,7 @@ import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import NotificationsDropdown from './NotificationsDropdown';
 import CentralizedSearchBar from './CentralizedSearchBar';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
 import UserProfileManager from '../utils/userProfileManager';
 
@@ -28,6 +29,9 @@ import {
   CheckCircle2,
   Shield,
   Receipt,
+  Sun,
+  Moon,
+  Zap,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -109,6 +113,7 @@ class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, 
 const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const { currentTheme, setTheme } = useTheme();
 
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [requiredPlan, setRequiredPlan] = useState<'Pro' | 'Excellence'>('Pro');
@@ -215,6 +220,22 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     navigate('/login');
   };
 
+  const handleThemeChange = () => {
+    const themes = ['light', 'dark', 'halloween'] as const;
+    const currentIndex = themes.indexOf(currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setTheme(themes[nextIndex]);
+  };
+
+  const getThemeIcon = () => {
+    switch (currentTheme) {
+      case 'light': return Sun;
+      case 'dark': return Moon;
+      case 'halloween': return Zap;
+      default: return Sun;
+    }
+  };
+
   const LinkRow: React.FC<{
     item: any;
     activeMatcher?: (p: string) => boolean;
@@ -295,8 +316,16 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             <CentralizedSearchBar />
           </div>
           
-          {/* Right section - Notifications, logout */}
+          {/* Right section - Theme, Notifications, logout */}
           <div className="flex items-center gap-2 sm:gap-3">
+            <button 
+              onClick={handleThemeChange}
+              className="size-10 rounded-lg grid place-items-center text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200"
+              title={`Current theme: ${currentTheme}. Click to cycle through themes.`}
+            >
+              {React.createElement(getThemeIcon(), { size: 18 })}
+            </button>
+
             <LocalErrorBoundary>
               <div className="size-10 rounded-lg grid place-items-center text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200">
                 <NotificationsDropdown />

@@ -3,6 +3,7 @@ import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import MessagingSystem from '../components/MessagingSystem';
+import ThemeSelector from '../components/ThemeSelector';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { 
@@ -758,6 +759,11 @@ const ProfilePageNew: React.FC = () => {
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
                 </div>
+              </div>
+
+              {/* Theme Preferences */}
+              <div className="mt-6 pt-6 border-t border-[#35414e]">
+                <ThemeSelector />
               </div>
             </div>
 

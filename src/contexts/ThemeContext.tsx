@@ -3,10 +3,14 @@ import { useAuth } from './AuthContext';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import toast from 'react-hot-toast';
 
+export type ThemeType = 'light' | 'dark' | 'halloween';
+
 interface ThemeContextType {
   isDarkMode: boolean;
+  currentTheme: ThemeType;
   toggleDarkMode: () => Promise<void>;
   setDarkMode: (enabled: boolean) => Promise<void>;
+  setTheme: (theme: ThemeType) => Promise<void>;
   loading: boolean;
 }
 
@@ -23,17 +27,22 @@ export const useTheme = () => {
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<ThemeType>('light');
   const [loading, setLoading] = useState(true);
 
   // Apply theme to document
-  const applyTheme = (darkMode: boolean) => {
+  const applyTheme = (theme: ThemeType) => {
     const html = document.documentElement;
-    if (darkMode) {
-      html.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-    }
-    setIsDarkMode(darkMode);
+    
+    // Remove all theme classes
+    html.classList.remove('dark', 'light', 'halloween');
+    
+    // Apply the new theme
+    html.classList.add(theme);
+    
+    // Update state
+    setCurrentTheme(theme);
+    setIsDarkMode(theme === 'dark' || theme === 'halloween');
   };
 
   // Load theme preference from Supabase or localStorage
@@ -44,9 +53,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // If Supabase is not configured, use localStorage
       if (!isSupabaseConfigured || !supabase || !user) {
         console.log('🎭 Using localStorage for theme preference');
-        const savedTheme = localStorage.getItem('darkMode');
-        const darkMode = savedTheme === 'true';
-        applyTheme(darkMode);
+        const savedTheme = localStorage.getItem('theme') as ThemeType || 'light';
+        applyTheme(savedTheme);
         setLoading(false);
         return;
       }
@@ -55,29 +63,27 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         console.log('🔍 Fetching theme preference from Supabase...');
         const { data, error } = await supabase
           .from('users')
-          .select('dark_mode')
+          .select('theme_preference')
           .eq('id', user.id)
           .maybeSingle();
 
         if (error) {
           console.error('❌ Error fetching theme preference:', error);
           // Fallback to localStorage
-          const savedTheme = localStorage.getItem('darkMode');
-          const darkMode = savedTheme === 'true';
-          applyTheme(darkMode);
+          const savedTheme = localStorage.getItem('theme') as ThemeType || 'light';
+          applyTheme(savedTheme);
         } else {
-          const darkMode = data?.dark_mode || false;
-          console.log('✅ Theme preference loaded:', darkMode ? 'Dark' : 'Light');
-          applyTheme(darkMode);
+          const theme = (data?.theme_preference as ThemeType) || 'light';
+          console.log('✅ Theme preference loaded:', theme);
+          applyTheme(theme);
           // Sync with localStorage
-          localStorage.setItem('darkMode', darkMode.toString());
+          localStorage.setItem('theme', theme);
         }
       } catch (error) {
         console.error('💥 Error loading theme preference:', error);
         // Fallback to localStorage
-        const savedTheme = localStorage.getItem('darkMode');
-        const darkMode = savedTheme === 'true';
-        applyTheme(darkMode);
+        const savedTheme = localStorage.getItem('theme') as ThemeType || 'light';
+        applyTheme(savedTheme);
       } finally {
         setLoading(false);
       }
@@ -87,18 +93,18 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [user?.id]); // Only depend on user.id to prevent infinite loops
 
   // Save theme preference to Supabase and localStorage
-  const saveThemePreference = async (darkMode: boolean) => {
-    console.log('💾 Saving theme preference:', darkMode ? 'Dark' : 'Light');
+  const saveThemePreference = async (theme: ThemeType) => {
+    console.log('💾 Saving theme preference:', theme);
     
     // Always save to localStorage for immediate persistence
-    localStorage.setItem('darkMode', darkMode.toString());
+    localStorage.setItem('theme', theme);
     
     // If Supabase is configured and user is logged in, save to database
     if (isSupabaseConfigured && supabase && user) {
       try {
         const { error } = await supabase
           .from('users')
-          .update({ dark_mode: darkMode })
+          .update({ theme_preference: theme })
           .eq('id', user.id);
 
         if (error) {
@@ -115,21 +121,30 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const setDarkMode = async (enabled: boolean) => {
-    applyTheme(enabled);
-    await saveThemePreference(enabled);
+    const theme = enabled ? 'dark' : 'light';
+    applyTheme(theme);
+    await saveThemePreference(theme);
+  };
+
+  const setTheme = async (theme: ThemeType) => {
+    applyTheme(theme);
+    await saveThemePreference(theme);
+    toast.success(`Switched to ${theme} theme`);
   };
 
   const toggleDarkMode = async () => {
-    const newDarkMode = !isDarkMode;
-    applyTheme(newDarkMode);
-    await saveThemePreference(newDarkMode);
-    toast.success(`Switched to ${newDarkMode ? 'dark' : 'light'} mode`);
+    const newTheme = isDarkMode ? 'light' : 'dark';
+    applyTheme(newTheme);
+    await saveThemePreference(newTheme);
+    toast.success(`Switched to ${newTheme} mode`);
   };
 
   const value = {
     isDarkMode,
+    currentTheme,
     toggleDarkMode,
     setDarkMode,
+    setTheme,
     loading
   };
 
