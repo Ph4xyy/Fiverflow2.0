@@ -174,6 +174,20 @@ const SettingsPage: React.FC = () => {
       if (success && privacySuccess) {
         // Show success message and navigate back
         showSuccessNotification('Paramètres sauvegardés avec succès !');
+        
+        // Recharger les données du profil
+        const updatedData = await ProfileService.getProfile(user.id);
+        if (updatedData) {
+          setProfileData(updatedData);
+          setSocialNetworks({
+            github: updatedData.github_url || '',
+            linkedin: updatedData.linkedin_url || '',
+            twitter: updatedData.twitter_url || '',
+            discord: updatedData.discord_username || '',
+            website: updatedData.website || ''
+          });
+        }
+        
         setTimeout(() => {
           navigate('/profile');
         }, 1500);

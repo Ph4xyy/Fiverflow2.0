@@ -98,8 +98,7 @@ const ProfilePageNew: React.FC = () => {
   });
 
   // Charger les données du profil depuis la base de données
-  useEffect(() => {
-    const loadProfileData = async () => {
+  const loadProfileData = async () => {
       if (!user) {
         console.log('🔍 ProfilePage: Pas d\'utilisateur connecté');
         return;
@@ -181,7 +180,25 @@ const ProfilePageNew: React.FC = () => {
       }
     };
 
+  useEffect(() => {
     loadProfileData();
+  }, [user]);
+
+  // Recharger les données quand l'utilisateur revient de la page settings
+  useEffect(() => {
+    const handleFocus = () => {
+      if (document.visibilityState === 'visible') {
+        loadProfileData();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleFocus);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleFocus);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [user]);
 
   // Vérifier le statut admin

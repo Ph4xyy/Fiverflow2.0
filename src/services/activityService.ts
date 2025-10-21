@@ -12,19 +12,25 @@ export interface Activity {
 
 export class ActivityService {
   static async getUserActivity(userId: string, limit: number = 20): Promise<Activity[]> {
-    const { data, error } = await supabase
-      .from('user_activity')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    try {
+      const { data, error } = await supabase
+        .from('user_activity')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit);
 
-    if (error) {
+      if (error) {
+        console.error('Erreur lors du chargement de l\'activité:', error);
+        // Retourner un tableau vide au lieu de lancer une erreur
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
       console.error('Erreur lors du chargement de l\'activité:', error);
-      throw error;
+      return [];
     }
-
-    return data || [];
   }
 
   static async getPublicActivity(userId: string, limit: number = 20): Promise<Activity[]> {

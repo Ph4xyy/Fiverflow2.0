@@ -65,10 +65,16 @@ export class ProfileService {
       
       console.log('Données nettoyées:', cleanData);
 
-      // Pour l'instant, ne mettre à jour que les champs de base qui existent certainement
-      const safeFields = ['full_name', 'avatar_url', 'bio'];
+      // Champs étendus qui devraient exister après les migrations
+      const extendedFields = [
+        'full_name', 'avatar_url', 'bio', 'banner_url', 'location', 'website', 
+        'phone', 'professional_title', 'status', 'show_email', 'show_phone',
+        'github_url', 'discord_username', 'twitter_url', 'linkedin_url',
+        'contact_email', 'contact_phone'
+      ];
+      
       const safeData = Object.fromEntries(
-        Object.entries(cleanData).filter(([key]) => safeFields.includes(key))
+        Object.entries(cleanData).filter(([key]) => extendedFields.includes(key))
       );
 
       console.log('Données sécurisées à mettre à jour:', safeData);
