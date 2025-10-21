@@ -9,11 +9,11 @@ import ImageUpload from '../components/ImageUpload';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { ProfileService, ProfileData, PrivacySettings } from '../services/profileService';
-import { ProjectsService, Project as UserProject } from '../services/projectsService';
+import { OrdersService, Order } from '../services/ordersService';
 // import { SkillsService, Skill as UserSkill } from '../services/skillsService';
 import { ActivityService, Activity as UserActivity } from '../services/activityService';
 import { StatisticsService } from '../services/statisticsService';
-import ProjectCard from '../components/ProjectCard';
+// import ProjectCard from '../components/ProjectCard';
 // import SocialLinks from '../components/SocialLinks';
 import { 
   Edit3, 
@@ -79,7 +79,7 @@ const ProfilePageNew: React.FC = () => {
 
   // Nouvelles données
   // skills supprimé - utilise maintenant les vraies données
-  const [projects, setProjects] = useState<UserProject[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [activities, setActivities] = useState<UserActivity[]>([]);
   const [statistics, setStatistics] = useState({
     clients: 0,
@@ -132,12 +132,12 @@ const ProfilePageNew: React.FC = () => {
 
         // Charger les compétences (TODO: implémenter l'affichage des compétences)
 
-        // Charger les projets
+        // Charger les commandes
         try {
-          const userProjects = await ProjectsService.getUserProjects(user.id);
-          setProjects(userProjects);
+          const userOrders = await OrdersService.getUserOrders(user.id);
+          setOrders(userOrders);
         } catch (error) {
-          console.error('Erreur lors du chargement des projets:', error);
+          console.error('Erreur lors du chargement des commandes:', error);
         }
 
         // Charger l'activité
@@ -481,15 +481,19 @@ const ProfilePageNew: React.FC = () => {
                       <ModernButton 
                         variant="outline" 
                         size="sm"
-                        onClick={() => setIsEditMenuOpen(!isEditMenuOpen)}
+                        onClick={() => {
+                          window.location.href = '/settings?category=profile';
+                        }}
                       >
                         <Edit3 size={16} className="mr-2" />
-                        Edit profile
+                        Modifier le profil
                       </ModernButton>
                       <ModernButton 
                         variant="outline" 
                         size="sm"
-                        onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
+                        onClick={() => {
+                          window.location.href = '/settings?category=privacy';
+                        }}
                       >
                         <Settings size={16} className="mr-2" />
                         Settings
@@ -1054,7 +1058,7 @@ const ProfilePageNew: React.FC = () => {
               <div className="flex gap-1 mb-6">
                 {[
                   { id: 'overview', label: 'Overview' },
-                  { id: 'projects', label: 'Projects' },
+                  { id: 'projects', label: 'Commandes' },
                   { id: 'activity', label: 'Activity' }
                 ].map(tab => (
                   <button
@@ -1097,29 +1101,54 @@ const ProfilePageNew: React.FC = () => {
               )}
 
               {activeTab === 'projects' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {projects.map(project => (
-                    <ProjectCard
-                      key={project.id}
-                      project={project}
-                      showAuthor={false}
-                      onLike={(projectId: string) => {
-                        console.log('Projet liké:', projectId);
-                      }}
-                      onView={(projectId: string) => {
-                        console.log('Projet vu:', projectId);
-                      }}
-                    />
-                  ))}
-                  {projects.length === 0 && (
-                    <div className="col-span-full text-center py-12">
+                <div className="space-y-4">
+                  {orders.length > 0 ? (
+                    <div className="space-y-4">
+                      {orders.map(order => (
+                        <div key={order.id} className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold text-white mb-2">{order.title}</h3>
+                              {order.description && (
+                                <p className="text-gray-400 text-sm mb-3">{order.description}</p>
+                              )}
+                              <div className="flex items-center gap-4 text-sm text-gray-400">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  order.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                                  order.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' :
+                                  order.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                                  'bg-red-500/20 text-red-400'
+                                }`}>
+                                  {order.status === 'completed' ? 'Terminé' :
+                                   order.status === 'in_progress' ? 'En cours' :
+                                   order.status === 'pending' ? 'En attente' : 'Annulé'}
+                                </span>
+                                {order.budget && (
+                                  <span className="text-white font-medium">
+                                    {order.budget} {order.currency}
+                                  </span>
+                                )}
+                                {order.due_date && (
+                                  <span>
+                                    Échéance: {new Date(order.due_date).toLocaleDateString('fr-FR')}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xs text-gray-500">
+                                {new Date(order.created_at).toLocaleDateString('fr-FR')}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
                       <Briefcase size={48} className="mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-lg font-semibold text-white mb-2">Aucun projet</h3>
-                      <p className="text-gray-400 mb-4">Commencez par créer votre premier projet</p>
-                      <ModernButton>
-                        <Plus size={16} className="mr-2" />
-                        Créer un projet
-                      </ModernButton>
+                      <h3 className="text-lg font-semibold text-white mb-2">Aucune commande</h3>
+                      <p className="text-gray-400">Vos commandes apparaîtront ici une fois que vous en aurez créé</p>
                     </div>
                   )}
                 </div>

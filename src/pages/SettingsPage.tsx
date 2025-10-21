@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
@@ -33,6 +34,8 @@ interface SettingsCategory {
 
 const SettingsPage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState<string>('profile');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -102,6 +105,14 @@ const SettingsPage: React.FC = () => {
     }
   ];
 
+  // Handle URL parameters
+  useEffect(() => {
+    const category = searchParams.get('category');
+    if (category && ['profile', 'privacy', 'notifications', 'appearance', 'social'].includes(category)) {
+      setActiveCategory(category);
+    }
+  }, [searchParams]);
+
   // Load profile data
   useEffect(() => {
     const loadProfileData = async () => {
@@ -160,8 +171,9 @@ const SettingsPage: React.FC = () => {
       const privacySuccess = await ProfileService.updatePrivacySettings(user.id, privacySettings);
       
       if (success && privacySuccess) {
-        // Show success message
+        // Show success message and navigate back
         console.log('Paramètres sauvegardés avec succès');
+        navigate('/profile');
       } else {
         console.error('Erreur lors de la sauvegarde');
       }
@@ -435,10 +447,94 @@ const SettingsPage: React.FC = () => {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-white mb-4">Préférences d'apparence</h3>
-              <div className="text-center py-12">
-                <Palette size={48} className="mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">Apparence</h3>
-                <p className="text-gray-400">Les paramètres d'apparence seront disponibles prochainement</p>
+              
+              {/* Thème spécial Halloween */}
+              <div className="mb-8">
+                <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-xl p-6 border-2 border-orange-400 relative overflow-hidden">
+                  <div className="absolute top-2 right-2">
+                    <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                      SPÉCIAL
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-xl font-bold text-white mb-2">🎃 Thème Halloween</h4>
+                      <p className="text-orange-100 text-sm">Thème spécial avec des couleurs orange et noir</p>
+                    </div>
+                    <button className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors">
+                      Activer
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Thèmes normaux */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-white font-semibold">Thème Sombre</h4>
+                    <div className="w-4 h-4 bg-gray-800 rounded-full border-2 border-gray-600"></div>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-3">Interface sombre classique</p>
+                  <button className="w-full bg-[#9c68f2] hover:bg-[#8a5cf0] text-white py-2 rounded-lg transition-colors">
+                    Activer
+                  </button>
+                </div>
+
+                <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-white font-semibold">Thème Clair</h4>
+                    <div className="w-4 h-4 bg-white rounded-full border-2 border-gray-300"></div>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-3">Interface claire et moderne</p>
+                  <button className="w-full bg-[#9c68f2] hover:bg-[#8a5cf0] text-white py-2 rounded-lg transition-colors">
+                    Activer
+                  </button>
+                </div>
+
+                <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-white font-semibold">Thème Bleu</h4>
+                    <div className="w-4 h-4 bg-blue-600 rounded-full border-2 border-blue-400"></div>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-3">Interface avec accents bleus</p>
+                  <button className="w-full bg-[#9c68f2] hover:bg-[#8a5cf0] text-white py-2 rounded-lg transition-colors">
+                    Activer
+                  </button>
+                </div>
+
+                <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-white font-semibold">Thème Vert</h4>
+                    <div className="w-4 h-4 bg-green-600 rounded-full border-2 border-green-400"></div>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-3">Interface avec accents verts</p>
+                  <button className="w-full bg-[#9c68f2] hover:bg-[#8a5cf0] text-white py-2 rounded-lg transition-colors">
+                    Activer
+                  </button>
+                </div>
+
+                <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-white font-semibold">Thème Rose</h4>
+                    <div className="w-4 h-4 bg-pink-600 rounded-full border-2 border-pink-400"></div>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-3">Interface avec accents roses</p>
+                  <button className="w-full bg-[#9c68f2] hover:bg-[#8a5cf0] text-white py-2 rounded-lg transition-colors">
+                    Activer
+                  </button>
+                </div>
+
+                <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-white font-semibold">Thème Violet</h4>
+                    <div className="w-4 h-4 bg-purple-600 rounded-full border-2 border-purple-400"></div>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-3">Interface avec accents violets</p>
+                  <button className="w-full bg-[#9c68f2] hover:bg-[#8a5cf0] text-white py-2 rounded-lg transition-colors">
+                    Activer
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -465,9 +561,17 @@ const SettingsPage: React.FC = () => {
   return (
     <Layout>
       <div className="p-6">
-        <div className="flex items-center gap-3 mb-8">
-          <Settings size={24} className="text-[#9c68f2]" />
-          <h1 className="text-2xl font-bold text-white">Paramètres</h1>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <Settings size={24} className="text-[#9c68f2]" />
+            <h1 className="text-2xl font-bold text-white">Paramètres</h1>
+          </div>
+          <button
+            onClick={() => navigate('/profile')}
+            className="p-2 hover:bg-[#35414e] rounded-lg transition-colors"
+          >
+            <X size={20} className="text-gray-400" />
+          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
