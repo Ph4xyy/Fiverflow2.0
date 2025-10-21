@@ -196,6 +196,8 @@ const OrdersPage: React.FC = () => {
       const { data, error, count } = await query;
       if (error) throw error;
 
+      console.log('🔍 Données récupérées de Supabase:', data);
+      
       // Convertir les statuts de la DB vers l'affichage utilisateur
       const getStatusForDisplay = (status: string) => {
         switch (status) {
@@ -732,6 +734,8 @@ const OrdersPage: React.FC = () => {
               platform: order.platform,
               client_name: order.client_name,
               client_email: order.client_email,
+              // Récupérer le client_id depuis la relation clients si disponible
+              client_id: order.client_id || order.clients?.id || '',
               clients: order.clients || { 
                 name: order.client_name || 'Client', 
                 platform: order.platform || null 
@@ -776,7 +780,9 @@ const OrdersPage: React.FC = () => {
             
             console.log('✅ OrderForForm final:', orderForForm);
             
-            editOrder(orderForForm as any);
+            // Passer directement à setEditingOrder au lieu d'utiliser editOrder
+            setEditingOrder(orderForForm as any);
+            setIsFormOpen(true);
           }}
         />
       </div>
