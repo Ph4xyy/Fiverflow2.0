@@ -220,13 +220,23 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
     const toastId = toast.loading(order ? 'Updating order...' : 'Creating order...');
 
     try {
+      // Convertir le statut au format ENUM de la base de données
+      const getStatusForDB = (status: string) => {
+        switch (status) {
+          case 'Pending': return 'pending';
+          case 'In Progress': return 'in_progress';
+          case 'Completed': return 'completed';
+          default: return 'pending';
+        }
+      };
+
       const orderData = {
         title: formData.title.trim(),
         description: formData.description.trim() || null,
         budget: parseFloat(`${formData.amount}`), // Utiliser 'budget' au lieu de 'amount'
         due_date: formData.deadline || null, // Utiliser 'due_date' au lieu de 'deadline'
         client_id: formData.client_id,
-        status: formData.status,
+        status: getStatusForDB(formData.status), // Convertir au format ENUM
         start_date: formData.start_date || null,
         completed_date: formData.completion_date || null,
         // Ajouter les champs client dénormalisés pour performance
@@ -257,9 +267,10 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
       onClose();
       setCurrentStep(1);
       setErrors({});
-    } catch (err) {
-      console.error('Error:', err);
-      toast.error('An error occurred. Please try again.', { id: toastId });
+    } catch (err: any) {
+      console.error('Error creating/updating order:', err);
+      const errorMessage = err?.message || 'An error occurred. Please try again.';
+      toast.error(errorMessage, { id: toastId });
     } finally {
       setLoading(false);
     }

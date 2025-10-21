@@ -166,11 +166,23 @@ const OrdersPage: React.FC = () => {
       const { data, error, count } = await query;
       if (error) throw error;
 
+      // Convertir les statuts de la DB vers l'affichage utilisateur
+      const getStatusForDisplay = (status: string) => {
+        switch (status) {
+          case 'pending': return 'Pending';
+          case 'in_progress': return 'In Progress';
+          case 'completed': return 'Completed';
+          case 'cancelled': return 'Cancelled';
+          case 'on_hold': return 'On Hold';
+          default: return status;
+        }
+      };
+
       const transformed = (data || []).map((o: any) => ({
         id: o.id,
         title: o.title,
         budget: o.budget, // Utiliser 'budget' au lieu de 'amount'
-        status: o.status,
+        status: getStatusForDisplay(o.status), // Convertir pour l'affichage
         due_date: o.due_date, // Utiliser 'due_date' au lieu de 'deadline'
         created_at: o.created_at,
         clients: {
@@ -306,6 +318,18 @@ const OrdersPage: React.FC = () => {
   ];
 
   const updateOrderStatus = async (orderId: string, newStatus: OrderRow['status']) => {
+    // Convertir le statut pour la base de données
+    const getStatusForDB = (status: string) => {
+      switch (status) {
+        case 'Pending': return 'pending';
+        case 'In Progress': return 'in_progress';
+        case 'Completed': return 'completed';
+        case 'Cancelled': return 'cancelled';
+        case 'On Hold': return 'on_hold';
+        default: return 'pending';
+      }
+    };
+
     if (!isSupabaseConfigured || !supabase) {
       // Demo mode: just update local state
       setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o)));
@@ -315,7 +339,7 @@ const OrdersPage: React.FC = () => {
     try {
       const { error } = await supabase
         .from('orders')
-        .update({ status: newStatus })
+        .update({ status: getStatusForDB(newStatus) })
         .eq('id', orderId);
       if (error) throw error;
       toast.success(`Status updated to ${newStatus}`);
