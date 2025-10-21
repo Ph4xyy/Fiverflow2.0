@@ -316,7 +316,7 @@ export const useAdminStats = (startDate: string, endDate: string) => {
             total_earnings: item.count * 10 // Estimation basique
           }));
 
-        // ===== ABONNEMENTS =====
+        // ===== ABONNEMENTS (VRAIES DONNÉES) =====
         let subscriptionStats = {
           total: 0,
           active: 0,
@@ -325,24 +325,41 @@ export const useAdminStats = (startDate: string, endDate: string) => {
         };
 
         try {
-          const { data: subscriptionsData, error: subscriptionsErr } = await supabase
-            .from('subscriptions')
-            .select('id, amount, billing_cycle, is_active');
+          // Utiliser la fonction SQL pour récupérer les vraies statistiques
+          const { data: subscriptionStatsData, error: subscriptionStatsErr } = await supabase
+            .rpc('get_subscription_stats');
 
-          if (!subscriptionsErr && subscriptionsData) {
+          if (!subscriptionStatsErr && subscriptionStatsData) {
             subscriptionStats = {
-              total: subscriptionsData.length,
-              active: subscriptionsData.filter(s => s.is_active).length,
-              monthlyRevenue: subscriptionsData
-                .filter(s => s.billing_cycle === 'monthly' && s.is_active)
-                .reduce((sum, s) => sum + safeNumber(s.amount), 0),
-              yearlyRevenue: subscriptionsData
-                .filter(s => s.billing_cycle === 'yearly' && s.is_active)
-                .reduce((sum, s) => sum + safeNumber(s.amount), 0)
+              total: subscriptionStatsData.total_subscriptions || 0,
+              active: subscriptionStatsData.active_subscriptions || 0,
+              monthlyRevenue: subscriptionStatsData.monthly_revenue || 0,
+              yearlyRevenue: subscriptionStatsData.yearly_revenue || 0
             };
+            console.log('📊 Vraies statistiques d\'abonnements:', subscriptionStatsData);
+          } else {
+            console.warn('Fonction get_subscription_stats non disponible, utilisation des données directes');
+            
+            // Fallback vers les données directes
+            const { data: subscriptionsData, error: subscriptionsErr } = await supabase
+              .from('user_subscriptions')
+              .select('id, amount, billing_cycle, status');
+
+            if (!subscriptionsErr && subscriptionsData) {
+              subscriptionStats = {
+                total: subscriptionsData.length,
+                active: subscriptionsData.filter(s => s.status === 'active').length,
+                monthlyRevenue: subscriptionsData
+                  .filter(s => s.billing_cycle === 'monthly' && s.status === 'active')
+                  .reduce((sum, s) => sum + safeNumber(s.amount), 0),
+                yearlyRevenue: subscriptionsData
+                  .filter(s => s.billing_cycle === 'yearly' && s.status === 'active')
+                  .reduce((sum, s) => sum + safeNumber(s.amount), 0)
+              };
+            }
           }
         } catch (e) {
-          console.warn('Subscriptions table not available:', e);
+          console.warn('Erreur lors du chargement des statistiques d\'abonnements:', e);
         }
 
         // ===== REVENUS =====
