@@ -776,7 +776,9 @@ const OrdersPage: React.FC = () => {
             
             console.log('✅ OrderForForm final:', orderForForm);
             
-            editOrder(orderForForm as any);
+            // Passer directement à setEditingOrder au lieu d'utiliser editOrder
+            setEditingOrder(orderForForm as any);
+            setIsFormOpen(true);
           }}
         />
       </div>

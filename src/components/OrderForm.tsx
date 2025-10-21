@@ -76,12 +76,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
 
   const [formData, setFormData] = useState(emptyForm);
 
-  // Hydrate quand la modale s’ouvre / quand order change
+  // Hydrate quand la modale s'ouvre / quand order change
   useEffect(() => {
+    console.log('🔍 OrderForm useEffect - isOpen:', isOpen, 'order:', order);
     if (!isOpen) return;
     setCurrentStep(1);
     setErrors({});
-    setFormData(order ? {
+    const formDataToSet = order ? {
       title: order.title || '',
       description: order.description || '',
       client_id: order.client_id || '',
@@ -99,7 +100,10 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
       notes: order.notes || '',
       client_feedback: order.client_feedback || '',
       tags: order.tags || [],
-    } : emptyForm);
+    } : emptyForm;
+    
+    console.log('📝 OrderForm - formDataToSet:', formDataToSet);
+    setFormData(formDataToSet);
   }, [isOpen, order, emptyForm]);
 
   // Charger la liste des clients
