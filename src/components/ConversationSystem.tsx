@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ConversationMenu from './ConversationMenu';
 import UserSearchModal from './UserSearchModal';
 import ConversationChat from './ConversationChat';
+import { useConversationManager } from './ConversationManager';
 
 interface ConversationSystemProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface ConversationSystemProps {
 }
 
 const ConversationSystem: React.FC<ConversationSystemProps> = ({ isOpen, onClose }) => {
+  const { isConversationOpen, currentConversationId, closeConversation } = useConversationManager();
   const [currentView, setCurrentView] = useState<'menu' | 'chat'>('menu');
   const [selectedConversation, setSelectedConversation] = useState<{
     id: string;
@@ -60,8 +62,26 @@ const ConversationSystem: React.FC<ConversationSystemProps> = ({ isOpen, onClose
     setCurrentView('menu');
     setSelectedConversation(null);
     setShowUserSearch(false);
+    closeConversation();
     onClose();
   };
+
+  // Si une conversation est ouverte via le contexte, passer en mode chat
+  React.useEffect(() => {
+    if (isConversationOpen && currentConversationId) {
+      setCurrentView('chat');
+      // TODO: Charger les données de la conversation
+      setSelectedConversation({
+        id: currentConversationId,
+        title: 'Conversation',
+        otherParticipant: {
+          name: 'Utilisateur',
+          username: 'utilisateur',
+          avatar: ''
+        }
+      });
+    }
+  }, [isConversationOpen, currentConversationId]);
 
   if (!isOpen) return null;
 

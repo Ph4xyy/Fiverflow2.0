@@ -15,6 +15,7 @@ import { AwardsService, Award as UserAward } from '../services/awardsService';
 import { ActivityService, Activity as UserActivity } from '../services/activityService';
 import { StatisticsService } from '../services/statisticsService';
 import { useProfile } from '../hooks/useProfile';
+import { useConversationManager } from '../components/ConversationManager';
 import { useNavigate } from 'react-router-dom';
 // import ProjectCard from '../components/ProjectCard';
 // import SocialLinks from '../components/SocialLinks';
@@ -68,6 +69,9 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
     error: profileError, 
     isOwnProfile 
   } = useProfile(username);
+  
+  // Hook pour gérer les conversations
+  const { startConversationWithUser } = useConversationManager();
   const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'activity'>('overview');
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
@@ -496,6 +500,21 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
     }
   };
 
+  // Fonction pour démarrer une conversation
+  const handleStartConversation = async () => {
+    if (!profileDataFromHook || !user) return;
+    
+    const targetUserId = profileDataFromHook.user_id;
+    const targetUserName = profileDataFromHook.public_data?.full_name || profileData.full_name;
+    const targetUserUsername = profileDataFromHook.public_data?.username || profileData.username;
+    
+    try {
+      await startConversationWithUser(targetUserId, targetUserName, targetUserUsername);
+    } catch (error) {
+      console.error('Erreur lors du démarrage de la conversation:', error);
+    }
+  };
+
   const handleSaveSettings = async () => {
     if (!user) return;
 
@@ -746,7 +765,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                       <ModernButton 
                         variant="outline" 
                         size="sm"
-                        onClick={() => setIsMessagingOpen(!isMessagingOpen)}
+                        onClick={handleStartConversation}
                       >
                         <MessageSquare size={16} className="mr-2" />
                         Message
