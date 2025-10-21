@@ -74,10 +74,10 @@ export class ProfileService {
    */
   static async updateStatus(userId: string, status: 'available' | 'busy' | 'away' | 'do_not_disturb'): Promise<boolean> {
     try {
-      const { error } = await supabase.rpc('update_user_status', {
-        user_uuid: userId,
-        new_status: status
-      });
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ status })
+        .eq('user_id', userId);
 
       if (error) {
         console.error('Erreur lors de la mise à jour du statut:', error);
@@ -96,11 +96,13 @@ export class ProfileService {
    */
   static async updatePrivacySettings(userId: string, settings: PrivacySettings): Promise<boolean> {
     try {
-      const { error } = await supabase.rpc('update_privacy_settings', {
-        user_uuid: userId,
-        show_email_setting: settings.show_email,
-        show_phone_setting: settings.show_phone
-      });
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({
+          show_email: settings.show_email,
+          show_phone: settings.show_phone
+        })
+        .eq('user_id', userId);
 
       if (error) {
         console.error('Erreur lors de la mise à jour des paramètres de confidentialité:', error);
@@ -128,12 +130,25 @@ export class ProfileService {
       const fileName = `${userId}-${imageType}-${Date.now()}.${fileExt}`;
       const filePath = `profiles/${fileName}`;
 
+      // Vérifier si le bucket existe, sinon le créer
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      if (bucketsError) {
+        console.error('Erreur lors de la récupération des buckets:', bucketsError);
+        return null;
+      }
+
+      const avatarsBucket = buckets?.find(bucket => bucket.name === 'avatars');
+      if (!avatarsBucket) {
+        console.error('Le bucket "avatars" n\'existe pas. Veuillez le créer dans Supabase.');
+        return null;
+      }
+
       // Upload vers Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: true // Permettre l'écrasement
         });
 
       if (uploadError) {
@@ -148,12 +163,15 @@ export class ProfileService {
 
       const imageUrl = data.publicUrl;
 
-      // Mettre à jour le profil avec la nouvelle URL
-      const { error: updateError } = await supabase.rpc('upload_profile_image', {
-        user_uuid: userId,
-        image_type: imageType,
-        image_url: imageUrl
-      });
+      // Mettre à jour le profil avec la nouvelle URL directement
+      const updateData = imageType === 'avatar' 
+        ? { avatar_url: imageUrl } 
+        : { banner_url: imageUrl };
+
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .update(updateData)
+        .eq('user_id', userId);
 
       if (updateError) {
         console.error('Erreur lors de la mise à jour du profil:', updateError);

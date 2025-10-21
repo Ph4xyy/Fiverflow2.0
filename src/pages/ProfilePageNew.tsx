@@ -214,11 +214,12 @@ const ProfilePageNew: React.FC = () => {
           setProfileData((prev: ProfileData) => ({ ...prev, ...updatedData }));
         }
       } else {
-        alert('Erreur lors de la sauvegarde du profil');
+        console.error('Erreur lors de la sauvegarde du profil');
+        // Ne pas afficher d'alerte, juste log l'erreur
       }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
-      alert('Erreur lors de la sauvegarde du profil');
+      // Ne pas afficher d'alerte, juste log l'erreur
     } finally {
       setIsSaving(false);
     }
@@ -245,11 +246,12 @@ const ProfilePageNew: React.FC = () => {
           });
         }
       } else {
-        alert('Erreur lors de la sauvegarde des paramètres');
+        console.error('Erreur lors de la sauvegarde des paramètres');
+        // Ne pas afficher d'alerte, juste log l'erreur
       }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
-      alert('Erreur lors de la sauvegarde des paramètres');
+      // Ne pas afficher d'alerte, juste log l'erreur
     } finally {
       setIsSaving(false);
     }
@@ -264,11 +266,12 @@ const ProfilePageNew: React.FC = () => {
       if (success) {
         setProfileData((prev: ProfileData) => ({ ...prev, status }));
       } else {
-        alert('Erreur lors de la mise à jour du statut');
+        console.error('Erreur lors de la mise à jour du statut');
+        // Ne pas afficher d'alerte, juste log l'erreur
       }
     } catch (error) {
       console.error('Erreur lors de la mise à jour du statut:', error);
-      alert('Erreur lors de la mise à jour du statut');
+      // Ne pas afficher d'alerte, juste log l'erreur
     }
   };
 
@@ -431,13 +434,18 @@ const ProfilePageNew: React.FC = () => {
                 <div className="w-full h-full bg-gradient-to-r from-[#9c68f2] to-[#422ca5]" />
               )}
               {isOwnProfile && (
-                <div className="absolute top-4 right-4">
-                  <ImageUpload
-                    currentImageUrl={profileData.banner_url}
-                    onImageChange={handleBannerUpload}
-                    onImageRemove={handleBannerRemove}
-                    type="banner"
-                  />
+                <div className="absolute top-4 right-4 group">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ImageUpload
+                      currentImageUrl={profileData.banner_url}
+                      onImageChange={handleBannerUpload}
+                      onImageRemove={handleBannerRemove}
+                      type="banner"
+                    />
+                  </div>
+                  <div className="absolute top-2 right-2 p-2 bg-black/20 backdrop-blur-sm rounded-lg group-hover:bg-black/30 transition-colors">
+                    <Camera size={20} className="text-white" />
+                  </div>
                 </div>
               )}
             </div>
@@ -460,13 +468,18 @@ const ProfilePageNew: React.FC = () => {
                       </div>
                     )}
                     {isOwnProfile && (
-                      <div className="absolute bottom-2 right-2">
-                        <ImageUpload
-                          currentImageUrl={profileData.avatar_url}
-                          onImageChange={handleAvatarUpload}
-                          onImageRemove={handleAvatarRemove}
-                          type="avatar"
-                        />
+                      <div className="absolute bottom-2 right-2 group">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <ImageUpload
+                            currentImageUrl={profileData.avatar_url}
+                            onImageChange={handleAvatarUpload}
+                            onImageRemove={handleAvatarRemove}
+                            type="avatar"
+                          />
+                        </div>
+                        <div className="absolute bottom-0 right-0 p-2 bg-[#35414e] rounded-full hover:bg-[#3d4a57] transition-colors">
+                          <Camera size={16} className="text-white" />
+                        </div>
                       </div>
                     )}
                   </div>

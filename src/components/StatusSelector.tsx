@@ -100,10 +100,10 @@ const StatusSelector: React.FC<StatusSelectorProps> = ({
       {isOpen && !disabled && (
         <>
           <div 
-            className="fixed inset-0 z-10" 
+            className="fixed inset-0 z-50" 
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute top-full left-0 mt-1 w-64 bg-[#2a3441] border border-[#1e2938] rounded-lg shadow-lg z-20">
+          <div className="absolute top-full left-0 mt-1 w-64 bg-[#2a3441] border border-[#1e2938] rounded-lg shadow-lg z-[60]">
             <div className="p-2">
               <div className="text-xs font-medium text-gray-400 mb-2 px-2">
                 Changer le statut

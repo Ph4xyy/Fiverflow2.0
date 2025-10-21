@@ -102,11 +102,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
       <div
         className={`
-          ${sizeClass} ${roundedClass} border-2 border-dashed border-[#1e2938] 
-          flex items-center justify-center cursor-pointer transition-colors
+          ${sizeClass} ${roundedClass} 
+          ${displayUrl ? '' : 'border-2 border-dashed border-[#1e2938]'}
+          flex items-center justify-center transition-colors
           ${disabled || isUploading 
             ? 'cursor-not-allowed opacity-50' 
-            : 'hover:border-[#9c68f2] hover:bg-[#9c68f2]/5'
+            : 'cursor-pointer hover:opacity-90'
           }
         `}
         onClick={handleClick}
@@ -125,24 +126,24 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             />
             {!disabled && (
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <div className="flex gap-2">
+                <div className="flex flex-col items-center gap-2">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleClick();
                     }}
-                    className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
+                    className="px-3 py-1 bg-white/20 rounded-lg hover:bg-white/30 transition-colors text-white text-sm font-medium"
                   >
-                    <Camera size={16} className="text-white" />
+                    Changer l'image
                   </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemove();
                     }}
-                    className="p-2 bg-red-500/20 rounded-full hover:bg-red-500/30 transition-colors"
+                    className="px-3 py-1 bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors text-white text-sm font-medium"
                   >
-                    <X size={16} className="text-white" />
+                    Supprimer
                   </button>
                 </div>
               </div>
