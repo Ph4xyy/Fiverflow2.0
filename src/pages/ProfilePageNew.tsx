@@ -42,7 +42,9 @@ import {
   Crown,
   Coffee,
   Heart,
-  Eye
+  Eye,
+  Copy,
+  Check
 } from 'lucide-react';
 
 // Interfaces supprimées - utilise maintenant les types des services
@@ -74,6 +76,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   // const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUsernameCopied, setIsUsernameCopied] = useState(false);
   
   // Profile data - utilise les données du hook ou des valeurs par défaut
   const [profileData, setProfileData] = useState<ProfileData>({
@@ -345,6 +348,20 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
   };
 
   // Fonction pour sauvegarder les paramètres
+  // Fonction pour copier le username
+  const handleCopyUsername = async () => {
+    const usernameToCopy = profileDataFromHook?.public_data?.username || profileData.username;
+    if (usernameToCopy) {
+      try {
+        await navigator.clipboard.writeText(usernameToCopy);
+        setIsUsernameCopied(true);
+        setTimeout(() => setIsUsernameCopied(false), 2000);
+      } catch (err) {
+        console.error('Erreur lors de la copie:', err);
+      }
+    }
+  };
+
   const handleSaveSettings = async () => {
     if (!user) return;
 
@@ -500,9 +517,22 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                     <div className="flex items-center gap-3 mb-2">
                       <div>
                         <h1 className="text-3xl font-bold text-white">{profileData.full_name || 'Utilisateur'}</h1>
-                        {/* Username affiché en dessous du nom */}
-                        {profileData.username && (
-                          <p className="text-sm text-gray-400 mt-1">@{profileData.username}</p>
+                        {/* Username affiché en dessous du nom avec bouton de copie */}
+                        {(profileDataFromHook?.public_data?.username || profileData.username) && (
+                          <div className="flex items-center gap-2 mt-1 group">
+                            <p className="text-sm text-gray-400">@{profileDataFromHook?.public_data?.username || profileData.username}</p>
+                            <button
+                              onClick={handleCopyUsername}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-gray-700 rounded"
+                              title="Copier le username"
+                            >
+                              {isUsernameCopied ? (
+                                <Check className="w-3 h-3 text-green-400" />
+                              ) : (
+                                <Copy className="w-3 h-3 text-gray-400 hover:text-white" />
+                              )}
+                            </button>
+                          </div>
                         )}
                       </div>
                       {/* Badges */}
