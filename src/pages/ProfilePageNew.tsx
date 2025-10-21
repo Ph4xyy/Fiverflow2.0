@@ -4,30 +4,28 @@ import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import MessagingSystem from '../components/MessagingSystem';
 import ThemeSelector from '../components/ThemeSelector';
+import StatusSelector from '../components/StatusSelector';
+import ImageUpload from '../components/ImageUpload';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { ProfileService, ProfileData, PrivacySettings } from '../services/profileService';
 import { 
   Edit3, 
-  Camera, 
   MapPin, 
   Calendar, 
   Users, 
   Star, 
   MessageSquare, 
   Share2, 
-  MoreHorizontal,
   Plus,
   Globe,
   Mail,
   Phone,
   Briefcase,
   Award,
-  Heart,
   ThumbsUp,
   Eye,
-  Send,
   Settings,
-  Bell,
   Shield,
   Zap,
   TrendingUp,
@@ -35,11 +33,9 @@ import {
   Coffee,
   ExternalLink,
   Crown,
-  ChevronDown,
-  User,
-  Palette,
   Save,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 
 interface SocialLink {
@@ -57,16 +53,7 @@ interface Badge {
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
 }
 
-interface ProfileData {
-  name: string;
-  title: string;
-  location: string;
-  memberSince: string;
-  bio: string;
-  website: string;
-  email: string;
-  phone: string;
-}
+// Interface ProfileData est maintenant importée du service
 
 interface Project {
   id: string;
@@ -93,19 +80,29 @@ const ProfilePageNew: React.FC = () => {
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
-  const [isOwnProfile, setIsOwnProfile] = useState(true); // Simulate if it's the user's own profile
+  const [isOwnProfile] = useState(true); // Simulate if it's the user's own profile
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Profile data - utilise les vraies données de l'utilisateur
   const [profileData, setProfileData] = useState<ProfileData>({
-    name: 'Utilisateur', // Valeur par défaut, sera mise à jour
-    title: 'UI/UX Designer & Frontend Developer',
+    full_name: 'Utilisateur', // Valeur par défaut, sera mise à jour
+    professional_title: 'UI/UX Designer & Frontend Developer',
     location: 'Paris, France',
-    memberSince: 'Jan 2019',
     bio: 'Passionate about design and development, I create exceptional user experiences for 5 years.',
     website: 'https://johndoe.design',
     email: user?.email || 'john@example.com',
-    phone: '+33 6 12 34 56 78'
+    phone: '+33 6 12 34 56 78',
+    status: 'available',
+    show_email: true,
+    show_phone: true
+  });
+
+  // Paramètres de confidentialité
+  const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
+    show_email: true,
+    show_phone: true
   });
 
   // Charger les données du profil depuis la base de données
@@ -116,48 +113,42 @@ const ProfilePageNew: React.FC = () => {
         return;
       }
 
+      setIsLoading(true);
       console.log('🔍 ProfilePage: Chargement du profil pour user:', user.id, 'email:', user.email);
 
       try {
-        // Récupérer les données du profil depuis user_profiles
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('full_name, email')
-          .eq('user_id', user.id)
-          .single();
-
-        console.log('🔍 ProfilePage: Données du profil:', { data, error });
-
-        if (error) {
-          console.error('❌ Erreur lors du chargement du profil:', error);
-          console.error('❌ Détails de l\'erreur:', error.message, error.status, error.statusText);
-          
-          // Vérifier spécifiquement l'erreur 406
-          if (error.status === 406) {
-            console.error('❌ ERREUR 406 DÉTECTÉE - Problème avec les en-têtes de requête');
-          }
-          // Utiliser les données de l'utilisateur auth comme fallback
-          setProfileData(prev => ({
+        const data = await ProfileService.getProfile(user.id);
+        
+        if (data) {
+          setProfileData((prev: ProfileData) => ({
             ...prev,
-            name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur',
-            email: user.email || 'john@example.com'
-          }));
-        } else if (data) {
-          // Utiliser les données de la base de données
-          setProfileData(prev => ({
-            ...prev,
-            name: data.full_name || user.email?.split('@')[0] || 'Utilisateur',
+            ...data,
             email: data.email || user.email || 'john@example.com'
+          }));
+          
+          // Mettre à jour les paramètres de confidentialité
+          setPrivacySettings({
+            show_email: data.show_email ?? true,
+            show_phone: data.show_phone ?? true
+          });
+        } else {
+          // Utiliser les données de l'utilisateur auth comme fallback
+          setProfileData((prev: ProfileData) => ({
+            ...prev,
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur',
+            email: user.email || 'john@example.com'
           }));
         }
       } catch (error) {
         console.error('Erreur lors du chargement du profil:', error);
         // Fallback vers les données auth
-        setProfileData(prev => ({
+        setProfileData((prev: ProfileData) => ({
           ...prev,
-          name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur',
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur',
           email: user.email || 'john@example.com'
         }));
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -186,6 +177,100 @@ const ProfilePageNew: React.FC = () => {
 
     checkAdminStatus();
   }, [user]);
+
+  // Fonctions pour gérer les uploads d'images
+  const handleAvatarUpload = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    return await ProfileService.uploadProfileImage(user.id, file, 'avatar');
+  };
+
+  const handleBannerUpload = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    return await ProfileService.uploadProfileImage(user.id, file, 'banner');
+  };
+
+  const handleAvatarRemove = async (): Promise<boolean> => {
+    if (!user) return false;
+    return await ProfileService.deleteProfileImage(user.id, 'avatar');
+  };
+
+  const handleBannerRemove = async (): Promise<boolean> => {
+    if (!user) return false;
+    return await ProfileService.deleteProfileImage(user.id, 'banner');
+  };
+
+  // Fonction pour sauvegarder le profil
+  const handleSaveProfile = async () => {
+    if (!user) return;
+
+    setIsSaving(true);
+    try {
+      const success = await ProfileService.updateProfile(user.id, profileData);
+      if (success) {
+        setIsEditMenuOpen(false);
+        // Recharger les données
+        const updatedData = await ProfileService.getProfile(user.id);
+        if (updatedData) {
+          setProfileData((prev: ProfileData) => ({ ...prev, ...updatedData }));
+        }
+      } else {
+        alert('Erreur lors de la sauvegarde du profil');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      alert('Erreur lors de la sauvegarde du profil');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Fonction pour sauvegarder les paramètres
+  const handleSaveSettings = async () => {
+    if (!user) return;
+
+    setIsSaving(true);
+    try {
+      const success = await ProfileService.updateProfile(user.id, profileData);
+      const privacySuccess = await ProfileService.updatePrivacySettings(user.id, privacySettings);
+      
+      if (success && privacySuccess) {
+        setIsSettingsMenuOpen(false);
+        // Recharger les données
+        const updatedData = await ProfileService.getProfile(user.id);
+        if (updatedData) {
+          setProfileData((prev: ProfileData) => ({ ...prev, ...updatedData }));
+          setPrivacySettings({
+            show_email: updatedData.show_email ?? true,
+            show_phone: updatedData.show_phone ?? true
+          });
+        }
+      } else {
+        alert('Erreur lors de la sauvegarde des paramètres');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      alert('Erreur lors de la sauvegarde des paramètres');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Fonction pour changer le statut
+  const handleStatusChange = async (status: 'available' | 'busy' | 'away' | 'do_not_disturb') => {
+    if (!user) return;
+
+    try {
+      const success = await ProfileService.updateStatus(user.id, status);
+      if (success) {
+        setProfileData((prev: ProfileData) => ({ ...prev, status }));
+      } else {
+        alert('Erreur lors de la mise à jour du statut');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut:', error);
+      alert('Erreur lors de la mise à jour du statut');
+    }
+  };
 
   // Badges data
   const badges: Badge[] = [
@@ -335,10 +420,26 @@ const ProfilePageNew: React.FC = () => {
           
           <div className="relative">
             {/* Cover Photo */}
-            <div className="h-48 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-t-xl relative">
-              <button className="absolute top-4 right-4 p-2 bg-black/20 backdrop-blur-sm rounded-lg hover:bg-black/30 transition-colors">
-                <Camera size={20} className="text-white" />
-              </button>
+            <div className="h-48 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-t-xl relative overflow-hidden">
+              {profileData.banner_url ? (
+                <img 
+                  src={profileData.banner_url} 
+                  alt="Bannière" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-r from-[#9c68f2] to-[#422ca5]" />
+              )}
+              {isOwnProfile && (
+                <div className="absolute top-4 right-4">
+                  <ImageUpload
+                    currentImageUrl={profileData.banner_url}
+                    onImageChange={handleBannerUpload}
+                    onImageRemove={handleBannerRemove}
+                    type="banner"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Profile Info */}
@@ -347,18 +448,33 @@ const ProfilePageNew: React.FC = () => {
                 <div className="flex items-end gap-6">
                   {/* Profile Picture */}
                   <div className="relative">
-                    <div className="w-32 h-32 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center text-white text-4xl font-bold">
-                      {profileData.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                    </div>
-                    <button className="absolute bottom-2 right-2 p-2 bg-[#35414e] rounded-full hover:bg-[#3d4a57] transition-colors">
-                      <Camera size={16} className="text-white" />
-                    </button>
+                    {profileData.avatar_url ? (
+                      <img 
+                        src={profileData.avatar_url} 
+                        alt="Avatar" 
+                        className="w-32 h-32 rounded-full object-cover border-4 border-[#2a3441]"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center text-white text-4xl font-bold border-4 border-[#2a3441]">
+                        {profileData.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
+                      </div>
+                    )}
+                    {isOwnProfile && (
+                      <div className="absolute bottom-2 right-2">
+                        <ImageUpload
+                          currentImageUrl={profileData.avatar_url}
+                          onImageChange={handleAvatarUpload}
+                          onImageRemove={handleAvatarRemove}
+                          type="avatar"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Basic Info */}
                   <div className="pb-4">
                     <div className="flex items-center gap-3 mb-2">
-                      <h1 className="text-3xl font-bold text-white">{profileData.name}</h1>
+                      <h1 className="text-3xl font-bold text-white">{profileData.full_name}</h1>
                       {/* Badges */}
                       <div className="flex items-center gap-2">
                         {/* Badge Administrateur */}
@@ -396,20 +512,30 @@ const ProfilePageNew: React.FC = () => {
                         ))}
                       </div>
                     </div>
-                    <p className="text-lg text-gray-400 mb-2">{profileData.title}</p>
+                    <p className="text-lg text-gray-400 mb-2">{profileData.professional_title}</p>
                     <div className="flex items-center gap-4 text-sm text-gray-400">
                       <div className="flex items-center gap-1">
                         <MapPin size={16} />
-                        {profileData.location}
+                        {profileData.location || 'Non spécifié'}
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar size={16} />
-                        Member since {profileData.memberSince}
+                        Membre depuis {new Date().getFullYear()}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Coffee size={16} />
-                        Available
-                      </div>
+                      {isOwnProfile ? (
+                        <StatusSelector
+                          currentStatus={profileData.status || 'available'}
+                          onStatusChange={handleStatusChange}
+                        />
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <Coffee size={16} />
+                          {profileData.status === 'available' && 'Disponible'}
+                          {profileData.status === 'busy' && 'Occupé'}
+                          {profileData.status === 'away' && 'Absent'}
+                          {profileData.status === 'do_not_disturb' && 'Ne pas déranger'}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -483,49 +609,50 @@ const ProfilePageNew: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Full name
+                    Nom complet
                   </label>
                   <input
                     type="text"
-                    value={profileData.name}
-                    onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                    value={profileData.full_name || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, full_name: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Professional title
+                    Titre professionnel
                   </label>
                   <input
                     type="text"
-                    value={profileData.title}
-                    onChange={(e) => setProfileData({...profileData, title: e.target.value})}
+                    value={profileData.professional_title || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, professional_title: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Location
+                    Lieu
                   </label>
                   <input
                     type="text"
-                    value={profileData.location}
-                    onChange={(e) => setProfileData({...profileData, location: e.target.value})}
+                    value={profileData.location || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, location: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Website
+                    Site web
                   </label>
                   <input
                     type="url"
-                    value={profileData.website}
-                    onChange={(e) => setProfileData({...profileData, website: e.target.value})}
+                    value={profileData.website || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, website: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                    placeholder="https://votre-site.com"
                   />
                 </div>
               </div>
@@ -538,21 +665,22 @@ const ProfilePageNew: React.FC = () => {
                   </label>
                   <input
                     type="email"
-                    value={profileData.email}
-                    onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                    value={profileData.email || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, email: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Phone
+                    Téléphone
                   </label>
                   <input
                     type="tel"
-                    value={profileData.phone}
-                    onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                    value={profileData.phone || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, phone: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                    placeholder="+33 6 12 34 56 78"
                   />
                 </div>
 
@@ -561,10 +689,11 @@ const ProfilePageNew: React.FC = () => {
                     Bio
                   </label>
                   <textarea
-                    value={profileData.bio}
-                    onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
+                    value={profileData.bio || ''}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setProfileData({...profileData, bio: e.target.value})}
                     rows={4}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2] resize-none"
+                    placeholder="Parlez-nous de vous..."
                   />
                 </div>
               </div>
@@ -575,12 +704,25 @@ const ProfilePageNew: React.FC = () => {
               <ModernButton 
                 variant="outline" 
                 onClick={() => setIsEditMenuOpen(false)}
+                disabled={isSaving}
               >
-                Cancel
+                Annuler
               </ModernButton>
-              <ModernButton>
-                <Save size={16} className="mr-2" />
-                Save
+              <ModernButton 
+                onClick={handleSaveProfile}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 size={16} className="mr-2 animate-spin" />
+                    Sauvegarde...
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} className="mr-2" />
+                    Sauvegarder
+                  </>
+                )}
               </ModernButton>
             </div>
                 </ModernCard>
@@ -609,40 +751,40 @@ const ProfilePageNew: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column - Profile Settings */}
               <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-white mb-4">Basic information</h4>
+                <h4 className="text-lg font-semibold text-white mb-4">Informations de base</h4>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Full name
+                    Nom complet
                   </label>
                   <input
                     type="text"
-                    value={profileData.name}
-                    onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                    value={profileData.full_name || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, full_name: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Professional title
+                    Titre professionnel
                   </label>
                   <input
                     type="text"
-                    value={profileData.title}
-                    onChange={(e) => setProfileData({...profileData, title: e.target.value})}
+                    value={profileData.professional_title || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, professional_title: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Location
+                    Lieu
                   </label>
                   <input
                     type="text"
-                    value={profileData.location}
-                    onChange={(e) => setProfileData({...profileData, location: e.target.value})}
+                    value={profileData.location || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, location: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
                 </div>
@@ -652,17 +794,64 @@ const ProfilePageNew: React.FC = () => {
                     Bio
                   </label>
                   <textarea
-                    value={profileData.bio}
-                    onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
+                    value={profileData.bio || ''}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setProfileData({...profileData, bio: e.target.value})}
                     rows={3}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2] resize-none"
                   />
+                </div>
+
+                {/* Paramètres de confidentialité */}
+                <div className="pt-4 border-t border-[#35414e]">
+                  <h5 className="text-md font-semibold text-white mb-3">Confidentialité</h5>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="text-sm font-medium text-gray-300">
+                          Afficher l'email
+                        </label>
+                        <p className="text-xs text-gray-400">
+                          Permet aux autres utilisateurs de voir votre email
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={privacySettings.show_email}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrivacySettings({...privacySettings, show_email: e.target.checked})}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#9c68f2]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#9c68f2]"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="text-sm font-medium text-gray-300">
+                          Afficher le téléphone
+                        </label>
+                        <p className="text-xs text-gray-400">
+                          Permet aux autres utilisateurs de voir votre téléphone
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={privacySettings.show_phone}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrivacySettings({...privacySettings, show_phone: e.target.checked})}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#9c68f2]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#9c68f2]"></div>
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Right Column - Social Networks */}
               <div className="space-y-4">
-                <h4 className="text-lg font-semibold text-white mb-4">Social networks</h4>
+                <h4 className="text-lg font-semibold text-white mb-4">Réseaux sociaux</h4>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -772,12 +961,25 @@ const ProfilePageNew: React.FC = () => {
               <ModernButton 
                 variant="outline" 
                 onClick={() => setIsSettingsMenuOpen(false)}
+                disabled={isSaving}
               >
-                Cancel
+                Annuler
               </ModernButton>
-              <ModernButton>
-                <Save size={16} className="mr-2" />
-                Save
+              <ModernButton 
+                onClick={handleSaveSettings}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 size={16} className="mr-2 animate-spin" />
+                    Sauvegarde...
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} className="mr-2" />
+                    Sauvegarder
+                  </>
+                )}
               </ModernButton>
             </div>
                 </ModernCard>
@@ -975,18 +1177,36 @@ const ProfilePageNew: React.FC = () => {
             {/* Contact */}
             <ModernCard title="Contact" icon={<Mail size={20} className="text-white" />}>
               <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <Mail size={16} className="text-gray-400" />
-                  <span className="text-sm text-gray-300">john.doe@example.com</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Phone size={16} className="text-gray-400" />
-                  <span className="text-sm text-gray-300">+33 6 12 34 56 78</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Globe size={16} className="text-gray-400" />
-                  <span className="text-sm text-gray-300">johndoe.design</span>
-                </div>
+                {profileData.show_email && profileData.email && (
+                  <div className="flex items-center gap-3">
+                    <Mail size={16} className="text-gray-400" />
+                    <span className="text-sm text-gray-300">{profileData.email}</span>
+                  </div>
+                )}
+                {profileData.show_phone && profileData.phone && (
+                  <div className="flex items-center gap-3">
+                    <Phone size={16} className="text-gray-400" />
+                    <span className="text-sm text-gray-300">{profileData.phone}</span>
+                  </div>
+                )}
+                {profileData.website && (
+                  <div className="flex items-center gap-3">
+                    <Globe size={16} className="text-gray-400" />
+                    <a 
+                      href={profileData.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-[#9c68f2] hover:text-white transition-colors"
+                    >
+                      {profileData.website}
+                    </a>
+                  </div>
+                )}
+                {!profileData.show_email && !profileData.show_phone && !profileData.website && (
+                  <div className="text-sm text-gray-500 text-center py-4">
+                    Aucune information de contact visible
+                  </div>
+                )}
               </div>
             </ModernCard>
           </div>

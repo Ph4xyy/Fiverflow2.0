@@ -1,369 +1,399 @@
+/**
+ * Edge Function pour traiter les webhooks Stripe
+ * Crée automatiquement les commissions de parrainage lors des paiements
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders } from '../_shared/cors.ts'
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')!
-const stripeWebhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!
-
-// Créer le client Supabase avec la clé de service
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-interface StripeEvent {
-  id: string
-  type: string
-  data: {
-    object: any
-  }
-}
-
-interface PaymentIntent {
-  id: string
-  amount: number
-  currency: string
-  customer: string
-  status: string
-  metadata?: {
-    order_id?: string
-    subscription_id?: string
-  }
-}
-
-interface Subscription {
-  id: string
-  customer: string
-  status: string
-  current_period_start: number
-  current_period_end: number
-  metadata?: {
-    order_id?: string
-  }
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
 serve(async (req) => {
-  // Gérer les CORS
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // Vérifier que c'est une requête POST
-    if (req.method !== 'POST') {
-      return new Response('Method not allowed', { 
-        status: 405, 
-        headers: corsHeaders 
-      })
-    }
+    // Créer le client Supabase
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: req.headers.get('Authorization')! },
+        },
+      }
+    )
 
-    // Récupérer le body et les headers
-    const body = await req.text()
+    // Vérifier la signature du webhook Stripe
     const signature = req.headers.get('stripe-signature')
-
     if (!signature) {
-      console.error('Missing stripe-signature header')
       return new Response('Missing stripe-signature header', { 
-        status: 400, 
+        status: 400,
         headers: corsHeaders 
       })
     }
 
-    // Vérifier la signature du webhook (optionnel en développement)
-    // En production, vous devriez vérifier la signature avec Stripe
-
-    let event: StripeEvent
-    try {
-      event = JSON.parse(body)
-    } catch (err) {
-      console.error('Invalid JSON:', err)
-      return new Response('Invalid JSON', { 
-        status: 400, 
+    // Récupérer le body de la requête
+    const body = await req.text()
+    
+    // Vérifier la signature avec la clé secrète Stripe
+    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')
+    if (!webhookSecret) {
+      console.error('❌ STRIPE_WEBHOOK_SECRET not configured')
+      return new Response('Webhook secret not configured', { 
+        status: 500,
         headers: corsHeaders 
       })
     }
 
-    console.log('🎯 Stripe webhook received:', event.type, event.id)
+    // Parser l'événement Stripe
+    const event = JSON.parse(body)
+    console.log('🎯 Processing Stripe webhook event:', event.type)
 
-    // Traiter les événements de paiement
+    // Traiter l'événement selon son type
+    let commissionCreated = false
+
     switch (event.type) {
-      case 'payment_intent.succeeded':
-        await handlePaymentSuccess(event.data.object as PaymentIntent)
+      case 'checkout.session.completed':
+        commissionCreated = await handleCheckoutSessionCompleted(event.data.object, supabaseClient)
         break
 
       case 'invoice.payment_succeeded':
-        await handleInvoicePaymentSuccess(event.data.object)
+        commissionCreated = await handleInvoicePaymentSucceeded(event.data.object, supabaseClient)
         break
 
       case 'customer.subscription.created':
+        commissionCreated = await handleSubscriptionCreated(event.data.object, supabaseClient)
+        break
+
       case 'customer.subscription.updated':
-        await handleSubscriptionUpdate(event.data.object as Subscription)
-        break
-
-      case 'payment_intent.payment_failed':
-      case 'invoice.payment_failed':
-        await handlePaymentFailure(event.data.object)
-        break
-
-      case 'customer.subscription.deleted':
-        await handleSubscriptionCancellation(event.data.object as Subscription)
+        commissionCreated = await handleSubscriptionUpdated(event.data.object, supabaseClient)
         break
 
       default:
-        console.log('Unhandled event type:', event.type)
+        console.log('ℹ️ Unhandled event type:', event.type)
+        return new Response('Event type not handled', { 
+          status: 200,
+          headers: corsHeaders 
+        })
     }
 
-    return new Response(JSON.stringify({ 
-      received: true, 
-      event_type: event.type 
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    })
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        commissionCreated,
+        eventType: event.type 
+      }), 
+      { 
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    )
 
   } catch (error) {
-    console.error('Webhook error:', error)
-    return new Response(JSON.stringify({ 
-      error: 'Webhook processing failed' 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    })
+    console.error('❌ Error processing webhook:', error)
+    return new Response(
+      JSON.stringify({ error: error.message }), 
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    )
   }
 })
 
 /**
- * Gérer un paiement réussi
+ * Traiter une session de checkout complétée
  */
-async function handlePaymentSuccess(paymentIntent: PaymentIntent) {
+async function handleCheckoutSessionCompleted(session: any, supabase: any): Promise<boolean> {
   try {
-    console.log('💰 Payment succeeded:', paymentIntent.id, paymentIntent.amount)
+    const userId = session.metadata?.user_id
+    const amount = session.amount_total / 100 // Convertir de centimes en euros
+    const subscriptionId = session.subscription
 
-    // Trouver l'utilisateur par son customer_id Stripe
-    const { data: user, error: userError } = await supabase
-      .from('profiles')
-      .select('id, referred_by, stripe_customer_id')
-      .eq('stripe_customer_id', paymentIntent.customer)
-      .single()
-
-    if (userError || !user) {
-      console.log('User not found for customer:', paymentIntent.customer)
-      return
+    if (!userId || !amount) {
+      console.log('❌ Missing user_id or amount in session')
+      return false
     }
 
-    // Vérifier si l'utilisateur a un parrain
-    if (!user.referred_by) {
-      console.log('No referrer found for user:', user.id)
-      return
+    console.log('🎯 Creating commission for checkout session:', { userId, amount, subscriptionId })
+
+    // Récupérer l'ID du profil utilisateur
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('id, referred_by')
+      .eq('user_id', userId)
+      .single()
+
+    if (profileError || !profile) {
+      console.log('❌ User profile not found:', userId)
+      return false
     }
 
-    // Créer la commission de parrainage (20%)
-    const commissionAmount = (paymentIntent.amount * 0.20) / 100 // Convertir de centimes en euros
-    const commissionPercentage = 20.00
+    if (!profile.referred_by) {
+      console.log('ℹ️ User has no referrer, no commission to create')
+      return false
+    }
 
-    console.log('🎯 Creating referral commission:', {
-      referrer_id: user.referred_by,
-      referred_id: user.id,
-      amount: commissionAmount,
-      percentage: commissionPercentage
-    })
-
-    const { data: commission, error: commissionError } = await supabase
-      .from('referral_commissions')
-      .insert({
-        referrer_id: user.referred_by,
-        referred_id: user.id,
-        amount: commissionAmount,
-        percentage: commissionPercentage,
-        status: 'pending',
-        payment_method: 'stripe',
-        payment_reference: paymentIntent.id,
-        order_id: paymentIntent.metadata?.order_id || null,
-        subscription_id: paymentIntent.metadata?.subscription_id || null
-      })
-      .select()
-      .single()
+    // Créer la commission via la fonction SQL
+    const { data: commissionId, error: commissionError } = await supabase.rpc(
+      'create_referral_commission',
+      {
+        p_referrer_id: profile.referred_by,
+        p_referred_id: profile.id,
+        p_amount: amount,
+        p_order_id: null,
+        p_subscription_id: subscriptionId
+      }
+    )
 
     if (commissionError) {
-      console.error('Failed to create referral commission:', commissionError)
-      return
+      console.error('❌ Error creating commission:', commissionError)
+      return false
     }
 
-    // Mettre à jour les statistiques du parrain
-    const { error: statsError } = await supabase
-      .from('profiles')
-      .update({
-        referral_earnings: supabase.raw('referral_earnings + ?', [commissionAmount]),
-        total_referrals: supabase.raw('total_referrals + 1')
-      })
-      .eq('id', user.referred_by)
-
-    if (statsError) {
-      console.error('Failed to update referrer stats:', statsError)
-    }
-
-    console.log('✅ Referral commission created successfully:', commission.id)
+    console.log('✅ Commission created successfully:', commissionId)
+    return true
 
   } catch (error) {
-    console.error('Error handling payment success:', error)
+    console.error('❌ Error handling checkout session completed:', error)
+    return false
   }
 }
 
 /**
- * Gérer un paiement d'abonnement réussi
+ * Traiter un paiement d'invoice réussi
  */
-async function handleInvoicePaymentSuccess(invoice: any) {
+async function handleInvoicePaymentSucceeded(invoice: any, supabase: any): Promise<boolean> {
   try {
-    console.log('💳 Invoice payment succeeded:', invoice.id)
+    const subscriptionId = invoice.subscription
+    const amount = invoice.amount_paid / 100 // Convertir de centimes en euros
+    const customerId = invoice.customer
 
-    // Trouver l'utilisateur par son customer_id Stripe
-    const { data: user, error: userError } = await supabase
-      .from('profiles')
-      .select('id, referred_by, stripe_customer_id')
-      .eq('stripe_customer_id', invoice.customer)
-      .single()
-
-    if (userError || !user || !user.referred_by) {
-      console.log('No referrer found for invoice payment')
-      return
+    if (!subscriptionId || !amount) {
+      console.log('❌ Missing subscription_id or amount in invoice')
+      return false
     }
 
-    // Créer la commission de parrainage (20%)
-    const commissionAmount = (invoice.amount_paid * 0.20) / 100
-    const commissionPercentage = 20.00
+    // Récupérer l'utilisateur via le customer_id
+    const userId = await getUserIdFromCustomerId(customerId, supabase)
+    if (!userId) {
+      console.log('❌ User not found for customer:', customerId)
+      return false
+    }
 
-    const { data: commission, error: commissionError } = await supabase
-      .from('referral_commissions')
-      .insert({
-        referrer_id: user.referred_by,
-        referred_id: user.id,
-        amount: commissionAmount,
-        percentage: commissionPercentage,
-        status: 'pending',
-        payment_method: 'stripe',
-        payment_reference: invoice.id,
-        subscription_id: invoice.subscription
-      })
-      .select()
+    console.log('🎯 Creating commission for invoice payment:', { userId, amount, subscriptionId })
+
+    // Récupérer l'ID du profil utilisateur
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('id, referred_by')
+      .eq('user_id', userId)
       .single()
+
+    if (profileError || !profile) {
+      console.log('❌ User profile not found:', userId)
+      return false
+    }
+
+    if (!profile.referred_by) {
+      console.log('ℹ️ User has no referrer, no commission to create')
+      return false
+    }
+
+    // Créer la commission via la fonction SQL
+    const { data: commissionId, error: commissionError } = await supabase.rpc(
+      'create_referral_commission',
+      {
+        p_referrer_id: profile.referred_by,
+        p_referred_id: profile.id,
+        p_amount: amount,
+        p_order_id: null,
+        p_subscription_id: subscriptionId
+      }
+    )
 
     if (commissionError) {
-      console.error('Failed to create referral commission for invoice:', commissionError)
-      return
+      console.error('❌ Error creating commission:', commissionError)
+      return false
     }
 
-    // Mettre à jour les statistiques du parrain
-    await supabase
-      .from('profiles')
-      .update({
-        referral_earnings: supabase.raw('referral_earnings + ?', [commissionAmount]),
-        total_referrals: supabase.raw('total_referrals + 1')
-      })
-      .eq('id', user.referred_by)
-
-    console.log('✅ Referral commission created for invoice:', commission.id)
+    console.log('✅ Commission created successfully:', commissionId)
+    return true
 
   } catch (error) {
-    console.error('Error handling invoice payment success:', error)
+    console.error('❌ Error handling invoice payment succeeded:', error)
+    return false
   }
 }
 
 /**
- * Gérer la mise à jour d'un abonnement
+ * Traiter une souscription créée
  */
-async function handleSubscriptionUpdate(subscription: Subscription) {
+async function handleSubscriptionCreated(subscription: any, supabase: any): Promise<boolean> {
   try {
-    console.log('🔄 Subscription updated:', subscription.id, subscription.status)
+    const customerId = subscription.customer
+    const subscriptionId = subscription.id
+    const amount = subscription.items?.data?.[0]?.price?.unit_amount / 100
 
-    // Si l'abonnement est actif, créer une commission
-    if (subscription.status === 'active') {
-      // Trouver l'utilisateur
-      const { data: user, error: userError } = await supabase
-        .from('profiles')
-        .select('id, referred_by, stripe_customer_id')
-        .eq('stripe_customer_id', subscription.customer)
-        .single()
+    if (!customerId || !subscriptionId || !amount) {
+      console.log('❌ Missing required data in subscription')
+      return false
+    }
 
-      if (userError || !user || !user.referred_by) {
-        console.log('No referrer found for subscription')
-        return
+    // Récupérer l'utilisateur via le customer_id
+    const userId = await getUserIdFromCustomerId(customerId, supabase)
+    if (!userId) {
+      console.log('❌ User not found for customer:', customerId)
+      return false
+    }
+
+    console.log('🎯 Creating commission for subscription created:', { userId, amount, subscriptionId })
+
+    // Récupérer l'ID du profil utilisateur
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('id, referred_by')
+      .eq('user_id', userId)
+      .single()
+
+    if (profileError || !profile) {
+      console.log('❌ User profile not found:', userId)
+      return false
+    }
+
+    if (!profile.referred_by) {
+      console.log('ℹ️ User has no referrer, no commission to create')
+      return false
+    }
+
+    // Créer la commission via la fonction SQL
+    const { data: commissionId, error: commissionError } = await supabase.rpc(
+      'create_referral_commission',
+      {
+        p_referrer_id: profile.referred_by,
+        p_referred_id: profile.id,
+        p_amount: amount,
+        p_order_id: null,
+        p_subscription_id: subscriptionId
       }
+    )
 
-      // Récupérer les détails de l'abonnement depuis Stripe
-      // (Vous devriez faire un appel à l'API Stripe pour récupérer le prix)
-      // Pour l'instant, on utilise une valeur par défaut
-      const subscriptionAmount = 29.99 // Montant par défaut
-      const commissionAmount = subscriptionAmount * 0.20
+    if (commissionError) {
+      console.error('❌ Error creating commission:', commissionError)
+      return false
+    }
 
-      const { data: commission, error: commissionError } = await supabase
-        .from('referral_commissions')
-        .insert({
-          referrer_id: user.referred_by,
-          referred_id: user.id,
-          amount: commissionAmount,
-          percentage: 20.00,
-          status: 'pending',
-          payment_method: 'stripe',
-          payment_reference: subscription.id,
-          subscription_id: subscription.id
-        })
-        .select()
-        .single()
+    console.log('✅ Commission created successfully:', commissionId)
+    return true
 
-      if (commissionError) {
-        console.error('Failed to create referral commission for subscription:', commissionError)
-        return
+  } catch (error) {
+    console.error('❌ Error handling subscription created:', error)
+    return false
+  }
+}
+
+/**
+ * Traiter une souscription mise à jour
+ */
+async function handleSubscriptionUpdated(subscription: any, supabase: any): Promise<boolean> {
+  try {
+    // Seulement traiter si la souscription devient active
+    if (subscription.status !== 'active') {
+      console.log('ℹ️ Subscription not active, skipping commission')
+      return false
+    }
+
+    const customerId = subscription.customer
+    const subscriptionId = subscription.id
+    const amount = subscription.items?.data?.[0]?.price?.unit_amount / 100
+
+    if (!customerId || !subscriptionId || !amount) {
+      console.log('❌ Missing required data in subscription update')
+      return false
+    }
+
+    // Récupérer l'utilisateur via le customer_id
+    const userId = await getUserIdFromCustomerId(customerId, supabase)
+    if (!userId) {
+      console.log('❌ User not found for customer:', customerId)
+      return false
+    }
+
+    console.log('🎯 Creating commission for subscription updated:', { userId, amount, subscriptionId })
+
+    // Récupérer l'ID du profil utilisateur
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('id, referred_by')
+      .eq('user_id', userId)
+      .single()
+
+    if (profileError || !profile) {
+      console.log('❌ User profile not found:', userId)
+      return false
+    }
+
+    if (!profile.referred_by) {
+      console.log('ℹ️ User has no referrer, no commission to create')
+      return false
+    }
+
+    // Créer la commission via la fonction SQL
+    const { data: commissionId, error: commissionError } = await supabase.rpc(
+      'create_referral_commission',
+      {
+        p_referrer_id: profile.referred_by,
+        p_referred_id: profile.id,
+        p_amount: amount,
+        p_order_id: null,
+        p_subscription_id: subscriptionId
       }
+    )
 
-      console.log('✅ Referral commission created for subscription:', commission.id)
+    if (commissionError) {
+      console.error('❌ Error creating commission:', commissionError)
+      return false
     }
 
+    console.log('✅ Commission created successfully:', commissionId)
+    return true
+
   } catch (error) {
-    console.error('Error handling subscription update:', error)
+    console.error('❌ Error handling subscription updated:', error)
+    return false
   }
 }
 
 /**
- * Gérer un échec de paiement
+ * Récupérer l'ID utilisateur depuis le customer_id Stripe
  */
-async function handlePaymentFailure(paymentData: any) {
+async function getUserIdFromCustomerId(customerId: string, supabase: any): Promise<string | null> {
   try {
-    console.log('❌ Payment failed:', paymentData.id)
+    console.log('🔍 Looking up user for customer:', customerId)
+    
+    // Chercher l'utilisateur par customer_id Stripe
+    // Note: Vous devrez adapter cette requête selon votre structure de données
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('user_id')
+      .eq('stripe_customer_id', customerId)
+      .single()
 
-    // Marquer les commissions correspondantes comme annulées
-    const { error } = await supabase
-      .from('referral_commissions')
-      .update({ status: 'cancelled' })
-      .eq('payment_reference', paymentData.id)
-      .in('status', ['pending', 'paid'])
-
-    if (error) {
-      console.error('Failed to cancel commissions for failed payment:', error)
+    if (error || !data) {
+      console.log('❌ User not found for customer:', customerId)
+      return null
     }
 
-  } catch (error) {
-    console.error('Error handling payment failure:', error)
-  }
-}
-
-/**
- * Gérer l'annulation d'un abonnement
- */
-async function handleSubscriptionCancellation(subscription: Subscription) {
-  try {
-    console.log('🚫 Subscription cancelled:', subscription.id)
-
-    // Marquer les commissions correspondantes comme annulées
-    const { error } = await supabase
-      .from('referral_commissions')
-      .update({ status: 'cancelled' })
-      .eq('subscription_id', subscription.id)
-      .in('status', ['pending', 'paid'])
-
-    if (error) {
-      console.error('Failed to cancel commissions for cancelled subscription:', error)
-    }
+    return data.user_id
 
   } catch (error) {
-    console.error('Error handling subscription cancellation:', error)
+    console.error('❌ Error getting user ID from customer ID:', error)
+    return null
   }
 }

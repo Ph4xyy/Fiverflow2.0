@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { ReferralService } from '../services/referralService';
+import { ReferralTracker } from '../services/referralTracker';
 import { supabase } from '../lib/supabase';
 
 interface ReferralContextType {
@@ -171,9 +172,9 @@ export const ReferralProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const clearReferralCode = useCallback(() => {
     setReferralCodeState(null);
     setReferrerInfo(null);
-    saveReferralCode(null);
     setError(null);
-  }, [saveReferralCode]);
+    ReferralTracker.clearReferralCode();
+  }, []);
 
   // Appliquer le code de parrainage lors de l'inscription
   const applyReferralCode = useCallback(async (userId: string): Promise<boolean> => {
@@ -222,24 +223,31 @@ export const ReferralProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // =============================================
 
   useEffect(() => {
-    // Charger le code depuis localStorage au démarrage
-    loadReferralCode();
-    
-    // Détecter le code dans l'URL si pas de code stocké
-    if (!referralCode) {
-      const urlCode = detectReferralCodeFromUrl();
-      if (urlCode) {
-        setReferralCode(urlCode);
-      }
+    // Utiliser ReferralTracker pour détecter et stocker le code
+    const detectedCode = ReferralTracker.autoDetectFromCurrentUrl();
+    const storedCode = ReferralTracker.getStoredReferralCode();
+
+    if (detectedCode && detectedCode !== storedCode) {
+      // Nouveau code détecté dans l'URL, le valider et le stocker
+      validateAndSetReferralCode(detectedCode);
+    } else if (storedCode && !detectedCode) {
+      // Pas de ref dans l'URL, mais un en stockage, le valider et l'utiliser
+      validateAndSetReferralCode(storedCode);
+    } else if (referralCode && !referrerInfo && !loading) {
+      // Si on a un code mais pas d'info (ex: refresh de page), re-valider
+      validateAndSetReferralCode(referralCode);
+    } else if (!detectedCode && !storedCode && referralCode) {
+      // Si le code était défini mais plus dans l'URL ou le stockage, le nettoyer
+      clearReferralCode();
     }
-  }, [loadReferralCode, detectReferralCodeFromUrl, referralCode]);
+  }, [referralCode, referrerInfo, loading, validateAndSetReferralCode, clearReferralCode]);
 
   // Détecter les changements d'URL (pour les SPA)
   useEffect(() => {
     const handleUrlChange = () => {
-      const urlCode = detectReferralCodeFromUrl();
-      if (urlCode && urlCode !== referralCode) {
-        setReferralCode(urlCode);
+      const detectedCode = ReferralTracker.autoDetectFromCurrentUrl();
+      if (detectedCode && detectedCode !== referralCode) {
+        validateAndSetReferralCode(detectedCode);
       }
     };
 
@@ -254,7 +262,7 @@ export const ReferralProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       window.removeEventListener('popstate', handleUrlChange);
       observer.disconnect();
     };
-  }, [detectReferralCodeFromUrl, referralCode]);
+  }, [validateAndSetReferralCode, referralCode]);
 
   const value: ReferralContextType = {
     referralCode,
