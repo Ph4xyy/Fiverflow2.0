@@ -4,6 +4,7 @@ import {
   X, FileText, User, DollarSign, Calendar, Tags as TagsIcon,
   ClipboardList, Building2, Edit3, Copy, Clock, CheckCircle
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 type OrderDetailClient = {
   name: string;
@@ -117,6 +118,8 @@ const chipForPlatform = (p?: string | null) =>
     : 'bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-400 border border-gray-500/30';
 
 const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, isOpen, onClose, onEdit }) => {
+  const navigate = useNavigate();
+  
   if (!isOpen) return null;
 
   const clientName = order?.clients?.name || order?.client_name || '—';
@@ -167,7 +170,10 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, isOpen, onCl
           <div className="flex items-center gap-3">
             {onEdit && order && (
               <button
-                onClick={() => onEdit(order)}
+                onClick={() => {
+                  onClose();
+                  navigate(`/orders/${order.id}/edit`);
+                }}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[#9c68f2] to-[#422ca5] text-white text-sm font-medium hover:from-[#8a5cf0] hover:to-[#3a2590] shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
               >
                 <Edit3 className="w-4 h-4" />

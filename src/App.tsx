@@ -47,6 +47,7 @@ import SettingsPage from './pages/SettingsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import ClientsPage from './pages/ClientsPageOptimized';
 import OrdersPage from './pages/OrdersPage';
+import OrderEditPage from './pages/OrderEditPage';
 import TemplatesPage from './pages/TemplatesPage';
 import StatsPage from './pages/StatsPage';
 import UpgradePageNew from './pages/UpgradePageNew';
@@ -111,6 +112,13 @@ function AppContent() {
             <InstantProtectedRoute>
               <SubscriptionGuard requiredPlan="launch" pageName="orders" description="Gestion des commandes (max 10 avec Launch)">
                 <OrdersPage />
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
+          <Route path="/orders/:orderId/edit" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="launch" pageName="orders" description="Édition des commandes">
+                <OrderEditPage />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
