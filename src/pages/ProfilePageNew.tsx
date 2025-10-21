@@ -109,6 +109,50 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
     }
   }, [profileDataFromHook, isOwnProfile, user?.email]);
 
+  // Charger les vraies données (statistiques, compétences, récompenses, etc.)
+  useEffect(() => {
+    const loadRealData = async () => {
+      if (!profileDataFromHook) return;
+
+      const targetUserId = profileDataFromHook.user_id;
+      
+      try {
+        // Charger les statistiques
+        const userStats = await StatisticsService.getProfileStatistics(targetUserId);
+        setStatistics(userStats);
+
+        // Charger les compétences
+        const userSkills = await SkillsService.getUserSkills(targetUserId);
+        setSkills(userSkills);
+
+        // Charger les récompenses
+        const userAwards = await AwardsService.getUserAwards(targetUserId);
+        setAwards(userAwards);
+
+        // Charger les commandes
+        const userOrders = await OrdersService.getUserOrders(targetUserId);
+        setOrders(userOrders);
+
+        // Charger les activités
+        const userActivities = await ActivityService.getUserActivities(targetUserId);
+        setActivities(userActivities);
+
+        console.log('📊 Données réelles chargées:', {
+          statistics: userStats,
+          skills: userSkills.length,
+          awards: userAwards.length,
+          orders: userOrders.length,
+          activities: userActivities.length
+        });
+
+      } catch (error) {
+        console.error('Erreur lors du chargement des données réelles:', error);
+      }
+    };
+
+    loadRealData();
+  }, [profileDataFromHook]);
+
   // Paramètres de confidentialité
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
     show_email: true,
@@ -233,8 +277,46 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
 
   // Ne charger les données que si c'est le profil de l'utilisateur connecté (pas de username fourni)
   useEffect(() => {
-    if (!username) {
+    if (!username && user) {
       loadProfileData();
+      
+      // Charger aussi les vraies données pour le profil propre
+      const loadOwnData = async () => {
+        try {
+          // Charger les statistiques
+          const userStats = await StatisticsService.getProfileStatistics(user.id);
+          setStatistics(userStats);
+
+          // Charger les compétences
+          const userSkills = await SkillsService.getUserSkills(user.id);
+          setSkills(userSkills);
+
+          // Charger les récompenses
+          const userAwards = await AwardsService.getUserAwards(user.id);
+          setAwards(userAwards);
+
+          // Charger les commandes
+          const userOrders = await OrdersService.getUserOrders(user.id);
+          setOrders(userOrders);
+
+          // Charger les activités
+          const userActivities = await ActivityService.getUserActivities(user.id);
+          setActivities(userActivities);
+
+          console.log('📊 Données propres chargées:', {
+            statistics: userStats,
+            skills: userSkills.length,
+            awards: userAwards.length,
+            orders: userOrders.length,
+            activities: userActivities.length
+          });
+
+        } catch (error) {
+          console.error('Erreur lors du chargement des données propres:', error);
+        }
+      };
+
+      loadOwnData();
     }
   }, [user, username]);
 
