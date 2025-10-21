@@ -138,6 +138,7 @@ const StatsPage: React.FC = () => {
   // Utiliser les données du hook pour les graphiques
   const pieData = stats?.ordersByStatus.map(s => ({ name: s.status, value: s.count })) || [];
   const topClients = stats?.topClients || [];
+  const allStatuses = stats?.ordersByStatus.map(s => s.status) || [];
 
   // Recent Activity
   const recentActivities = stats?.recentOrders.map(o => ({
