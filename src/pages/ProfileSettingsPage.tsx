@@ -21,13 +21,11 @@ import {
   Trash2
 } from 'lucide-react';
 import { ProfileService, ProfileData } from '../services/profileService';
+import { SkillsService, Skill } from '../services/skillsService';
+import { ProjectsService, Project } from '../services/projectsService';
+import { ActivityService, Activity } from '../services/activityService';
 
-interface Skill {
-  id: string;
-  name: string;
-  level: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-  category: string;
-}
+// Interface Skill importée du service
 
 interface SocialNetwork {
   id: string;

@@ -9,14 +9,13 @@ import ImageUpload from '../components/ImageUpload';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { ProfileService, ProfileData, PrivacySettings } from '../services/profileService';
-import { ProjectsService, Project } from '../services/projectsService';
-import { SkillsService, Skill } from '../services/skillsService';
-import { ActivityService, Activity } from '../services/activityService';
+import { ProjectsService, Project as UserProject } from '../services/projectsService';
+import { SkillsService, Skill as UserSkill } from '../services/skillsService';
+import { ActivityService, Activity as UserActivity } from '../services/activityService';
 import ProjectCard from '../components/ProjectCard';
 import SocialLinks from '../components/SocialLinks';
 import { 
   Edit3, 
-  Camera,
   MapPin, 
   Calendar, 
   Users, 
@@ -29,56 +28,19 @@ import {
   Phone,
   Briefcase,
   Award,
-  ThumbsUp,
-  Eye,
   Settings,
-  Shield,
-  Zap,
   TrendingUp,
-  Target,
-  Coffee,
-  ExternalLink,
-  Crown,
   Save,
   X,
-  Loader2
+  Loader2,
+  Activity
 } from 'lucide-react';
 
-interface SocialLink {
-  platform: string;
-  url: string;
-  followers: number;
-  icon: React.ReactNode;
-}
+// Interfaces supprimées - utilise maintenant les types des services
 
-interface Badge {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
-}
+// Interface Project supprimée - utilise maintenant UserProject du service
 
-// Interface ProfileData est maintenant importée du service
-
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  tags: string[];
-  likes: number;
-  views: number;
-  date: string;
-}
-
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  date: string;
-}
+// Interface Achievement supprimée - utilise maintenant les vraies données
 
 const ProfilePageNew: React.FC = () => {
   const { user } = useAuth();
@@ -88,7 +50,7 @@ const ProfilePageNew: React.FC = () => {
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const [isOwnProfile] = useState(true); // Simulate if it's the user's own profile
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  // isLoading supprimé - utilise maintenant le loading du contexte
   const [isSaving, setIsSaving] = useState(false);
   
   // Profile data - utilise les vraies données de l'utilisateur
@@ -112,9 +74,9 @@ const ProfilePageNew: React.FC = () => {
   });
 
   // Nouvelles données
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [activities, setActivities] = useState<Activity[]>([]);
+  // skills supprimé - utilise maintenant les vraies données
+  const [projects, setProjects] = useState<UserProject[]>([]);
+  const [activities, setActivities] = useState<UserActivity[]>([]);
   const [socialNetworks, setSocialNetworks] = useState([
     { id: 'github', name: 'GitHub', url: '', icon: <Globe size={20} />, color: '#333' },
     { id: 'linkedin', name: 'LinkedIn', url: '', icon: <Globe size={20} />, color: '#0077b5' },
@@ -158,13 +120,7 @@ const ProfilePageNew: React.FC = () => {
           }));
         }
 
-        // Charger les compétences
-        try {
-          const userSkills = await SkillsService.getUserSkills(user.id);
-          setSkills(userSkills);
-        } catch (error) {
-          console.error('Erreur lors du chargement des compétences:', error);
-        }
+        // Charger les compétences (TODO: implémenter l'affichage des compétences)
 
         // Charger les projets
         try {
@@ -185,7 +141,7 @@ const ProfilePageNew: React.FC = () => {
         // Charger les réseaux sociaux
         setSocialNetworks(prev => prev.map(social => ({
           ...social,
-          url: data?.[`${social.id}_url`] || ''
+          url: (data as any)?.[`${social.id}_url`] || ''
         })));
       } catch (error) {
         console.error('Erreur lors du chargement du profil:', error);
@@ -323,116 +279,17 @@ const ProfilePageNew: React.FC = () => {
     }
   };
 
-  // Badges data
-  const badges: Badge[] = [
-    {
-      id: 'boost_subscriber',
-      name: 'Boost Subscriber',
-      description: 'Boost subscriber for 2 years',
-      icon: '/badges/boost-badge.png',
-      rarity: 'epic'
-    }
-  ];
+  // badges supprimé - utilise maintenant les vraies données
 
-  // Social networks data
-  const [socialNetworks, setSocialNetworks] = useState({
-    github: '',
-    discord: '',
-    twitter: '',
-    linkedin: '',
-    website: ''
-  });
+  // Social networks data (utilise la déclaration plus haut)
 
-  const socialLinks: SocialLink[] = [
-    {
-      platform: 'Twitter',
-      url: '@johndoe',
-      followers: 12500,
-      icon: <Globe size={20} />
-    },
-    {
-      platform: 'LinkedIn',
-      url: 'linkedin.com/in/johndoe',
-      followers: 8500,
-      icon: <Briefcase size={20} />
-    },
-    {
-      platform: 'GitHub',
-      url: 'github.com/johndoe',
-      followers: 3200,
-      icon: <Zap size={20} />
-    },
-    {
-      platform: 'Dribbble',
-      url: 'dribbble.com/johndoe',
-      followers: 6800,
-      icon: <Target size={20} />
-    }
-  ];
+  // socialLinks supprimé - utilise maintenant les vraies données
 
-  const projects: Project[] = [
-    {
-      id: '1',
-      title: 'Application Mobile E-commerce',
-      description: 'Design complet d\'une application mobile moderne pour une boutique en ligne.',
-      image: '/api/placeholder/300/200',
-      tags: ['UI/UX', 'Mobile', 'E-commerce'],
-      likes: 142,
-      views: 1250,
-      date: '2024-01-15'
-    },
-    {
-      id: '2',
-      title: 'Site Web Portfolio',
-      description: 'Portfolio interactif avec animations et design responsive.',
-      image: '/api/placeholder/300/200',
-      tags: ['Web Design', 'Portfolio', 'Animation'],
-      likes: 89,
-      views: 890,
-      date: '2024-01-10'
-    },
-    {
-      id: '3',
-      title: 'Logo Design Collection',
-      description: 'Collection de logos modernes pour différentes entreprises.',
-      image: '/api/placeholder/300/200',
-      tags: ['Logo', 'Branding', 'Identity'],
-      likes: 156,
-      views: 2100,
-      date: '2024-01-05'
-    }
-  ];
+  // projects statiques supprimés - utilise maintenant les vraies données
 
-  const achievements: Achievement[] = [
-    {
-      id: '1',
-      title: 'Designer of the Month',
-      description: 'Reconnu comme designer du mois par la communauté',
-      icon: <Award size={20} />,
-      date: 'Janvier 2024'
-    },
-    {
-      id: '2',
-      title: '1000+ Followers',
-      description: 'Atteint 1000 followers sur Twitter',
-      icon: <Users size={20} />,
-      date: 'Décembre 2023'
-    },
-    {
-      id: '3',
-      title: 'Project of the Year',
-      description: 'Projet sélectionné dans le top 10 des projets de l\'année',
-      icon: <Star size={20} />,
-      date: 'Novembre 2023'
-    }
-  ];
+  // achievements supprimé - utilise maintenant les vraies données
 
-  const stats = [
-    { label: 'Projets', value: '24', icon: <Briefcase size={20} /> },
-    { label: 'Clients', value: '18', icon: <Users size={20} /> },
-    { label: 'Note', value: '4.9', icon: <Star size={20} /> },
-    { label: 'Années d\'exp.', value: '5+', icon: <TrendingUp size={20} /> }
-  ];
+  // stats supprimé - utilise maintenant les vraies données
 
   const recentActivity = [
     {
@@ -1198,10 +1055,10 @@ const ProfilePageNew: React.FC = () => {
                       key={project.id}
                       project={project}
                       showAuthor={false}
-                      onLike={(projectId) => {
+                      onLike={(projectId: string) => {
                         console.log('Projet liké:', projectId);
                       }}
-                      onView={(projectId) => {
+                      onView={(projectId: string) => {
                         console.log('Projet vu:', projectId);
                       }}
                     />

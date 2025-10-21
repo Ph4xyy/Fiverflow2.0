@@ -8,6 +8,7 @@ export interface ProfileData {
   location?: string;
   website?: string;
   phone?: string;
+  email?: string; // Email principal de l'utilisateur
   professional_title?: string;
   status?: 'available' | 'busy' | 'away' | 'do_not_disturb';
   show_email?: boolean;

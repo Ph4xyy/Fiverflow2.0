@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Heart, Eye, ExternalLink, Calendar, User, Tag } from 'lucide-react';
 import { ProjectsService, Project } from '../services/projectsService';
 import { ActivityService } from '../services/activityService';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ProjectCardProps {
   project: Project;
@@ -24,17 +25,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   isLiked = false,
   className = ''
 }) => {
+  const { user } = useAuth();
   const [likes, setLikes] = useState(project.likes_count);
   const [views, setViews] = useState(project.views_count);
   const [liked, setLiked] = useState(isLiked);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLike = async () => {
-    if (isLoading) return;
+    if (isLoading || !user) return;
     
     try {
       setIsLoading(true);
-      await ProjectsService.likeProject(project.id, 'current-user-id');
+      await ProjectsService.likeProject(project.id, user.id);
       
       if (liked) {
         setLikes(prev => Math.max(0, prev - 1));
@@ -54,8 +56,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   };
 
   const handleView = async () => {
+    if (!user) return;
+    
     try {
-      await ProjectsService.viewProject(project.id, 'current-user-id');
+      await ProjectsService.viewProject(project.id, user.id);
       setViews(prev => prev + 1);
       onView?.(project.id);
     } catch (error) {

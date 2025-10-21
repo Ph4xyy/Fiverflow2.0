@@ -128,16 +128,38 @@ export class ProjectsService {
         .eq('project_id', projectId)
         .eq('user_id', userId);
 
-      // Décrémenter le compteur
-      await supabase.rpc('decrement_project_likes', { project_id: projectId });
+      // Décrémenter le compteur manuellement
+      const { data: project } = await supabase
+        .from('user_projects')
+        .select('likes_count')
+        .eq('id', projectId)
+        .single();
+      
+      if (project) {
+        await supabase
+          .from('user_projects')
+          .update({ likes_count: Math.max(0, project.likes_count - 1) })
+          .eq('id', projectId);
+      }
     } else {
       // Ajouter le like
       await supabase
         .from('project_likes')
         .insert([{ project_id: projectId, user_id: userId }]);
 
-      // Incrémenter le compteur
-      await supabase.rpc('increment_project_likes', { project_id: projectId });
+      // Incrémenter le compteur manuellement
+      const { data: project } = await supabase
+        .from('user_projects')
+        .select('likes_count')
+        .eq('id', projectId)
+        .single();
+      
+      if (project) {
+        await supabase
+          .from('user_projects')
+          .update({ likes_count: project.likes_count + 1 })
+          .eq('id', projectId);
+      }
     }
   }
 
@@ -151,8 +173,19 @@ export class ProjectsService {
         ip_address: ipAddress
       }]);
 
-    // Incrémenter le compteur de vues
-    await supabase.rpc('increment_project_views', { project_id: projectId });
+    // Incrémenter le compteur de vues manuellement
+    const { data: project } = await supabase
+      .from('user_projects')
+      .select('views_count')
+      .eq('id', projectId)
+      .single();
+    
+    if (project) {
+      await supabase
+        .from('user_projects')
+        .update({ views_count: project.views_count + 1 })
+        .eq('id', projectId);
+    }
   }
 
   static async getUserLikedProjects(userId: string): Promise<string[]> {
