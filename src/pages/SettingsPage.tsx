@@ -597,7 +597,7 @@ const SettingsPage: React.FC = () => {
               {/* Thème spécial Halloween */}
               <div className="mb-8">
                 <div className="relative rounded-xl p-6 border-2 border-orange-400 overflow-hidden" style={{
-                  backgroundImage: 'url(/src/assets/Images/grunge-halloween-background.jpg)',
+                  backgroundImage: 'url(/image.png)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat'
@@ -878,8 +878,7 @@ const SettingsPage: React.FC = () => {
                 <h3 className="text-xl font-semibold text-white mb-4">Plans disponibles</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Users size={20} className="text-blue-400" />
+                    <div className="mb-3">
                       <h4 className="text-white font-semibold">Lunch</h4>
                     </div>
                     <p className="text-2xl font-bold text-[#9c68f2] mb-2">0€<span className="text-sm text-gray-400">/mois</span></p>
@@ -898,8 +897,7 @@ const SettingsPage: React.FC = () => {
                     <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
                       <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">Populaire</span>
                     </div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Zap size={20} className="text-yellow-400" />
+                    <div className="mb-3">
                       <h4 className="text-white font-semibold">Boost</h4>
                     </div>
                     <p className="text-2xl font-bold text-[#9c68f2] mb-2">24€<span className="text-sm text-gray-400">/mois</span></p>
@@ -918,8 +916,7 @@ const SettingsPage: React.FC = () => {
                   </div>
 
                   <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Crown size={20} className="text-purple-400" />
+                    <div className="mb-3">
                       <h4 className="text-white font-semibold">Scale</h4>
                     </div>
                     <p className="text-2xl font-bold text-[#9c68f2] mb-2">59€<span className="text-sm text-gray-400">/mois</span></p>
@@ -943,27 +940,30 @@ const SettingsPage: React.FC = () => {
             {/* Méthodes de paiement */}
             <ModernCard>
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Méthodes de paiement</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold text-white">Méthodes de paiement</h3>
+                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                    <Shield size={16} />
+                    <span>Sécurisé par Stripe</span>
+                  </div>
+                </div>
+                
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-                        <CreditCard size={16} className="text-white" />
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">Carte bancaire</p>
-                        <p className="text-sm text-gray-400">•••• •••• •••• 4242</p>
-                      </div>
-                    </div>
-                    <button className="text-red-400 hover:text-red-300 text-sm">
-                      Supprimer
-                    </button>
+                  <div className="text-center py-8 text-gray-400">
+                    <CreditCard size={48} className="mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-medium mb-2">Aucune méthode de paiement</p>
+                    <p className="text-sm">Ajoutez une carte pour souscrire à un abonnement</p>
                   </div>
 
-                  <ModernButton variant="outline" className="w-full">
+                  <ModernButton className="w-full">
                     <Plus size={16} className="mr-2" />
-                    Ajouter une méthode de paiement
+                    Ajouter une carte bancaire
                   </ModernButton>
+                  
+                  <div className="text-xs text-gray-500 text-center">
+                    <p>🔒 Vos informations de paiement sont sécurisées par Stripe</p>
+                    <p>Nous ne stockons jamais vos données bancaires</p>
+                  </div>
                 </div>
               </div>
             </ModernCard>
