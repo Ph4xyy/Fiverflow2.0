@@ -713,37 +713,66 @@ const OrdersPage: React.FC = () => {
           isOpen={isDetailModalOpen}
           onClose={() => setIsDetailModalOpen(false)}
           onEdit={(order: any) => {
+            console.log('🔍 OrderDetailModal onEdit - order reçu:', order);
             setIsDetailModalOpen(false);
-            const orow: OrderRow = order?.clients
-              ? order
-              : {
-                  ...order,
-                  clients: { name: order?.client_name || 'Client', platform: order?.platform || null },
-                };
             
-            // Convertir les données OrderDetail vers le format OrderForm
-            const orderForForm = {
-              id: orow.id,
-              title: orow.title,
-              description: orow.description,
-              amount: orow.budget || 0, // budget -> amount
-              deadline: orow.due_date || '', // due_date -> deadline
-              client_id: orow.client_id || '',
-              status: orow.status as 'Pending' | 'In Progress' | 'Completed',
-              // Champs existants dans la DB
-              start_date: orow.start_date,
-              completion_date: orow.completed_date, // completed_date -> completion_date
-              // Champs non disponibles dans la DB (valeurs par défaut)
-              project_type: orow.project_type || '',
-              priority_level: orow.priority_level || 'medium',
-              estimated_hours: orow.estimated_hours || '',
-              hourly_rate: orow.hourly_rate || '',
-              payment_status: orow.payment_status || 'pending',
-              notes: orow.notes || '',
-              tags: orow.tags || [],
-              revision_count: orow.revision_count || 0,
-              client_feedback: orow.client_feedback || '',
+            // Convertir OrderDetail vers OrderRow puis vers OrderForm
+            const orderRow: OrderRow = {
+              id: order.id,
+              title: order.title,
+              description: order.description,
+              budget: order.budget,
+              status: order.status,
+              due_date: order.due_date,
+              created_at: order.created_at,
+              start_date: order.start_date,
+              completed_date: order.completed_date,
+              platform: order.platform,
+              client_name: order.client_name,
+              client_email: order.client_email,
+              clients: order.clients || { 
+                name: order.client_name || 'Client', 
+                platform: order.platform || null 
+              },
+              // Champs non disponibles dans la DB (pour compatibilité)
+              project_type: order.project_type,
+              priority_level: order.priority_level,
+              estimated_hours: order.estimated_hours,
+              hourly_rate: order.hourly_rate,
+              payment_status: order.payment_status,
+              notes: order.notes,
+              tags: order.tags,
+              revision_count: order.revision_count,
+              client_feedback: order.client_feedback,
             };
+            
+            console.log('🔄 OrderRow converti:', orderRow);
+            
+            // Convertir OrderRow vers le format OrderForm
+            const orderForForm = {
+              id: orderRow.id,
+              title: orderRow.title,
+              description: orderRow.description,
+              amount: orderRow.budget || 0, // budget -> amount
+              deadline: orderRow.due_date || '', // due_date -> deadline
+              client_id: orderRow.client_id || '',
+              status: orderRow.status as 'Pending' | 'In Progress' | 'Completed',
+              // Champs existants dans la DB
+              start_date: orderRow.start_date,
+              completion_date: orderRow.completed_date, // completed_date -> completion_date
+              // Champs non disponibles dans la DB (valeurs par défaut)
+              project_type: orderRow.project_type || '',
+              priority_level: orderRow.priority_level || 'medium',
+              estimated_hours: orderRow.estimated_hours || '',
+              hourly_rate: orderRow.hourly_rate || '',
+              payment_status: orderRow.payment_status || 'pending',
+              notes: orderRow.notes || '',
+              tags: orderRow.tags || [],
+              revision_count: orderRow.revision_count || 0,
+              client_feedback: orderRow.client_feedback || '',
+            };
+            
+            console.log('✅ OrderForForm final:', orderForForm);
             
             editOrder(orderForForm as any);
           }}
