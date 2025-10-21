@@ -716,6 +716,16 @@ const OrdersPage: React.FC = () => {
           order={selectedOrder}
           isOpen={isDetailModalOpen}
           onClose={() => setIsDetailModalOpen(false)}
+          onOrderUpdated={(updatedOrder) => {
+            // Mettre à jour la liste des orders avec les nouvelles données
+            setOrders(prevOrders => 
+              prevOrders.map(order => 
+                order.id === updatedOrder.id ? { ...order, ...updatedOrder } : order
+              )
+            );
+            // Mettre à jour l'order sélectionné
+            setSelectedOrder(updatedOrder);
+          }}
           onEdit={(order: any) => {
             console.log('🔍 OrderDetailModal onEdit - order reçu:', order);
             setIsDetailModalOpen(false);
