@@ -176,7 +176,7 @@ const OrdersPage: React.FC = () => {
           id,title,description,budget,status,due_date,created_at,
           start_date,completed_date,platform,client_name,client_email,
           client_id,
-          clients!inner(name,platform,user_id)
+          clients!inner(id,name,platform,user_id)
         `, { count: 'exact' })
         .eq('clients.user_id', user.id)
         .order('created_at', { ascending: false });
