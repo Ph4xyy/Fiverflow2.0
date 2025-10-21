@@ -1,11 +1,11 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import UniversalProfilePageNew from '../components/UniversalProfilePageNew';
+import ProfilePageNew from './ProfilePageNew';
 
 const ProfileUsername: React.FC = () => {
   const { username } = useParams<{ username: string }>();
 
-  return <UniversalProfilePageNew username={username} />;
+  return <ProfilePageNew username={username} />;
 };
 
 export default ProfileUsername;

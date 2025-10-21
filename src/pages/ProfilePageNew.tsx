@@ -14,6 +14,8 @@ import { SkillsService, Skill as UserSkill } from '../services/skillsService';
 import { AwardsService, Award as UserAward } from '../services/awardsService';
 import { ActivityService, Activity as UserActivity } from '../services/activityService';
 import { StatisticsService } from '../services/statisticsService';
+import { useProfile } from '../hooks/useProfile';
+import { useNavigate } from 'react-router-dom';
 // import ProjectCard from '../components/ProjectCard';
 // import SocialLinks from '../components/SocialLinks';
 import { 
@@ -49,20 +51,33 @@ import {
 
 // Interface Achievement supprimée - utilise maintenant les vraies données
 
-const ProfilePageNew: React.FC = () => {
+interface ProfilePageNewProps {
+  username?: string;
+}
+
+const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  // Utiliser le hook useProfile pour récupérer les données
+  const { 
+    profileData: profileDataFromHook, 
+    loading: profileLoading, 
+    error: profileError, 
+    isOwnProfile 
+  } = useProfile(username);
   const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'activity'>('overview');
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
-  const [isOwnProfile] = useState(true); // Simulate if it's the user's own profile
+  // isOwnProfile vient maintenant du hook useProfile
   const [isAdmin, setIsAdmin] = useState(false);
   // const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
-  // Profile data - utilise les vraies données de l'utilisateur
+  // Profile data - utilise les données du hook ou des valeurs par défaut
   const [profileData, setProfileData] = useState<ProfileData>({
-    full_name: 'Utilisateur', // Valeur par défaut, sera mise à jour
+    full_name: 'Utilisateur',
     professional_title: 'UI/UX Designer & Frontend Developer',
     location: 'Paris, France',
     bio: 'Passionate about design and development, I create exceptional user experiences for 5 years.',
@@ -73,6 +88,69 @@ const ProfilePageNew: React.FC = () => {
     show_email: true,
     show_phone: true
   });
+
+  // Mettre à jour les données du profil quand les données du hook changent
+  useEffect(() => {
+    if (profileDataFromHook) {
+      const publicData = profileDataFromHook.public_data;
+      setProfileData(prev => ({
+        ...prev,
+        full_name: publicData.full_name || prev.full_name,
+        bio: publicData.bio || prev.bio,
+        location: publicData.location || prev.location,
+        website: publicData.website || prev.website,
+        // Ne pas exposer l'email et le téléphone pour les autres utilisateurs
+        email: isOwnProfile ? (user?.email || prev.email) : '',
+        phone: isOwnProfile ? prev.phone : ''
+      }));
+    }
+  }, [profileDataFromHook, isOwnProfile, user?.email]);
+
+  // Gestion des états de chargement et d'erreur
+  if (profileLoading) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
+            <p className="text-gray-600 dark:text-gray-400">Chargement du profil...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (profileError) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-8 max-w-md">
+              <div className="text-red-500 mb-4">
+                <X className="h-12 w-12 mx-auto" />
+              </div>
+              <h1 className="text-2xl font-bold text-red-700 dark:text-red-400 mb-2">
+                {profileError}
+              </h1>
+              <p className="text-red-600 dark:text-red-300 mb-6">
+                {profileError === 'Profil introuvable' 
+                  ? 'Ce profil n\'existe pas ou a été supprimé.'
+                  : 'Une erreur est survenue lors du chargement du profil.'
+                }
+              </p>
+              <ModernButton
+                onClick={() => navigate('/')}
+                variant="primary"
+                size="md"
+              >
+                Retour à l'accueil
+              </ModernButton>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   // Paramètres de confidentialité
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
