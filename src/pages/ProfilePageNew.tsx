@@ -116,37 +116,77 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
 
       const targetUserId = profileDataFromHook.user_id;
       
+      console.log('🔄 Chargement des données pour userId:', targetUserId);
+      
       try {
         // Charger les statistiques
-        const userStats = await StatisticsService.getProfileStatistics(targetUserId);
-        setStatistics(userStats);
+        try {
+          const userStats = await StatisticsService.getProfileStatistics(targetUserId);
+          setStatistics(userStats);
+          console.log('✅ Statistiques chargées:', userStats);
+        } catch (error) {
+          console.warn('⚠️ Erreur statistiques:', error);
+          setStatistics({ clients: 0, orders: 0, rating: 0, experience: 0 });
+        }
 
         // Charger les compétences
-        const userSkills = await SkillsService.getUserSkills(targetUserId);
-        setSkills(userSkills);
+        try {
+          const userSkills = await SkillsService.getUserSkills(targetUserId);
+          setSkills(userSkills);
+          console.log('✅ Compétences chargées:', userSkills.length);
+        } catch (error) {
+          console.warn('⚠️ Erreur compétences:', error);
+          setSkills([]);
+        }
 
         // Charger les récompenses
-        const userAwards = await AwardsService.getUserAwards(targetUserId);
-        setAwards(userAwards);
+        try {
+          const userAwards = await AwardsService.getUserAwards(targetUserId);
+          setAwards(userAwards);
+          console.log('✅ Récompenses chargées:', userAwards.length);
+        } catch (error) {
+          console.warn('⚠️ Erreur récompenses:', error);
+          setAwards([]);
+        }
 
         // Charger les commandes
-        const userOrders = await OrdersService.getUserOrders(targetUserId);
-        setOrders(userOrders);
+        try {
+          const userOrders = await OrdersService.getUserOrders(targetUserId);
+          setOrders(userOrders);
+          console.log('✅ Commandes chargées:', userOrders.length);
+        } catch (error) {
+          console.warn('⚠️ Erreur commandes:', error);
+          setOrders([]);
+        }
 
         // Charger les activités
-        const userActivities = await ActivityService.getUserActivities(targetUserId);
-        setActivities(userActivities);
+        try {
+          const userActivities = await ActivityService.getUserActivities(targetUserId);
+          setActivities(userActivities);
+          console.log('✅ Activités chargées:', userActivities.length);
+        } catch (error) {
+          console.warn('⚠️ Erreur activités:', error);
+          setActivities([]);
+        }
 
-        console.log('📊 Données réelles chargées:', {
-          statistics: userStats,
-          skills: userSkills.length,
-          awards: userAwards.length,
-          orders: userOrders.length,
-          activities: userActivities.length
+        console.log('📊 Données réelles chargées pour profil:', {
+          userId: targetUserId,
+          username: profileDataFromHook.public_data?.username,
+          statistics: statistics,
+          skills: skills.length,
+          awards: awards.length,
+          orders: orders.length,
+          activities: activities.length
         });
 
       } catch (error) {
         console.error('Erreur lors du chargement des données réelles:', error);
+        // En cas d'erreur, réinitialiser les données
+        setStatistics({ clients: 0, orders: 0, rating: 0, experience: 0 });
+        setSkills([]);
+        setAwards([]);
+        setOrders([]);
+        setActivities([]);
       }
     };
 
