@@ -24,18 +24,25 @@ const ConversationSystem: React.FC<ConversationSystemProps> = ({ isOpen, onClose
   const [showUserSearch, setShowUserSearch] = useState(false);
 
   const handleStartConversation = (userId: string) => {
-    // TODO: Créer ou récupérer la conversation
     console.log('Démarrer conversation avec:', userId);
     
-    // Pour l'instant, on simule une conversation
+    // Simuler une conversation avec des données de test
+    const mockUsers = {
+      '1': { name: 'John Doe', username: 'johndoe', avatar: '' },
+      '2': { name: 'Jane Smith', username: 'janesmith', avatar: '' },
+      '3': { name: 'Mike Johnson', username: 'mikej', avatar: '' }
+    };
+    
+    const user = mockUsers[userId as keyof typeof mockUsers] || { 
+      name: 'Utilisateur', 
+      username: 'utilisateur', 
+      avatar: '' 
+    };
+    
     setSelectedConversation({
-      id: 'new-conversation',
-      title: 'Nouvelle conversation',
-      otherParticipant: {
-        name: 'Utilisateur',
-        username: 'utilisateur',
-        avatar: ''
-      }
+      id: `conversation-${userId}`,
+      title: `Conversation avec ${user.name}`,
+      otherParticipant: user
     });
     setCurrentView('chat');
   };
@@ -91,6 +98,7 @@ const ConversationSystem: React.FC<ConversationSystemProps> = ({ isOpen, onClose
         <ConversationMenu
           isOpen={isOpen}
           onClose={handleClose}
+          onSelectConversation={handleSelectConversation}
         />
       )}
       

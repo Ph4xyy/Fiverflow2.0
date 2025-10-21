@@ -43,15 +43,8 @@ const UserSearchModal: React.FC<UserSearchModalProps> = ({
     
     setLoading(true);
     try {
-      // TODO: Implémenter la vraie recherche
-      // const { data } = await supabase
-      //   .from('user_profiles')
-      //   .select('user_id, full_name, username, avatar_url')
-      //   .or(`${searchType}.ilike.%${searchQuery}%`)
-      //   .neq('user_id', user.id)
-      //   .limit(10);
-      
-      // Données de test pour l'instant
+      // Pour l'instant, utiliser des données de test
+      // TODO: Remplacer par les vraies données quand la DB sera créée
       const mockResults: User[] = [
         {
           id: '1',
@@ -70,10 +63,26 @@ const UserSearchModal: React.FC<UserSearchModalProps> = ({
           avatar_url: '',
           is_friend: true,
           friend_request_status: 'accepted'
+        },
+        {
+          id: '3',
+          full_name: 'Mike Johnson',
+          username: 'mikej',
+          email: 'mike@example.com',
+          avatar_url: '',
+          is_friend: false,
+          friend_request_status: 'none'
         }
       ];
       
-      setSearchResults(mockResults);
+      // Filtrer les résultats basés sur la recherche
+      const filteredResults = mockResults.filter(user => 
+        user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (searchType === 'email' && user.email.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      
+      setSearchResults(filteredResults);
     } catch (error) {
       console.error('Erreur lors de la recherche:', error);
     } finally {

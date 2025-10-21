@@ -17,9 +17,10 @@ interface Conversation {
 interface ConversationMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  onSelectConversation?: (conversation: Conversation) => void;
 }
 
-const ConversationMenu: React.FC<ConversationMenuProps> = ({ isOpen, onClose }) => {
+const ConversationMenu: React.FC<ConversationMenuProps> = ({ isOpen, onClose, onSelectConversation }) => {
   const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,11 +39,8 @@ const ConversationMenu: React.FC<ConversationMenuProps> = ({ isOpen, onClose }) 
     
     setLoading(true);
     try {
-      // TODO: Implémenter le chargement des conversations
-      // const { data } = await supabase.rpc('get_user_conversations', { user_id: user.id });
-      // setConversations(data || []);
-      
-      // Données de test pour l'instant
+      // Pour l'instant, utiliser des données de test
+      // TODO: Remplacer par les vraies données quand la DB sera créée
       setConversations([
         {
           id: '1',
@@ -53,6 +51,17 @@ const ConversationMenu: React.FC<ConversationMenuProps> = ({ isOpen, onClose }) 
           unread_count: 2,
           other_participant_name: 'John Doe',
           other_participant_username: 'johndoe',
+          other_participant_avatar: ''
+        },
+        {
+          id: '2',
+          title: 'Conversation avec Jane Smith',
+          type: 'direct',
+          last_message_content: 'Merci pour le projet !',
+          last_message_at: new Date(Date.now() - 3600000).toISOString(),
+          unread_count: 0,
+          other_participant_name: 'Jane Smith',
+          other_participant_username: 'janesmith',
           other_participant_avatar: ''
         }
       ]);
@@ -162,6 +171,7 @@ const ConversationMenu: React.FC<ConversationMenuProps> = ({ isOpen, onClose }) 
                   <div
                     key={conversation.id}
                     className="flex items-center gap-3 p-4 hover:bg-gray-800 cursor-pointer transition-colors"
+                    onClick={() => onSelectConversation?.(conversation)}
                   >
                     {/* Avatar */}
                     <div className="relative">

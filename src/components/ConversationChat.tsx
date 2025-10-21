@@ -49,14 +49,8 @@ const ConversationChat: React.FC<ConversationChatProps> = ({
   const loadMessages = async () => {
     setLoading(true);
     try {
-      // TODO: Implémenter le chargement des messages
-      // const { data } = await supabase
-      //   .from('messages')
-      //   .select('*, sender:user_profiles!messages_sender_id_fkey(*)')
-      //   .eq('conversation_id', conversationId)
-      //   .order('created_at', { ascending: true });
-      
-      // Données de test pour l'instant
+      // Pour l'instant, utiliser des données de test
+      // TODO: Remplacer par les vraies données quand la DB sera créée
       const mockMessages: Message[] = [
         {
           id: '1',
@@ -79,6 +73,17 @@ const ConversationChat: React.FC<ConversationChatProps> = ({
           sender_name: 'Moi',
           sender_username: 'moi',
           sender_avatar: ''
+        },
+        {
+          id: '3',
+          content: 'Super ! J\'ai un nouveau projet à te proposer',
+          sender_id: otherParticipant.username,
+          created_at: new Date(Date.now() - 900000).toISOString(),
+          is_edited: false,
+          is_deleted: false,
+          sender_name: otherParticipant.name,
+          sender_username: otherParticipant.username,
+          sender_avatar: otherParticipant.avatar
         }
       ];
       
@@ -95,16 +100,8 @@ const ConversationChat: React.FC<ConversationChatProps> = ({
     
     setSending(true);
     try {
-      // TODO: Implémenter l'envoi de message
-      // const { data } = await supabase
-      //   .from('messages')
-      //   .insert({
-      //     conversation_id: conversationId,
-      //     content: newMessage.trim(),
-      //     sender_id: user.id
-      //   });
-      
-      // Message temporaire
+      // Pour l'instant, simuler l'envoi de message
+      // TODO: Remplacer par les vraies données quand la DB sera créée
       const tempMessage: Message = {
         id: Date.now().toString(),
         content: newMessage.trim(),
@@ -117,8 +114,26 @@ const ConversationChat: React.FC<ConversationChatProps> = ({
         sender_avatar: ''
       };
       
+      // Ajouter le message à la liste
       setMessages(prev => [...prev, tempMessage]);
       setNewMessage('');
+      
+      // Simuler une réponse automatique après 2 secondes
+      setTimeout(() => {
+        const autoReply: Message = {
+          id: (Date.now() + 1).toString(),
+          content: 'Merci pour votre message ! Je vous répondrai bientôt.',
+          sender_id: otherParticipant.username,
+          created_at: new Date().toISOString(),
+          is_edited: false,
+          is_deleted: false,
+          sender_name: otherParticipant.name,
+          sender_username: otherParticipant.username,
+          sender_avatar: otherParticipant.avatar
+        };
+        setMessages(prev => [...prev, autoReply]);
+      }, 2000);
+      
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message:', error);
     } finally {
