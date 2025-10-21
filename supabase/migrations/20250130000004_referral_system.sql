@@ -17,7 +17,23 @@ CREATE INDEX IF NOT EXISTS idx_user_profiles_referral_code ON user_profiles(refe
 CREATE INDEX IF NOT EXISTS idx_user_profiles_referred_by ON user_profiles(referred_by);
 
 -- =============================================
--- 2. TABLE REFERRAL_COMMISSIONS
+-- 2. TYPE ENUM POUR LE STATUT DES COMMISSIONS
+-- =============================================
+
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'commission_status') THEN
+        CREATE TYPE commission_status AS ENUM (
+            'pending',      -- En attente de paiement
+            'paid',         -- Payé
+            'cancelled',    -- Annulé
+            'refunded'      -- Remboursé
+        );
+    END IF;
+END $$;
+
+-- =============================================
+-- 3. TABLE REFERRAL_COMMISSIONS
 -- =============================================
 
 CREATE TABLE IF NOT EXISTS referral_commissions (
@@ -47,21 +63,6 @@ CREATE INDEX IF NOT EXISTS idx_referral_commissions_referred ON referral_commiss
 CREATE INDEX IF NOT EXISTS idx_referral_commissions_status ON referral_commissions(status);
 CREATE INDEX IF NOT EXISTS idx_referral_commissions_created ON referral_commissions(created_at);
 
--- =============================================
--- 3. TYPE ENUM POUR LE STATUT DES COMMISSIONS
--- =============================================
-
-DO $$ 
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'commission_status') THEN
-        CREATE TYPE commission_status AS ENUM (
-            'pending',      -- En attente de paiement
-            'paid',         -- Payé
-            'cancelled',    -- Annulé
-            'refunded'      -- Remboursé
-        );
-    END IF;
-END $$;
 
 -- =============================================
 -- 4. FONCTIONS SQL POUR LE SYSTÈME DE PARRAINAGE
