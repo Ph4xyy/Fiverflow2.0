@@ -4,8 +4,6 @@ import { corsHeaders } from '../_shared/cors.ts'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY')!
-const stripeWebhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!
 
 // Créer le client Supabase avec la clé de service
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
@@ -28,6 +26,15 @@ interface PaymentIntent {
     order_id?: string
     subscription_id?: string
   }
+}
+
+interface Invoice {
+  id: string
+  customer: string
+  amount_paid: number
+  currency: string
+  subscription?: string
+  status: string
 }
 
 interface Subscription {
@@ -68,9 +75,6 @@ serve(async (req) => {
       })
     }
 
-    // Vérifier la signature du webhook (optionnel en développement)
-    // En production, vous devriez vérifier la signature avec Stripe
-
     let event: StripeEvent
     try {
       event = JSON.parse(body)
@@ -82,16 +86,16 @@ serve(async (req) => {
       })
     }
 
-    console.log('🎯 Stripe webhook received:', event.type, event.id)
+    console.log('🎯 Referral webhook received:', event.type, event.id)
 
-    // Traiter les événements de paiement
+    // Traiter les événements de paiement pour les commissions
     switch (event.type) {
       case 'payment_intent.succeeded':
         await handlePaymentSuccess(event.data.object as PaymentIntent)
         break
 
       case 'invoice.payment_succeeded':
-        await handleInvoicePaymentSuccess(event.data.object)
+        await handleInvoicePaymentSuccess(event.data.object as Invoice)
         break
 
       case 'customer.subscription.created':
@@ -109,21 +113,22 @@ serve(async (req) => {
         break
 
       default:
-        console.log('Unhandled event type:', event.type)
+        console.log('Unhandled referral event type:', event.type)
     }
 
     return new Response(JSON.stringify({ 
       received: true, 
-      event_type: event.type 
+      event_type: event.type,
+      processed: true
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
 
   } catch (error) {
-    console.error('Webhook error:', error)
+    console.error('Referral webhook error:', error)
     return new Response(JSON.stringify({ 
-      error: 'Webhook processing failed' 
+      error: 'Referral webhook processing failed' 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -132,11 +137,15 @@ serve(async (req) => {
 })
 
 /**
- * Gérer un paiement réussi
+ * Gérer un paiement réussi - Créer une commission de parrainage
  */
 async function handlePaymentSuccess(paymentIntent: PaymentIntent) {
   try {
-    console.log('💰 Payment succeeded:', paymentIntent.id, paymentIntent.amount)
+    console.log('💰 Payment succeeded - Creating referral commission:', {
+      payment_id: paymentIntent.id,
+      amount: paymentIntent.amount,
+      customer: paymentIntent.customer
+    })
 
     // Trouver l'utilisateur par son customer_id Stripe
     const { data: user, error: userError } = await supabase
@@ -156,17 +165,20 @@ async function handlePaymentSuccess(paymentIntent: PaymentIntent) {
       return
     }
 
-    // Créer la commission de parrainage (20%)
-    const commissionAmount = (paymentIntent.amount * 0.20) / 100 // Convertir de centimes en euros
+    // Calculer la commission (20% du montant)
+    const amountInEuros = paymentIntent.amount / 100 // Convertir de centimes en euros
+    const commissionAmount = amountInEuros * 0.20 // 20% de commission
     const commissionPercentage = 20.00
 
     console.log('🎯 Creating referral commission:', {
       referrer_id: user.referred_by,
       referred_id: user.id,
       amount: commissionAmount,
-      percentage: commissionPercentage
+      percentage: commissionPercentage,
+      payment_reference: paymentIntent.id
     })
 
+    // Créer la commission de parrainage
     const { data: commission, error: commissionError } = await supabase
       .from('referral_commissions')
       .insert({
@@ -201,7 +213,11 @@ async function handlePaymentSuccess(paymentIntent: PaymentIntent) {
       console.error('Failed to update referrer stats:', statsError)
     }
 
-    console.log('✅ Referral commission created successfully:', commission.id)
+    console.log('✅ Referral commission created successfully:', {
+      commission_id: commission.id,
+      amount: commissionAmount,
+      referrer_id: user.referred_by
+    })
 
   } catch (error) {
     console.error('Error handling payment success:', error)
@@ -211,9 +227,13 @@ async function handlePaymentSuccess(paymentIntent: PaymentIntent) {
 /**
  * Gérer un paiement d'abonnement réussi
  */
-async function handleInvoicePaymentSuccess(invoice: any) {
+async function handleInvoicePaymentSuccess(invoice: Invoice) {
   try {
-    console.log('💳 Invoice payment succeeded:', invoice.id)
+    console.log('💳 Invoice payment succeeded - Creating referral commission:', {
+      invoice_id: invoice.id,
+      amount: invoice.amount_paid,
+      customer: invoice.customer
+    })
 
     // Trouver l'utilisateur par son customer_id Stripe
     const { data: user, error: userError } = await supabase
@@ -227,10 +247,12 @@ async function handleInvoicePaymentSuccess(invoice: any) {
       return
     }
 
-    // Créer la commission de parrainage (20%)
-    const commissionAmount = (invoice.amount_paid * 0.20) / 100
+    // Calculer la commission (20% du montant)
+    const amountInEuros = invoice.amount_paid / 100 // Convertir de centimes en euros
+    const commissionAmount = amountInEuros * 0.20 // 20% de commission
     const commissionPercentage = 20.00
 
+    // Créer la commission de parrainage
     const { data: commission, error: commissionError } = await supabase
       .from('referral_commissions')
       .insert({
@@ -241,7 +263,7 @@ async function handleInvoicePaymentSuccess(invoice: any) {
         status: 'pending',
         payment_method: 'stripe',
         payment_reference: invoice.id,
-        subscription_id: invoice.subscription
+        subscription_id: invoice.subscription || null
       })
       .select()
       .single()
@@ -260,7 +282,11 @@ async function handleInvoicePaymentSuccess(invoice: any) {
       })
       .eq('id', user.referred_by)
 
-    console.log('✅ Referral commission created for invoice:', commission.id)
+    console.log('✅ Referral commission created for invoice:', {
+      commission_id: commission.id,
+      amount: commissionAmount,
+      referrer_id: user.referred_by
+    })
 
   } catch (error) {
     console.error('Error handling invoice payment success:', error)
@@ -272,7 +298,11 @@ async function handleInvoicePaymentSuccess(invoice: any) {
  */
 async function handleSubscriptionUpdate(subscription: Subscription) {
   try {
-    console.log('🔄 Subscription updated:', subscription.id, subscription.status)
+    console.log('🔄 Subscription updated:', {
+      subscription_id: subscription.id,
+      status: subscription.status,
+      customer: subscription.customer
+    })
 
     // Si l'abonnement est actif, créer une commission
     if (subscription.status === 'active') {
@@ -288,11 +318,10 @@ async function handleSubscriptionUpdate(subscription: Subscription) {
         return
       }
 
-      // Récupérer les détails de l'abonnement depuis Stripe
-      // (Vous devriez faire un appel à l'API Stripe pour récupérer le prix)
-      // Pour l'instant, on utilise une valeur par défaut
-      const subscriptionAmount = 29.99 // Montant par défaut
-      const commissionAmount = subscriptionAmount * 0.20
+      // Pour les abonnements, on utilise un montant par défaut
+      // Vous pouvez récupérer le prix réel depuis l'API Stripe si nécessaire
+      const subscriptionAmount = 29.99 // Montant par défaut en euros
+      const commissionAmount = subscriptionAmount * 0.20 // 20% de commission
 
       const { data: commission, error: commissionError } = await supabase
         .from('referral_commissions')
@@ -314,7 +343,20 @@ async function handleSubscriptionUpdate(subscription: Subscription) {
         return
       }
 
-      console.log('✅ Referral commission created for subscription:', commission.id)
+      // Mettre à jour les statistiques du parrain
+      await supabase
+        .from('profiles')
+        .update({
+          referral_earnings: supabase.raw('referral_earnings + ?', [commissionAmount]),
+          total_referrals: supabase.raw('total_referrals + 1')
+        })
+        .eq('id', user.referred_by)
+
+      console.log('✅ Referral commission created for subscription:', {
+        commission_id: commission.id,
+        amount: commissionAmount,
+        referrer_id: user.referred_by
+      })
     }
 
   } catch (error) {
@@ -323,21 +365,26 @@ async function handleSubscriptionUpdate(subscription: Subscription) {
 }
 
 /**
- * Gérer un échec de paiement
+ * Gérer un échec de paiement - Annuler les commissions
  */
 async function handlePaymentFailure(paymentData: any) {
   try {
-    console.log('❌ Payment failed:', paymentData.id)
+    console.log('❌ Payment failed - Cancelling commissions:', paymentData.id)
 
     // Marquer les commissions correspondantes comme annulées
     const { error } = await supabase
       .from('referral_commissions')
-      .update({ status: 'cancelled' })
+      .update({ 
+        status: 'cancelled',
+        updated_at: new Date().toISOString()
+      })
       .eq('payment_reference', paymentData.id)
       .in('status', ['pending', 'paid'])
 
     if (error) {
       console.error('Failed to cancel commissions for failed payment:', error)
+    } else {
+      console.log('✅ Commissions cancelled for failed payment')
     }
 
   } catch (error) {
@@ -346,21 +393,26 @@ async function handlePaymentFailure(paymentData: any) {
 }
 
 /**
- * Gérer l'annulation d'un abonnement
+ * Gérer l'annulation d'un abonnement - Annuler les commissions
  */
 async function handleSubscriptionCancellation(subscription: Subscription) {
   try {
-    console.log('🚫 Subscription cancelled:', subscription.id)
+    console.log('🚫 Subscription cancelled - Cancelling commissions:', subscription.id)
 
     // Marquer les commissions correspondantes comme annulées
     const { error } = await supabase
       .from('referral_commissions')
-      .update({ status: 'cancelled' })
+      .update({ 
+        status: 'cancelled',
+        updated_at: new Date().toISOString()
+      })
       .eq('subscription_id', subscription.id)
       .in('status', ['pending', 'paid'])
 
     if (error) {
       console.error('Failed to cancel commissions for cancelled subscription:', error)
+    } else {
+      console.log('✅ Commissions cancelled for cancelled subscription')
     }
 
   } catch (error) {

@@ -32,6 +32,7 @@ import {
   Sun,
   Moon,
   Zap,
+  Gift,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -192,6 +193,12 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       icon: ClipboardList,
       restricted: !checkAccess('tasks') && !restrictions?.isAdmin,
       requiredPlan: 'Pro' as const
+    },
+    { 
+      path: '/referrals', 
+      label: 'Parrainage', 
+      icon: Gift,
+      restricted: false
     },
   ];
 

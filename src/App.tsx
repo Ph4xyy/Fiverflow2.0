@@ -17,6 +17,7 @@ import { UserDataProvider } from './contexts/UserDataContext';
 import { LoadingProvider } from './contexts/LoadingContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { ReferralProvider } from './contexts/ReferralContext';
 
 // Composants de protection et d'interface
 import InstantProtectedRoute from './components/InstantProtectedRoute';
@@ -47,6 +48,7 @@ import UpgradePageNew from './pages/UpgradePageNew';
 import OnboardingPage from './pages/OnboardingPage';
 import NetworkPage from './pages/NetworkPage';
 import AdminDashboard from './pages/AdminDashboard';
+import ReferralsPage from './pages/ReferralsPage';
 import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
 
@@ -139,6 +141,7 @@ function AppContent() {
           } />
           <Route path="/upgrade" element={<InstantProtectedRoute><UpgradePageNew /></InstantProtectedRoute>} />
           <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
+          <Route path="/referrals" element={<InstantProtectedRoute><ReferralsPage /></InstantProtectedRoute>} />
 
           {/* Administration */}
           <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
@@ -190,17 +193,19 @@ function App() {
     <AppErrorBoundary>
       <AuthProvider>
         <ThemeProvider>
-          <Router>
-            <AnalyticsWrapper>
-              <LoadingProvider>
-                <CurrencyProvider>
-                  <UserDataProvider>
-                    <AppContent />
-                  </UserDataProvider>
-                </CurrencyProvider>
-              </LoadingProvider>
-            </AnalyticsWrapper>
-          </Router>
+          <ReferralProvider>
+            <Router>
+              <AnalyticsWrapper>
+                <LoadingProvider>
+                  <CurrencyProvider>
+                    <UserDataProvider>
+                      <AppContent />
+                    </UserDataProvider>
+                  </CurrencyProvider>
+                </LoadingProvider>
+              </AnalyticsWrapper>
+            </Router>
+          </ReferralProvider>
         </ThemeProvider>
       </AuthProvider>
     </AppErrorBoundary>
