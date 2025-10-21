@@ -109,6 +109,96 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
     }
   }, [profileDataFromHook, isOwnProfile, user?.email]);
 
+  // Charger les vraies données (statistiques, compétences, récompenses, etc.)
+  useEffect(() => {
+    const loadRealData = async () => {
+      if (!profileDataFromHook) return;
+
+      const targetUserId = profileDataFromHook.user_id;
+      
+      console.log('🔄 Chargement des données pour userId:', targetUserId);
+      
+      try {
+        // Charger les statistiques
+        try {
+          const userStats = await StatisticsService.getUserStatistics(targetUserId);
+          // Adapter les données au format attendu
+          setStatistics({
+            clients: userStats.totalClients || 0,
+            orders: userStats.totalOrders || 0,
+            rating: 4.5, // Valeur par défaut
+            experience: Math.max(1, Math.floor((userStats.totalOrders || 0) / 10)) // Calcul basé sur les commandes
+          });
+          console.log('✅ Statistiques chargées:', userStats);
+        } catch (error) {
+          console.warn('⚠️ Erreur statistiques:', error);
+          setStatistics({ clients: 0, orders: 0, rating: 0, experience: 0 });
+        }
+
+        // Charger les compétences
+        try {
+          const userSkills = await SkillsService.getUserSkills(targetUserId);
+          setSkills(userSkills);
+          console.log('✅ Compétences chargées:', userSkills.length);
+        } catch (error) {
+          console.warn('⚠️ Erreur compétences:', error);
+          setSkills([]);
+        }
+
+        // Charger les récompenses
+        try {
+          const userAwards = await AwardsService.getUserAwards(targetUserId);
+          setAwards(userAwards);
+          console.log('✅ Récompenses chargées:', userAwards.length);
+        } catch (error) {
+          console.warn('⚠️ Erreur récompenses:', error);
+          setAwards([]);
+        }
+
+        // Charger les commandes
+        try {
+          const userOrders = await OrdersService.getUserOrders(targetUserId);
+          setOrders(userOrders);
+          console.log('✅ Commandes chargées:', userOrders.length);
+        } catch (error) {
+          console.warn('⚠️ Erreur commandes:', error);
+          setOrders([]);
+        }
+
+        // Charger les activités
+        try {
+          const userActivities = await ActivityService.getUserActivity(targetUserId);
+          setActivities(userActivities);
+          console.log('✅ Activités chargées:', userActivities.length);
+        } catch (error) {
+          console.warn('⚠️ Erreur activités:', error);
+          setActivities([]);
+        }
+
+        console.log('📊 Données réelles chargées pour profil:', {
+          userId: targetUserId,
+          username: profileDataFromHook.public_data?.username,
+          statistics: statistics,
+          skills: skills.length,
+          awards: awards.length,
+          orders: orders.length,
+          activities: activities.length
+        });
+
+      } catch (error) {
+        console.error('Erreur lors du chargement des données réelles:', error);
+        // En cas d'erreur, réinitialiser les données
+        setStatistics({ clients: 0, orders: 0, rating: 0, experience: 0 });
+        setSkills([]);
+        setAwards([]);
+        setOrders([]);
+        setActivities([]);
+      }
+    };
+
+    loadRealData();
+  }, [profileDataFromHook]);
+
   // Paramètres de confidentialité
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
     show_email: true,
@@ -233,8 +323,52 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
 
   // Ne charger les données que si c'est le profil de l'utilisateur connecté (pas de username fourni)
   useEffect(() => {
-    if (!username) {
+    if (!username && user) {
       loadProfileData();
+      
+      // Charger aussi les vraies données pour le profil propre
+      const loadOwnData = async () => {
+        try {
+          // Charger les statistiques
+          const userStats = await StatisticsService.getUserStatistics(user.id);
+          // Adapter les données au format attendu
+          setStatistics({
+            clients: userStats.totalClients || 0,
+            orders: userStats.totalOrders || 0,
+            rating: 4.5, // Valeur par défaut
+            experience: Math.max(1, Math.floor((userStats.totalOrders || 0) / 10)) // Calcul basé sur les commandes
+          });
+
+          // Charger les compétences
+          const userSkills = await SkillsService.getUserSkills(user.id);
+          setSkills(userSkills);
+
+          // Charger les récompenses
+          const userAwards = await AwardsService.getUserAwards(user.id);
+          setAwards(userAwards);
+
+          // Charger les commandes
+          const userOrders = await OrdersService.getUserOrders(user.id);
+          setOrders(userOrders);
+
+          // Charger les activités
+          const userActivities = await ActivityService.getUserActivity(user.id);
+          setActivities(userActivities);
+
+          console.log('📊 Données propres chargées:', {
+            statistics: userStats,
+            skills: userSkills.length,
+            awards: userAwards.length,
+            orders: userOrders.length,
+            activities: userActivities.length
+          });
+
+        } catch (error) {
+          console.error('Erreur lors du chargement des données propres:', error);
+        }
+      };
+
+      loadOwnData();
     }
   }, [user, username]);
 
