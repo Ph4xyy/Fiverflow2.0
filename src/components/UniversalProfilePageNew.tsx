@@ -29,7 +29,8 @@ import {
   Coffee,
   Heart,
   Eye,
-  UserPlus
+  UserPlus,
+  User
 } from 'lucide-react';
 
 interface UniversalProfilePageNewProps {
