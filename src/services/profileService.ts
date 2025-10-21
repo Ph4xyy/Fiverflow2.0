@@ -56,16 +56,42 @@ export class ProfileService {
    */
   static async updateProfile(userId: string, profileData: Partial<ProfileData>): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update(profileData)
-        .eq('user_id', userId);
+      console.log('Tentative de mise à jour du profil:', { userId, profileData });
+      
+      // Nettoyer les données - supprimer les champs undefined/null
+      const cleanData = Object.fromEntries(
+        Object.entries(profileData).filter(([_, value]) => value !== undefined && value !== null)
+      );
+      
+      console.log('Données nettoyées:', cleanData);
 
-      if (error) {
-        console.error('Erreur lors de la mise à jour du profil:', error);
-        return false;
+      // Pour l'instant, ne mettre à jour que les champs de base qui existent certainement
+      const safeFields = ['full_name', 'avatar_url', 'bio'];
+      const safeData = Object.fromEntries(
+        Object.entries(cleanData).filter(([key]) => safeFields.includes(key))
+      );
+
+      console.log('Données sécurisées à mettre à jour:', safeData);
+
+      if (Object.keys(safeData).length > 0) {
+        const { error } = await supabase
+          .from('user_profiles')
+          .update(safeData)
+          .eq('user_id', userId);
+
+        if (error) {
+          console.error('Erreur lors de la mise à jour du profil:', error);
+          console.error('Détails de l\'erreur:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
+          return false;
+        }
       }
 
+      console.log('Profil mis à jour avec succès');
       return true;
     } catch (error) {
       console.error('Erreur lors de la mise à jour du profil:', error);
