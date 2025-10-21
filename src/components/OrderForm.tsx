@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { X, FileText, DollarSign, Calendar, CheckCircle } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { NotificationHelpers } from '../utils/notifications';
+import { showSuccessNotification, showErrorNotification } from '../utils/notifications';
 import { usePlanLimits } from '../hooks/usePlanLimits';
 import toast from 'react-hot-toast';
 
@@ -198,17 +198,21 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Vérifier qu'on est bien à la dernière étape
+    if (currentStep !== 4) {
+      console.log('Form submitted at step', currentStep, 'but should be at step 4');
+      return;
+    }
+
     if (!order) {
       const canAddOrder = await checkOrderLimit();
       if (!canAddOrder) return;
     }
 
-    for (let s = 1; s <= 4; s++) {
-      if (!validateStep(s)) {
-        setCurrentStep(s);
-        toast.error('Please fix the errors before submitting');
-        return;
-      }
+    // Valider seulement l'étape actuelle (4)
+    if (!validateStep(4)) {
+      toast.error('Please fix the errors before submitting');
+      return;
     }
 
     if (!isSupabaseConfigured || !supabase) {
@@ -220,24 +224,31 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
     const toastId = toast.loading(order ? 'Updating order...' : 'Creating order...');
 
     try {
+      // Convertir le statut au format ENUM de la base de données
+      const getStatusForDB = (status: string) => {
+        switch (status) {
+          case 'Pending': return 'pending';
+          case 'In Progress': return 'in_progress';
+          case 'Completed': return 'completed';
+          default: return 'pending';
+        }
+      };
+
       const orderData = {
+        user_id: user.id, // ⚠️ CRITIQUE: Ajouter user_id pour RLS
         title: formData.title.trim(),
         description: formData.description.trim() || null,
-        amount: parseFloat(`${formData.amount}`),
-        deadline: formData.deadline || null,
+        budget: parseFloat(`${formData.amount}`), // Utiliser 'budget' au lieu de 'amount'
+        due_date: formData.deadline || null, // Utiliser 'due_date' au lieu de 'deadline'
         client_id: formData.client_id,
-        status: formData.status,
-        project_type: formData.project_type || null,
-        priority_level: formData.priority_level,
-        estimated_hours: formData.estimated_hours ? parseInt(`${formData.estimated_hours}`, 10) : null,
-        hourly_rate: formData.hourly_rate ? parseFloat(`${formData.hourly_rate}`) : null,
-        payment_status: formData.payment_status,
-        notes: formData.notes.trim() || null,
-        tags: formData.tags.length ? formData.tags : null,
+        status: getStatusForDB(formData.status), // Convertir au format ENUM
         start_date: formData.start_date || null,
-        completion_date: formData.completion_date || null,
-        revision_count: formData.revision_count || 0,
-        client_feedback: formData.client_feedback.trim() || null
+        completed_date: formData.completion_date || null,
+        // Ajouter les champs client dénormalisés pour performance
+        client_name: clients.find(c => c.id === formData.client_id)?.name || null,
+        client_email: null, // Peut être ajouté plus tard si nécessaire
+        platform: clients.find(c => c.id === formData.client_id)?.platform || null,
+        currency: 'USD' // Valeur par défaut
       };
 
       if (order) {
@@ -251,7 +262,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
         if (data && user) {
           const selectedClient = clients.find(c => c.id === formData.client_id);
           if (selectedClient) {
-            await NotificationHelpers.orderCreated(user.id, formData.title, selectedClient.name, data.id);
+            // TODO: Implémenter le suivi d'activité pour les nouvelles commandes
+            console.log('Nouvelle commande créée:', { userId: user.id, orderTitle: formData.title, clientName: selectedClient.name, orderId: data.id });
           }
         }
         toast.success('Order created successfully!', { id: toastId });
@@ -261,16 +273,24 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
       onClose();
       setCurrentStep(1);
       setErrors({});
-    } catch (err) {
-      console.error('Error:', err);
-      toast.error('An error occurred. Please try again.', { id: toastId });
+    } catch (err: any) {
+      console.error('Error creating/updating order:', err);
+      const errorMessage = err?.message || 'An error occurred. Please try again.';
+      toast.error(errorMessage, { id: toastId });
     } finally {
       setLoading(false);
     }
   };
 
-  const nextStep = () => {
-    if (validateStep(currentStep) && currentStep < 4) setCurrentStep(s => s + 1);
+  const nextStep = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    if (validateStep(currentStep) && currentStep < 4) {
+      setCurrentStep(s => s + 1);
+    }
   };
   const prevStep = () => currentStep > 1 && setCurrentStep(s => s - 1);
 
@@ -648,7 +668,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
               {currentStep < 4 ? (
                 <button
                   type="button"
-                  onClick={nextStep}
+                  onClick={(e) => nextStep(e)}
                   className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-lg"
                 >
                   Next

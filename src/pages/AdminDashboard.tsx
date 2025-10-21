@@ -4,6 +4,7 @@ import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import UserProfileManager from '../utils/userProfileManager';
 import { 
   Users, 
   Shield, 
@@ -98,23 +99,11 @@ const AdminDashboard: React.FC = () => {
     console.log('🔍 AdminDashboard: Vérification admin pour user:', user.id);
 
     try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('is_admin')
-        .eq('user_id', user.id)
-        .single();
-
-      console.log('🔍 AdminDashboard: Résultat vérification:', { data, error });
-
-      if (error) {
-        console.error('Erreur lors de la vérification admin:', error);
-        setIsAdmin(false);
-      } else {
-        console.log('🔍 AdminDashboard: is_admin =', data?.is_admin);
-        setIsAdmin(data?.is_admin || false);
-      }
+      // Utiliser la nouvelle classe utilitaire sans RPC
+      const isAdmin = await UserProfileManager.checkAdminStatus(user);
+      setIsAdmin(isAdmin);
     } catch (error) {
-      console.error('Erreur lors de la vérification admin:', error);
+      console.error('❌ Erreur lors de la vérification admin:', error);
       setIsAdmin(false);
     } finally {
       setAdminCheckLoading(false);
@@ -915,6 +904,9 @@ const AdminDashboard: React.FC = () => {
                         </div>
                         <div>
                           <h4 className="text-xl font-semibold text-white">{selectedUser.full_name || 'Utilisateur'}</h4>
+                          {selectedUser.username && (
+                            <p className="text-sm text-gray-300">@{selectedUser.username}</p>
+                          )}
                           <p className="text-gray-400">{selectedUser.email}</p>
                         </div>
                       </div>

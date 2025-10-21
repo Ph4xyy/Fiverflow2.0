@@ -5,11 +5,16 @@ import { Toaster } from 'react-hot-toast';
 import App from './App.tsx';
 import './index.css';
 import './utils/cleanAuth'; // Importer l'utilitaire de nettoyage
+import { ReferralTracker } from './services/referralTracker';
 
-/** Force le mode sombre dès le chargement */
+/** Initialisation du thème - sera géré par ThemeProvider */
 try {
-  document.documentElement.classList.add('dark');
-  localStorage.setItem('theme', 'dark');
+  // Ne pas forcer le thème, laisser ThemeProvider gérer cela
+} catch {}
+
+/** Initialisation du tracking des parrainages */
+try {
+  ReferralTracker.initialize();
 } catch {}
 
 /** Pare-chocs global pour éviter l’écran blanc en cas d’erreur non rattrapée */

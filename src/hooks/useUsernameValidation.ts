@@ -1,84 +1,61 @@
-import { useState, useCallback } from 'react';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import toast from 'react-hot-toast';
+import { useState, useEffect, useCallback } from 'react';
+import { ProfileService } from '../services/profileService';
 
-interface UseUsernameValidationReturn {
-  isUsernameAvailable: (username: string) => Promise<boolean>;
-  validateUsername: (username: string) => { isValid: boolean; error?: string };
-  loading: boolean;
+export type UsernameStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid';
+
+interface UseUsernameValidationOptions {
+  debounceMs?: number;
+  currentUserId?: string;
 }
 
-export const useUsernameValidation = (): UseUsernameValidationReturn => {
-  const [loading, setLoading] = useState(false);
+export function useUsernameValidation(
+  username: string,
+  options: UseUsernameValidationOptions = {}
+) {
+  const { debounceMs = 500, currentUserId } = options;
+  const [status, setStatus] = useState<UsernameStatus>('idle');
+  const [isChecking, setIsChecking] = useState(false);
 
-  const validateUsername = useCallback((username: string): { isValid: boolean; error?: string } => {
-    // Basic validation rules
-    if (!username || username.trim() === '') {
-      return { isValid: false, error: 'Username is required' };
+  const validateUsername = useCallback(async (value: string) => {
+    if (!value || value.trim() === '') {
+      setStatus('idle');
+      return;
     }
 
-    if (username.length < 3) {
-      return { isValid: false, error: 'Username must be at least 3 characters long' };
+    // Validation côté client
+    if (!ProfileService.validateUsername(value)) {
+      setStatus('invalid');
+      return;
     }
 
-    if (username.length > 20) {
-      return { isValid: false, error: 'Username must be less than 20 characters' };
-    }
-
-    if (!/^[a-zA-Z0-9]+$/.test(username)) {
-      return { isValid: false, error: 'Username can only contain letters and numbers' };
-    }
-
-    // Reserved usernames
-    const reservedUsernames = [
-      'admin', 'administrator', 'root', 'user', 'users', 'api', 'www', 'mail',
-      'support', 'help', 'contact', 'about', 'terms', 'privacy', 'login',
-      'register', 'signup', 'signin', 'dashboard', 'profile', 'settings',
-      'account', 'billing', 'payment', 'pricing', 'features', 'blog', 'news',
-      'fiverflow', 'fiver', 'flow', 'app', 'home', 'index', 'main'
-    ];
-
-    if (reservedUsernames.includes(username.toLowerCase())) {
-      return { isValid: false, error: 'This username is reserved' };
-    }
-
-    return { isValid: true };
-  }, []);
-
-  const isUsernameAvailable = useCallback(async (username: string): Promise<boolean> => {
-    if (!isSupabaseConfigured || !supabase) {
-      return true; // Allow in mock mode
-    }
-
-    const validation = validateUsername(username);
-    if (!validation.isValid) {
-      return false;
-    }
+    setIsChecking(true);
+    setStatus('checking');
 
     try {
-      setLoading(true);
-      
-      const { data, error } = await supabase.rpc('is_username_available', {
-        username_to_check: username.trim()
-      });
-
-      if (error) {
-        console.error('❌ Error checking username availability:', error);
-        return false;
-      }
-
-      return data === true;
+      const isAvailable = await ProfileService.checkUsernameAvailability(value, currentUserId);
+      setStatus(isAvailable ? 'available' : 'taken');
     } catch (error) {
-      console.error('💥 Unexpected error checking username:', error);
-      return false;
+      console.error('Erreur lors de la vérification du username:', error);
+      setStatus('taken'); // Par défaut, considérer comme pris en cas d'erreur
     } finally {
-      setLoading(false);
+      setIsChecking(false);
     }
-  }, [validateUsername]);
+  }, [currentUserId]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      validateUsername(username);
+    }, debounceMs);
+
+    return () => clearTimeout(timeoutId);
+  }, [username, validateUsername, debounceMs]);
 
   return {
-    isUsernameAvailable,
-    validateUsername,
-    loading
+    status,
+    isChecking,
+    isValid: status === 'available',
+    isInvalid: status === 'invalid',
+    isTaken: status === 'taken',
+    isAvailable: status === 'available'
   };
-};
+}

@@ -14,8 +14,8 @@ export type OrderDetail = {
   id: string;
   title: string;
   description?: string | null;
-  amount?: number | null;
-  deadline?: string | null;
+  budget?: number | null; // Changé de 'amount' à 'budget'
+  due_date?: string | null; // Changé de 'deadline' à 'due_date'
   created_at?: string | null;
 
   // management
@@ -183,7 +183,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, isOpen, onCl
           </Section>
 
           <Section icon={<DollarSign className="w-4 h-4 text-gray-500 dark:text-gray-400" />} title="Finance">
-            <Row label="Montant" value={typeof order?.amount === 'number' ? `$${order.amount.toLocaleString()}` : '—'} />
+            <Row label="Montant" value={typeof order?.budget === 'number' ? `$${order.budget.toLocaleString()}` : '—'} />
             <Row label="Statut de paiement" value={order?.payment_status ?? '—'} />
             <Row label="Heures estimées" value={order?.estimated_hours ?? '—'} />
             <Row label="Taux horaire" value={order?.hourly_rate ? `$${Number(order.hourly_rate).toFixed(2)}` : '—'} />
@@ -192,7 +192,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ order, isOpen, onCl
 
           <Section icon={<Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />} title="Timeline & Management">
             <Row label="Date de début" value={order?.start_date ? new Date(order.start_date).toLocaleDateString() : '—'} />
-            <Row label="Échéance" value={order?.deadline ? new Date(order.deadline).toLocaleDateString() : '—'} />
+            <Row label="Échéance" value={order?.due_date ? new Date(order.due_date).toLocaleDateString() : '—'} />
             <Row label="Date de complétion" value={order?.completion_date ? new Date(order.completion_date).toLocaleDateString() : '—'} />
             <Row label="Révisions" value={order?.revision_count ?? 0} />
           </Section>

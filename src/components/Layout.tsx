@@ -3,12 +3,15 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 // Import logo
 import LogoImage from '../assets/LogoFiverFlow.png';
+import ErrorBoundary from './ErrorBoundary';
 
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import NotificationsDropdown from './NotificationsDropdown';
 import CentralizedSearchBar from './CentralizedSearchBar';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
+import UserProfileManager from '../utils/userProfileManager';
 
 import { 
   Menu, 
@@ -27,6 +30,10 @@ import {
   CheckCircle2,
   Shield,
   Receipt,
+  Sun,
+  Moon,
+  Zap,
+  Gift,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -57,47 +64,15 @@ const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
       console.log('🔍 Layout: Vérification admin pour user:', user.id);
 
       try {
-        const { data, error } = await supabase
-          .from('user_profiles')
-          .select('is_admin')
-          .eq('user_id', user.id)
-          .single();
-
-        console.log('🔍 Layout: Résultat vérification:', { data, error });
-
-        if (error) {
-          console.error('❌ Erreur lors de la vérification admin:', error);
-          console.error('❌ Détails de l\'erreur:', error.message, error.status, error.statusText);
-          
-          // Vérifier spécifiquement l'erreur 406
-          if (error.status === 406) {
-            console.error('❌ ERREUR 406 DÉTECTÉE DANS LAYOUT - Tentative de contournement...');
-            
-            // Solution de contournement: utiliser une requête alternative
-            try {
-              const { data: fallbackData, error: fallbackError } = await supabase
-                .from('user_profiles')
-                .select('is_admin')
-                .eq('user_id', user.id);
-              
-              if (fallbackError) {
-                console.error('❌ Erreur de contournement aussi:', fallbackError);
-                setIsAdmin(false);
-              } else {
-                console.log('✅ Contournement réussi:', fallbackData);
-                setIsAdmin(fallbackData?.[0]?.is_admin || false);
-              }
-            } catch (fallbackErr) {
-              console.error('❌ Erreur dans le contournement:', fallbackErr);
-              setIsAdmin(false);
-            }
-          } else {
-            setIsAdmin(false);
-          }
-        } else {
-          console.log('🔍 Layout: is_admin =', data?.is_admin);
-          setIsAdmin(data?.is_admin || false);
+        if (!supabase) {
+          console.error('❌ Supabase client non initialisé');
+          setIsAdmin(false);
+          return;
         }
+
+        // Utiliser la nouvelle classe utilitaire sans RPC
+        const isAdmin = await UserProfileManager.checkAdminStatus(user);
+        setIsAdmin(isAdmin);
       } catch (error) {
         console.error('Erreur lors de la vérification admin:', error);
         setIsAdmin(false);
@@ -140,6 +115,8 @@ class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, 
 const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const { currentTheme, setTheme, getThemeColors } = useTheme();
+  const themeColors = getThemeColors();
 
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [requiredPlan, setRequiredPlan] = useState<'Pro' | 'Excellence'>('Pro');
@@ -182,11 +159,10 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       requiredPlan: 'Excellence' as const
     },
     { 
-      path: '/network', 
-      label: 'Referrals', 
-      icon: Network,
-      restricted: !checkAccess('referrals') && !restrictions?.isAdmin,
-      requiredPlan: 'Pro' as const
+      path: '/referrals', 
+      label: 'Parrainage', 
+      icon: Gift,
+      restricted: false
     },
   ];
 
@@ -244,6 +220,22 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
+  };
+
+  const handleThemeChange = () => {
+    const themes = ['light', 'dark', 'halloween'] as const;
+    const currentIndex = themes.indexOf(currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setTheme(themes[nextIndex]);
+  };
+
+  const getThemeIcon = () => {
+    switch (currentTheme) {
+      case 'light': return Sun;
+      case 'dark': return Moon;
+      case 'halloween': return Zap;
+      default: return Sun;
+    }
   };
 
   const LinkRow: React.FC<{
@@ -326,8 +318,17 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             <CentralizedSearchBar />
           </div>
           
-          {/* Right section - Notifications, logout */}
+          {/* Right section - Theme, Notifications, logout */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Theme changer moved to settings */}
+            {/* <button 
+              onClick={handleThemeChange}
+              className="size-10 rounded-lg grid place-items-center text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200"
+              title={`Current theme: ${currentTheme}. Click to cycle through themes.`}
+            >
+              {React.createElement(getThemeIcon(), { size: 18 })}
+            </button> */}
+
             <LocalErrorBoundary>
               <div className="size-10 rounded-lg grid place-items-center text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200">
                 <NotificationsDropdown />

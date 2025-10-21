@@ -16,6 +16,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { UserDataProvider } from './contexts/UserDataContext';
 import { LoadingProvider } from './contexts/LoadingContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { ReferralProvider } from './contexts/ReferralContext';
 
 // Composants de protection et d'interface
 import InstantProtectedRoute from './components/InstantProtectedRoute';
@@ -38,6 +40,9 @@ import CalendarPageNew from './pages/CalendarPageNew';
 import PricingPageNew from './pages/PricingPageNew';
 import WorkboardPageNew from './pages/WorkboardPageNew';
 import ProfilePageNew from './pages/ProfilePageNew';
+import ProfileSettingsPage from './pages/ProfileSettingsPage';
+import SettingsPage from './pages/SettingsPage';
+import ProjectDetailPage from './pages/ProjectDetailPage';
 import ClientsPage from './pages/ClientsPageOptimized';
 import OrdersPage from './pages/OrdersPage';
 import TemplatesPage from './pages/TemplatesPage';
@@ -46,6 +51,7 @@ import UpgradePageNew from './pages/UpgradePageNew';
 import OnboardingPage from './pages/OnboardingPage';
 import NetworkPage from './pages/NetworkPage';
 import AdminDashboard from './pages/AdminDashboard';
+import ReferralsPage from './pages/ReferralsPage';
 import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
 
@@ -129,6 +135,9 @@ function AppContent() {
             </InstantProtectedRoute>
           } />
           <Route path="/profile" element={<InstantProtectedRoute><ProfilePageNew /></InstantProtectedRoute>} />
+          <Route path="/profile-settings" element={<InstantProtectedRoute><ProfileSettingsPage /></InstantProtectedRoute>} />
+          <Route path="/settings" element={<InstantProtectedRoute><SettingsPage /></InstantProtectedRoute>} />
+          <Route path="/project/:projectId" element={<InstantProtectedRoute><ProjectDetailPage /></InstantProtectedRoute>} />
           <Route path="/network" element={
             <InstantProtectedRoute>
               <SubscriptionGuard requiredPlan="boost" pageName="referrals" description="Système de parrainage disponible avec Boost">
@@ -138,6 +147,7 @@ function AppContent() {
           } />
           <Route path="/upgrade" element={<InstantProtectedRoute><UpgradePageNew /></InstantProtectedRoute>} />
           <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
+          <Route path="/referrals" element={<InstantProtectedRoute><ReferralsPage /></InstantProtectedRoute>} />
 
           {/* Administration */}
           <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
@@ -188,17 +198,21 @@ function App() {
   return (
     <AppErrorBoundary>
       <AuthProvider>
-        <Router>
-          <AnalyticsWrapper>
-            <LoadingProvider>
-              <CurrencyProvider>
-                <UserDataProvider>
-                  <AppContent />
-                </UserDataProvider>
-              </CurrencyProvider>
-            </LoadingProvider>
-          </AnalyticsWrapper>
-        </Router>
+        <ThemeProvider>
+          <ReferralProvider>
+            <Router>
+              <AnalyticsWrapper>
+                <LoadingProvider>
+                  <CurrencyProvider>
+                    <UserDataProvider>
+                      <AppContent />
+                    </UserDataProvider>
+                  </CurrencyProvider>
+                </LoadingProvider>
+              </AnalyticsWrapper>
+            </Router>
+          </ReferralProvider>
+        </ThemeProvider>
       </AuthProvider>
     </AppErrorBoundary>
   );
