@@ -41,6 +41,8 @@ import PricingPageNew from './pages/PricingPageNew';
 import WorkboardPageNew from './pages/WorkboardPageNew';
 import ProfilePageNew from './pages/ProfilePageNew';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
+import ProfileRedirect from './pages/ProfileRedirect';
+import ProfileUsername from './pages/ProfileUsername';
 import SettingsPage from './pages/SettingsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import ClientsPage from './pages/ClientsPageOptimized';
@@ -134,7 +136,9 @@ function AppContent() {
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          <Route path="/profile" element={<InstantProtectedRoute><ProfilePageNew /></InstantProtectedRoute>} />
+          {/* Système de profil universel */}
+          <Route path="/profile" element={<InstantProtectedRoute><ProfileRedirect /></InstantProtectedRoute>} />
+          <Route path="/profile/:username" element={<InstantProtectedRoute><ProfileUsername /></InstantProtectedRoute>} />
           <Route path="/profile-settings" element={<InstantProtectedRoute><ProfileSettingsPage /></InstantProtectedRoute>} />
           <Route path="/settings" element={<InstantProtectedRoute><SettingsPage /></InstantProtectedRoute>} />
           <Route path="/project/:projectId" element={<InstantProtectedRoute><ProjectDetailPage /></InstantProtectedRoute>} />
