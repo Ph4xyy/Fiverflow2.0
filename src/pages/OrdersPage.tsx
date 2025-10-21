@@ -716,9 +716,33 @@ const OrdersPage: React.FC = () => {
           order={selectedOrder}
           isOpen={isDetailModalOpen}
           onClose={() => setIsDetailModalOpen(false)}
-          onEdit={(order: any) => {
+          onEdit={async (order: any) => {
             console.log('🔍 OrderDetailModal onEdit - order reçu:', order);
             setIsDetailModalOpen(false);
+            
+            // Récupérer le client_id en cherchant par nom dans la liste des clients
+            let clientId = order.client_id || order.clients?.id || '';
+            
+            if (!clientId && order.clients?.name) {
+              // Chercher le client par nom dans la liste des clients
+              try {
+                if (isSupabaseConfigured && supabase && user) {
+                  const { data: clientData } = await supabase
+                    .from('clients')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .eq('name', order.clients.name)
+                    .single();
+                  
+                  if (clientData) {
+                    clientId = clientData.id;
+                    console.log('🔍 Client trouvé par nom:', clientId);
+                  }
+                }
+              } catch (error) {
+                console.log('⚠️ Erreur lors de la recherche du client:', error);
+              }
+            }
             
             // Convertir OrderDetail vers OrderRow puis vers OrderForm
             const orderRow: OrderRow = {
@@ -734,8 +758,7 @@ const OrdersPage: React.FC = () => {
               platform: order.platform,
               client_name: order.client_name,
               client_email: order.client_email,
-              // Récupérer le client_id depuis la relation clients si disponible
-              client_id: order.client_id || order.clients?.id || '',
+              client_id: clientId,
               clients: order.clients || { 
                 name: order.client_name || 'Client', 
                 platform: order.platform || null 
