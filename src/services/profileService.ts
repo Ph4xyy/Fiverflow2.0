@@ -139,14 +139,67 @@ export class ProfileService {
 
       const avatarsBucket = buckets?.find(bucket => bucket.name === 'avatars');
       if (!avatarsBucket) {
-        console.warn('Le bucket "avatars" n\'existe pas.');
-        console.warn('Veuillez exécuter le script SQL suivant dans Supabase SQL Editor :');
-        console.warn(`
+        console.warn('Le bucket "avatars" n\'existe pas. Tentative de création...');
+        
+        // Essayer de créer le bucket via l'API
+        const { data: newBucket, error: createError } = await supabase.storage.createBucket('avatars', {
+          public: true,
+          allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+          fileSizeLimit: 10485760 // 10MB
+        });
+
+        if (createError) {
+          console.error('Impossible de créer le bucket avatars automatiquement:', createError);
+          
+          // Essayer d'utiliser un bucket existant comme fallback
+          const fallbackBucket = buckets?.find(bucket => bucket.public === true);
+          if (fallbackBucket) {
+            console.warn(`Utilisation du bucket de fallback: ${fallbackBucket.name}`);
+            // Modifier le chemin pour utiliser le bucket de fallback
+            const fallbackPath = `avatars/${filePath}`;
+            
+            // Upload vers le bucket de fallback
+            const { error: uploadError } = await supabase.storage
+              .from(fallbackBucket.name)
+              .upload(fallbackPath, file, {
+                cacheControl: '3600',
+                upsert: true
+              });
+
+            if (uploadError) {
+              console.error('Erreur lors de l\'upload vers le bucket de fallback:', uploadError);
+              return null;
+            }
+
+            // Retourner l'URL publique
+            const { data: { publicUrl } } = supabase.storage
+              .from(fallbackBucket.name)
+              .getPublicUrl(fallbackPath);
+
+            return publicUrl;
+          }
+          
+          console.error('Aucun bucket public disponible. Veuillez créer le bucket "avatars" manuellement :');
+          console.error(`
+-- Dans Supabase SQL Editor :
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('avatars', 'avatars', true)
 ON CONFLICT (id) DO NOTHING;
-        `);
-        return null;
+
+-- Puis créer les politiques :
+CREATE POLICY "Public avatars are viewable by everyone" ON storage.objects
+FOR SELECT USING (bucket_id = 'avatars');
+
+CREATE POLICY "Users can upload their own avatars" ON storage.objects
+FOR INSERT WITH CHECK (
+  bucket_id = 'avatars' 
+  AND auth.uid()::text = (storage.foldername(name))[1]
+);
+          `);
+          return null;
+        }
+
+        console.log('Bucket avatars créé avec succès!');
       }
 
       // Upload vers Supabase Storage
