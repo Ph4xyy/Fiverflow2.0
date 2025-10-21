@@ -139,7 +139,13 @@ export class ProfileService {
 
       const avatarsBucket = buckets?.find(bucket => bucket.name === 'avatars');
       if (!avatarsBucket) {
-        console.error('Le bucket "avatars" n\'existe pas. Veuillez le créer dans Supabase.');
+        console.warn('Le bucket "avatars" n\'existe pas.');
+        console.warn('Veuillez exécuter le script SQL suivant dans Supabase SQL Editor :');
+        console.warn(`
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('avatars', 'avatars', true)
+ON CONFLICT (id) DO NOTHING;
+        `);
         return null;
       }
 
