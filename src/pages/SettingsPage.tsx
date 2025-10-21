@@ -9,6 +9,8 @@ import { ProfileService, ProfileData, PrivacySettings } from '../services/profil
 import { SkillsService, Skill } from '../services/skillsService';
 import { AwardsService, Award } from '../services/awardsService';
 import { showSuccessNotification, showErrorNotification } from '../utils/notifications';
+import SkillModal from '../components/SkillModal';
+import AwardModal from '../components/AwardModal';
 import { 
   User, 
   Shield, 
@@ -28,7 +30,8 @@ import {
   Check,
   Award,
   Plus,
-  Edit
+  Edit,
+  CreditCard
 } from 'lucide-react';
 
 interface SettingsCategory {
@@ -122,13 +125,19 @@ const SettingsPage: React.FC = () => {
       name: 'Compétences & Récompenses',
       icon: <Award size={20} />,
       description: 'Gérer vos compétences et récompenses'
+    },
+    {
+      id: 'subscription',
+      name: 'Abonnement & Paiement',
+      icon: <CreditCard size={20} />,
+      description: 'Gérer votre abonnement et méthodes de paiement'
     }
   ];
 
   // Handle URL parameters
   useEffect(() => {
     const category = searchParams.get('category');
-    if (category && ['profile', 'privacy', 'notifications', 'appearance', 'social', 'skills'].includes(category)) {
+    if (category && ['profile', 'privacy', 'notifications', 'appearance', 'social', 'skills', 'subscription'].includes(category)) {
       setActiveCategory(category);
     }
   }, [searchParams]);
@@ -587,147 +596,280 @@ const SettingsPage: React.FC = () => {
 
       case 'skills':
         return (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Compétences */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">Compétences</h3>
-                <ModernButton
-                  size="sm"
-                  onClick={() => {
-                    setEditingSkill(null);
-                    setIsEditingSkill(true);
-                  }}
-                >
-                  <Plus size={16} className="mr-2" />
-                  Ajouter
-                </ModernButton>
-              </div>
-              
-              <div className="space-y-3">
-                {skills.map((skill) => (
-                  <div key={skill.id} className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg">
-                    <div className="flex-1">
-                      <h4 className="text-white font-medium">{skill.name}</h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-gray-400">{skill.category}</span>
-                        <span className={`text-sm font-medium ${
-                          skill.level === 'expert' ? 'text-orange-400' :
-                          skill.level === 'advanced' ? 'text-purple-400' :
-                          skill.level === 'intermediate' ? 'text-blue-400' :
-                          'text-green-400'
-                        }`}>
-                          {skill.level === 'expert' ? 'Expert' :
-                           skill.level === 'advanced' ? 'Avancé' :
-                           skill.level === 'intermediate' ? 'Intermédiaire' : 'Débutant'}
-                        </span>
+            <ModernCard>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">Compétences</h3>
+                    <p className="text-gray-400 text-sm">Gérez vos compétences et niveaux</p>
+                  </div>
+                  <ModernButton
+                    onClick={() => {
+                      setEditingSkill(null);
+                      setIsEditingSkill(true);
+                    }}
+                  >
+                    <Plus size={16} className="mr-2" />
+                    Ajouter une compétence
+                  </ModernButton>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {skills.map((skill) => (
+                    <div key={skill.id} className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938] hover:border-[#9c68f2]/50 transition-colors">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="text-white font-medium mb-1">{skill.name}</h4>
+                          <p className="text-sm text-gray-400 mb-2">{skill.category}</p>
+                          <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                            skill.level === 'expert' ? 'bg-orange-500/20 text-orange-400' :
+                            skill.level === 'advanced' ? 'bg-purple-500/20 text-purple-400' :
+                            skill.level === 'intermediate' ? 'bg-blue-500/20 text-blue-400' :
+                            'bg-green-500/20 text-green-400'
+                          }`}>
+                            {skill.level === 'expert' ? 'Expert' :
+                             skill.level === 'advanced' ? 'Avancé' :
+                             skill.level === 'intermediate' ? 'Intermédiaire' : 'Débutant'}
+                          </span>
+                        </div>
+                        <div className="flex gap-1 ml-2">
+                          <button
+                            onClick={() => {
+                              setEditingSkill(skill);
+                              setIsEditingSkill(true);
+                            }}
+                            className="p-1 hover:bg-[#1e2938] rounded transition-colors"
+                          >
+                            <Edit size={14} className="text-gray-400" />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (await SkillsService.deleteSkill(skill.id)) {
+                                setSkills(skills.filter(s => s.id !== skill.id));
+                                showSuccessNotification('Compétence supprimée');
+                              }
+                            }}
+                            className="p-1 hover:bg-[#1e2938] rounded transition-colors"
+                          >
+                            <X size={14} className="text-red-400" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <ModernButton
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditingSkill(skill);
-                          setIsEditingSkill(true);
-                        }}
-                      >
-                        <Edit size={16} />
-                      </ModernButton>
-                      <ModernButton
-                        variant="outline"
-                        size="sm"
-                        onClick={async () => {
-                          if (await SkillsService.deleteSkill(skill.id)) {
-                            setSkills(skills.filter(s => s.id !== skill.id));
-                            showSuccessNotification('Compétence supprimée');
-                          }
-                        }}
-                      >
-                        <X size={16} />
-                      </ModernButton>
+                  ))}
+                  
+                  {skills.length === 0 && (
+                    <div className="col-span-full text-center py-12 text-gray-400">
+                      <Award size={48} className="mx-auto mb-4 opacity-50" />
+                      <p className="text-lg font-medium mb-2">Aucune compétence</p>
+                      <p className="text-sm">Ajoutez vos premières compétences</p>
                     </div>
-                  </div>
-                ))}
-                
-                {skills.length === 0 && (
-                  <div className="text-center py-8 text-gray-400">
-                    <Award size={48} className="mx-auto mb-4 opacity-50" />
-                    <p>Aucune compétence ajoutée</p>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
+            </ModernCard>
 
             {/* Récompenses */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">Récompenses</h3>
-                <ModernButton
-                  size="sm"
-                  onClick={() => {
-                    setEditingAward(null);
-                    setIsEditingAward(true);
-                  }}
-                >
-                  <Plus size={16} className="mr-2" />
-                  Ajouter
-                </ModernButton>
-              </div>
-              
-              <div className="space-y-3">
-                {awards.map((award) => (
-                  <div key={award.id} className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg">
-                    <div className="flex-1">
-                      <h4 className="text-white font-medium">{award.title}</h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm text-gray-400">{award.issuer}</span>
-                        <span className="text-sm text-gray-400">•</span>
-                        <span className="text-sm text-gray-400">{award.category}</span>
-                        <span className="text-sm text-gray-400">•</span>
-                        <span className="text-sm text-gray-400">
-                          {new Date(award.date_received).toLocaleDateString('fr-FR')}
-                        </span>
-                      </div>
-                      {award.description && (
-                        <p className="text-sm text-gray-400 mt-1">{award.description}</p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <ModernButton
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditingAward(award);
-                          setIsEditingAward(true);
-                        }}
-                      >
-                        <Edit size={16} />
-                      </ModernButton>
-                      <ModernButton
-                        variant="outline"
-                        size="sm"
-                        onClick={async () => {
-                          if (await AwardsService.deleteAward(award.id)) {
-                            setAwards(awards.filter(a => a.id !== award.id));
-                            showSuccessNotification('Récompense supprimée');
-                          }
-                        }}
-                      >
-                        <X size={16} />
-                      </ModernButton>
-                    </div>
+            <ModernCard>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">Récompenses</h3>
+                    <p className="text-gray-400 text-sm">Gérez vos récompenses et certifications</p>
                   </div>
-                ))}
+                  <ModernButton
+                    onClick={() => {
+                      setEditingAward(null);
+                      setIsEditingAward(true);
+                    }}
+                  >
+                    <Plus size={16} className="mr-2" />
+                    Ajouter une récompense
+                  </ModernButton>
+                </div>
                 
-                {awards.length === 0 && (
-                  <div className="text-center py-8 text-gray-400">
-                    <Award size={48} className="mx-auto mb-4 opacity-50" />
-                    <p>Aucune récompense ajoutée</p>
-                  </div>
-                )}
+                <div className="space-y-4">
+                  {awards.map((award) => (
+                    <div key={award.id} className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938] hover:border-[#9c68f2]/50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-start gap-3">
+                            <Award size={20} className="text-yellow-400 mt-1 flex-shrink-0" />
+                            <div className="flex-1">
+                              <h4 className="text-white font-medium mb-1">{award.title}</h4>
+                              <p className="text-sm text-gray-400 mb-2">{award.issuer}</p>
+                              <div className="flex items-center gap-3 text-xs text-gray-500">
+                                <span>{award.category}</span>
+                                <span>•</span>
+                                <span>{new Date(award.date_received).toLocaleDateString('fr-FR')}</span>
+                              </div>
+                              {award.description && (
+                                <p className="text-sm text-gray-400 mt-2">{award.description}</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-1 ml-4">
+                          <button
+                            onClick={() => {
+                              setEditingAward(award);
+                              setIsEditingAward(true);
+                            }}
+                            className="p-1 hover:bg-[#1e2938] rounded transition-colors"
+                          >
+                            <Edit size={14} className="text-gray-400" />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (await AwardsService.deleteAward(award.id)) {
+                                setAwards(awards.filter(a => a.id !== award.id));
+                                showSuccessNotification('Récompense supprimée');
+                              }
+                            }}
+                            className="p-1 hover:bg-[#1e2938] rounded transition-colors"
+                          >
+                            <X size={14} className="text-red-400" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {awards.length === 0 && (
+                    <div className="text-center py-12 text-gray-400">
+                      <Award size={48} className="mx-auto mb-4 opacity-50" />
+                      <p className="text-lg font-medium mb-2">Aucune récompense</p>
+                      <p className="text-sm">Ajoutez vos premières récompenses</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            </ModernCard>
+          </div>
+        );
+
+      case 'subscription':
+        return (
+          <div className="space-y-6">
+            {/* Plan actuel */}
+            <ModernCard>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-white mb-4">Plan actuel</h3>
+                <div className="bg-gradient-to-r from-[#9c68f2] to-[#8a5cf0] rounded-lg p-4 text-white">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-lg font-semibold">Plan Gratuit</h4>
+                      <p className="text-sm opacity-90">Accès aux fonctionnalités de base</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold">0€</p>
+                      <p className="text-sm opacity-90">/mois</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ModernCard>
+
+            {/* Plans disponibles */}
+            <ModernCard>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-white mb-4">Plans disponibles</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
+                    <h4 className="text-white font-semibold mb-2">Boost</h4>
+                    <p className="text-2xl font-bold text-[#9c68f2] mb-2">29€<span className="text-sm text-gray-400">/mois</span></p>
+                    <ul className="text-sm text-gray-400 space-y-1 mb-4">
+                      <li>• Toutes les fonctionnalités</li>
+                      <li>• Support prioritaire</li>
+                      <li>• Analytics avancés</li>
+                    </ul>
+                    <ModernButton variant="outline" className="w-full">
+                      Choisir Boost
+                    </ModernButton>
+                  </div>
+
+                  <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938] relative">
+                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">Populaire</span>
+                    </div>
+                    <h4 className="text-white font-semibold mb-2">Scale</h4>
+                    <p className="text-2xl font-bold text-[#9c68f2] mb-2">59€<span className="text-sm text-gray-400">/mois</span></p>
+                    <ul className="text-sm text-gray-400 space-y-1 mb-4">
+                      <li>• Tout Boost +</li>
+                      <li>• API avancée</li>
+                      <li>• Intégrations premium</li>
+                    </ul>
+                    <ModernButton className="w-full">
+                      Choisir Scale
+                    </ModernButton>
+                  </div>
+
+                  <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
+                    <h4 className="text-white font-semibold mb-2">Enterprise</h4>
+                    <p className="text-2xl font-bold text-[#9c68f2] mb-2">Sur mesure</p>
+                    <ul className="text-sm text-gray-400 space-y-1 mb-4">
+                      <li>• Solution personnalisée</li>
+                      <li>• Support dédié</li>
+                      <li>• Formation incluse</li>
+                    </ul>
+                    <ModernButton variant="outline" className="w-full">
+                      Nous contacter
+                    </ModernButton>
+                  </div>
+                </div>
+              </div>
+            </ModernCard>
+
+            {/* Méthodes de paiement */}
+            <ModernCard>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-white mb-4">Méthodes de paiement</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
+                        <CreditCard size={16} className="text-white" />
+                      </div>
+                      <div>
+                        <p className="text-white font-medium">Carte bancaire</p>
+                        <p className="text-sm text-gray-400">•••• •••• •••• 4242</p>
+                      </div>
+                    </div>
+                    <button className="text-red-400 hover:text-red-300 text-sm">
+                      Supprimer
+                    </button>
+                  </div>
+
+                  <ModernButton variant="outline" className="w-full">
+                    <Plus size={16} className="mr-2" />
+                    Ajouter une méthode de paiement
+                  </ModernButton>
+                </div>
+              </div>
+            </ModernCard>
+
+            {/* Historique des factures */}
+            <ModernCard>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-white mb-4">Historique des factures</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg">
+                    <div>
+                      <p className="text-white font-medium">Facture #001</p>
+                      <p className="text-sm text-gray-400">Plan Boost - Janvier 2024</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-white font-medium">29€</p>
+                      <button className="text-[#9c68f2] hover:text-[#8a5cf0] text-sm">
+                        Télécharger
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ModernCard>
           </div>
         );
 
@@ -838,6 +980,37 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modales */}
+      <SkillModal
+        isOpen={isEditingSkill}
+        onClose={() => {
+          setIsEditingSkill(false);
+          setEditingSkill(null);
+        }}
+        onSuccess={() => {
+          // Recharger les skills
+          if (user) {
+            SkillsService.getUserSkills(user.id).then(setSkills);
+          }
+        }}
+        skill={editingSkill}
+      />
+
+      <AwardModal
+        isOpen={isEditingAward}
+        onClose={() => {
+          setIsEditingAward(false);
+          setEditingAward(null);
+        }}
+        onSuccess={() => {
+          // Recharger les awards
+          if (user) {
+            AwardsService.getUserAwards(user.id).then(setAwards);
+          }
+        }}
+        award={editingAward}
+      />
     </Layout>
   );
 };
