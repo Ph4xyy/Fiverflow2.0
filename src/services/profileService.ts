@@ -66,12 +66,13 @@ export class ProfileService {
       console.log('Données nettoyées:', cleanData);
 
       // Champs étendus qui devraient exister après les migrations
-      const extendedFields = [
-        'full_name', 'avatar_url', 'bio', 'banner_url', 'location', 'website', 
-        'phone', 'professional_title', 'status', 'show_email', 'show_phone',
-        'github_url', 'discord_username', 'twitter_url', 'linkedin_url',
-        'contact_email', 'contact_phone'
-      ];
+  const extendedFields = [
+    'full_name', 'avatar_url', 'bio', 'banner_url', 'location', 'website',
+    'phone', 'professional_title', 'status', 'show_email', 'show_phone',
+    'github_url', 'discord_username', 'twitter_url', 'linkedin_url',
+    'instagram_url', 'tiktok_url', 'youtube_url',
+    'contact_email', 'contact_phone', 'theme'
+  ];
       
       const safeData = Object.fromEntries(
         Object.entries(cleanData).filter(([key]) => extendedFields.includes(key))

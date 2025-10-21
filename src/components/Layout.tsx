@@ -319,13 +319,14 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           
           {/* Right section - Theme, Notifications, logout */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <button 
+            {/* Theme changer moved to settings */}
+            {/* <button 
               onClick={handleThemeChange}
               className="size-10 rounded-lg grid place-items-center text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200"
               title={`Current theme: ${currentTheme}. Click to cycle through themes.`}
             >
               {React.createElement(getThemeIcon(), { size: 18 })}
-            </button>
+            </button> */}
 
             <LocalErrorBoundary>
               <div className="size-10 rounded-lg grid place-items-center text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200">

@@ -1322,10 +1322,30 @@ const ProfilePageNew: React.FC = () => {
 
             {/* Achievements */}
             <ModernCard title="Récompenses" icon={<Award size={20} className="text-white" />}>
-              <div className="text-center py-8">
-                <Award size={48} className="mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">Aucune récompense</h3>
-                <p className="text-gray-400">Vos récompenses apparaîtront ici</p>
+              <div className="space-y-3">
+                {awards.length > 0 ? (
+                  awards.map(award => (
+                    <div key={award.id} className="flex items-start gap-3 p-3 bg-[#35414e] rounded-lg">
+                      <Award size={20} className="text-yellow-400 mt-1 flex-shrink-0" />
+                      <div className="flex-1">
+                        <h4 className="text-white font-medium">{award.title}</h4>
+                        <p className="text-sm text-gray-400">{award.issuer}</p>
+                        {award.description && (
+                          <p className="text-sm text-gray-400 mt-1">{award.description}</p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(award.date_received).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <Award size={48} className="mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-semibold text-white mb-2">Aucune récompense</h3>
+                    <p className="text-gray-400">Vos récompenses apparaîtront ici</p>
+                  </div>
+                )}
               </div>
             </ModernCard>
 

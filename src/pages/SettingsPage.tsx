@@ -95,6 +95,9 @@ const SettingsPage: React.FC = () => {
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
   const [editingAward, setEditingAward] = useState<Award | null>(null);
 
+  // Thème
+  const [currentTheme, setCurrentTheme] = useState('dark');
+
   // Settings categories
   const categories: SettingsCategory[] = [
     {
@@ -186,6 +189,11 @@ const SettingsPage: React.FC = () => {
         // Charger les récompenses
         const userAwards = await AwardsService.getUserAwards(user.id);
         setAwards(userAwards);
+
+        // Charger le thème
+        if (data && data.theme) {
+          setCurrentTheme(data.theme);
+        }
       } catch (error) {
         console.error('Erreur lors du chargement du profil:', error);
       } finally {
@@ -197,6 +205,21 @@ const SettingsPage: React.FC = () => {
   }, [user]);
 
   // Save profile
+  const handleThemeChange = async (theme: string) => {
+    if (!user) return;
+    
+    setCurrentTheme(theme);
+    
+    // Sauvegarder le thème en base de données
+    try {
+      await ProfileService.updateProfile(user.id, { theme });
+      showSuccessNotification('Thème sauvegardé !');
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du thème:', error);
+      showErrorNotification('Erreur lors de la sauvegarde du thème');
+    }
+  };
+
   const handleSaveProfile = async () => {
     if (!user) return;
 
@@ -208,6 +231,9 @@ const SettingsPage: React.FC = () => {
         linkedin_url: socialNetworks.linkedin,
         twitter_url: socialNetworks.twitter,
         discord_username: socialNetworks.discord,
+        instagram_url: socialNetworks.instagram,
+        tiktok_url: socialNetworks.tiktok,
+        youtube_url: socialNetworks.youtube,
         website: socialNetworks.website
       };
 
@@ -227,6 +253,9 @@ const SettingsPage: React.FC = () => {
             linkedin: updatedData.linkedin_url || '',
             twitter: updatedData.twitter_url || '',
             discord: updatedData.discord_username || '',
+            instagram: updatedData.instagram_url || '',
+            tiktok: updatedData.tiktok_url || '',
+            youtube: updatedData.youtube_url || '',
             website: updatedData.website || ''
           });
         }
@@ -597,7 +626,7 @@ const SettingsPage: React.FC = () => {
               {/* Thème spécial Halloween */}
               <div className="mb-8">
                 <div className="relative rounded-xl p-6 border-2 border-orange-400 overflow-hidden" style={{
-                  backgroundImage: 'url(/image.png)',
+                  backgroundImage: 'url(/src/assets/Images/grunge-halloween-background.jpg)',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat'
@@ -614,8 +643,15 @@ const SettingsPage: React.FC = () => {
                         <h4 className="text-xl font-bold text-white mb-2">🎃 Thème Halloween</h4>
                         <p className="text-orange-100 text-sm">Thème spécial avec fond grunge Halloween</p>
                       </div>
-                      <button className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors">
-                        Activer
+                      <button 
+                        onClick={() => handleThemeChange('halloween')}
+                        className={`px-4 py-2 rounded-lg transition-colors ${
+                          currentTheme === 'halloween' 
+                            ? 'bg-orange-500 text-white' 
+                            : 'bg-white/20 hover:bg-white/30 text-white'
+                        }`}
+                      >
+                        {currentTheme === 'halloween' ? 'Actif' : 'Activer'}
                       </button>
                     </div>
                   </div>
@@ -630,8 +666,15 @@ const SettingsPage: React.FC = () => {
                     <div className="w-4 h-4 bg-gray-800 rounded-full border-2 border-gray-600"></div>
                   </div>
                   <p className="text-gray-400 text-sm mb-3">Interface sombre classique</p>
-                  <button className="w-full bg-[#9c68f2] hover:bg-[#8a5cf0] text-white py-2 rounded-lg transition-colors">
-                    Activer
+                  <button 
+                    onClick={() => handleThemeChange('dark')}
+                    className={`w-full py-2 rounded-lg transition-colors ${
+                      currentTheme === 'dark' 
+                        ? 'bg-[#9c68f2] text-white' 
+                        : 'bg-[#9c68f2] hover:bg-[#8a5cf0] text-white'
+                    }`}
+                  >
+                    {currentTheme === 'dark' ? 'Actif' : 'Activer'}
                   </button>
                 </div>
 
@@ -641,8 +684,15 @@ const SettingsPage: React.FC = () => {
                     <div className="w-4 h-4 bg-white rounded-full border-2 border-gray-300"></div>
                   </div>
                   <p className="text-gray-400 text-sm mb-3">Interface claire et moderne</p>
-                  <button className="w-full bg-[#9c68f2] hover:bg-[#8a5cf0] text-white py-2 rounded-lg transition-colors">
-                    Activer
+                  <button 
+                    onClick={() => handleThemeChange('light')}
+                    className={`w-full py-2 rounded-lg transition-colors ${
+                      currentTheme === 'light' 
+                        ? 'bg-[#9c68f2] text-white' 
+                        : 'bg-[#9c68f2] hover:bg-[#8a5cf0] text-white'
+                    }`}
+                  >
+                    {currentTheme === 'light' ? 'Actif' : 'Activer'}
                   </button>
                 </div>
 
@@ -652,8 +702,15 @@ const SettingsPage: React.FC = () => {
                     <div className="w-4 h-4 bg-blue-600 rounded-full border-2 border-blue-400"></div>
                   </div>
                   <p className="text-gray-400 text-sm mb-3">Interface avec accents bleus</p>
-                  <button className="w-full bg-[#9c68f2] hover:bg-[#8a5cf0] text-white py-2 rounded-lg transition-colors">
-                    Activer
+                  <button 
+                    onClick={() => handleThemeChange('blue')}
+                    className={`w-full py-2 rounded-lg transition-colors ${
+                      currentTheme === 'blue' 
+                        ? 'bg-[#9c68f2] text-white' 
+                        : 'bg-[#9c68f2] hover:bg-[#8a5cf0] text-white'
+                    }`}
+                  >
+                    {currentTheme === 'blue' ? 'Actif' : 'Activer'}
                   </button>
                 </div>
 
@@ -663,8 +720,15 @@ const SettingsPage: React.FC = () => {
                     <div className="w-4 h-4 bg-green-600 rounded-full border-2 border-green-400"></div>
                   </div>
                   <p className="text-gray-400 text-sm mb-3">Interface avec accents verts</p>
-                  <button className="w-full bg-[#9c68f2] hover:bg-[#8a5cf0] text-white py-2 rounded-lg transition-colors">
-                    Activer
+                  <button 
+                    onClick={() => handleThemeChange('green')}
+                    className={`w-full py-2 rounded-lg transition-colors ${
+                      currentTheme === 'green' 
+                        ? 'bg-[#9c68f2] text-white' 
+                        : 'bg-[#9c68f2] hover:bg-[#8a5cf0] text-white'
+                    }`}
+                  >
+                    {currentTheme === 'green' ? 'Actif' : 'Activer'}
                   </button>
                 </div>
 
@@ -674,8 +738,15 @@ const SettingsPage: React.FC = () => {
                     <div className="w-4 h-4 bg-pink-600 rounded-full border-2 border-pink-400"></div>
                   </div>
                   <p className="text-gray-400 text-sm mb-3">Interface avec accents roses</p>
-                  <button className="w-full bg-[#9c68f2] hover:bg-[#8a5cf0] text-white py-2 rounded-lg transition-colors">
-                    Activer
+                  <button 
+                    onClick={() => handleThemeChange('pink')}
+                    className={`w-full py-2 rounded-lg transition-colors ${
+                      currentTheme === 'pink' 
+                        ? 'bg-[#9c68f2] text-white' 
+                        : 'bg-[#9c68f2] hover:bg-[#8a5cf0] text-white'
+                    }`}
+                  >
+                    {currentTheme === 'pink' ? 'Actif' : 'Activer'}
                   </button>
                 </div>
 
@@ -685,8 +756,15 @@ const SettingsPage: React.FC = () => {
                     <div className="w-4 h-4 bg-purple-600 rounded-full border-2 border-purple-400"></div>
                   </div>
                   <p className="text-gray-400 text-sm mb-3">Interface avec accents violets</p>
-                  <button className="w-full bg-[#9c68f2] hover:bg-[#8a5cf0] text-white py-2 rounded-lg transition-colors">
-                    Activer
+                  <button 
+                    onClick={() => handleThemeChange('purple')}
+                    className={`w-full py-2 rounded-lg transition-colors ${
+                      currentTheme === 'purple' 
+                        ? 'bg-[#9c68f2] text-white' 
+                        : 'bg-[#9c68f2] hover:bg-[#8a5cf0] text-white'
+                    }`}
+                  >
+                    {currentTheme === 'purple' ? 'Actif' : 'Activer'}
                   </button>
                 </div>
               </div>
