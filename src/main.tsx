@@ -6,10 +6,9 @@ import App from './App.tsx';
 import './index.css';
 import './utils/cleanAuth'; // Importer l'utilitaire de nettoyage
 
-/** Force le mode sombre dès le chargement */
+/** Initialisation du thème - sera géré par ThemeProvider */
 try {
-  document.documentElement.classList.add('dark');
-  localStorage.setItem('theme', 'dark');
+  // Ne pas forcer le thème, laisser ThemeProvider gérer cela
 } catch {}
 
 /** Pare-chocs global pour éviter l’écran blanc en cas d’erreur non rattrapée */

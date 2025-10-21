@@ -16,6 +16,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { UserDataProvider } from './contexts/UserDataContext';
 import { LoadingProvider } from './contexts/LoadingContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Composants de protection et d'interface
 import InstantProtectedRoute from './components/InstantProtectedRoute';
@@ -188,17 +189,19 @@ function App() {
   return (
     <AppErrorBoundary>
       <AuthProvider>
-        <Router>
-          <AnalyticsWrapper>
-            <LoadingProvider>
-              <CurrencyProvider>
-                <UserDataProvider>
-                  <AppContent />
-                </UserDataProvider>
-              </CurrencyProvider>
-            </LoadingProvider>
-          </AnalyticsWrapper>
-        </Router>
+        <ThemeProvider>
+          <Router>
+            <AnalyticsWrapper>
+              <LoadingProvider>
+                <CurrencyProvider>
+                  <UserDataProvider>
+                    <AppContent />
+                  </UserDataProvider>
+                </CurrencyProvider>
+              </LoadingProvider>
+            </AnalyticsWrapper>
+          </Router>
+        </ThemeProvider>
       </AuthProvider>
     </AppErrorBoundary>
   );
