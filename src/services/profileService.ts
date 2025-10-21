@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase';
 
 export interface ProfileData {
   full_name?: string;
+  username?: string; // Username unique pour les URLs publiques
   avatar_url?: string;
   banner_url?: string;
   bio?: string;
@@ -67,7 +68,7 @@ export class ProfileService {
 
       // Champs étendus qui devraient exister après les migrations
   const extendedFields = [
-    'full_name', 'avatar_url', 'bio', 'banner_url', 'location', 'website',
+    'full_name', 'username', 'avatar_url', 'bio', 'banner_url', 'location', 'website',
     'phone', 'professional_title', 'status', 'show_email', 'show_phone',
     'github_url', 'discord_username', 'twitter_url', 'linkedin_url',
     'instagram_url', 'tiktok_url', 'youtube_url',
@@ -344,5 +345,121 @@ FOR INSERT WITH CHECK (
     if (!email || email.trim() === '') return true; // Email vide est valide
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailPattern.test(email);
+  }
+
+  /**
+   * Valide un username
+   */
+  static validateUsername(username: string): boolean {
+    if (!username || username.trim() === '') return false;
+    
+    // Vérifier la longueur (3-50 caractères)
+    if (username.length < 3 || username.length > 50) return false;
+    
+    // Vérifier qu'il ne contient que des caractères autorisés (lettres, chiffres, underscores)
+    if (!/^[a-z0-9_]+$/.test(username)) return false;
+    
+    // Vérifier qu'il ne commence pas par un chiffre
+    if (/^[0-9]/.test(username)) return false;
+    
+    // Vérifier qu'il ne se termine pas par un underscore
+    if (/_$/.test(username)) return false;
+    
+    return true;
+  }
+
+  /**
+   * Vérifie l'unicité d'un username
+   */
+  static async checkUsernameAvailability(username: string, currentUserId?: string): Promise<boolean> {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('username')
+        .eq('username', username.toLowerCase())
+        .neq('user_id', currentUserId || '');
+
+      if (error) {
+        console.error('Erreur lors de la vérification du username:', error);
+        return false;
+      }
+
+      return data.length === 0;
+    } catch (error) {
+      console.error('Erreur lors de la vérification du username:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Met à jour le username d'un utilisateur
+   */
+  static async updateUsername(userId: string, username: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      // Normaliser le username
+      const normalizedUsername = username.toLowerCase().trim();
+      
+      // Valider le username
+      if (!this.validateUsername(normalizedUsername)) {
+        return { 
+          success: false, 
+          error: 'Username invalide. Utilisez uniquement des lettres minuscules, chiffres et underscores (3-50 caractères)' 
+        };
+      }
+
+      // Vérifier l'unicité
+      const isAvailable = await this.checkUsernameAvailability(normalizedUsername, userId);
+      if (!isAvailable) {
+        return { 
+          success: false, 
+          error: 'Ce username est déjà utilisé' 
+        };
+      }
+
+      // Mettre à jour le username
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ username: normalizedUsername })
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Erreur lors de la mise à jour du username:', error);
+        return { 
+          success: false, 
+          error: 'Erreur lors de la mise à jour du username' 
+        };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du username:', error);
+      return { 
+        success: false, 
+        error: 'Erreur inattendue lors de la mise à jour du username' 
+      };
+    }
+  }
+
+  /**
+   * Récupère un profil par username
+   */
+  static async getProfileByUsername(username: string): Promise<ProfileData | null> {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('username', username.toLowerCase())
+        .single();
+
+      if (error) {
+        console.error('Erreur lors de la récupération du profil par username:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Erreur lors de la récupération du profil par username:', error);
+      return null;
+    }
   }
 }

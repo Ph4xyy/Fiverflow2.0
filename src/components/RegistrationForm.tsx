@@ -11,9 +11,12 @@ import {
   Briefcase, 
   CheckCircle, 
   AlertCircle, 
-  Shield
+  Shield,
+  Loader2,
+  XCircle
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useUsernameValidation } from '../hooks/useUsernameValidation';
 
 import toast from 'react-hot-toast';
 import LogoImage from '../assets/LogoFiverFlow.png';
@@ -56,6 +59,9 @@ const RegistrationForm: React.FC = () => {
   });
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+
+  // Hook de validation des usernames
+  const usernameValidation = useUsernameValidation(formData.username);
 
   const countries = [
     'Afghanistan', 'Albania', 'Algeria', 'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan',
@@ -111,9 +117,15 @@ const RegistrationForm: React.FC = () => {
   const validateUsername = (username: string): string | undefined => {
     if (!username) return 'Le nom d\'utilisateur est obligatoire';
     if (username.length < 3) return 'Le nom d\'utilisateur doit contenir au moins 3 caractères';
-    if (username.length > 20) return 'Le nom d\'utilisateur ne peut pas dépasser 20 caractères';
-    if (!/^[a-zA-Z0-9-_]+$/.test(username)) return 'Le nom d\'utilisateur ne peut contenir que des lettres, chiffres, tirets et underscores';
-    if (username.startsWith('-') || username.endsWith('-')) return 'Le nom d\'utilisateur ne peut pas commencer ou finir par un tiret';
+    if (username.length > 50) return 'Le nom d\'utilisateur ne peut pas dépasser 50 caractères';
+    if (!/^[a-z0-9_]+$/.test(username)) return 'Le nom d\'utilisateur ne peut contenir que des lettres minuscules, chiffres et underscores';
+    if (/^[0-9]/.test(username)) return 'Le nom d\'utilisateur ne peut pas commencer par un chiffre';
+    if (/_$/.test(username)) return 'Le nom d\'utilisateur ne peut pas se terminer par un underscore';
+    
+    // Vérifier le statut de validation en temps réel
+    if (usernameValidation.status === 'taken') return 'Ce nom d\'utilisateur est déjà utilisé';
+    if (usernameValidation.status === 'invalid') return 'Nom d\'utilisateur invalide';
+    
     return undefined;
   };
 
@@ -242,6 +254,12 @@ const RegistrationForm: React.FC = () => {
 
     if (!isValid) {
       toast.error('Veuillez corriger les erreurs avant de continuer');
+      return;
+    }
+
+    // Vérifier que le username est disponible
+    if (!usernameValidation.isAvailable) {
+      toast.error('Le nom d\'utilisateur n\'est pas disponible');
       return;
     }
 
@@ -387,15 +405,25 @@ const RegistrationForm: React.FC = () => {
                   value={formData.username}
                   onChange={(e) => handleFieldChange('username', e.target.value.toLowerCase())}
                   onBlur={() => handleFieldBlur('username')}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
-                    errors.username ? 'border-red-500/50 bg-red-900/20' : 'border-[#1C2230]'
+                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-white placeholder-slate-400 ${
+                    errors.username ? 'border-red-500/50 bg-red-900/20' : 
+                    usernameValidation.isAvailable ? 'border-green-500/50 bg-green-900/20' : 'border-[#1C2230]'
                   }`}
                   placeholder="nom-utilisateur"
                   required
                 />
-                {errors.username && (
-                  <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400" size={20} />
-                )}
+                {/* Indicateur de validation en temps réel */}
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  {usernameValidation.isChecking && (
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                  )}
+                  {usernameValidation.isAvailable && !usernameValidation.isChecking && (
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  )}
+                  {(usernameValidation.isTaken || usernameValidation.isInvalid) && !usernameValidation.isChecking && (
+                    <XCircle className="h-4 w-4 text-red-500" />
+                  )}
+                </div>
               </div>
               {errors.username && (
                 <p className="mt-1 text-sm text-red-300 flex items-center">
@@ -403,8 +431,14 @@ const RegistrationForm: React.FC = () => {
                   {errors.username}
                 </p>
               )}
+              {!errors.username && usernameValidation.isAvailable && (
+                <p className="mt-1 text-sm text-green-300 flex items-center">
+                  <CheckCircle size={14} className="mr-1" />
+                  Nom d'utilisateur disponible
+                </p>
+              )}
               <p className="mt-1 text-xs text-slate-500">
-                3-20 caractères, lettres, chiffres, tirets et underscores autorisés
+                Utilisez uniquement des lettres minuscules, chiffres et underscores (3-50 caractères)
               </p>
             </div>
 

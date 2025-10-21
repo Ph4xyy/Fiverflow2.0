@@ -904,6 +904,9 @@ const AdminDashboard: React.FC = () => {
                         </div>
                         <div>
                           <h4 className="text-xl font-semibold text-white">{selectedUser.full_name || 'Utilisateur'}</h4>
+                          {selectedUser.username && (
+                            <p className="text-sm text-gray-300">@{selectedUser.username}</p>
+                          )}
                           <p className="text-gray-400">{selectedUser.email}</p>
                         </div>
                       </div>

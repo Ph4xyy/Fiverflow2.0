@@ -461,7 +461,13 @@ const ProfilePageNew: React.FC = () => {
                   {/* Basic Info */}
                   <div className="pb-4">
                     <div className="flex items-center gap-3 mb-2">
-                      <h1 className="text-3xl font-bold text-white">{profileData.full_name || 'Utilisateur'}</h1>
+                      <div>
+                        <h1 className="text-3xl font-bold text-white">{profileData.full_name || 'Utilisateur'}</h1>
+                        {/* Username affiché en dessous du nom */}
+                        {profileData.username && (
+                          <p className="text-sm text-gray-400 mt-1">@{profileData.username}</p>
+                        )}
+                      </div>
                       {/* Badges */}
                       <div className="flex items-center gap-2">
                         {/* Badge Administrateur */}
