@@ -74,3 +74,4 @@ Write-Host "3. Reconnectez-vous" -ForegroundColor Gray
 Write-Host "4. Le statut admin devrait être reconnu" -ForegroundColor Gray
 
 Write-Host "`n✨ C'est beaucoup plus simple comme ça !" -ForegroundColor Cyan
+

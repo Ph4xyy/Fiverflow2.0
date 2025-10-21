@@ -170,3 +170,4 @@ Write-Host "✅ demoteFromAdmin() - Rétrograder" -ForegroundColor Green
 Write-Host "`n🎯 La solution sans RPC est prête !" -ForegroundColor Cyan
 Write-Host "Plus d'erreur 404, plus de dépendance aux fonctions RPC." -ForegroundColor White
 Write-Host "Tout est géré avec du JavaScript direct et simple." -ForegroundColor White
+

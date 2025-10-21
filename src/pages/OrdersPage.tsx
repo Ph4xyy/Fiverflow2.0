@@ -19,9 +19,9 @@ import SubscriptionLimits from '@/components/SubscriptionLimits';
 type OrderRow = {
   id: string;
   title: string;
-  amount: number | null;
+  budget: number | null; // Changé de 'amount' à 'budget'
   status: 'Pending' | 'In Progress' | 'Completed' | string;
-  deadline: string | null;
+  due_date: string | null; // Changé de 'deadline' à 'due_date'
   created_at: string | null;
   clients: {
     name: string;
@@ -112,9 +112,9 @@ const OrdersPage: React.FC = () => {
       const demo: OrderRow[] = Array.from({ length: 42 }).map((_, i) => ({
         id: String(i + 1),
         title: i % 3 ? `Website Redesign #${i + 1}` : `Mobile App #${i + 1}`,
-        amount: 250 + (i % 7) * 150,
+        budget: 250 + (i % 7) * 150, // Utiliser 'budget' au lieu de 'amount'
         status: (['Pending', 'In Progress', 'Completed'] as const)[i % 3],
-        deadline: new Date(Date.now() + (i % 15) * 86400000).toISOString(),
+        due_date: new Date(Date.now() + (i % 15) * 86400000).toISOString(), // Utiliser 'due_date' au lieu de 'deadline'
         created_at: new Date().toISOString(),
         clients: {
           name: i % 2 ? `Acme Corp` : `John Doe`,
@@ -147,7 +147,7 @@ const OrdersPage: React.FC = () => {
 
       let query = supabase
         .from('orders')
-        .select(`id,title,amount,status,deadline,created_at, clients!inner(name,platform,user_id)`, { count: 'exact' })
+        .select(`id,title,budget,status,due_date,created_at, clients!inner(name,platform,user_id)`, { count: 'exact' })
         .eq('clients.user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -166,8 +166,13 @@ const OrdersPage: React.FC = () => {
       const { data, error, count } = await query;
       if (error) throw error;
 
-      const transformed = (data || []).map((o: any) => ({
-        ...o,
+      const transformed = (data || []).map((o => ({
+        id: o.id,
+        title: o.title,
+        budget: o.budget, // Utiliser 'budget' au lieu de 'amount'
+        status: o.status,
+        due_date: o.due_date, // Utiliser 'due_date' au lieu de 'deadline'
+        created_at: o.created_at,
         clients: {
           name: o.clients.name,
           platform: o.clients.platform
@@ -275,10 +280,10 @@ const OrdersPage: React.FC = () => {
       : 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-300';
 
   const kpis = useMemo(() => {
-    const totalRevenue = orders.reduce((s, o) => s + (o.amount || 0), 0);
+    const totalRevenue = orders.reduce((s, o) => s + (o.budget || 0), 0);
     const pendingRevenue = orders
       .filter(o => o.status !== 'Completed')
-      .reduce((s, o) => s + (o.amount || 0), 0);
+      .reduce((s, o) => s + (o.budget || 0), 0);
     const inProgress = orders.filter(o => o.status === 'In Progress').length;
     return { totalRevenue, pendingRevenue, inProgress };
   }, [orders]);
@@ -563,7 +568,7 @@ const OrdersPage: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                          {typeof o.amount === 'number' ? new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(o.amount) : '—'}
+                          {typeof o.budget === 'number' ? new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(o.budget) : '—'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap relative" ref={openStatusFor === o.id ? statusMenuRef : undefined}>
                           <button
@@ -596,7 +601,7 @@ const OrdersPage: React.FC = () => {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">
-                          {o.deadline ? new Date(o.deadline).toLocaleDateString() : '—'}
+                          {o.due_date ? new Date(o.due_date).toLocaleDateString() : '—'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <button

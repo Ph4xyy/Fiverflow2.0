@@ -254,3 +254,4 @@ export class UserProfileManager {
 }
 
 export default UserProfileManager;
+

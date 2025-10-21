@@ -223,21 +223,17 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
       const orderData = {
         title: formData.title.trim(),
         description: formData.description.trim() || null,
-        amount: parseFloat(`${formData.amount}`),
-        deadline: formData.deadline || null,
+        budget: parseFloat(`${formData.amount}`), // Utiliser 'budget' au lieu de 'amount'
+        due_date: formData.deadline || null, // Utiliser 'due_date' au lieu de 'deadline'
         client_id: formData.client_id,
         status: formData.status,
-        project_type: formData.project_type || null,
-        priority_level: formData.priority_level,
-        estimated_hours: formData.estimated_hours ? parseInt(`${formData.estimated_hours}`, 10) : null,
-        hourly_rate: formData.hourly_rate ? parseFloat(`${formData.hourly_rate}`) : null,
-        payment_status: formData.payment_status,
-        notes: formData.notes.trim() || null,
-        tags: formData.tags.length ? formData.tags : null,
         start_date: formData.start_date || null,
-        completion_date: formData.completion_date || null,
-        revision_count: formData.revision_count || 0,
-        client_feedback: formData.client_feedback.trim() || null
+        completed_date: formData.completion_date || null,
+        // Ajouter les champs client dénormalisés pour performance
+        client_name: clients.find(c => c.id === formData.client_id)?.name || null,
+        client_email: null, // Peut être ajouté plus tard si nécessaire
+        platform: clients.find(c => c.id === formData.client_id)?.platform || null,
+        currency: 'USD' // Valeur par défaut
       };
 
       if (order) {
