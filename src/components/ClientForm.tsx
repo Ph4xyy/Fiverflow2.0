@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { X, User, Mail, Briefcase, MessageSquare } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { NotificationHelpers } from '../utils/notifications';
+import { showSuccessNotification, showErrorNotification } from '../utils/notifications';
 import { usePlanLimits } from '../hooks/usePlanLimits';
 import toast from 'react-hot-toast';
 
@@ -308,12 +308,8 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
         if (error) throw error;
 
         if (data && user) {
-          await NotificationHelpers.newClient(
-            user.id,
-            formData.name,
-            formData.platform,
-            data.id
-          );
+          // TODO: Implémenter le suivi d'activité pour les nouveaux clients
+          console.log('Nouveau client créé:', { userId: user.id, clientName: formData.name, platform: formData.platform, clientId: data.id });
         }
 
         toast.success('Client créé avec succès !', { id: toastId });

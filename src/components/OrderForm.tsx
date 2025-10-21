@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { X, FileText, DollarSign, Calendar, CheckCircle } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { NotificationHelpers } from '../utils/notifications';
+import { showSuccessNotification, showErrorNotification } from '../utils/notifications';
 import { usePlanLimits } from '../hooks/usePlanLimits';
 import toast from 'react-hot-toast';
 
@@ -262,7 +262,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
         if (data && user) {
           const selectedClient = clients.find(c => c.id === formData.client_id);
           if (selectedClient) {
-            await NotificationHelpers.orderCreated(user.id, formData.title, selectedClient.name, data.id);
+            // TODO: Implémenter le suivi d'activité pour les nouvelles commandes
+            console.log('Nouvelle commande créée:', { userId: user.id, orderTitle: formData.title, clientName: selectedClient.name, orderId: data.id });
           }
         }
         toast.success('Order created successfully!', { id: toastId });
