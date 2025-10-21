@@ -767,149 +767,149 @@ const ProfilePageNew: React.FC = () => {
                     {/* Left Column - Profile Settings */}
                     <div className="space-y-4">
                       <h4 className="text-lg font-semibold text-white mb-4">Informations de base</h4>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Nom complet
-                  </label>
-                  <input
-                    type="text"
-                    value={profileData.full_name || ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, full_name: e.target.value})}
-                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Titre professionnel
-                  </label>
-                  <input
-                    type="text"
-                    value={profileData.professional_title || ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, professional_title: e.target.value})}
-                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Lieu
-                  </label>
-                  <input
-                    type="text"
-                    value={profileData.location || ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, location: e.target.value})}
-                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Bio
-                  </label>
-                  <textarea
-                    value={profileData.bio || ''}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setProfileData({...profileData, bio: e.target.value})}
-                    rows={3}
-                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2] resize-none"
-                  />
-                </div>
-
-                {/* Paramètres de confidentialité */}
-                <div className="pt-4 border-t border-[#35414e]">
-                  <h5 className="text-md font-semibold text-white mb-3">Confidentialité</h5>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
+                      
                       <div>
-                        <label className="text-sm font-medium text-gray-300">
-                          Afficher l'email
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Nom complet
                         </label>
-                        <p className="text-xs text-gray-400">
-                          Permet aux autres utilisateurs de voir votre email
-                        </p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
                         <input
-                          type="checkbox"
-                          checked={privacySettings.show_email}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrivacySettings({...privacySettings, show_email: e.target.checked})}
-                          className="sr-only peer"
+                          type="text"
+                          value={profileData.full_name || ''}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, full_name: e.target.value})}
+                          className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                         />
-                        <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#9c68f2]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#9c68f2]"></div>
-                      </label>
-                    </div>
+                      </div>
 
-                    <div className="flex items-center justify-between">
                       <div>
-                        <label className="text-sm font-medium text-gray-300">
-                          Afficher le téléphone
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Titre professionnel
                         </label>
-                        <p className="text-xs text-gray-400">
-                          Permet aux autres utilisateurs de voir votre téléphone
-                        </p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
                         <input
-                          type="checkbox"
-                          checked={privacySettings.show_phone}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrivacySettings({...privacySettings, show_phone: e.target.checked})}
-                          className="sr-only peer"
+                          type="text"
+                          value={profileData.professional_title || ''}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, professional_title: e.target.value})}
+                          className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                         />
-                        <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#9c68f2]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#9c68f2]"></div>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                      </div>
 
-              {/* Right Column - Contact & Social Networks */}
-              <div className="space-y-6">
-                {/* Contact Section */}
-                <div>
-                  <h4 className="text-lg font-semibold text-white mb-4">Informations de contact</h4>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Email de contact
-                      </label>
-                      <input
-                        type="email"
-                        value={profileData.contact_email || ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, contact_email: e.target.value})}
-                        className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                        placeholder="contact@example.com"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Email professionnel pour les clients
-                      </p>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Lieu
+                        </label>
+                        <input
+                          type="text"
+                          value={profileData.location || ''}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, location: e.target.value})}
+                          className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Bio
+                        </label>
+                        <textarea
+                          value={profileData.bio || ''}
+                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setProfileData({...profileData, bio: e.target.value})}
+                          rows={3}
+                          className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2] resize-none"
+                        />
+                      </div>
+
+                      {/* Paramètres de confidentialité */}
+                      <div className="pt-4 border-t border-[#35414e]">
+                        <h5 className="text-md font-semibold text-white mb-3">Confidentialité</h5>
+                        
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="text-sm font-medium text-gray-300">
+                                Afficher l'email
+                              </label>
+                              <p className="text-xs text-gray-400">
+                                Permet aux autres utilisateurs de voir votre email
+                              </p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={privacySettings.show_email}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrivacySettings({...privacySettings, show_email: e.target.checked})}
+                                className="sr-only peer"
+                              />
+                              <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#9c68f2]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#9c68f2]"></div>
+                            </label>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="text-sm font-medium text-gray-300">
+                                Afficher le téléphone
+                              </label>
+                              <p className="text-xs text-gray-400">
+                                Permet aux autres utilisateurs de voir votre téléphone
+                              </p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={privacySettings.show_phone}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrivacySettings({...privacySettings, show_phone: e.target.checked})}
+                                className="sr-only peer"
+                              />
+                              <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#9c68f2]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#9c68f2]"></div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Téléphone de contact
-                      </label>
-                      <input
-                        type="tel"
-                        value={profileData.contact_phone || ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, contact_phone: e.target.value})}
-                        className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                        placeholder="+33 6 12 34 56 78"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Numéro professionnel pour les clients
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                    {/* Right Column - Contact & Social Networks */}
+                    <div className="space-y-6">
+                      {/* Contact Section */}
+                      <div>
+                        <h4 className="text-lg font-semibold text-white mb-4">Informations de contact</h4>
+                        
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Email de contact
+                            </label>
+                            <input
+                              type="email"
+                              value={profileData.contact_email || ''}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, contact_email: e.target.value})}
+                              className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                              placeholder="contact@example.com"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Email professionnel pour les clients
+                            </p>
+                          </div>
 
-                {/* Social Networks Section */}
-                <div>
-                  <h4 className="text-lg font-semibold text-white mb-4">Réseaux sociaux</h4>
-                  
-                  <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Téléphone de contact
+                            </label>
+                            <input
+                              type="tel"
+                              value={profileData.contact_phone || ''}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, contact_phone: e.target.value})}
+                              className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                              placeholder="+33 6 12 34 56 78"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Numéro professionnel pour les clients
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Social Networks Section */}
+                      <div>
+                        <h4 className="text-lg font-semibold text-white mb-4">Réseaux sociaux</h4>
+                        
+                        <div className="space-y-4">
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 bg-gray-800 rounded flex items-center justify-center">
@@ -1040,11 +1040,11 @@ const ProfilePageNew: React.FC = () => {
                 )}
               </ModernButton>
             </div>
-                </ModernCard>
+                  </ModernCard>
+                </div>
               </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
 
         {/* Messaging System */}
         {isMessagingOpen && (
