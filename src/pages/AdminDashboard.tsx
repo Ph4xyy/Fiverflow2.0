@@ -203,17 +203,63 @@ const AdminDashboard: React.FC = () => {
         new Date(user.created_at) >= today
       ).length || 0;
 
+      // Récupérer les vraies données d'abonnements
+      let subscriptionStats = {
+        totalSubscriptions: 0,
+        totalRevenue: 0,
+        launchSubscriptions: 0,
+        boostSubscriptions: 0,
+        scaleSubscriptions: 0
+      };
+
+      try {
+        // Utiliser la fonction SQL pour récupérer les vraies statistiques
+        const { data: subscriptionStatsData, error: subscriptionStatsErr } = await supabase
+          .rpc('get_subscription_stats');
+
+        if (!subscriptionStatsErr && subscriptionStatsData) {
+          subscriptionStats = {
+            totalSubscriptions: subscriptionStatsData.total_subscriptions || 0,
+            totalRevenue: subscriptionStatsData.total_revenue || 0,
+            launchSubscriptions: subscriptionStatsData.plan_stats?.launch || 0,
+            boostSubscriptions: subscriptionStatsData.plan_stats?.boost || 0,
+            scaleSubscriptions: subscriptionStatsData.plan_stats?.scale || 0
+          };
+          console.log('📊 Vraies statistiques d\'abonnements:', subscriptionStatsData);
+        } else {
+          console.warn('Fonction get_subscription_stats non disponible, utilisation des données directes');
+          
+          // Fallback vers les données directes
+          const { data: subscriptionsData, error: subscriptionsErr } = await supabase
+            .from('user_subscriptions')
+            .select('id, amount, billing_cycle, status, plan_id');
+
+          if (!subscriptionsErr && subscriptionsData) {
+            const activeSubscriptions = subscriptionsData.filter(s => s.status === 'active');
+            subscriptionStats = {
+              totalSubscriptions: subscriptionsData.length,
+              totalRevenue: activeSubscriptions.reduce((sum, s) => sum + (s.amount || 0), 0),
+              launchSubscriptions: activeSubscriptions.filter(s => s.plan_id === 'launch').length,
+              boostSubscriptions: activeSubscriptions.filter(s => s.plan_id === 'boost').length,
+              scaleSubscriptions: activeSubscriptions.filter(s => s.plan_id === 'scale').length
+            };
+          }
+        }
+      } catch (e) {
+        console.warn('Erreur lors du chargement des statistiques d\'abonnements:', e);
+      }
+
       const statsData = {
         totalUsers: allUsers?.length || 0,
         activeUsers: allUsers?.filter(u => u.is_active).length || 0,
         adminUsers: allUsers?.filter(u => u.is_admin).length || 0,
         newUsersToday,
-        // Données simulées pour les abonnements (à remplacer par de vraies données)
-        totalSubscriptions: 156,
-        totalRevenue: 12450.00,
-        launchSubscriptions: 89,
-        boostSubscriptions: 45,
-        scaleSubscriptions: 22
+        // Vraies données d'abonnements
+        totalSubscriptions: subscriptionStats.totalSubscriptions,
+        totalRevenue: subscriptionStats.totalRevenue,
+        launchSubscriptions: subscriptionStats.launchSubscriptions,
+        boostSubscriptions: subscriptionStats.boostSubscriptions,
+        scaleSubscriptions: subscriptionStats.scaleSubscriptions
       };
 
       console.log('🔍 AdminDashboard: Statistiques calculées:', statsData);

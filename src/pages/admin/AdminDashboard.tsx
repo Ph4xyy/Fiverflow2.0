@@ -3,6 +3,7 @@ import Layout, { pageBgClass, cardClass } from '../../components/Layout';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAdminStats } from '../../hooks/useAdminStats';
 import AdminSubscriptionManager from '../../components/AdminSubscriptionManager';
+import UserDetailedStats from '../../components/UserDetailedStats';
 import {
   Users,
   UserCheck,
@@ -30,6 +31,8 @@ const AdminDashboard: React.FC = () => {
   const [endDate, setEndDate] = useState<string>(
     new Date().toISOString().slice(0, 10)
   );
+  const [selectedUserForStats, setSelectedUserForStats] = useState<string | null>(null);
+  const [showUserStats, setShowUserStats] = useState(false);
 
   const { stats, loading, error } = useAdminStats(startDate, endDate);
 
@@ -61,6 +64,16 @@ const AdminDashboard: React.FC = () => {
     if (name && name.trim().length) return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     if (email && email.length) return email.slice(0, 2).toUpperCase();
     return 'US';
+  };
+
+  const handleViewUserStats = (userId: string) => {
+    setSelectedUserForStats(userId);
+    setShowUserStats(true);
+  };
+
+  const handleCloseUserStats = () => {
+    setShowUserStats(false);
+    setSelectedUserForStats(null);
   };
 
   const getStatusColor = (status: string) => {
@@ -654,6 +667,15 @@ const AdminDashboard: React.FC = () => {
               </p>
             </div>
           </>
+        )}
+
+        {/* Modal de Statistiques Détaillées */}
+        {selectedUserForStats && (
+          <UserDetailedStats
+            userId={selectedUserForStats}
+            isOpen={showUserStats}
+            onClose={handleCloseUserStats}
+          />
         )}
       </div>
     </Layout>
