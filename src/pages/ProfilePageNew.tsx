@@ -9,6 +9,11 @@ import ImageUpload from '../components/ImageUpload';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { ProfileService, ProfileData, PrivacySettings } from '../services/profileService';
+import { ProjectsService, Project } from '../services/projectsService';
+import { SkillsService, Skill } from '../services/skillsService';
+import { ActivityService, Activity } from '../services/activityService';
+import ProjectCard from '../components/ProjectCard';
+import SocialLinks from '../components/SocialLinks';
 import { 
   Edit3, 
   Camera,
@@ -106,6 +111,18 @@ const ProfilePageNew: React.FC = () => {
     show_phone: true
   });
 
+  // Nouvelles données
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [socialNetworks, setSocialNetworks] = useState([
+    { id: 'github', name: 'GitHub', url: '', icon: <Globe size={20} />, color: '#333' },
+    { id: 'linkedin', name: 'LinkedIn', url: '', icon: <Globe size={20} />, color: '#0077b5' },
+    { id: 'twitter', name: 'Twitter', url: '', icon: <Globe size={20} />, color: '#1da1f2' },
+    { id: 'discord', name: 'Discord', url: '', icon: <Globe size={20} />, color: '#7289da' },
+    { id: 'website', name: 'Site web', url: '', icon: <Globe size={20} />, color: '#6c757d' }
+  ]);
+
   // Charger les données du profil depuis la base de données
   useEffect(() => {
     const loadProfileData = async () => {
@@ -140,6 +157,36 @@ const ProfilePageNew: React.FC = () => {
             email: user.email || 'john@example.com'
           }));
         }
+
+        // Charger les compétences
+        try {
+          const userSkills = await SkillsService.getUserSkills(user.id);
+          setSkills(userSkills);
+        } catch (error) {
+          console.error('Erreur lors du chargement des compétences:', error);
+        }
+
+        // Charger les projets
+        try {
+          const userProjects = await ProjectsService.getUserProjects(user.id);
+          setProjects(userProjects);
+        } catch (error) {
+          console.error('Erreur lors du chargement des projets:', error);
+        }
+
+        // Charger l'activité
+        try {
+          const userActivity = await ActivityService.getUserActivity(user.id);
+          setActivities(userActivity);
+        } catch (error) {
+          console.error('Erreur lors du chargement de l\'activité:', error);
+        }
+
+        // Charger les réseaux sociaux
+        setSocialNetworks(prev => prev.map(social => ({
+          ...social,
+          url: data?.[`${social.id}_url`] || ''
+        })));
       } catch (error) {
         console.error('Erreur lors du chargement du profil:', error);
         // Fallback vers les données auth
@@ -755,12 +802,26 @@ const ProfilePageNew: React.FC = () => {
                 <ModernCard>
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-semibold text-white">Profile settings</h3>
-                    <button 
-                      onClick={() => setIsSettingsMenuOpen(false)}
-                      className="p-2 hover:bg-[#35414e] rounded-lg transition-colors"
-                    >
-                      <X size={20} className="text-gray-400" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <ModernButton 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setIsSettingsMenuOpen(false);
+                          // Navigation vers la page des paramètres avancés
+                          window.location.href = '/profile-settings';
+                        }}
+                      >
+                        <Settings size={16} className="mr-2" />
+                        Paramètres avancés
+                      </ModernButton>
+                      <button 
+                        onClick={() => setIsSettingsMenuOpen(false)}
+                        className="p-2 hover:bg-[#35414e] rounded-lg transition-colors"
+                      >
+                        <X size={20} className="text-gray-400" />
+                      </button>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1131,58 +1192,63 @@ const ProfilePageNew: React.FC = () => {
               )}
 
               {activeTab === 'projects' && (
-                <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {projects.map(project => (
-                    <ModernCard key={project.id}>
-                      <div className="flex gap-4">
-                        <div className="w-24 h-16 bg-[#35414e] rounded-lg flex items-center justify-center">
-                          <span className="text-xs text-gray-400">Image</span>
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-white mb-2">{project.title}</h4>
-                          <p className="text-gray-400 text-sm mb-3">{project.description}</p>
-                          <div className="flex items-center justify-between">
-                            <div className="flex gap-2">
-                              {project.tags.map(tag => (
-                                <span key={tag} className="px-2 py-1 bg-[#35414e] text-gray-300 rounded text-xs">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                            <div className="flex items-center gap-4 text-sm text-gray-400">
-                              <div className="flex items-center gap-1">
-                                <ThumbsUp size={14} />
-                                {project.likes}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Eye size={14} />
-                                {project.views}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </ModernCard>
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      showAuthor={false}
+                      onLike={(projectId) => {
+                        console.log('Projet liké:', projectId);
+                      }}
+                      onView={(projectId) => {
+                        console.log('Projet vu:', projectId);
+                      }}
+                    />
                   ))}
+                  {projects.length === 0 && (
+                    <div className="col-span-full text-center py-12">
+                      <Briefcase size={48} className="mx-auto text-gray-400 mb-4" />
+                      <h3 className="text-lg font-semibold text-white mb-2">Aucun projet</h3>
+                      <p className="text-gray-400 mb-4">Commencez par créer votre premier projet</p>
+                      <ModernButton>
+                        <Plus size={16} className="mr-2" />
+                        Créer un projet
+                      </ModernButton>
+                    </div>
+                  )}
                 </div>
               )}
 
               {activeTab === 'activity' && (
                 <div className="space-y-4">
-                  {recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3 bg-[#35414e] rounded-lg">
+                  {activities.map((activity) => (
+                    <div key={activity.id} className="flex items-start gap-3 p-3 bg-[#35414e] rounded-lg">
                       <div className="w-8 h-8 bg-[#9c68f2] rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-medium">
-                          {activity.type === 'project' ? 'P' : activity.type === 'achievement' ? 'A' : 'C'}
-                        </span>
+                        <Activity size={16} className="text-white" />
                       </div>
                       <div className="flex-1">
                         <h4 className="text-sm font-medium text-white">{activity.title}</h4>
                         <p className="text-xs text-gray-400">{activity.description}</p>
-                        <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(activity.created_at).toLocaleDateString('fr-FR', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
                       </div>
                     </div>
                   ))}
+                  {activities.length === 0 && (
+                    <div className="text-center py-12">
+                      <Activity size={48} className="mx-auto text-gray-400 mb-4" />
+                      <h3 className="text-lg font-semibold text-white mb-2">Aucune activité</h3>
+                      <p className="text-gray-400">Votre activité apparaîtra ici</p>
+                    </div>
+                  )}
                 </div>
               )}
             </ModernCard>
@@ -1191,25 +1257,8 @@ const ProfilePageNew: React.FC = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Social Links */}
-            <ModernCard title="Social networks" icon={<Globe size={20} className="text-white" />}>
-              <div className="space-y-3">
-                {socialLinks.map(link => (
-                  <div key={link.platform} className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-[#9c68f2] rounded-lg flex items-center justify-center text-white">
-                        {link.icon}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-white">{link.platform}</p>
-                        <p className="text-xs text-gray-400">{link.followers.toLocaleString()} followers</p>
-                      </div>
-                    </div>
-                    <button className="text-[#9c68f2] hover:text-white transition-colors">
-                      <ExternalLink size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
+            <ModernCard title="Réseaux sociaux" icon={<Globe size={20} className="text-white" />}>
+              <SocialLinks socialNetworks={socialNetworks} />
             </ModernCard>
 
             {/* Achievements */}
