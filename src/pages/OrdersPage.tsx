@@ -27,6 +27,23 @@ type OrderRow = {
     name: string;
     platform: string | null;
   };
+  // Champs supplémentaires pour l'édition
+  description?: string | null;
+  client_id?: string;
+  project_type?: string | null;
+  priority_level?: string | null;
+  estimated_hours?: number | null;
+  hourly_rate?: number | null;
+  payment_status?: string | null;
+  notes?: string | null;
+  tags?: string[] | null;
+  start_date?: string | null;
+  completion_date?: string | null;
+  revision_count?: number | null;
+  client_feedback?: string | null;
+  // Champs dénormalisés
+  client_name?: string | null;
+  platform?: string | null;
 };
 
 const PAGE_SIZE = 20;
@@ -112,10 +129,23 @@ const OrdersPage: React.FC = () => {
       const demo: OrderRow[] = Array.from({ length: 42 }).map((_, i) => ({
         id: String(i + 1),
         title: i % 3 ? `Website Redesign #${i + 1}` : `Mobile App #${i + 1}`,
-        budget: 250 + (i % 7) * 150, // Utiliser 'budget' au lieu de 'amount'
+        description: i % 2 ? `Complete redesign of the company website with modern UI/UX` : `Mobile app development for iOS and Android`,
+        budget: 250 + (i % 7) * 150,
         status: (['Pending', 'In Progress', 'Completed'] as const)[i % 3],
-        due_date: new Date(Date.now() + (i % 15) * 86400000).toISOString(), // Utiliser 'due_date' au lieu de 'deadline'
+        due_date: new Date(Date.now() + (i % 15) * 86400000).toISOString(),
         created_at: new Date().toISOString(),
+        project_type: ['Web Development', 'Mobile Development', 'UI/UX Design'][i % 3],
+        priority_level: ['low', 'medium', 'high'][i % 3],
+        estimated_hours: 20 + (i % 5) * 10,
+        hourly_rate: 25 + (i % 3) * 15,
+        payment_status: ['pending', 'partial', 'paid'][i % 3],
+        notes: i % 4 ? `Important notes for project ${i + 1}` : null,
+        tags: i % 3 ? [`tag${i + 1}`, `project${i + 1}`] : [],
+        start_date: new Date(Date.now() - (i % 10) * 86400000).toISOString(),
+        completion_date: i % 3 === 2 ? new Date(Date.now() - (i % 5) * 86400000).toISOString() : null,
+        revision_count: i % 4,
+        client_feedback: i % 5 ? `Great work on project ${i + 1}!` : null,
+        client_id: String(i + 1),
         clients: {
           name: i % 2 ? `Acme Corp` : `John Doe`,
           platform: ['Fiverr', 'Upwork', 'Direct'][i % 3]
@@ -147,7 +177,13 @@ const OrdersPage: React.FC = () => {
 
       let query = supabase
         .from('orders')
-        .select(`id,title,budget,status,due_date,created_at, clients!inner(name,platform,user_id)`, { count: 'exact' })
+        .select(`
+          id,title,description,budget,status,due_date,created_at,
+          project_type,priority_level,estimated_hours,hourly_rate,
+          payment_status,notes,tags,start_date,completion_date,
+          revision_count,client_feedback,client_id,
+          clients!inner(name,platform,user_id)
+        `, { count: 'exact' })
         .eq('clients.user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -692,7 +728,30 @@ const OrdersPage: React.FC = () => {
                   ...order,
                   clients: { name: order?.client_name || 'Client', platform: order?.platform || null },
                 };
-            editOrder(orow);
+            
+            // Convertir les données OrderDetail vers le format OrderForm
+            const orderForForm = {
+              id: orow.id,
+              title: orow.title,
+              description: orow.description,
+              amount: orow.budget || 0, // budget -> amount
+              deadline: orow.due_date || '', // due_date -> deadline
+              client_id: orow.client_id || '',
+              status: orow.status as 'Pending' | 'In Progress' | 'Completed',
+              project_type: orow.project_type,
+              priority_level: orow.priority_level,
+              estimated_hours: orow.estimated_hours,
+              hourly_rate: orow.hourly_rate,
+              payment_status: orow.payment_status,
+              notes: orow.notes,
+              tags: orow.tags,
+              start_date: orow.start_date,
+              completion_date: orow.completion_date,
+              revision_count: orow.revision_count,
+              client_feedback: orow.client_feedback,
+            };
+            
+            editOrder(orderForForm as any);
           }}
         />
       </div>
