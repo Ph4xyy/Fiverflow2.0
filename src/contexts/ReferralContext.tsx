@@ -219,6 +219,25 @@ export const ReferralProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   // =============================================
+  // FONCTION COMBINÉE DE VALIDATION ET DÉFINITION
+  // =============================================
+
+  // Fonction qui valide et définit un code de parrainage
+  const validateAndSetReferralCode = useCallback(async (code: string) => {
+    if (!code) return;
+    
+    const isValid = await validateReferralCode(code);
+    if (isValid) {
+      setReferralCodeState(code);
+      saveReferralCode(code);
+    } else {
+      setReferralCodeState(null);
+      setReferrerInfo(null);
+      saveReferralCode(null);
+    }
+  }, [validateReferralCode, saveReferralCode]);
+
+  // =============================================
   // INITIALISATION ET DÉTECTION AUTOMATIQUE
   // =============================================
 
