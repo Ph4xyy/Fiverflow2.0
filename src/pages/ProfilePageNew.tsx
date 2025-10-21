@@ -418,7 +418,7 @@ const ProfilePageNew: React.FC = () => {
     <Layout>
       <div className="p-6 space-y-6">
         {/* Header Profile */}
-        <ModernCard className="relative overflow-hidden">
+        <ModernCard className="relative overflow-hidden p-0">
           {/* Background gradient */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] opacity-10" />
           
@@ -670,8 +670,8 @@ const ProfilePageNew: React.FC = () => {
                   </label>
                   <input
                     type="email"
-                    value={profileData.email || ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, email: e.target.value})}
+                    value={profileData.contact_email || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, contact_email: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
                 </div>
@@ -1003,8 +1003,6 @@ const ProfilePageNew: React.FC = () => {
                     onChange={(e) => setSocialNetworks({...socialNetworks, website: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
-                </div>
-                  </div>
                         </div>
                       </div>
                     </div>
@@ -1041,9 +1039,9 @@ const ProfilePageNew: React.FC = () => {
                       )}
                     </ModernButton>
                   </div>
-                  </ModernCard>
-                </div>
+                </ModernCard>
               </div>
+            </div>
             </>
           )}
 
