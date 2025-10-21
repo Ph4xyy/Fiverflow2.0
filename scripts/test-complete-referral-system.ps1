@@ -63,3 +63,4 @@ Write-Host "6. Vérifier que la commission est créée" -ForegroundColor White
 
 Write-Host "`n✅ Système de parrainage complet et sécurisé!" -ForegroundColor Green
 
+
