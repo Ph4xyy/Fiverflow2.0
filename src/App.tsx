@@ -41,6 +41,7 @@ import PricingPageNew from './pages/PricingPageNew';
 import WorkboardPageNew from './pages/WorkboardPageNew';
 import ProfilePageNew from './pages/ProfilePageNew';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
+import SettingsPage from './pages/SettingsPage';
 import ClientsPage from './pages/ClientsPageOptimized';
 import OrdersPage from './pages/OrdersPage';
 import TemplatesPage from './pages/TemplatesPage';
@@ -134,6 +135,7 @@ function AppContent() {
           } />
           <Route path="/profile" element={<InstantProtectedRoute><ProfilePageNew /></InstantProtectedRoute>} />
           <Route path="/profile-settings" element={<InstantProtectedRoute><ProfileSettingsPage /></InstantProtectedRoute>} />
+          <Route path="/settings" element={<InstantProtectedRoute><SettingsPage /></InstantProtectedRoute>} />
           <Route path="/network" element={
             <InstantProtectedRoute>
               <SubscriptionGuard requiredPlan="boost" pageName="referrals" description="Système de parrainage disponible avec Boost">

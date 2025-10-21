@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 // Import logo
 import LogoImage from '../assets/LogoFiverFlow.png';
+import ErrorBoundary from './ErrorBoundary';
 
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import NotificationsDropdown from './NotificationsDropdown';

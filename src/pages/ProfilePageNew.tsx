@@ -10,10 +10,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { ProfileService, ProfileData, PrivacySettings } from '../services/profileService';
 import { ProjectsService, Project as UserProject } from '../services/projectsService';
-import { SkillsService, Skill as UserSkill } from '../services/skillsService';
+// import { SkillsService, Skill as UserSkill } from '../services/skillsService';
 import { ActivityService, Activity as UserActivity } from '../services/activityService';
+import { StatisticsService } from '../services/statisticsService';
 import ProjectCard from '../components/ProjectCard';
-import SocialLinks from '../components/SocialLinks';
+// import SocialLinks from '../components/SocialLinks';
 import { 
   Edit3, 
   MapPin, 
@@ -53,7 +54,7 @@ const ProfilePageNew: React.FC = () => {
   const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const [isOwnProfile] = useState(true); // Simulate if it's the user's own profile
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
   // Profile data - utilise les vraies données de l'utilisateur
@@ -80,13 +81,19 @@ const ProfilePageNew: React.FC = () => {
   // skills supprimé - utilise maintenant les vraies données
   const [projects, setProjects] = useState<UserProject[]>([]);
   const [activities, setActivities] = useState<UserActivity[]>([]);
-  const [socialNetworks, setSocialNetworks] = useState([
-    { id: 'github', name: 'GitHub', url: '', icon: <Globe size={20} />, color: '#333' },
-    { id: 'linkedin', name: 'LinkedIn', url: '', icon: <Globe size={20} />, color: '#0077b5' },
-    { id: 'twitter', name: 'Twitter', url: '', icon: <Globe size={20} />, color: '#1da1f2' },
-    { id: 'discord', name: 'Discord', url: '', icon: <Globe size={20} />, color: '#7289da' },
-    { id: 'website', name: 'Site web', url: '', icon: <Globe size={20} />, color: '#6c757d' }
-  ]);
+  const [statistics, setStatistics] = useState({
+    clients: 0,
+    orders: 0,
+    rating: 4.5,
+    experience: 1
+  });
+  const [socialNetworks, setSocialNetworks] = useState({
+    github: '',
+    linkedin: '',
+    twitter: '',
+    discord: '',
+    website: ''
+  });
 
   // Charger les données du profil depuis la base de données
   useEffect(() => {
@@ -96,7 +103,7 @@ const ProfilePageNew: React.FC = () => {
         return;
       }
 
-      setIsLoading(true);
+      // setIsLoading(true);
       console.log('🔍 ProfilePage: Chargement du profil pour user:', user.id, 'email:', user.email);
 
       try {
@@ -141,12 +148,23 @@ const ProfilePageNew: React.FC = () => {
           console.error('Erreur lors du chargement de l\'activité:', error);
         }
 
+        // Charger les statistiques
+        try {
+          const userStats = await StatisticsService.getProfileStatistics(user.id);
+          setStatistics(userStats);
+        } catch (error) {
+          console.error('Erreur lors du chargement des statistiques:', error);
+        }
+
         // Charger les réseaux sociaux
         if (data) {
-          setSocialNetworks(prev => prev.map(social => ({
-            ...social,
-            url: (data as any)[`${social.id}_url`] || ''
-          })));
+          setSocialNetworks({
+            github: data.github_url || '',
+            linkedin: data.linkedin_url || '',
+            twitter: data.twitter_url || '',
+            discord: data.discord_username || '',
+            website: data.website || ''
+          });
         }
       } catch (error) {
         console.error('Erreur lors du chargement du profil:', error);
@@ -157,7 +175,7 @@ const ProfilePageNew: React.FC = () => {
           email: user.email || 'john@example.com'
         }));
       } finally {
-        setIsLoading(false);
+        // setIsLoading(false);
       }
     };
 
@@ -170,6 +188,8 @@ const ProfilePageNew: React.FC = () => {
       if (!user) return;
 
       try {
+        if (!supabase) return;
+        
         const { data, error } = await supabase
           .from('user_profiles')
           .select('is_admin')
@@ -214,13 +234,31 @@ const ProfilePageNew: React.FC = () => {
 
     setIsSaving(true);
     try {
-      const success = await ProfileService.updateProfile(user.id, profileData);
+      // Préparer les données à sauvegarder incluant les réseaux sociaux
+      const dataToSave = {
+        ...profileData,
+        github_url: socialNetworks.github,
+        linkedin_url: socialNetworks.linkedin,
+        twitter_url: socialNetworks.twitter,
+        discord_username: socialNetworks.discord,
+        website: socialNetworks.website
+      };
+
+      const success = await ProfileService.updateProfile(user.id, dataToSave);
       if (success) {
         setIsEditMenuOpen(false);
         // Recharger les données
         const updatedData = await ProfileService.getProfile(user.id);
         if (updatedData) {
           setProfileData((prev: ProfileData) => ({ ...prev, ...updatedData }));
+          // Mettre à jour les réseaux sociaux
+          setSocialNetworks({
+            github: updatedData.github_url || '',
+            linkedin: updatedData.linkedin_url || '',
+            twitter: updatedData.twitter_url || '',
+            discord: updatedData.discord_username || '',
+            website: updatedData.website || ''
+          });
         }
       } else {
         console.error('Erreur lors de la sauvegarde du profil');
@@ -240,7 +278,17 @@ const ProfilePageNew: React.FC = () => {
 
     setIsSaving(true);
     try {
-      const success = await ProfileService.updateProfile(user.id, profileData);
+      // Préparer les données à sauvegarder incluant les réseaux sociaux
+      const dataToSave = {
+        ...profileData,
+        github_url: socialNetworks.github,
+        linkedin_url: socialNetworks.linkedin,
+        twitter_url: socialNetworks.twitter,
+        discord_username: socialNetworks.discord,
+        website: socialNetworks.website
+      };
+
+      const success = await ProfileService.updateProfile(user.id, dataToSave);
       const privacySuccess = await ProfileService.updatePrivacySettings(user.id, privacySettings);
       
       if (success && privacySuccess) {
@@ -252,6 +300,14 @@ const ProfilePageNew: React.FC = () => {
           setPrivacySettings({
             show_email: updatedData.show_email ?? true,
             show_phone: updatedData.show_phone ?? true
+          });
+          // Mettre à jour les réseaux sociaux
+          setSocialNetworks({
+            github: updatedData.github_url || '',
+            linkedin: updatedData.linkedin_url || '',
+            twitter: updatedData.twitter_url || '',
+            discord: updatedData.discord_username || '',
+            website: updatedData.website || ''
           });
         }
       } else {
@@ -370,7 +426,7 @@ const ProfilePageNew: React.FC = () => {
                   {/* Basic Info */}
                   <div className="pb-4">
                     <div className="flex items-center gap-3 mb-2">
-                      <h1 className="text-3xl font-bold text-white">{profileData.full_name}</h1>
+                      <h1 className="text-3xl font-bold text-white">{profileData.full_name || 'Utilisateur'}</h1>
                       {/* Badges */}
                       <div className="flex items-center gap-2">
                         {/* Badge Administrateur */}
@@ -396,7 +452,7 @@ const ProfilePageNew: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    <p className="text-lg text-gray-400 mb-2">{profileData.professional_title}</p>
+                    <p className="text-lg text-gray-400 mb-2">{profileData.professional_title || 'Professionnel'}</p>
                     <div className="flex items-center gap-4 text-sm text-gray-400">
                       <div className="flex items-center gap-1">
                         <MapPin size={16} />
@@ -412,6 +468,7 @@ const ProfilePageNew: React.FC = () => {
                         {profileData.status === 'busy' && 'Occupé'}
                         {profileData.status === 'away' && 'Absent'}
                         {profileData.status === 'do_not_disturb' && 'Ne pas déranger'}
+                        {!profileData.status && 'Disponible'}
                       </div>
                     </div>
                   </div>
@@ -633,8 +690,8 @@ const ProfilePageNew: React.FC = () => {
                         size="sm"
                         onClick={() => {
                           setIsSettingsMenuOpen(false);
-                          // Navigation vers la page des paramètres avancés
-                          window.location.href = '/profile-settings';
+                          // Navigation vers la page des paramètres
+                          window.location.href = '/settings';
                         }}
                       >
                         <Settings size={16} className="mr-2" />
@@ -796,99 +853,101 @@ const ProfilePageNew: React.FC = () => {
                         <h4 className="text-lg font-semibold text-white mb-4">Réseaux sociaux</h4>
                         
                         <div className="space-y-4">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 bg-gray-800 rounded flex items-center justify-center">
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                        </svg>
-                      </div>
-                      GitHub
-                    </div>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="https://github.com/username"
-                    value={socialNetworks.github}
-                    onChange={(e) => setSocialNetworks({...socialNetworks, github: e.target.value})}
-                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                  />
-                </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-5 bg-gray-800 rounded flex items-center justify-center">
+                                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                                  </svg>
+                                </div>
+                                GitHub
+                              </div>
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="https://github.com/username"
+                              value={socialNetworks.github}
+                              onChange={(e) => setSocialNetworks({...socialNetworks, github: e.target.value})}
+                              className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                            />
+                          </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center">
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-                        </svg>
-                      </div>
-                      Discord
-                    </div>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="username#1234"
-                    value={socialNetworks.discord}
-                    onChange={(e) => setSocialNetworks({...socialNetworks, discord: e.target.value})}
-                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                  />
-                </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center">
+                                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                                  </svg>
+                                </div>
+                                Discord
+                              </div>
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="username#1234"
+                              value={socialNetworks.discord}
+                              onChange={(e) => setSocialNetworks({...socialNetworks, discord: e.target.value})}
+                              className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                            />
+                          </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 bg-black rounded flex items-center justify-center">
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                        </svg>
-                      </div>
-                      Twitter (X)
-                    </div>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="@username"
-                    value={socialNetworks.twitter}
-                    onChange={(e) => setSocialNetworks({...socialNetworks, twitter: e.target.value})}
-                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                  />
-                </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-5 bg-black rounded flex items-center justify-center">
+                                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                  </svg>
+                                </div>
+                                Twitter (X)
+                              </div>
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="@username"
+                              value={socialNetworks.twitter}
+                              onChange={(e) => setSocialNetworks({...socialNetworks, twitter: e.target.value})}
+                              className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                            />
+                          </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center">
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                        </svg>
-                      </div>
-                      LinkedIn
-                    </div>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="https://linkedin.com/in/username"
-                    value={socialNetworks.linkedin}
-                    onChange={(e) => setSocialNetworks({...socialNetworks, linkedin: e.target.value})}
-                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                  />
-                </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center">
+                                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                  </svg>
+                                </div>
+                                LinkedIn
+                              </div>
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="https://linkedin.com/in/username"
+                              value={socialNetworks.linkedin}
+                              onChange={(e) => setSocialNetworks({...socialNetworks, linkedin: e.target.value})}
+                              className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                            />
+                          </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    <div className="flex items-center gap-2">
-                      <Globe size={16} className="text-[#9c68f2]" />
-                      Website
-                    </div>
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://yourwebsite.com"
-                    value={socialNetworks.website}
-                    onChange={(e) => setSocialNetworks({...socialNetworks, website: e.target.value})}
-                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                  />
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              <div className="flex items-center gap-2">
+                                <Globe size={16} className="text-[#9c68f2]" />
+                                Website
+                              </div>
+                            </label>
+                            <input
+                              type="url"
+                              placeholder="https://yourwebsite.com"
+                              value={socialNetworks.website}
+                              onChange={(e) => setSocialNetworks({...socialNetworks, website: e.target.value})}
+                              className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -952,8 +1011,8 @@ const ProfilePageNew: React.FC = () => {
           <ModernCard>
             <div className="relative">
               <div>
-                <p className="text-2xl font-bold text-white">{projects.length}</p>
-                <p className="text-sm text-gray-400">Projets</p>
+                <p className="text-2xl font-bold text-white">{statistics.orders}</p>
+                <p className="text-sm text-gray-400">Commandes</p>
               </div>
               <Briefcase size={20} className="absolute top-0 right-0 text-[#9c68f2]" />
             </div>
@@ -961,7 +1020,7 @@ const ProfilePageNew: React.FC = () => {
           <ModernCard>
             <div className="relative">
               <div>
-                <p className="text-2xl font-bold text-white">18</p>
+                <p className="text-2xl font-bold text-white">{statistics.clients}</p>
                 <p className="text-sm text-gray-400">Clients</p>
               </div>
               <Users size={20} className="absolute top-0 right-0 text-[#9c68f2]" />
@@ -970,7 +1029,7 @@ const ProfilePageNew: React.FC = () => {
           <ModernCard>
             <div className="relative">
               <div>
-                <p className="text-2xl font-bold text-white">4.9</p>
+                <p className="text-2xl font-bold text-white">{statistics.rating}</p>
                 <p className="text-sm text-gray-400">Note</p>
               </div>
               <Star size={20} className="absolute top-0 right-0 text-[#9c68f2]" />
@@ -979,7 +1038,7 @@ const ProfilePageNew: React.FC = () => {
           <ModernCard>
             <div className="relative">
               <div>
-                <p className="text-2xl font-bold text-white">5+</p>
+                <p className="text-2xl font-bold text-white">{statistics.experience}+</p>
                 <p className="text-sm text-gray-400">Années d'exp.</p>
               </div>
               <TrendingUp size={20} className="absolute top-0 right-0 text-[#9c68f2]" />
@@ -1104,7 +1163,67 @@ const ProfilePageNew: React.FC = () => {
           <div className="space-y-6">
             {/* Social Links */}
             <ModernCard title="Réseaux sociaux" icon={<Globe size={20} className="text-white" />}>
-              <SocialLinks socialNetworks={socialNetworks} />
+              <div className="space-y-3">
+                {socialNetworks.github && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-gray-800 rounded flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                      </svg>
+                    </div>
+                    <a href={socialNetworks.github} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9c68f2] hover:text-white transition-colors">
+                      GitHub
+                    </a>
+                  </div>
+                )}
+                {socialNetworks.linkedin && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                      </svg>
+                    </div>
+                    <a href={socialNetworks.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9c68f2] hover:text-white transition-colors">
+                      LinkedIn
+                    </a>
+                  </div>
+                )}
+                {socialNetworks.twitter && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-black rounded flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                    </div>
+                    <a href={socialNetworks.twitter} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9c68f2] hover:text-white transition-colors">
+                      Twitter
+                    </a>
+                  </div>
+                )}
+                {socialNetworks.discord && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                      </svg>
+                    </div>
+                    <span className="text-sm text-gray-300">{socialNetworks.discord}</span>
+                  </div>
+                )}
+                {socialNetworks.website && (
+                  <div className="flex items-center gap-3">
+                    <Globe size={16} className="text-gray-400" />
+                    <a href={socialNetworks.website} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9c68f2] hover:text-white transition-colors">
+                      Site web
+                    </a>
+                  </div>
+                )}
+                {!socialNetworks.github && !socialNetworks.linkedin && !socialNetworks.twitter && !socialNetworks.discord && !socialNetworks.website && (
+                  <div className="text-sm text-gray-500 text-center py-4">
+                    Aucun réseau social configuré
+                  </div>
+                )}
+              </div>
             </ModernCard>
 
             {/* Achievements */}

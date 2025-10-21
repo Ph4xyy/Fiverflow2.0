@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 export interface Activity {
   id: string;
   user_id: string;
-  type: 'project_created' | 'project_liked' | 'profile_updated' | 'skill_added' | 'social_connected';
+  type: 'project_created' | 'project_liked' | 'profile_updated' | 'skill_added' | 'social_connected' | 'order_created' | 'order_updated' | 'order_completed' | 'client_created' | 'client_updated';
   title: string;
   description: string;
   metadata?: any;
@@ -133,6 +133,72 @@ export class ActivityService {
       'Réseau social connecté',
       `Vous avez connecté votre ${platform}`,
       { platform }
+    );
+  }
+
+  // Nouvelles méthodes pour le suivi des commandes et clients
+  static async logOrderCreated(orderId: string, orderTitle: string): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await this.logActivity(
+      user.id,
+      'order_created',
+      'Nouvelle commande créée',
+      `Vous avez créé la commande "${orderTitle}"`,
+      { order_id: orderId }
+    );
+  }
+
+  static async logOrderUpdated(orderId: string, orderTitle: string, changes: string[]): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await this.logActivity(
+      user.id,
+      'order_updated',
+      'Commande mise à jour',
+      `Vous avez modifié la commande "${orderTitle}" (${changes.join(', ')})`,
+      { order_id: orderId, changes }
+    );
+  }
+
+  static async logOrderCompleted(orderId: string, orderTitle: string): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await this.logActivity(
+      user.id,
+      'order_completed',
+      'Commande terminée',
+      `Vous avez terminé la commande "${orderTitle}"`,
+      { order_id: orderId }
+    );
+  }
+
+  static async logClientCreated(clientId: string, clientName: string): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await this.logActivity(
+      user.id,
+      'client_created',
+      'Nouveau client ajouté',
+      `Vous avez ajouté le client "${clientName}"`,
+      { client_id: clientId }
+    );
+  }
+
+  static async logClientUpdated(clientId: string, clientName: string, changes: string[]): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await this.logActivity(
+      user.id,
+      'client_updated',
+      'Client mis à jour',
+      `Vous avez modifié le client "${clientName}" (${changes.join(', ')})`,
+      { client_id: clientId, changes }
     );
   }
 }
