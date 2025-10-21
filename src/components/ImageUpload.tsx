@@ -100,73 +100,41 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         disabled={disabled || isUploading}
       />
 
-      <div
-        className={`
-          ${sizeClass} ${roundedClass} 
-          ${displayUrl ? '' : 'border-2 border-dashed border-[#1e2938]'}
-          flex items-center justify-center transition-colors
-          ${disabled || isUploading 
-            ? 'cursor-not-allowed opacity-50' 
-            : 'cursor-pointer hover:opacity-90'
-          }
-        `}
-        onClick={handleClick}
-      >
-        {isUploading ? (
-          <div className="flex flex-col items-center gap-2">
-            <Loader2 size={24} className="animate-spin text-[#9c68f2]" />
-            <span className="text-sm text-gray-400">Upload...</span>
-          </div>
-        ) : displayUrl ? (
-          <div className="relative w-full h-full group">
-            <img
-              src={displayUrl}
-              alt={isAvatar ? 'Avatar' : 'Bannière'}
-              className={`w-full h-full object-cover ${roundedClass}`}
-            />
-            {!disabled && (
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <div className="flex flex-col items-center gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleClick();
-                    }}
-                    className="px-3 py-1 bg-white/20 rounded-lg hover:bg-white/30 transition-colors text-white text-sm font-medium"
-                  >
-                    Changer l'image
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemove();
-                    }}
-                    className="px-3 py-1 bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors text-white text-sm font-medium"
-                  >
-                    Supprimer
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-2 text-gray-400">
-            <Camera size={24} />
-            <span className="text-sm">
-              {isAvatar ? 'Ajouter une photo' : 'Ajouter une bannière'}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {!displayUrl && !isUploading && (
-        <div className="mt-2 text-center">
-          <p className="text-xs text-gray-400">
-            {isAvatar 
-              ? 'JPG, PNG ou GIF. Max 5MB' 
-              : 'JPG, PNG ou GIF. Max 10MB'
-            }
-          </p>
+      {isUploading ? (
+        <div className="flex flex-col items-center gap-2 p-4">
+          <Loader2 size={24} className="animate-spin text-white" />
+          <span className="text-sm text-white">Upload...</span>
+        </div>
+      ) : displayUrl ? (
+        <div className="flex flex-col items-center gap-2 p-4">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClick();
+            }}
+            className="px-4 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors text-white text-sm font-medium"
+          >
+            Changer l'image
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemove();
+            }}
+            className="px-4 py-2 bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors text-white text-sm font-medium"
+          >
+            Supprimer
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-2 p-4">
+          <Camera size={32} className="text-white" />
+          <button
+            onClick={handleClick}
+            className="px-4 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors text-white text-sm font-medium"
+          >
+            {isAvatar ? 'Ajouter une photo' : 'Ajouter une bannière'}
+          </button>
         </div>
       )}
     </div>

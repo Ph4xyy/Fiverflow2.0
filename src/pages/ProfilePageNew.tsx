@@ -435,17 +435,16 @@ const ProfilePageNew: React.FC = () => {
                 <div className="w-full h-full bg-gradient-to-r from-[#9c68f2] to-[#422ca5]" />
               )}
               {isOwnProfile && (
-                <div className="absolute top-4 right-4 group">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ImageUpload
-                      currentImageUrl={profileData.banner_url}
-                      onImageChange={handleBannerUpload}
-                      onImageRemove={handleBannerRemove}
-                      type="banner"
-                    />
-                  </div>
-                  <div className="absolute top-2 right-2 p-2 bg-black/20 backdrop-blur-sm rounded-lg group-hover:bg-black/30 transition-colors">
-                    <Camera size={20} className="text-white" />
+                <div className="absolute inset-0 group">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <ImageUpload
+                        currentImageUrl={profileData.banner_url}
+                        onImageChange={handleBannerUpload}
+                        onImageRemove={handleBannerRemove}
+                        type="banner"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -469,17 +468,16 @@ const ProfilePageNew: React.FC = () => {
                       </div>
                     )}
                     {isOwnProfile && (
-                      <div className="absolute bottom-2 right-2 group">
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <ImageUpload
-                            currentImageUrl={profileData.avatar_url}
-                            onImageChange={handleAvatarUpload}
-                            onImageRemove={handleAvatarRemove}
-                            type="avatar"
-                          />
-                        </div>
-                        <div className="absolute bottom-0 right-0 p-2 bg-[#35414e] rounded-full hover:bg-[#3d4a57] transition-colors">
-                          <Camera size={16} className="text-white" />
+                      <div className="absolute inset-0 group">
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 rounded-full transition-all duration-200 flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <ImageUpload
+                              currentImageUrl={profileData.avatar_url}
+                              onImageChange={handleAvatarUpload}
+                              onImageRemove={handleAvatarRemove}
+                              type="avatar"
+                            />
+                          </div>
                         </div>
                       </div>
                     )}
