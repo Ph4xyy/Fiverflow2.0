@@ -192,7 +192,7 @@ export class ConversationService {
       const { data, error } = await supabase
         .from('user_profiles')
         .select('user_id, full_name, username, avatar_url')
-        .or(`${searchType}.ilike.%${query}%`)
+        .ilike(searchType, `%${query}%`)
         .limit(10);
 
       if (error) {
