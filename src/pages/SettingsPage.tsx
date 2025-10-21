@@ -31,7 +31,11 @@ import {
   Award,
   Plus,
   Edit,
-  CreditCard
+  CreditCard,
+  Users,
+  Zap,
+  Crown,
+  Shield
 } from 'lucide-react';
 
 interface SettingsCategory {
@@ -77,6 +81,9 @@ const SettingsPage: React.FC = () => {
     linkedin: '',
     twitter: '',
     discord: '',
+    instagram: '',
+    tiktok: '',
+    youtube: '',
     website: ''
   });
 
@@ -397,7 +404,8 @@ const SettingsPage: React.FC = () => {
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold text-white mb-4">Réseaux sociaux</h3>
-              <div className="space-y-4">
+              <p className="text-gray-400 text-sm mb-6">Entrez votre nom d'utilisateur (sans @ ou https://), les liens seront générés automatiquement</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     <div className="flex items-center gap-2">
@@ -411,11 +419,12 @@ const SettingsPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="https://github.com/username"
+                    placeholder="nom d'utilisateur"
                     value={socialNetworks.github}
                     onChange={(e) => setSocialNetworks({...socialNetworks, github: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
+                  <p className="text-xs text-gray-400 mt-1">github.com/{socialNetworks.github || 'votre-nom'}</p>
                 </div>
 
                 <div>
@@ -431,11 +440,12 @@ const SettingsPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="https://linkedin.com/in/username"
+                    placeholder="nom d'utilisateur"
                     value={socialNetworks.linkedin}
                     onChange={(e) => setSocialNetworks({...socialNetworks, linkedin: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
+                  <p className="text-xs text-gray-400 mt-1">linkedin.com/in/{socialNetworks.linkedin || 'votre-nom'}</p>
                 </div>
 
                 <div>
@@ -451,11 +461,75 @@ const SettingsPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="@username"
+                    placeholder="nom d'utilisateur"
                     value={socialNetworks.twitter}
                     onChange={(e) => setSocialNetworks({...socialNetworks, twitter: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
+                  <p className="text-xs text-gray-400 mt-1">twitter.com/{socialNetworks.twitter || 'votre-nom'}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-pink-600 rounded flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        </svg>
+                      </div>
+                      Instagram
+                    </div>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="nom d'utilisateur"
+                    value={socialNetworks.instagram}
+                    onChange={(e) => setSocialNetworks({...socialNetworks, instagram: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">instagram.com/{socialNetworks.instagram || 'votre-nom'}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-black rounded flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-.88-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                        </svg>
+                      </div>
+                      TikTok
+                    </div>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="nom d'utilisateur"
+                    value={socialNetworks.tiktok}
+                    onChange={(e) => setSocialNetworks({...socialNetworks, tiktok: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">tiktok.com/@{socialNetworks.tiktok || 'votre-nom'}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-red-600 rounded flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                      </div>
+                      YouTube
+                    </div>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="nom de la chaîne"
+                    value={socialNetworks.youtube}
+                    onChange={(e) => setSocialNetworks({...socialNetworks, youtube: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">youtube.com/c/{socialNetworks.youtube || 'votre-chaine'}</p>
                 </div>
 
                 <div>
@@ -474,6 +548,24 @@ const SettingsPage: React.FC = () => {
                     placeholder="username#1234"
                     value={socialNetworks.discord}
                     onChange={(e) => setSocialNetworks({...socialNetworks, discord: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
+                        <Globe size={12} className="text-white" />
+                      </div>
+                      Site web
+                    </div>
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://monsite.com"
+                    value={socialNetworks.website}
+                    onChange={(e) => setSocialNetworks({...socialNetworks, website: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
                 </div>
@@ -504,20 +596,28 @@ const SettingsPage: React.FC = () => {
               
               {/* Thème spécial Halloween */}
               <div className="mb-8">
-                <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-xl p-6 border-2 border-orange-400 relative overflow-hidden">
-                  <div className="absolute top-2 right-2">
-                    <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                      SPÉCIAL
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-xl font-bold text-white mb-2">🎃 Thème Halloween</h4>
-                      <p className="text-orange-100 text-sm">Thème spécial avec des couleurs orange et noir</p>
+                <div className="relative rounded-xl p-6 border-2 border-orange-400 overflow-hidden" style={{
+                  backgroundImage: 'url(/src/assets/Images/grunge-halloween-background.jpg)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat'
+                }}>
+                  <div className="absolute inset-0 bg-black/40"></div>
+                  <div className="relative z-10">
+                    <div className="absolute top-2 right-2">
+                      <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                        SPÉCIAL
+                      </span>
                     </div>
-                    <button className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors">
-                      Activer
-                    </button>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-xl font-bold text-white mb-2">🎃 Thème Halloween</h4>
+                        <p className="text-orange-100 text-sm">Thème spécial avec fond grunge Halloween</p>
+                      </div>
+                      <button className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors">
+                        Activer
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -760,8 +860,8 @@ const SettingsPage: React.FC = () => {
                 <div className="bg-gradient-to-r from-[#9c68f2] to-[#8a5cf0] rounded-lg p-4 text-white">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-lg font-semibold">Plan Gratuit</h4>
-                      <p className="text-sm opacity-90">Accès aux fonctionnalités de base</p>
+                      <h4 className="text-lg font-semibold">Lunch (Gratuit)</h4>
+                      <p className="text-sm opacity-90">Parfait pour débuter</p>
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold">0€</p>
@@ -778,15 +878,19 @@ const SettingsPage: React.FC = () => {
                 <h3 className="text-xl font-semibold text-white mb-4">Plans disponibles</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
-                    <h4 className="text-white font-semibold mb-2">Boost</h4>
-                    <p className="text-2xl font-bold text-[#9c68f2] mb-2">29€<span className="text-sm text-gray-400">/mois</span></p>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Users size={20} className="text-blue-400" />
+                      <h4 className="text-white font-semibold">Lunch</h4>
+                    </div>
+                    <p className="text-2xl font-bold text-[#9c68f2] mb-2">0€<span className="text-sm text-gray-400">/mois</span></p>
                     <ul className="text-sm text-gray-400 space-y-1 mb-4">
-                      <li>• Toutes les fonctionnalités</li>
-                      <li>• Support prioritaire</li>
-                      <li>• Analytics avancés</li>
+                      <li>• Jusqu'à 5 clients</li>
+                      <li>• 10 commandes/mois</li>
+                      <li>• Calendrier basique</li>
+                      <li>• Support email</li>
                     </ul>
-                    <ModernButton variant="outline" className="w-full">
-                      Choisir Boost
+                    <ModernButton variant="outline" className="w-full" disabled>
+                      Plan actuel
                     </ModernButton>
                   </div>
 
@@ -794,28 +898,42 @@ const SettingsPage: React.FC = () => {
                     <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
                       <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">Populaire</span>
                     </div>
-                    <h4 className="text-white font-semibold mb-2">Scale</h4>
-                    <p className="text-2xl font-bold text-[#9c68f2] mb-2">59€<span className="text-sm text-gray-400">/mois</span></p>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Zap size={20} className="text-yellow-400" />
+                      <h4 className="text-white font-semibold">Boost</h4>
+                    </div>
+                    <p className="text-2xl font-bold text-[#9c68f2] mb-2">24€<span className="text-sm text-gray-400">/mois</span></p>
                     <ul className="text-sm text-gray-400 space-y-1 mb-4">
-                      <li>• Tout Boost +</li>
-                      <li>• API avancée</li>
-                      <li>• Intégrations premium</li>
+                      <li>• Clients illimités</li>
+                      <li>• Commandes illimitées</li>
+                      <li>• Statistiques avancées</li>
+                      <li>• Calendrier intelligent</li>
+                      <li>• Réseau de partenaires</li>
+                      <li>• Support prioritaire</li>
                     </ul>
                     <ModernButton className="w-full">
-                      Choisir Scale
+                      <Shield size={16} className="mr-2" />
+                      Sécurisé par Stripe
                     </ModernButton>
                   </div>
 
                   <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
-                    <h4 className="text-white font-semibold mb-2">Enterprise</h4>
-                    <p className="text-2xl font-bold text-[#9c68f2] mb-2">Sur mesure</p>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Crown size={20} className="text-purple-400" />
+                      <h4 className="text-white font-semibold">Scale</h4>
+                    </div>
+                    <p className="text-2xl font-bold text-[#9c68f2] mb-2">59€<span className="text-sm text-gray-400">/mois</span></p>
                     <ul className="text-sm text-gray-400 space-y-1 mb-4">
-                      <li>• Solution personnalisée</li>
+                      <li>• Tout Boost +</li>
+                      <li>• Gestion d'équipe</li>
+                      <li>• API avancée</li>
+                      <li>• Intégrations premium</li>
                       <li>• Support dédié</li>
                       <li>• Formation incluse</li>
                     </ul>
                     <ModernButton variant="outline" className="w-full">
-                      Nous contacter
+                      <Shield size={16} className="mr-2" />
+                      Sécurisé par Stripe
                     </ModernButton>
                   </div>
                 </div>
