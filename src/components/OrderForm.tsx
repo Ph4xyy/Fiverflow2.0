@@ -231,6 +231,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
       };
 
       const orderData = {
+        user_id: user.id, // ⚠️ CRITIQUE: Ajouter user_id pour RLS
         title: formData.title.trim(),
         description: formData.description.trim() || null,
         budget: parseFloat(`${formData.amount}`), // Utiliser 'budget' au lieu de 'amount'
