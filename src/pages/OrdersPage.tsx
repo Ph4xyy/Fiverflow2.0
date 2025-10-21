@@ -19,14 +19,32 @@ import SubscriptionLimits from '@/components/SubscriptionLimits';
 type OrderRow = {
   id: string;
   title: string;
-  budget: number | null; // Changé de 'amount' à 'budget'
+  budget: number | null;
   status: 'Pending' | 'In Progress' | 'Completed' | string;
-  due_date: string | null; // Changé de 'deadline' à 'due_date'
+  due_date: string | null;
   created_at: string | null;
   clients: {
     name: string;
     platform: string | null;
   };
+  // Champs existants dans la base de données
+  description?: string | null;
+  client_id?: string;
+  start_date?: string | null;
+  completed_date?: string | null;
+  platform?: string | null;
+  client_name?: string | null;
+  client_email?: string | null;
+  // Champs non disponibles dans la DB (pour compatibilité avec OrderForm)
+  project_type?: string | null;
+  priority_level?: string | null;
+  estimated_hours?: number | null;
+  hourly_rate?: number | null;
+  payment_status?: string | null;
+  notes?: string | null;
+  tags?: string[] | null;
+  revision_count?: number | null;
+  client_feedback?: string | null;
 };
 
 const PAGE_SIZE = 20;
@@ -112,10 +130,16 @@ const OrdersPage: React.FC = () => {
       const demo: OrderRow[] = Array.from({ length: 42 }).map((_, i) => ({
         id: String(i + 1),
         title: i % 3 ? `Website Redesign #${i + 1}` : `Mobile App #${i + 1}`,
-        budget: 250 + (i % 7) * 150, // Utiliser 'budget' au lieu de 'amount'
+        description: i % 2 ? `Complete redesign of the company website with modern UI/UX` : `Mobile app development for iOS and Android`,
+        budget: 250 + (i % 7) * 150,
         status: (['Pending', 'In Progress', 'Completed'] as const)[i % 3],
-        due_date: new Date(Date.now() + (i % 15) * 86400000).toISOString(), // Utiliser 'due_date' au lieu de 'deadline'
+        due_date: new Date(Date.now() + (i % 15) * 86400000).toISOString(),
         created_at: new Date().toISOString(),
+        start_date: new Date(Date.now() - (i % 10) * 86400000).toISOString(),
+        completed_date: i % 3 === 2 ? new Date(Date.now() - (i % 5) * 86400000).toISOString() : null,
+        platform: ['Fiverr', 'Upwork', 'Direct'][i % 3],
+        client_name: i % 2 ? `Acme Corp` : `John Doe`,
+        client_email: i % 2 ? `contact@acmecorp.com` : `john.doe@email.com`,
         clients: {
           name: i % 2 ? `Acme Corp` : `John Doe`,
           platform: ['Fiverr', 'Upwork', 'Direct'][i % 3]
@@ -147,7 +171,11 @@ const OrdersPage: React.FC = () => {
 
       let query = supabase
         .from('orders')
-        .select(`id,title,budget,status,due_date,created_at, clients!inner(name,platform,user_id)`, { count: 'exact' })
+        .select(`
+          id,title,description,budget,status,due_date,created_at,
+          start_date,completed_date,platform,client_name,client_email,
+          clients!inner(name,platform,user_id)
+        `, { count: 'exact' })
         .eq('clients.user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -685,14 +713,68 @@ const OrdersPage: React.FC = () => {
           isOpen={isDetailModalOpen}
           onClose={() => setIsDetailModalOpen(false)}
           onEdit={(order: any) => {
+            console.log('🔍 OrderDetailModal onEdit - order reçu:', order);
             setIsDetailModalOpen(false);
-            const orow: OrderRow = order?.clients
-              ? order
-              : {
-                  ...order,
-                  clients: { name: order?.client_name || 'Client', platform: order?.platform || null },
-                };
-            editOrder(orow);
+            
+            // Convertir OrderDetail vers OrderRow puis vers OrderForm
+            const orderRow: OrderRow = {
+              id: order.id,
+              title: order.title,
+              description: order.description,
+              budget: order.budget,
+              status: order.status,
+              due_date: order.due_date,
+              created_at: order.created_at,
+              start_date: order.start_date,
+              completed_date: order.completed_date,
+              platform: order.platform,
+              client_name: order.client_name,
+              client_email: order.client_email,
+              clients: order.clients || { 
+                name: order.client_name || 'Client', 
+                platform: order.platform || null 
+              },
+              // Champs non disponibles dans la DB (pour compatibilité)
+              project_type: order.project_type,
+              priority_level: order.priority_level,
+              estimated_hours: order.estimated_hours,
+              hourly_rate: order.hourly_rate,
+              payment_status: order.payment_status,
+              notes: order.notes,
+              tags: order.tags,
+              revision_count: order.revision_count,
+              client_feedback: order.client_feedback,
+            };
+            
+            console.log('🔄 OrderRow converti:', orderRow);
+            
+            // Convertir OrderRow vers le format OrderForm
+            const orderForForm = {
+              id: orderRow.id,
+              title: orderRow.title,
+              description: orderRow.description,
+              amount: orderRow.budget || 0, // budget -> amount
+              deadline: orderRow.due_date || '', // due_date -> deadline
+              client_id: orderRow.client_id || '',
+              status: orderRow.status as 'Pending' | 'In Progress' | 'Completed',
+              // Champs existants dans la DB
+              start_date: orderRow.start_date,
+              completion_date: orderRow.completed_date, // completed_date -> completion_date
+              // Champs non disponibles dans la DB (valeurs par défaut)
+              project_type: orderRow.project_type || '',
+              priority_level: orderRow.priority_level || 'medium',
+              estimated_hours: orderRow.estimated_hours || '',
+              hourly_rate: orderRow.hourly_rate || '',
+              payment_status: orderRow.payment_status || 'pending',
+              notes: orderRow.notes || '',
+              tags: orderRow.tags || [],
+              revision_count: orderRow.revision_count || 0,
+              client_feedback: orderRow.client_feedback || '',
+            };
+            
+            console.log('✅ OrderForForm final:', orderForForm);
+            
+            editOrder(orderForForm as any);
           }}
         />
       </div>
