@@ -121,8 +121,14 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
       try {
         // Charger les statistiques
         try {
-          const userStats = await StatisticsService.getProfileStatistics(targetUserId);
-          setStatistics(userStats);
+          const userStats = await StatisticsService.getUserStatistics(targetUserId);
+          // Adapter les données au format attendu
+          setStatistics({
+            clients: userStats.totalClients || 0,
+            orders: userStats.totalOrders || 0,
+            rating: 4.5, // Valeur par défaut
+            experience: Math.max(1, Math.floor((userStats.totalOrders || 0) / 10)) // Calcul basé sur les commandes
+          });
           console.log('✅ Statistiques chargées:', userStats);
         } catch (error) {
           console.warn('⚠️ Erreur statistiques:', error);
@@ -161,7 +167,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
 
         // Charger les activités
         try {
-          const userActivities = await ActivityService.getUserActivities(targetUserId);
+          const userActivities = await ActivityService.getUserActivity(targetUserId);
           setActivities(userActivities);
           console.log('✅ Activités chargées:', userActivities.length);
         } catch (error) {
@@ -324,8 +330,14 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
       const loadOwnData = async () => {
         try {
           // Charger les statistiques
-          const userStats = await StatisticsService.getProfileStatistics(user.id);
-          setStatistics(userStats);
+          const userStats = await StatisticsService.getUserStatistics(user.id);
+          // Adapter les données au format attendu
+          setStatistics({
+            clients: userStats.totalClients || 0,
+            orders: userStats.totalOrders || 0,
+            rating: 4.5, // Valeur par défaut
+            experience: Math.max(1, Math.floor((userStats.totalOrders || 0) / 10)) // Calcul basé sur les commandes
+          });
 
           // Charger les compétences
           const userSkills = await SkillsService.getUserSkills(user.id);
@@ -340,7 +352,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
           setOrders(userOrders);
 
           // Charger les activités
-          const userActivities = await ActivityService.getUserActivities(user.id);
+          const userActivities = await ActivityService.getUserActivity(user.id);
           setActivities(userActivities);
 
           console.log('📊 Données propres chargées:', {
