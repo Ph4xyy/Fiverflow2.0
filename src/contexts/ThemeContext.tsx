@@ -1,160 +1,150 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import toast from 'react-hot-toast';
-
-export type ThemeType = 'light' | 'dark' | 'halloween';
 
 interface ThemeContextType {
-  isDarkMode: boolean;
-  currentTheme: ThemeType;
-  toggleDarkMode: () => Promise<void>;
-  setDarkMode: (enabled: boolean) => Promise<void>;
-  setTheme: (theme: ThemeType) => Promise<void>;
-  loading: boolean;
+  currentTheme: string;
+  setTheme: (theme: string) => void;
+  getThemeColors: () => {
+    primary: string;
+    secondary: string;
+    background: string;
+    card: string;
+    text: string;
+    border: string;
+  };
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;
 };
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface ThemeProviderProps {
+  children: React.ReactNode;
+}
+
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  const [currentTheme, setCurrentTheme] = useState('dark');
   const { user } = useAuth();
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState<ThemeType>('light');
-  const [loading, setLoading] = useState(true);
 
-  // Apply theme to document
-  const applyTheme = (theme: ThemeType) => {
-    const html = document.documentElement;
-    
-    // Remove all theme classes
-    html.classList.remove('dark', 'light', 'halloween');
-    
-    // Apply the new theme
-    html.classList.add(theme);
-    
-    // Also set data attribute for more specific targeting
-    html.setAttribute('data-theme', theme);
-    
-    // Update state
-    setCurrentTheme(theme);
-    setIsDarkMode(theme === 'dark' || theme === 'halloween');
-    
-    console.log('🎨 Theme applied:', theme, 'Classes:', html.className);
-  };
-
-  // Load theme preference from Supabase or localStorage
+  // Charger le thème depuis la base de données
   useEffect(() => {
-    const loadThemePreference = async () => {
-      console.log('🎨 Loading theme preference...');
+    const loadTheme = async () => {
+      if (!user) return;
       
-      // If Supabase is not configured, use localStorage
-      if (!isSupabaseConfigured || !supabase || !user) {
-        console.log('🎭 Using localStorage for theme preference');
-        const savedTheme = localStorage.getItem('theme') as ThemeType || 'light';
-        applyTheme(savedTheme);
-        setLoading(false);
-        return;
-      }
-
       try {
-        console.log('🔍 Fetching theme preference from Supabase...');
-        const { data, error } = await supabase
-          .from('users')
-          .select('dark_mode')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (error) {
-          console.error('❌ Error fetching theme preference:', error);
-          // Fallback to localStorage
-          const savedTheme = localStorage.getItem('theme') as ThemeType || 'light';
-          applyTheme(savedTheme);
-        } else {
-          // Convert dark_mode boolean to theme
-          const isDark = data?.dark_mode || false;
-          const theme = isDark ? 'dark' : 'light';
-          console.log('✅ Theme preference loaded:', theme);
-          applyTheme(theme);
-          // Sync with localStorage
-          localStorage.setItem('theme', theme);
+        const { data } = await supabase
+          .from('user_profiles')
+          .select('theme')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (data?.theme) {
+          setCurrentTheme(data.theme);
         }
       } catch (error) {
-        console.error('💥 Error loading theme preference:', error);
-        // Fallback to localStorage
-        const savedTheme = localStorage.getItem('theme') as ThemeType || 'light';
-        applyTheme(savedTheme);
-      } finally {
-        setLoading(false);
+        console.error('Erreur lors du chargement du thème:', error);
       }
     };
 
-    loadThemePreference();
-  }, [user?.id]); // Only depend on user.id to prevent infinite loops
+    loadTheme();
+  }, [user]);
 
-  // Save theme preference to Supabase and localStorage
-  const saveThemePreference = async (theme: ThemeType) => {
-    console.log('💾 Saving theme preference:', theme);
+  // Sauvegarder le thème en base de données
+  const setTheme = async (theme: string) => {
+    setCurrentTheme(theme);
     
-    // Always save to localStorage for immediate persistence
-    localStorage.setItem('theme', theme);
-    
-    // If Supabase is configured and user is logged in, try to save to database
-    if (isSupabaseConfigured && supabase && user) {
+    if (user) {
       try {
-        // Try to update dark_mode column (convert theme to boolean)
-        const isDark = theme === 'dark' || theme === 'halloween';
-        const { error } = await supabase
-          .from('users')
-          .update({ dark_mode: isDark })
-          .eq('id', user.id);
-
-        if (error) {
-          console.warn('⚠️ Could not save theme preference to database (column may not exist):', error.message);
-          // Don't show error toast for this, just log it
-        } else {
-          console.log('✅ Theme preference saved to database');
-        }
+        await supabase
+          .from('user_profiles')
+          .update({ theme })
+          .eq('user_id', user.id);
       } catch (error) {
-        console.warn('⚠️ Database save failed, but theme is saved locally:', error);
-        // Don't show error toast for this, just log it
+        console.error('Erreur lors de la sauvegarde du thème:', error);
       }
     }
   };
 
-  const setDarkMode = async (enabled: boolean) => {
-    const theme = enabled ? 'dark' : 'light';
-    applyTheme(theme);
-    await saveThemePreference(theme);
-  };
-
-  const setTheme = async (theme: ThemeType) => {
-    applyTheme(theme);
-    await saveThemePreference(theme);
-    toast.success(`Switched to ${theme} theme`);
-  };
-
-  const toggleDarkMode = async () => {
-    const newTheme = isDarkMode ? 'light' : 'dark';
-    applyTheme(newTheme);
-    await saveThemePreference(newTheme);
-    toast.success(`Switched to ${newTheme} mode`);
+  // Obtenir les couleurs du thème
+  const getThemeColors = () => {
+    switch (currentTheme) {
+      case 'light':
+        return {
+          primary: '#3b82f6', // Blue
+          secondary: '#1e40af',
+          background: '#ffffff',
+          card: '#f8fafc',
+          text: '#1f2937',
+          border: '#e5e7eb'
+        };
+      case 'blue':
+        return {
+          primary: '#3b82f6', // Blue
+          secondary: '#1e40af',
+          background: '#111726',
+          card: '#1e2938',
+          text: '#ffffff',
+          border: '#374151'
+        };
+      case 'green':
+        return {
+          primary: '#10b981', // Green
+          secondary: '#059669',
+          background: '#111726',
+          card: '#1e2938',
+          text: '#ffffff',
+          border: '#374151'
+        };
+      case 'pink':
+        return {
+          primary: '#ec4899', // Pink
+          secondary: '#be185d',
+          background: '#111726',
+          card: '#1e2938',
+          text: '#ffffff',
+          border: '#374151'
+        };
+      case 'purple':
+        return {
+          primary: '#8b5cf6', // Purple
+          secondary: '#7c3aed',
+          background: '#111726',
+          card: '#1e2938',
+          text: '#ffffff',
+          border: '#374151'
+        };
+      case 'halloween':
+        return {
+          primary: '#f97316', // Orange
+          secondary: '#ea580c',
+          background: '#111726',
+          card: '#1e2938',
+          text: '#ffffff',
+          border: '#374151'
+        };
+      default: // dark
+        return {
+          primary: '#9c68f2', // Purple
+          secondary: '#8a5cf0',
+          background: '#111726',
+          card: '#1e2938',
+          text: '#ffffff',
+          border: '#374151'
+        };
+    }
   };
 
   const value = {
-    isDarkMode,
     currentTheme,
-    toggleDarkMode,
-    setDarkMode,
     setTheme,
-    loading
+    getThemeColors
   };
 
   return (

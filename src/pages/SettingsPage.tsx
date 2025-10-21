@@ -4,6 +4,7 @@ import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
 import { ProfileService, ProfileData, PrivacySettings } from '../services/profileService';
 import { SkillsService, Skill } from '../services/skillsService';
@@ -47,6 +48,8 @@ interface SettingsCategory {
 
 const SettingsPage: React.FC = () => {
   const { user } = useAuth();
+  const { getThemeColors } = useTheme();
+  const themeColors = getThemeColors();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState<string>('profile');
@@ -97,6 +100,12 @@ const SettingsPage: React.FC = () => {
 
   // Thème
   const [currentTheme, setCurrentTheme] = useState('dark');
+
+  // Helper pour les boutons de thème
+  const getThemeButtonStyle = (themeName: string) => ({
+    backgroundColor: themeColors.primary,
+    color: 'white'
+  });
 
   // Settings categories
   const categories: SettingsCategory[] = [
@@ -425,6 +434,97 @@ const SettingsPage: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Modification du mot de passe */}
+            <ModernCard>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-white mb-4">Modifier le mot de passe</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Mot de passe actuel
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="Entrez votre mot de passe actuel"
+                      className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Nouveau mot de passe
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="Entrez votre nouveau mot de passe"
+                      className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Confirmer le nouveau mot de passe
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="Confirmez votre nouveau mot de passe"
+                      className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                    />
+                  </div>
+                  <button 
+                    className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
+                    style={getThemeButtonStyle('password')}
+                  >
+                    Modifier le mot de passe
+                  </button>
+                </div>
+              </div>
+            </ModernCard>
+
+            {/* Modification de l'email */}
+            <ModernCard>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-white mb-4">Modifier l'email</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Email actuel
+                    </label>
+                    <input
+                      type="email"
+                      value={user?.email || ''}
+                      disabled
+                      className="w-full px-3 py-2 bg-[#2a2a2a] border border-[#1e2938] rounded-lg text-gray-400 cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Nouvel email
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="Entrez votre nouvel email"
+                      className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Confirmer le nouvel email
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="Confirmez votre nouvel email"
+                      className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                    />
+                  </div>
+                  <button 
+                    className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
+                    style={getThemeButtonStyle('email')}
+                  >
+                    Modifier l'email
+                  </button>
+                </div>
+              </div>
+            </ModernCard>
           </div>
         );
 
@@ -668,11 +768,10 @@ const SettingsPage: React.FC = () => {
                   <p className="text-gray-400 text-sm mb-3">Interface sombre classique</p>
                   <button 
                     onClick={() => handleThemeChange('dark')}
-                    className={`w-full py-2 rounded-lg transition-colors ${
-                      currentTheme === 'dark' 
-                        ? 'bg-[#9c68f2] text-white' 
-                        : 'bg-[#9c68f2] hover:bg-[#8a5cf0] text-white'
-                    }`}
+                    className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
+                    style={{
+                      backgroundColor: themeColors.primary
+                    }}
                   >
                     {currentTheme === 'dark' ? 'Actif' : 'Activer'}
                   </button>
@@ -686,11 +785,8 @@ const SettingsPage: React.FC = () => {
                   <p className="text-gray-400 text-sm mb-3">Interface claire et moderne</p>
                   <button 
                     onClick={() => handleThemeChange('light')}
-                    className={`w-full py-2 rounded-lg transition-colors ${
-                      currentTheme === 'light' 
-                        ? 'bg-[#9c68f2] text-white' 
-                        : 'bg-[#9c68f2] hover:bg-[#8a5cf0] text-white'
-                    }`}
+                    className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
+                    style={getThemeButtonStyle('light')}
                   >
                     {currentTheme === 'light' ? 'Actif' : 'Activer'}
                   </button>
@@ -704,11 +800,8 @@ const SettingsPage: React.FC = () => {
                   <p className="text-gray-400 text-sm mb-3">Interface avec accents bleus</p>
                   <button 
                     onClick={() => handleThemeChange('blue')}
-                    className={`w-full py-2 rounded-lg transition-colors ${
-                      currentTheme === 'blue' 
-                        ? 'bg-[#9c68f2] text-white' 
-                        : 'bg-[#9c68f2] hover:bg-[#8a5cf0] text-white'
-                    }`}
+                    className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
+                    style={getThemeButtonStyle('blue')}
                   >
                     {currentTheme === 'blue' ? 'Actif' : 'Activer'}
                   </button>
@@ -722,11 +815,8 @@ const SettingsPage: React.FC = () => {
                   <p className="text-gray-400 text-sm mb-3">Interface avec accents verts</p>
                   <button 
                     onClick={() => handleThemeChange('green')}
-                    className={`w-full py-2 rounded-lg transition-colors ${
-                      currentTheme === 'green' 
-                        ? 'bg-[#9c68f2] text-white' 
-                        : 'bg-[#9c68f2] hover:bg-[#8a5cf0] text-white'
-                    }`}
+                    className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
+                    style={getThemeButtonStyle('green')}
                   >
                     {currentTheme === 'green' ? 'Actif' : 'Activer'}
                   </button>
@@ -740,11 +830,8 @@ const SettingsPage: React.FC = () => {
                   <p className="text-gray-400 text-sm mb-3">Interface avec accents roses</p>
                   <button 
                     onClick={() => handleThemeChange('pink')}
-                    className={`w-full py-2 rounded-lg transition-colors ${
-                      currentTheme === 'pink' 
-                        ? 'bg-[#9c68f2] text-white' 
-                        : 'bg-[#9c68f2] hover:bg-[#8a5cf0] text-white'
-                    }`}
+                    className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
+                    style={getThemeButtonStyle('pink')}
                   >
                     {currentTheme === 'pink' ? 'Actif' : 'Activer'}
                   </button>
@@ -758,11 +845,8 @@ const SettingsPage: React.FC = () => {
                   <p className="text-gray-400 text-sm mb-3">Interface avec accents violets</p>
                   <button 
                     onClick={() => handleThemeChange('purple')}
-                    className={`w-full py-2 rounded-lg transition-colors ${
-                      currentTheme === 'purple' 
-                        ? 'bg-[#9c68f2] text-white' 
-                        : 'bg-[#9c68f2] hover:bg-[#8a5cf0] text-white'
-                    }`}
+                    className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
+                    style={getThemeButtonStyle('purple')}
                   >
                     {currentTheme === 'purple' ? 'Actif' : 'Activer'}
                   </button>
@@ -987,10 +1071,13 @@ const SettingsPage: React.FC = () => {
                       <li>• Réseau de partenaires</li>
                       <li>• Support prioritaire</li>
                     </ul>
-                    <ModernButton className="w-full">
-                      <Shield size={16} className="mr-2" />
-                      Sécurisé par Stripe
-                    </ModernButton>
+                     <ModernButton 
+                       className="w-full"
+                       onClick={() => navigate('/upgrade')}
+                     >
+                       <Shield size={16} className="mr-2" />
+                       Sécurisé par Stripe
+                     </ModernButton>
                   </div>
 
                   <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
@@ -1006,10 +1093,14 @@ const SettingsPage: React.FC = () => {
                       <li>• Support dédié</li>
                       <li>• Formation incluse</li>
                     </ul>
-                    <ModernButton variant="outline" className="w-full">
-                      <Shield size={16} className="mr-2" />
-                      Sécurisé par Stripe
-                    </ModernButton>
+                     <ModernButton 
+                       variant="outline" 
+                       className="w-full"
+                       onClick={() => navigate('/upgrade')}
+                     >
+                       <Shield size={16} className="mr-2" />
+                       Sécurisé par Stripe
+                     </ModernButton>
                   </div>
                 </div>
               </div>

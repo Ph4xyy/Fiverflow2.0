@@ -115,7 +115,8 @@ class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, 
 const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const { currentTheme, setTheme } = useTheme();
+  const { currentTheme, setTheme, getThemeColors } = useTheme();
+  const themeColors = getThemeColors();
 
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [requiredPlan, setRequiredPlan] = useState<'Pro' | 'Excellence'>('Pro');
