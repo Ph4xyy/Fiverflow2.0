@@ -35,7 +35,7 @@ SET
   is_active = TRUE,
   full_name = 'Fx Admin',
   email = 'fx.bergeron011@gmail.com',
-  username = 'admin'
+  username = 'whyyexo'
 WHERE user_id = 'd670e08d-ea95-4738-a8b0-93682c9b5814';
 
 -- 5. Créer le profil s'il n'existe pas
@@ -53,7 +53,7 @@ SELECT
   'd670e08d-ea95-4738-a8b0-93682c9b5814',
   'Fx Admin',
   'fx.bergeron011@gmail.com',
-  'admin',
+  'whyyexo',
   TRUE,
   TRUE,
   NOW(),
