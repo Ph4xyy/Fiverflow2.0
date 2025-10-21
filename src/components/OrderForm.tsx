@@ -198,17 +198,21 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Vérifier qu'on est bien à la dernière étape
+    if (currentStep !== 4) {
+      console.log('Form submitted at step', currentStep, 'but should be at step 4');
+      return;
+    }
+
     if (!order) {
       const canAddOrder = await checkOrderLimit();
       if (!canAddOrder) return;
     }
 
-    for (let s = 1; s <= 4; s++) {
-      if (!validateStep(s)) {
-        setCurrentStep(s);
-        toast.error('Please fix the errors before submitting');
-        return;
-      }
+    // Valider seulement l'étape actuelle (4)
+    if (!validateStep(4)) {
+      toast.error('Please fix the errors before submitting');
+      return;
     }
 
     if (!isSupabaseConfigured || !supabase) {
@@ -277,8 +281,15 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
     }
   };
 
-  const nextStep = () => {
-    if (validateStep(currentStep) && currentStep < 4) setCurrentStep(s => s + 1);
+  const nextStep = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    if (validateStep(currentStep) && currentStep < 4) {
+      setCurrentStep(s => s + 1);
+    }
   };
   const prevStep = () => currentStep > 1 && setCurrentStep(s => s - 1);
 
@@ -656,7 +667,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ isOpen, onClose, onSuccess, order
               {currentStep < 4 ? (
                 <button
                   type="button"
-                  onClick={nextStep}
+                  onClick={(e) => nextStep(e)}
                   className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 shadow-lg"
                 >
                   Next
