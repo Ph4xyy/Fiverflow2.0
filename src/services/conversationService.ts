@@ -143,7 +143,7 @@ export class ConversationService {
             username,
             avatar_url
           )
-        )
+        `)
         .single();
 
       if (error) {
