@@ -189,10 +189,11 @@ export class ConversationService {
    */
   static async searchUsers(query: string, searchType: 'username' | 'email'): Promise<User[]> {
     try {
+      const searchPattern = `%${query}%`;
       const { data, error } = await supabase
         .from('user_profiles')
         .select('user_id, full_name, username, avatar_url')
-        .ilike(searchType, `%${query}%`)
+        .ilike(searchType, searchPattern)
         .limit(10);
 
       if (error) {
