@@ -11,6 +11,7 @@ import { supabase } from '../lib/supabase';
 import { ProfileService, ProfileData, PrivacySettings } from '../services/profileService';
 import { 
   Edit3, 
+  Camera,
   MapPin, 
   Calendar, 
   Users, 
