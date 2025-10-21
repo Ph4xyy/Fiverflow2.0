@@ -208,11 +208,11 @@ const StatsPage: React.FC = () => {
   const pendingOrders = useMemo(() => orders.filter((o) => !isDone(o)), [orders]);
 
   const totalRevenue = useMemo(
-    () => completedOrders.reduce((sum, o) => sum + parseNum(o.amount), 0),
+    () => completedOrders.reduce((sum, o) => sum + parseNum(o.budget), 0),
     [completedOrders]
   );
   const pendingRevenue = useMemo(
-    () => pendingOrders.reduce((sum, o) => sum + parseNum(o.amount), 0),
+    () => pendingOrders.reduce((sum, o) => sum + parseNum(o.budget), 0),
     [pendingOrders]
   );
 
@@ -243,7 +243,7 @@ const StatsPage: React.FC = () => {
     return orders.reduce<Record<string, number>>((acc, o) => {
       const cl = clientsById[o.client_id];
       const platform = cl?.platform || 'Unknown';
-      acc[platform] = (acc[platform] || 0) + parseNum(o.amount);
+      acc[platform] = (acc[platform] || 0) + parseNum(o.budget);
       return acc;
     }, {});
   }, [orders, clientsById]);
@@ -258,7 +258,7 @@ const StatsPage: React.FC = () => {
     return orders.reduce((acc, o) => {
       const id = o.client_id;
       if (!id) return acc;
-      acc[id] = (acc[id] || 0) + parseNum(o.amount);
+      acc[id] = (acc[id] || 0) + parseNum(o.budget);
       return acc;
     }, {} as Record<string, number>);
   }, [orders]);
@@ -297,7 +297,7 @@ const StatsPage: React.FC = () => {
       const d = toDate(o.completion_date);
       if (!d) return;
       const key = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString().slice(0, 10);
-      m[key] = (m[key] || 0) + parseNum(o.amount);
+      m[key] = (m[key] || 0) + parseNum(o.budget);
     });
     return m;
   }, [completedOrders]);
