@@ -133,6 +133,7 @@ const StatsPage: React.FC = () => {
   const completionRate = stats?.completionRate || 0;
   const averageOrderValue = stats?.averageOrderValue || 0;
   const orderVolume = stats?.totalOrders || 0;
+  const pendingOrdersCount = orderVolume - Math.round((completionRate / 100) * orderVolume);
 
   // Utiliser les données du hook pour les graphiques
   const pieData = stats?.ordersByStatus.map(s => ({ name: s.status, value: s.count })) || [];
@@ -309,7 +310,7 @@ const StatsPage: React.FC = () => {
                 <ShoppingCart size={20} className="text-gray-400" />
               </div>
             </div>
-            <p className="mt-2 text-xs text-slate-400">{'Open orders:'} {pendingOrders.length}</p>
+            <p className="mt-2 text-xs text-slate-400">{'Open orders:'} {pendingOrdersCount}</p>
           </div>
 
           <div className={`${cardClass} p-4`}>
