@@ -1005,41 +1005,42 @@ const ProfilePageNew: React.FC = () => {
                   />
                 </div>
                   </div>
-                </div>
-              </div>
+                        </div>
+                      </div>
+                    </div>
 
-              {/* Theme Preferences */}
-              <div className="mt-6 pt-6 border-t border-[#35414e]">
-                <ThemeSelector />
-              </div>
-            </div>
+                    {/* Theme Preferences */}
+                    <div className="mt-6 pt-6 border-t border-[#35414e]">
+                      <ThemeSelector />
+                    </div>
+                  </div>
 
-            {/* Save Button */}
-            <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-[#35414e]">
-              <ModernButton 
-                variant="outline" 
-                onClick={() => setIsSettingsMenuOpen(false)}
-                disabled={isSaving}
-              >
-                Annuler
-              </ModernButton>
-              <ModernButton 
-                onClick={handleSaveSettings}
-                disabled={isSaving}
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 size={16} className="mr-2 animate-spin" />
-                    Sauvegarde...
-                  </>
-                ) : (
-                  <>
-                    <Save size={16} className="mr-2" />
-                    Sauvegarder
-                  </>
-                )}
-              </ModernButton>
-            </div>
+                  {/* Save Button */}
+                  <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-[#35414e]">
+                    <ModernButton 
+                      variant="outline" 
+                      onClick={() => setIsSettingsMenuOpen(false)}
+                      disabled={isSaving}
+                    >
+                      Annuler
+                    </ModernButton>
+                    <ModernButton 
+                      onClick={handleSaveSettings}
+                      disabled={isSaving}
+                    >
+                      {isSaving ? (
+                        <>
+                          <Loader2 size={16} className="mr-2 animate-spin" />
+                          Sauvegarde...
+                        </>
+                      ) : (
+                        <>
+                          <Save size={16} className="mr-2" />
+                          Sauvegarder
+                        </>
+                      )}
+                    </ModernButton>
+                  </div>
                   </ModernCard>
                 </div>
               </div>
