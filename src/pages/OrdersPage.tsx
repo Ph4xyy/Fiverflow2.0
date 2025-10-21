@@ -140,6 +140,7 @@ const OrdersPage: React.FC = () => {
         platform: ['Fiverr', 'Upwork', 'Direct'][i % 3],
         client_name: i % 2 ? `Acme Corp` : `John Doe`,
         client_email: i % 2 ? `contact@acmecorp.com` : `john.doe@email.com`,
+        client_id: String(i + 1), // Ajouter le client_id
         clients: {
           name: i % 2 ? `Acme Corp` : `John Doe`,
           platform: ['Fiverr', 'Upwork', 'Direct'][i % 3]
@@ -174,6 +175,7 @@ const OrdersPage: React.FC = () => {
         .select(`
           id,title,description,budget,status,due_date,created_at,
           start_date,completed_date,platform,client_name,client_email,
+          client_id,
           clients!inner(name,platform,user_id)
         `, { count: 'exact' })
         .eq('clients.user_id', user.id)
@@ -748,14 +750,14 @@ const OrdersPage: React.FC = () => {
             
             console.log('🔄 OrderRow converti:', orderRow);
             
-            // Convertir OrderRow vers le format OrderForm
+            // Convertir OrderRow vers le format OrderForm (selon l'interface OrderFormProps)
             const orderForForm = {
               id: orderRow.id,
               title: orderRow.title,
               description: orderRow.description,
               amount: orderRow.budget || 0, // budget -> amount
               deadline: orderRow.due_date || '', // due_date -> deadline
-              client_id: orderRow.client_id || '',
+              client_id: orderRow.client_id || '', // Important: récupérer le client_id
               status: orderRow.status as 'Pending' | 'In Progress' | 'Completed',
               // Champs existants dans la DB
               start_date: orderRow.start_date,
@@ -763,8 +765,8 @@ const OrdersPage: React.FC = () => {
               // Champs non disponibles dans la DB (valeurs par défaut)
               project_type: orderRow.project_type || '',
               priority_level: orderRow.priority_level || 'medium',
-              estimated_hours: orderRow.estimated_hours || '',
-              hourly_rate: orderRow.hourly_rate || '',
+              estimated_hours: orderRow.estimated_hours || 0,
+              hourly_rate: orderRow.hourly_rate || 0,
               payment_status: orderRow.payment_status || 'pending',
               notes: orderRow.notes || '',
               tags: orderRow.tags || [],
