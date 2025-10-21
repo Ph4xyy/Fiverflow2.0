@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import { useDashboardStats } from '../hooks/useDashboardStats';
 import { useCurrency } from '../contexts/CurrencyContext';
+import ClientForm from '../components/ClientForm';
+import OrderForm from '../components/OrderForm';
 import { 
   Users, 
   Package, 
@@ -19,6 +21,35 @@ import {
 const DashboardExample: React.FC = () => {
   const { stats, loading, error, refetch } = useDashboardStats();
   const { currency } = useCurrency();
+  
+  // États pour les modales
+  const [isClientFormOpen, setIsClientFormOpen] = useState(false);
+  const [isOrderFormOpen, setIsOrderFormOpen] = useState(false);
+
+  // Fonctions de gestion des actions
+  const handleAddClient = () => {
+    setIsClientFormOpen(true);
+  };
+
+  const handleCreateOrder = () => {
+    setIsOrderFormOpen(true);
+  };
+
+  const handleScheduleMeeting = () => {
+    // Rediriger vers la page de calendrier ou ouvrir une modale de planification
+    window.location.href = '/calendar';
+  };
+
+  const handleCreateInvoice = () => {
+    // Rediriger vers la page de facturation
+    window.location.href = '/invoices';
+  };
+
+  const handleFormSuccess = () => {
+    setIsClientFormOpen(false);
+    setIsOrderFormOpen(false);
+    refetch(); // Rafraîchir les statistiques
+  };
 
   if (loading) {
     return (
@@ -77,19 +108,31 @@ const DashboardExample: React.FC = () => {
               {/* Dropdown Menu */}
               <div className="absolute top-full right-0 mt-2 w-48 bg-[#1e2938] border border-[#35414e] rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <div className="py-2">
-                  <button className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2">
+                  <button 
+                    onClick={handleAddClient}
+                    className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2"
+                  >
                     <Users size={16} />
                     Add Client
                   </button>
-                  <button className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2">
+                  <button 
+                    onClick={handleCreateOrder}
+                    className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2"
+                  >
                     <Package size={16} />
                     Create Order
                   </button>
-                  <button className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2">
+                  <button 
+                    onClick={handleScheduleMeeting}
+                    className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2"
+                  >
                     <Calendar size={16} />
                     Schedule Meeting
                   </button>
-                  <button className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2">
+                  <button 
+                    onClick={handleCreateInvoice}
+                    className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2"
+                  >
                     <DollarSign size={16} />
                     Create Invoice
                   </button>
@@ -297,6 +340,19 @@ const DashboardExample: React.FC = () => {
             </div>
           </ModernCard>
         </div>
+
+        {/* Modales */}
+        <ClientForm
+          isOpen={isClientFormOpen}
+          onClose={() => setIsClientFormOpen(false)}
+          onSuccess={handleFormSuccess}
+        />
+
+        <OrderForm
+          isOpen={isOrderFormOpen}
+          onClose={() => setIsOrderFormOpen(false)}
+          onSuccess={handleFormSuccess}
+        />
       </div>
     </Layout>
   );
