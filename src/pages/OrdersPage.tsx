@@ -19,17 +19,23 @@ import SubscriptionLimits from '@/components/SubscriptionLimits';
 type OrderRow = {
   id: string;
   title: string;
-  budget: number | null; // Changé de 'amount' à 'budget'
+  budget: number | null;
   status: 'Pending' | 'In Progress' | 'Completed' | string;
-  due_date: string | null; // Changé de 'deadline' à 'due_date'
+  due_date: string | null;
   created_at: string | null;
   clients: {
     name: string;
     platform: string | null;
   };
-  // Champs supplémentaires pour l'édition
+  // Champs existants dans la base de données
   description?: string | null;
   client_id?: string;
+  start_date?: string | null;
+  completed_date?: string | null;
+  platform?: string | null;
+  client_name?: string | null;
+  client_email?: string | null;
+  // Champs non disponibles dans la DB (pour compatibilité avec OrderForm)
   project_type?: string | null;
   priority_level?: string | null;
   estimated_hours?: number | null;
@@ -37,13 +43,8 @@ type OrderRow = {
   payment_status?: string | null;
   notes?: string | null;
   tags?: string[] | null;
-  start_date?: string | null;
-  completion_date?: string | null;
   revision_count?: number | null;
   client_feedback?: string | null;
-  // Champs dénormalisés
-  client_name?: string | null;
-  platform?: string | null;
 };
 
 const PAGE_SIZE = 20;
@@ -134,18 +135,11 @@ const OrdersPage: React.FC = () => {
         status: (['Pending', 'In Progress', 'Completed'] as const)[i % 3],
         due_date: new Date(Date.now() + (i % 15) * 86400000).toISOString(),
         created_at: new Date().toISOString(),
-        project_type: ['Web Development', 'Mobile Development', 'UI/UX Design'][i % 3],
-        priority_level: ['low', 'medium', 'high'][i % 3],
-        estimated_hours: 20 + (i % 5) * 10,
-        hourly_rate: 25 + (i % 3) * 15,
-        payment_status: ['pending', 'partial', 'paid'][i % 3],
-        notes: i % 4 ? `Important notes for project ${i + 1}` : null,
-        tags: i % 3 ? [`tag${i + 1}`, `project${i + 1}`] : [],
         start_date: new Date(Date.now() - (i % 10) * 86400000).toISOString(),
-        completion_date: i % 3 === 2 ? new Date(Date.now() - (i % 5) * 86400000).toISOString() : null,
-        revision_count: i % 4,
-        client_feedback: i % 5 ? `Great work on project ${i + 1}!` : null,
-        client_id: String(i + 1),
+        completed_date: i % 3 === 2 ? new Date(Date.now() - (i % 5) * 86400000).toISOString() : null,
+        platform: ['Fiverr', 'Upwork', 'Direct'][i % 3],
+        client_name: i % 2 ? `Acme Corp` : `John Doe`,
+        client_email: i % 2 ? `contact@acmecorp.com` : `john.doe@email.com`,
         clients: {
           name: i % 2 ? `Acme Corp` : `John Doe`,
           platform: ['Fiverr', 'Upwork', 'Direct'][i % 3]
@@ -179,9 +173,7 @@ const OrdersPage: React.FC = () => {
         .from('orders')
         .select(`
           id,title,description,budget,status,due_date,created_at,
-          project_type,priority_level,estimated_hours,hourly_rate,
-          payment_status,notes,tags,start_date,completion_date,
-          revision_count,client_feedback,client_id,
+          start_date,completed_date,platform,client_name,client_email,
           clients!inner(name,platform,user_id)
         `, { count: 'exact' })
         .eq('clients.user_id', user.id)
@@ -738,17 +730,19 @@ const OrdersPage: React.FC = () => {
               deadline: orow.due_date || '', // due_date -> deadline
               client_id: orow.client_id || '',
               status: orow.status as 'Pending' | 'In Progress' | 'Completed',
-              project_type: orow.project_type,
-              priority_level: orow.priority_level,
-              estimated_hours: orow.estimated_hours,
-              hourly_rate: orow.hourly_rate,
-              payment_status: orow.payment_status,
-              notes: orow.notes,
-              tags: orow.tags,
+              // Champs existants dans la DB
               start_date: orow.start_date,
-              completion_date: orow.completion_date,
-              revision_count: orow.revision_count,
-              client_feedback: orow.client_feedback,
+              completion_date: orow.completed_date, // completed_date -> completion_date
+              // Champs non disponibles dans la DB (valeurs par défaut)
+              project_type: orow.project_type || '',
+              priority_level: orow.priority_level || 'medium',
+              estimated_hours: orow.estimated_hours || '',
+              hourly_rate: orow.hourly_rate || '',
+              payment_status: orow.payment_status || 'pending',
+              notes: orow.notes || '',
+              tags: orow.tags || [],
+              revision_count: orow.revision_count || 0,
+              client_feedback: orow.client_feedback || '',
             };
             
             editOrder(orderForForm as any);
