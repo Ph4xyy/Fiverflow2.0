@@ -6,6 +6,8 @@ import ModernButton from '../components/ModernButton';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { ProfileService, ProfileData, PrivacySettings } from '../services/profileService';
+import { SkillsService, Skill } from '../services/skillsService';
+import { AwardsService, Award } from '../services/awardsService';
 import { showSuccessNotification, showErrorNotification } from '../utils/notifications';
 import { 
   User, 
@@ -23,7 +25,10 @@ import {
   Loader2,
   Settings,
   ChevronRight,
-  Check
+  Check,
+  Award,
+  Plus,
+  Edit
 } from 'lucide-react';
 
 interface SettingsCategory {
@@ -72,6 +77,14 @@ const SettingsPage: React.FC = () => {
     website: ''
   });
 
+  // Skills et récompenses
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [awards, setAwards] = useState<Award[]>([]);
+  const [isEditingSkill, setIsEditingSkill] = useState(false);
+  const [isEditingAward, setIsEditingAward] = useState(false);
+  const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
+  const [editingAward, setEditingAward] = useState<Award | null>(null);
+
   // Settings categories
   const categories: SettingsCategory[] = [
     {
@@ -103,13 +116,19 @@ const SettingsPage: React.FC = () => {
       name: 'Réseaux sociaux',
       icon: <Globe size={20} />,
       description: 'Liens vers vos réseaux sociaux'
+    },
+    {
+      id: 'skills',
+      name: 'Compétences & Récompenses',
+      icon: <Award size={20} />,
+      description: 'Gérer vos compétences et récompenses'
     }
   ];
 
   // Handle URL parameters
   useEffect(() => {
     const category = searchParams.get('category');
-    if (category && ['profile', 'privacy', 'notifications', 'appearance', 'social'].includes(category)) {
+    if (category && ['profile', 'privacy', 'notifications', 'appearance', 'social', 'skills'].includes(category)) {
       setActiveCategory(category);
     }
   }, [searchParams]);
@@ -143,6 +162,14 @@ const SettingsPage: React.FC = () => {
             website: data.website || ''
           });
         }
+
+        // Charger les compétences
+        const userSkills = await SkillsService.getUserSkills(user.id);
+        setSkills(userSkills);
+
+        // Charger les récompenses
+        const userAwards = await AwardsService.getUserAwards(user.id);
+        setAwards(userAwards);
       } catch (error) {
         console.error('Erreur lors du chargement du profil:', error);
       } finally {
@@ -553,6 +580,152 @@ const SettingsPage: React.FC = () => {
                     Activer
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'skills':
+        return (
+          <div className="space-y-6">
+            {/* Compétences */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white">Compétences</h3>
+                <ModernButton
+                  size="sm"
+                  onClick={() => {
+                    setEditingSkill(null);
+                    setIsEditingSkill(true);
+                  }}
+                >
+                  <Plus size={16} className="mr-2" />
+                  Ajouter
+                </ModernButton>
+              </div>
+              
+              <div className="space-y-3">
+                {skills.map((skill) => (
+                  <div key={skill.id} className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg">
+                    <div className="flex-1">
+                      <h4 className="text-white font-medium">{skill.name}</h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm text-gray-400">{skill.category}</span>
+                        <span className={`text-sm font-medium ${
+                          skill.level === 'expert' ? 'text-orange-400' :
+                          skill.level === 'advanced' ? 'text-purple-400' :
+                          skill.level === 'intermediate' ? 'text-blue-400' :
+                          'text-green-400'
+                        }`}>
+                          {skill.level === 'expert' ? 'Expert' :
+                           skill.level === 'advanced' ? 'Avancé' :
+                           skill.level === 'intermediate' ? 'Intermédiaire' : 'Débutant'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <ModernButton
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEditingSkill(skill);
+                          setIsEditingSkill(true);
+                        }}
+                      >
+                        <Edit size={16} />
+                      </ModernButton>
+                      <ModernButton
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          if (await SkillsService.deleteSkill(skill.id)) {
+                            setSkills(skills.filter(s => s.id !== skill.id));
+                            showSuccessNotification('Compétence supprimée');
+                          }
+                        }}
+                      >
+                        <X size={16} />
+                      </ModernButton>
+                    </div>
+                  </div>
+                ))}
+                
+                {skills.length === 0 && (
+                  <div className="text-center py-8 text-gray-400">
+                    <Award size={48} className="mx-auto mb-4 opacity-50" />
+                    <p>Aucune compétence ajoutée</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Récompenses */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white">Récompenses</h3>
+                <ModernButton
+                  size="sm"
+                  onClick={() => {
+                    setEditingAward(null);
+                    setIsEditingAward(true);
+                  }}
+                >
+                  <Plus size={16} className="mr-2" />
+                  Ajouter
+                </ModernButton>
+              </div>
+              
+              <div className="space-y-3">
+                {awards.map((award) => (
+                  <div key={award.id} className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg">
+                    <div className="flex-1">
+                      <h4 className="text-white font-medium">{award.title}</h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm text-gray-400">{award.issuer}</span>
+                        <span className="text-sm text-gray-400">•</span>
+                        <span className="text-sm text-gray-400">{award.category}</span>
+                        <span className="text-sm text-gray-400">•</span>
+                        <span className="text-sm text-gray-400">
+                          {new Date(award.date_received).toLocaleDateString('fr-FR')}
+                        </span>
+                      </div>
+                      {award.description && (
+                        <p className="text-sm text-gray-400 mt-1">{award.description}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <ModernButton
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEditingAward(award);
+                          setIsEditingAward(true);
+                        }}
+                      >
+                        <Edit size={16} />
+                      </ModernButton>
+                      <ModernButton
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          if (await AwardsService.deleteAward(award.id)) {
+                            setAwards(awards.filter(a => a.id !== award.id));
+                            showSuccessNotification('Récompense supprimée');
+                          }
+                        }}
+                      >
+                        <X size={16} />
+                      </ModernButton>
+                    </div>
+                  </div>
+                ))}
+                
+                {awards.length === 0 && (
+                  <div className="text-center py-8 text-gray-400">
+                    <Award size={48} className="mx-auto mb-4 opacity-50" />
+                    <p>Aucune récompense ajoutée</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
