@@ -228,26 +228,31 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
       }
     };
 
+  // Ne charger les données que si c'est le profil de l'utilisateur connecté (pas de username fourni)
   useEffect(() => {
-    loadProfileData();
-  }, [user]);
+    if (!username) {
+      loadProfileData();
+    }
+  }, [user, username]);
 
-  // Recharger les données quand l'utilisateur revient de la page settings
+  // Recharger les données quand l'utilisateur revient de la page settings (seulement pour le profil propre)
   useEffect(() => {
-    const handleFocus = () => {
-      if (document.visibilityState === 'visible') {
-        loadProfileData();
-      }
-    };
+    if (!username) {
+      const handleFocus = () => {
+        if (document.visibilityState === 'visible') {
+          loadProfileData();
+        }
+      };
 
-    document.addEventListener('visibilitychange', handleFocus);
-    window.addEventListener('focus', handleFocus);
+      document.addEventListener('visibilitychange', handleFocus);
+      window.addEventListener('focus', handleFocus);
 
-    return () => {
-      document.removeEventListener('visibilitychange', handleFocus);
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [user]);
+      return () => {
+        document.removeEventListener('visibilitychange', handleFocus);
+        window.removeEventListener('focus', handleFocus);
+      };
+    }
+  }, [user, username]);
 
   // Vérifier le statut admin
   useEffect(() => {
