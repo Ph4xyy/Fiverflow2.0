@@ -6,15 +6,15 @@
 -- 1. TABLE PROFILES (mise à jour)
 -- =============================================
 
--- Ajouter les colonnes de parrainage à la table profiles existante
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS referral_code TEXT UNIQUE;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS referred_by UUID REFERENCES profiles(id);
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS referral_earnings DECIMAL(10,2) DEFAULT 0;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS total_referrals INTEGER DEFAULT 0;
+-- Ajouter les colonnes de parrainage à la table user_profiles existante
+ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS referral_code TEXT UNIQUE;
+ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS referred_by UUID REFERENCES user_profiles(id);
+ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS referral_earnings DECIMAL(10,2) DEFAULT 0;
+ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS total_referrals INTEGER DEFAULT 0;
 
 -- Index pour optimiser les requêtes
-CREATE INDEX IF NOT EXISTS idx_profiles_referral_code ON profiles(referral_code);
-CREATE INDEX IF NOT EXISTS idx_profiles_referred_by ON profiles(referred_by);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_referral_code ON user_profiles(referral_code);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_referred_by ON user_profiles(referred_by);
 
 -- =============================================
 -- 2. TABLE REFERRAL_COMMISSIONS
@@ -22,8 +22,8 @@ CREATE INDEX IF NOT EXISTS idx_profiles_referred_by ON profiles(referred_by);
 
 CREATE TABLE IF NOT EXISTS referral_commissions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    referrer_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-    referred_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+    referrer_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
+    referred_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
     order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
     subscription_id TEXT, -- ID de l'abonnement Stripe
     amount DECIMAL(10,2) NOT NULL, -- Montant de la commission
@@ -79,7 +79,7 @@ BEGIN
         new_code := 'FXR-' || LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
         
         -- Vérifier si le code existe déjà
-        SELECT EXISTS(SELECT 1 FROM profiles WHERE referral_code = new_code) INTO code_exists;
+        SELECT EXISTS(SELECT 1 FROM user_profiles WHERE referral_code = new_code) INTO code_exists;
         
         -- Si le code n'existe pas, on peut l'utiliser
         IF NOT code_exists THEN
@@ -128,7 +128,7 @@ BEGIN
     ) RETURNING id INTO commission_id;
     
     -- Mettre à jour les statistiques du parrain
-    UPDATE profiles 
+    UPDATE user_profiles 
     SET 
         referral_earnings = referral_earnings + commission_amount,
         total_referrals = total_referrals + 1
@@ -177,9 +177,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Créer le trigger
-DROP TRIGGER IF EXISTS trigger_generate_referral_code ON profiles;
+DROP TRIGGER IF EXISTS trigger_generate_referral_code ON user_profiles;
 CREATE TRIGGER trigger_generate_referral_code
-    BEFORE INSERT OR UPDATE ON profiles
+    BEFORE INSERT OR UPDATE ON user_profiles
     FOR EACH ROW
     EXECUTE FUNCTION generate_user_referral_code();
 
@@ -240,7 +240,7 @@ SELECT
     COALESCE(SUM(CASE WHEN rc.status = 'paid' THEN rc.amount ELSE 0 END), 0) as paid_commissions,
     COALESCE(SUM(CASE WHEN rc.status = 'pending' THEN rc.amount ELSE 0 END), 0) as pending_commissions,
     COALESCE(SUM(CASE WHEN rc.status = 'cancelled' THEN rc.amount ELSE 0 END), 0) as cancelled_commissions
-FROM profiles p
+FROM user_profiles p
 LEFT JOIN referral_commissions rc ON p.id = rc.referrer_id
 GROUP BY p.id, p.referral_code, p.referral_earnings, p.total_referrals;
 
@@ -257,7 +257,7 @@ SELECT
     rc.created_at as commission_created_at,
     rc.paid_at
 FROM referral_commissions rc
-JOIN profiles p_referred ON rc.referred_id = p_referred.id
+JOIN user_profiles p_referred ON rc.referred_id = p_referred.id
 ORDER BY rc.created_at DESC;
 
 -- =============================================

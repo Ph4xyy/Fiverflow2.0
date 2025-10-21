@@ -157,11 +157,10 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       requiredPlan: 'Excellence' as const
     },
     { 
-      path: '/network', 
-      label: 'Referrals', 
-      icon: Network,
-      restricted: !checkAccess('referrals') && !restrictions?.isAdmin,
-      requiredPlan: 'Pro' as const
+      path: '/referrals', 
+      label: 'Parrainage', 
+      icon: Gift,
+      restricted: false
     },
   ];
 
@@ -193,12 +192,6 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       icon: ClipboardList,
       restricted: !checkAccess('tasks') && !restrictions?.isAdmin,
       requiredPlan: 'Pro' as const
-    },
-    { 
-      path: '/referrals', 
-      label: 'Parrainage', 
-      icon: Gift,
-      restricted: false
     },
   ];
 

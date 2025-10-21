@@ -22,9 +22,9 @@ export class ReferralService {
   static async getUserReferralProfile(userId: string): Promise<ReferralProfile | null> {
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('user_profiles')
         .select('id, referral_code, referred_by, referral_earnings, total_referrals, created_at, updated_at')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single();
 
       if (error) throw error;
@@ -45,9 +45,9 @@ export class ReferralService {
 
       // Mettre à jour le profil avec le nouveau code
       const { error: updateError } = await supabase
-        .from('profiles')
+        .from('user_profiles')
         .update({ referral_code: data })
-        .eq('id', userId);
+        .eq('user_id', userId);
 
       if (updateError) throw updateError;
       return data;
@@ -64,7 +64,7 @@ export class ReferralService {
     try {
       // Trouver le parrain par son code
       const { data: referrer, error: referrerError } = await supabase
-        .from('profiles')
+        .from('user_profiles')
         .select('id')
         .eq('referral_code', referralCode)
         .single();
@@ -76,9 +76,9 @@ export class ReferralService {
 
       // Mettre à jour le profil du filleul
       const { error: updateError } = await supabase
-        .from('profiles')
+        .from('user_profiles')
         .update({ referred_by: referrer.id })
-        .eq('id', userId);
+        .eq('user_id', userId);
 
       if (updateError) throw updateError;
       return true;
@@ -285,7 +285,7 @@ export class ReferralService {
   static async validateReferralCode(code: string): Promise<boolean> {
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('user_profiles')
         .select('id')
         .eq('referral_code', code)
         .single();

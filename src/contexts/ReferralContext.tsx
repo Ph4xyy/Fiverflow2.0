@@ -112,7 +112,7 @@ export const ReferralProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       // Vérifier que le code existe dans la base de données
       const { data: referrer, error: referrerError } = await supabase
-        .from('profiles')
+        .from('user_profiles')
         .select('id, full_name, email')
         .eq('referral_code', code)
         .single();

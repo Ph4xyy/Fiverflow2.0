@@ -149,7 +149,7 @@ async function handlePaymentSuccess(paymentIntent: PaymentIntent) {
 
     // Trouver l'utilisateur par son customer_id Stripe
     const { data: user, error: userError } = await supabase
-      .from('profiles')
+      .from('user_profiles')
       .select('id, referred_by, stripe_customer_id')
       .eq('stripe_customer_id', paymentIntent.customer)
       .single()
@@ -202,7 +202,7 @@ async function handlePaymentSuccess(paymentIntent: PaymentIntent) {
 
     // Mettre à jour les statistiques du parrain
     const { error: statsError } = await supabase
-      .from('profiles')
+      .from('user_profiles')
       .update({
         referral_earnings: supabase.raw('referral_earnings + ?', [commissionAmount]),
         total_referrals: supabase.raw('total_referrals + 1')
@@ -237,7 +237,7 @@ async function handleInvoicePaymentSuccess(invoice: Invoice) {
 
     // Trouver l'utilisateur par son customer_id Stripe
     const { data: user, error: userError } = await supabase
-      .from('profiles')
+      .from('user_profiles')
       .select('id, referred_by, stripe_customer_id')
       .eq('stripe_customer_id', invoice.customer)
       .single()
@@ -275,7 +275,7 @@ async function handleInvoicePaymentSuccess(invoice: Invoice) {
 
     // Mettre à jour les statistiques du parrain
     await supabase
-      .from('profiles')
+      .from('user_profiles')
       .update({
         referral_earnings: supabase.raw('referral_earnings + ?', [commissionAmount]),
         total_referrals: supabase.raw('total_referrals + 1')
@@ -308,7 +308,7 @@ async function handleSubscriptionUpdate(subscription: Subscription) {
     if (subscription.status === 'active') {
       // Trouver l'utilisateur
       const { data: user, error: userError } = await supabase
-        .from('profiles')
+        .from('user_profiles')
         .select('id, referred_by, stripe_customer_id')
         .eq('stripe_customer_id', subscription.customer)
         .single()
@@ -345,7 +345,7 @@ async function handleSubscriptionUpdate(subscription: Subscription) {
 
       // Mettre à jour les statistiques du parrain
       await supabase
-        .from('profiles')
+        .from('user_profiles')
         .update({
           referral_earnings: supabase.raw('referral_earnings + ?', [commissionAmount]),
           total_referrals: supabase.raw('total_referrals + 1')
