@@ -37,7 +37,9 @@ import {
   Activity,
   Shield,
   Crown,
-  Coffee
+  Coffee,
+  Heart,
+  Eye
 } from 'lucide-react';
 
 // Interfaces supprimées - utilise maintenant les types des services
@@ -1058,7 +1060,7 @@ const ProfilePageNew: React.FC = () => {
               <div className="flex gap-1 mb-6">
                 {[
                   { id: 'overview', label: 'Overview' },
-                  { id: 'projects', label: 'Commandes' },
+                  { id: 'projects', label: 'Projects' },
                   { id: 'activity', label: 'Activity' }
                 ].map(tab => (
                   <button
@@ -1105,12 +1107,16 @@ const ProfilePageNew: React.FC = () => {
                   {orders.length > 0 ? (
                     <div className="space-y-4">
                       {orders.map(order => (
-                        <div key={order.id} className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
+                        <div 
+                          key={order.id} 
+                          className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938] hover:border-[#9c68f2]/50 transition-colors cursor-pointer group"
+                          onClick={() => window.location.href = `/project/${order.id}`}
+                        >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <h3 className="text-lg font-semibold text-white mb-2">{order.title}</h3>
+                              <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#9c68f2] transition-colors">{order.title}</h3>
                               {order.description && (
-                                <p className="text-gray-400 text-sm mb-3">{order.description}</p>
+                                <p className="text-gray-400 text-sm mb-3 line-clamp-2">{order.description}</p>
                               )}
                               <div className="flex items-center gap-4 text-sm text-gray-400">
                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -1139,6 +1145,17 @@ const ProfilePageNew: React.FC = () => {
                               <p className="text-xs text-gray-500">
                                 {new Date(order.created_at).toLocaleDateString('fr-FR')}
                               </p>
+                              {/* Likes et vues simulés */}
+                              <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                                <span className="flex items-center gap-1">
+                                  <Heart size={12} className="text-red-400" />
+                                  {Math.floor(Math.random() * 50) + 5}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Eye size={12} className="text-blue-400" />
+                                  {Math.floor(Math.random() * 200) + 20}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1147,8 +1164,8 @@ const ProfilePageNew: React.FC = () => {
                   ) : (
                     <div className="text-center py-12">
                       <Briefcase size={48} className="mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-lg font-semibold text-white mb-2">Aucune commande</h3>
-                      <p className="text-gray-400">Vos commandes apparaîtront ici une fois que vous en aurez créé</p>
+                      <h3 className="text-lg font-semibold text-white mb-2">Aucun projet</h3>
+                      <p className="text-gray-400">Vos projets apparaîtront ici une fois que vous en aurez créé</p>
                     </div>
                   )}
                 </div>

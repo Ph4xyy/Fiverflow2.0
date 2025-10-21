@@ -6,6 +6,7 @@ import ModernButton from '../components/ModernButton';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { ProfileService, ProfileData, PrivacySettings } from '../services/profileService';
+import { showSuccessNotification, showErrorNotification } from '../utils/notifications';
 import { 
   User, 
   Shield, 
@@ -172,13 +173,16 @@ const SettingsPage: React.FC = () => {
       
       if (success && privacySuccess) {
         // Show success message and navigate back
-        console.log('Paramètres sauvegardés avec succès');
-        navigate('/profile');
+        showSuccessNotification('Paramètres sauvegardés avec succès !');
+        setTimeout(() => {
+          navigate('/profile');
+        }, 1500);
       } else {
-        console.error('Erreur lors de la sauvegarde');
+        showErrorNotification('Erreur lors de la sauvegarde des paramètres');
       }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
+      showErrorNotification('Une erreur est survenue lors de la sauvegarde');
     } finally {
       setIsSaving(false);
     }
