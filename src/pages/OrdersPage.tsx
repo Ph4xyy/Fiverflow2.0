@@ -166,7 +166,7 @@ const OrdersPage: React.FC = () => {
       const { data, error, count } = await query;
       if (error) throw error;
 
-      const transformed = (data || []).map((o => ({
+      const transformed = (data || []).map((o: any) => ({
         id: o.id,
         title: o.title,
         budget: o.budget, // Utiliser 'budget' au lieu de 'amount'
