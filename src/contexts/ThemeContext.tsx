@@ -63,7 +63,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         console.log('🔍 Fetching theme preference from Supabase...');
         const { data, error } = await supabase
           .from('users')
-          .select('theme_preference')
+          .select('dark_mode')
           .eq('id', user.id)
           .maybeSingle();
 
@@ -73,7 +73,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const savedTheme = localStorage.getItem('theme') as ThemeType || 'light';
           applyTheme(savedTheme);
         } else {
-          const theme = (data?.theme_preference as ThemeType) || 'light';
+          // Convert dark_mode boolean to theme
+          const isDark = data?.dark_mode || false;
+          const theme = isDark ? 'dark' : 'light';
           console.log('✅ Theme preference loaded:', theme);
           applyTheme(theme);
           // Sync with localStorage
@@ -99,23 +101,25 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     // Always save to localStorage for immediate persistence
     localStorage.setItem('theme', theme);
     
-    // If Supabase is configured and user is logged in, save to database
+    // If Supabase is configured and user is logged in, try to save to database
     if (isSupabaseConfigured && supabase && user) {
       try {
+        // Try to update dark_mode column (convert theme to boolean)
+        const isDark = theme === 'dark' || theme === 'halloween';
         const { error } = await supabase
           .from('users')
-          .update({ theme_preference: theme })
+          .update({ dark_mode: isDark })
           .eq('id', user.id);
 
         if (error) {
-          console.error('❌ Error saving theme preference:', error);
-          toast.error('Failed to save theme preference');
+          console.warn('⚠️ Could not save theme preference to database (column may not exist):', error.message);
+          // Don't show error toast for this, just log it
         } else {
           console.log('✅ Theme preference saved to database');
         }
       } catch (error) {
-        console.error('💥 Error saving theme preference:', error);
-        toast.error('Failed to save theme preference');
+        console.warn('⚠️ Database save failed, but theme is saved locally:', error);
+        // Don't show error toast for this, just log it
       }
     }
   };
