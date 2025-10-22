@@ -124,37 +124,9 @@ const ClientsPageOptimized: React.FC = () => {
       });
       lastFetchedUserIdRef.current = user.id;
 
-      // Demo mode
       if (!isSupabaseConfigured || !supabase) {
-        const demo: ClientRow[] = Array.from({ length: 42 }).map((_, i) => ({
-          id: String(i + 1),
-          name: i % 3 ? `Client ${i + 1}` : 'John Doe',
-          company_name: i % 2 ? 'Acme Inc' : null,
-          platform: ['Fiverr', 'Upwork', 'Direct'][i % 3],
-          email_primary: i % 2 ? `client${i + 1}@mail.com` : null,
-          country: ['France', 'Canada', 'United States'][i % 3],
-          client_status: ['prospect', 'active', 'inactive', 'completed'][i % 4],
-          created_at: new Date().toISOString(),
-        }));
-
-        const term = debouncedSearch.toLowerCase();
-        let filtered = demo.filter((c) =>
-          [
-            c.name || '',
-            c.company_name || '',
-            c.email_primary || '',
-            c.platform || '',
-          ].some((v) => v.toLowerCase().includes(term))
-        );
-        if (status) filtered = filtered.filter((c) => (c.client_status || '') === status);
-        if (platform) filtered = filtered.filter((c) => (c.platform || '') === platform);
-        if (country) filtered = filtered.filter((c) => (c.country || '') === country);
-
-        setTotal(filtered.length);
-        const start = (page - 1) * PAGE_SIZE;
-        const slice = filtered.slice(start, start + PAGE_SIZE);
-
-        return slice;
+        console.error('Supabase not configured - cannot fetch clients');
+        throw new Error('Database not configured');
       }
 
       try {

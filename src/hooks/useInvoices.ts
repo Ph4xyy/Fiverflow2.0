@@ -67,33 +67,10 @@ export function useInvoices() {
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      // Demo data
-      const demo: Invoice[] = Array.from({ length: 5 }).map((_, i) => ({
-        id: `demo-invoice-${i + 1}`,
-        user_id: user.id,
-        number: `INV-2025-${String(i + 1).padStart(4, "0")}`,
-        client_id: "demo-client",
-        status: (["draft", "sent", "paid", "overdue"][i % 4] as any),
-        currency: "USD",
-        issue_date: new Date().toISOString().split('T')[0],
-        due_date: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-        subtotal: 100 + i * 25,
-        tax_rate: 20,
-        discount: i % 3 === 0 ? 10 : 0,
-        total: 100 + i * 25 + 18,
-        notes: `Demo invoice ${i + 1}`,
-        terms: "Payment due in 7 days",
-        tags: ["demo", "test"],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        clients: {
-          id: "demo-client",
-          name: i % 2 ? "Acme Inc" : "John Doe",
-          platform: i % 2 ? "Fiverr" : "Upwork"
-        }
-      }));
-      setInvoices(demo);
+      console.error('Supabase not configured - cannot fetch invoices');
+      setInvoices([]);
       setLoading(false);
+      setError('Database not configured');
       return;
     }
 

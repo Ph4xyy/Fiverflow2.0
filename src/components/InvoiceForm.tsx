@@ -342,9 +342,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({
     console.log("[InvoiceForm] Calculated totals:", totals);
 
     if (!isSupabaseConfigured || !supabase || !user) {
-      toast.success("Simulé (demo): facture enregistrée");
-      onSuccess();
-      onClose();
+      console.error('Supabase not configured - cannot save invoice');
+      toast.error('Database not configured');
       return;
     }
 

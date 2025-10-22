@@ -50,13 +50,10 @@ const LogoUploader: React.FC<Props> = ({ path, onChange, maxSizeMB = 5 }) => {
       return;
     }
 
-    // Mode DEMO : pas de supabase configuré → data URL locale
+    // Mode DEMO : pas de supabase configuré → erreur
     if (!isSupabaseConfigured || !supabase) {
-      const local = URL.createObjectURL(file);
-      setPreviewUrl(local);
-      onChange(null); // pas de path en mode demo
-      toast.success("Logo défini (demo)");
-      resetInput();
+      console.error('Supabase not configured - cannot upload logo');
+      toast.error('Database not configured');
       return;
     }
 
@@ -131,9 +128,8 @@ const LogoUploader: React.FC<Props> = ({ path, onChange, maxSizeMB = 5 }) => {
 
   const onRemove = async () => {
     if (!isSupabaseConfigured || !supabase) {
-      // demo
-      setPreviewUrl(null);
-      onChange(null);
+      console.error('Supabase not configured - cannot delete logo');
+      toast.error('Database not configured');
       return;
     }
 

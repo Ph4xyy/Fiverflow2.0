@@ -44,20 +44,10 @@ export function useInvoicePayments(invoiceId?: string) {
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      // Demo data
-        const demo: InvoicePayment[] = [
-        {
-          id: `demo-payment-1-${targetInvoiceId}`,
-          invoice_id: targetInvoiceId,
-          amount: 500,
-          paid_at: new Date().toISOString().split('T')[0],
-          method: "Bank Transfer",
-          note: "Partial payment",
-          created_at: new Date().toISOString()
-        }
-      ];
-      setPayments(demo);
+      console.error('Supabase not configured - cannot fetch invoice payments');
+      setPayments([]);
       setLoading(false);
+      setError('Database not configured');
       return;
     }
 
@@ -94,19 +84,8 @@ export function useInvoicePayments(invoiceId?: string) {
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      // Demo mode
-      const newPayment: InvoicePayment = {
-        id: `demo-payment-${Date.now()}`,
-        invoice_id: data.invoice_id,
-        amount: data.amount,
-        paid_at: data.paid_at,
-        method: data.method,
-        note: data.note,
-        created_at: new Date().toISOString()
-      };
-      setPayments(prev => [newPayment, ...prev]);
-      toast.success("Payment recorded successfully");
-      return newPayment;
+      console.error('Supabase not configured - cannot add payment');
+      return null;
     }
 
     try {
@@ -144,11 +123,7 @@ export function useInvoicePayments(invoiceId?: string) {
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      // Demo mode
-      setPayments(prev => prev.map(payment => 
-        payment.id === id ? { ...payment, ...data } : payment
-      ));
-      toast.success("Payment updated successfully");
+      console.error('Supabase not configured - cannot update payment');
       return;
     }
 
@@ -179,9 +154,7 @@ export function useInvoicePayments(invoiceId?: string) {
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      // Demo mode
-      setPayments(prev => prev.filter(payment => payment.id !== id));
-      toast.success("Payment deleted successfully");
+      console.error('Supabase not configured - cannot delete payment');
       return;
     }
 
@@ -212,8 +185,8 @@ export function useInvoicePayments(invoiceId?: string) {
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      // Demo mode
-      return payments.find(payment => payment.id === id);
+      console.error('Supabase not configured - cannot get payment');
+      return null;
     }
 
     try {

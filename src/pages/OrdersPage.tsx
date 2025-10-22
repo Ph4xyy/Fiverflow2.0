@@ -127,42 +127,11 @@ const OrdersPage: React.FC = () => {
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      const demo: OrderRow[] = Array.from({ length: 42 }).map((_, i) => ({
-        id: String(i + 1),
-        title: i % 3 ? `Website Redesign #${i + 1}` : `Mobile App #${i + 1}`,
-        description: i % 2 ? `Complete redesign of the company website with modern UI/UX` : `Mobile app development for iOS and Android`,
-        budget: 250 + (i % 7) * 150,
-        status: (['Pending', 'In Progress', 'Completed'] as const)[i % 3],
-        due_date: new Date(Date.now() + (i % 15) * 86400000).toISOString(),
-        created_at: new Date().toISOString(),
-        start_date: new Date(Date.now() - (i % 10) * 86400000).toISOString(),
-        completed_date: i % 3 === 2 ? new Date(Date.now() - (i % 5) * 86400000).toISOString() : null,
-        platform: ['Fiverr', 'Upwork', 'Direct'][i % 3],
-        client_name: i % 2 ? `Acme Corp` : `John Doe`,
-        client_email: i % 2 ? `contact@acmecorp.com` : `john.doe@email.com`,
-        client_id: String(i + 1), // Ajouter le client_id
-        clients: {
-          name: i % 2 ? `Acme Corp` : `John Doe`,
-          platform: ['Fiverr', 'Upwork', 'Direct'][i % 3]
-        }
-      }));
-
-      let filtered = demo;
-      if (debouncedSearch) {
-        const term = debouncedSearch.toLowerCase();
-        filtered = filtered.filter(o =>
-          [o.title, o.clients.name, o.clients.platform || '']
-            .some(v => (v || '').toLowerCase().includes(term))
-        );
-      }
-      if (status) filtered = filtered.filter(o => (o.status || '') === status);
-      if (platform) filtered = filtered.filter(o => (o.clients.platform || '') === platform);
-
-      setTotal(filtered.length);
-      const start = (page - 1) * PAGE_SIZE;
-      setOrders(filtered.slice(start, start + PAGE_SIZE));
+      console.error('Supabase not configured - cannot fetch orders');
+      setOrders([]);
+      setTotal(0);
       setLoading(false);
-      setError(null);
+      setError('Database not configured');
       return;
     }
 
@@ -363,9 +332,8 @@ const OrdersPage: React.FC = () => {
     };
 
     if (!isSupabaseConfigured || !supabase) {
-      // Demo mode: just update local state
-      setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o)));
-      toast.success(`Status updated to ${newStatus}`);
+      console.error('Supabase not configured - cannot update order status');
+      toast.error('Database not configured');
       return;
     }
     try {

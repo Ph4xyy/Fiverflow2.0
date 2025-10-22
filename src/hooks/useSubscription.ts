@@ -21,14 +21,7 @@ interface UseSubscriptionReturn {
 }
 
 // Mock subscription for when Supabase is not configured
-const mockSubscription: SubscriptionStatus = {
-  plan: 'free',
-  is_trial_active: false,
-  trial_end: null,
-  days_remaining: null,
-  hours_remaining: null,
-  trial_available: true
-};
+const mockSubscription: SubscriptionStatus | null = null;
 
 export const useSubscription = (): UseSubscriptionReturn => {
   const { user } = useAuth();
@@ -39,12 +32,12 @@ export const useSubscription = (): UseSubscriptionReturn => {
   const checkTrialStatus = useCallback(async () => {
     console.log('📋 Checking trial status...');
     
-    // If Supabase is not configured, use mock data
+    // If Supabase is not configured, return null
     if (!isSupabaseConfigured || !supabase) {
-      console.log('🎭 Using mock subscription data');
-      setSubscription(mockSubscription);
+      console.error('Supabase not configured - cannot check trial status');
+      setSubscription(null);
       setLoading(false);
-      setError(null);
+      setError('Database not configured');
       return;
     }
 
@@ -72,8 +65,8 @@ export const useSubscription = (): UseSubscriptionReturn => {
     } catch (error) {
       console.error('💥 Error checking trial status:', error);
       setError(error instanceof Error ? error.message : 'Failed to check trial status');
-      // Fallback to mock data
-      setSubscription(mockSubscription);
+      // Fallback to null data
+      setSubscription(null);
     } finally {
       setLoading(false);
     }
@@ -82,20 +75,10 @@ export const useSubscription = (): UseSubscriptionReturn => {
   const activateProTrial = useCallback(async (): Promise<boolean> => {
     console.log('🚀 Activating Pro trial...');
     
-    // If Supabase is not configured, simulate activation
+    // If Supabase is not configured, return false
     if (!isSupabaseConfigured || !supabase) {
-      console.log('🎭 Mock: Pro trial activated');
-      const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-      setSubscription({
-        plan: 'pro',
-        is_trial_active: true,
-        trial_end: trialEnd.toISOString(),
-        days_remaining: 7,
-        hours_remaining: 0,
-        trial_available: false
-      });
-      toast.success('Essai Pro activé ! 7 jours gratuits');
-      return true;
+      console.error('Supabase not configured - cannot activate trial');
+      return false;
     }
 
     if (!user) {

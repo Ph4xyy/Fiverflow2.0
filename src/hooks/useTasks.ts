@@ -64,63 +64,8 @@ interface UseTasksReturn {
 }
 
 // Mock data pour quand Supabase n'est pas configuré
-const mockTasks: Task[] = [
-  {
-    id: '1',
-    order_id: '1',
-    title: 'Design initial concepts',
-    description: 'Create 3 different logo concepts',
-    status: 'completed',
-    priority: 'high',
-    estimated_hours: 4,
-    actual_hours: 3.5,
-    due_date: '2024-02-10',
-    completed_at: '2024-02-09T15:30:00Z',
-    created_at: '2024-02-05T10:00:00Z',
-    updated_at: '2024-02-09T15:30:00Z',
-    order: {
-      title: 'Logo Design Project',
-      client: { name: 'John Doe' }
-    }
-  },
-  {
-    id: '2',
-    order_id: '1',
-    title: 'Client feedback integration',
-    description: 'Implement client feedback on chosen concept',
-    status: 'in_progress',
-    priority: 'medium',
-    estimated_hours: 2,
-    actual_hours: 1.2,
-    due_date: '2024-02-15',
-    created_at: '2024-02-10T09:00:00Z',
-    updated_at: '2024-02-12T14:20:00Z',
-    order: {
-      title: 'Logo Design Project',
-      client: { name: 'John Doe' }
-    }
-  }
-];
-
-const mockTimeEntries: TimeEntry[] = [
-  {
-    id: '1',
-    task_id: '1',
-    order_id: '1',
-    user_id: 'mock-user',
-    start_time: '2024-02-09T10:00:00Z',
-    end_time: '2024-02-09T13:30:00Z',
-    duration_minutes: 210,
-    description: 'Worked on logo concepts',
-    is_billable: true,
-    created_at: '2024-02-09T10:00:00Z',
-    task: { title: 'Design initial concepts' },
-    order: {
-      title: 'Logo Design Project',
-      client: { name: 'John Doe' }
-    }
-  }
-];
+const mockTasks: Task[] = [];
+const mockTimeEntries: TimeEntry[] = [];
 
 export const useTasks = (orderId?: string): UseTasksReturn => {
   const { user } = useAuth();

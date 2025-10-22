@@ -55,11 +55,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
 
   const fetchOrders = async () => {
     if (!isSupabaseConfigured || !supabase || !user) {
-      // Mock orders pour la démo
-      setOrders([
-        { id: '1', title: 'Logo Design Project', client: { name: 'John Doe' } },
-        { id: '2', title: 'Website Development', client: { name: 'Jane Smith' } }
-      ]);
+      console.error('Supabase not configured - cannot fetch orders');
+      setOrders([]);
       return;
     }
 
