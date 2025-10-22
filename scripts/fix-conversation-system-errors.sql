@@ -71,11 +71,10 @@ BEGIN
   END IF;
 
   -- Créer une nouvelle conversation
-  INSERT INTO conversations (title, conversation_type, created_by)
+  INSERT INTO conversations (title, type)
   VALUES (
     'Conversation directe',
-    'direct',
-    user1_id
+    'direct'
   )
   RETURNING id INTO conversation_id;
 
@@ -85,19 +84,8 @@ BEGIN
     (conversation_id, user1_id, NOW()),
     (conversation_id, user2_id, NOW());
 
-  -- Mettre à jour les informations de l'autre participant
-  UPDATE conversations 
-  SET 
-    other_participant_name = (
-      SELECT full_name FROM user_profiles WHERE user_id = user2_id
-    ),
-    other_participant_username = (
-      SELECT username FROM user_profiles WHERE user_id = user2_id
-    ),
-    other_participant_avatar = (
-      SELECT avatar_url FROM user_profiles WHERE user_id = user2_id
-    )
-  WHERE id = conversation_id;
+  -- Les informations de l'autre participant sont gérées par la fonction get_user_conversations
+  -- Pas besoin de mettre à jour la table conversations
 
   RETURN conversation_id;
 END;
