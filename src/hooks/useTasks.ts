@@ -213,7 +213,7 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       toast.error('Failed to create task');
       return false;
     }
-  }, [refetchTasks]);
+  }, []);
 
   const updateTask = useCallback(async (taskId: string, updates: Partial<Task>): Promise<boolean> => {
     if (!isSupabaseConfigured || !supabase) {
@@ -237,7 +237,7 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       toast.error('Failed to update task');
       return false;
     }
-  }, [refetchTasks]);
+  }, []);
 
   const deleteTask = useCallback(async (taskId: string): Promise<boolean> => {
     if (!isSupabaseConfigured || !supabase) {
@@ -417,7 +417,7 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
 
   const refetchTasks = useCallback(async () => {
     await fetchTasks();
-  }, [fetchTasks]);
+  }, []);
 
   useEffect(() => {
     fetchTasks();
