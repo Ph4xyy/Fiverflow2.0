@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { MessageCircle, Bell } from 'lucide-react';
 import ConversationSystem from './ConversationSystem';
+import { useConversationManager } from './ConversationManager';
 
 interface NavigationWithConversationProps {
   children: React.ReactNode;
 }
 
 const NavigationWithConversation: React.FC<NavigationWithConversationProps> = ({ children }) => {
-  const [isConversationOpen, setIsConversationOpen] = useState(false);
+  const { isConversationOpen, openConversation, closeConversation } = useConversationManager();
 
   const handleOpenConversation = () => {
-    setIsConversationOpen(true);
+    console.log('🔵 Bouton conversation cliqué - ouverture du système');
+    openConversation('menu');
   };
 
   const handleCloseConversation = () => {
-    setIsConversationOpen(false);
+    console.log('🔴 Fermeture du système de conversation');
+    closeConversation();
   };
 
   return (

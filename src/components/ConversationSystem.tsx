@@ -92,7 +92,9 @@ const ConversationSystem: React.FC<ConversationSystemProps> = ({ isOpen, onClose
     }
   }, [isConversationOpen, currentConversationId]);
 
-  if (!isOpen) return null;
+  if (!isOpen && !isConversationOpen) return null;
+
+  console.log('🎨 ConversationSystem rendu:', { isOpen, isConversationOpen, currentView, selectedConversation });
 
   return (
     <>
