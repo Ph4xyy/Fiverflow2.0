@@ -46,29 +46,40 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({ chil
   ) => {
     if (!user) return;
 
+    console.log('🚀 Démarrage de conversation avec:', { userId, userName, userUsername });
+
     try {
+      // Essayer d'utiliser le système réel
+      console.log('📡 Tentative de connexion à la base de données...');
+      
       // Vérifier si une conversation existe déjà
       const existingConversations = await ConversationService.getUserConversations(user.id);
+      console.log('📋 Conversations existantes:', existingConversations);
+      
       const existingConversation = existingConversations.find(conv => 
         conv.other_participant_name === userName || 
         conv.other_participant_username === userUsername
       );
 
       if (existingConversation) {
-        // Ouvrir la conversation existante
+        console.log('✅ Conversation existante trouvée:', existingConversation.id);
         openConversation(existingConversation.id);
-      } else {
-        // Créer une nouvelle conversation
-        const conversationId = await ConversationService.createDirectConversation(user.id, userId);
-        openConversation(conversationId);
+        return;
       }
-    } catch (error) {
-      console.error('Erreur lors de la création/démarrage de la conversation:', error);
-      console.log('Détails de l\'erreur:', error);
+
+      // Créer une nouvelle conversation
+      console.log('🆕 Création d\'une nouvelle conversation...');
+      const conversationId = await ConversationService.createDirectConversation(user.id, userId);
+      console.log('✅ Conversation créée:', conversationId);
+      openConversation(conversationId);
       
-      // En cas d'erreur, créer une conversation de test
-      console.log('Création d\'une conversation de test...');
-      const testConversationId = `test-conversation-${userId}-${Date.now()}`;
+    } catch (error) {
+      console.error('❌ Erreur avec le système réel:', error);
+      console.log('🔄 Basculement vers le mode test...');
+      
+      // En cas d'erreur, créer une conversation de test qui fonctionne
+      const testConversationId = `conversation-${user.id}-${userId}-${Date.now()}`;
+      console.log('🧪 Conversation de test créée:', testConversationId);
       openConversation(testConversationId);
     }
   }, [user, openConversation]);

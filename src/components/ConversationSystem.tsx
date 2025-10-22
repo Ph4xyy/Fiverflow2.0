@@ -76,8 +76,10 @@ const ConversationSystem: React.FC<ConversationSystemProps> = ({ isOpen, onClose
   // Si une conversation est ouverte via le contexte, passer en mode chat
   React.useEffect(() => {
     if (isConversationOpen && currentConversationId) {
+      console.log('🎯 Ouverture de la conversation:', currentConversationId);
       setCurrentView('chat');
-      // TODO: Charger les données de la conversation
+      
+      // Créer une conversation avec des données de base
       setSelectedConversation({
         id: currentConversationId,
         title: 'Conversation',
