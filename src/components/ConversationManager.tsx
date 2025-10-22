@@ -5,7 +5,8 @@ import { ConversationService } from '../services/conversationService';
 interface ConversationContextType {
   isConversationOpen: boolean;
   currentConversationId: string | null;
-  openConversation: (conversationId: string) => void;
+  currentFriendInfo: { name: string; username: string; avatar: string } | null;
+  openConversation: (conversationId: string, friendInfo?: { name: string; username: string; avatar: string }) => void;
   closeConversation: () => void;
   startConversationWithUser: (userId: string, userName: string, userUsername: string) => Promise<void>;
 }
@@ -28,15 +29,24 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({ chil
   const { user } = useAuth();
   const [isConversationOpen, setIsConversationOpen] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [currentFriendInfo, setCurrentFriendInfo] = useState<{
+    name: string;
+    username: string;
+    avatar: string;
+  } | null>(null);
 
-  const openConversation = useCallback((conversationId: string) => {
+  const openConversation = useCallback((conversationId: string, friendInfo?: { name: string; username: string; avatar: string }) => {
     setCurrentConversationId(conversationId);
+    if (friendInfo) {
+      setCurrentFriendInfo(friendInfo);
+    }
     setIsConversationOpen(true);
   }, []);
 
   const closeConversation = useCallback(() => {
     setIsConversationOpen(false);
     setCurrentConversationId(null);
+    setCurrentFriendInfo(null);
   }, []);
 
   const startConversationWithUser = useCallback(async (
@@ -46,36 +56,59 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({ chil
   ) => {
     if (!user) return;
 
+    console.log('🚀 Démarrage de conversation avec:', { userId, userName, userUsername });
+
     try {
+      // Essayer d'utiliser le système réel
+      console.log('📡 Tentative de connexion à la base de données...');
+      
       // Vérifier si une conversation existe déjà
       const existingConversations = await ConversationService.getUserConversations(user.id);
+      console.log('📋 Conversations existantes:', existingConversations);
+      
       const existingConversation = existingConversations.find(conv => 
         conv.other_participant_name === userName || 
         conv.other_participant_username === userUsername
       );
 
       if (existingConversation) {
-        // Ouvrir la conversation existante
-        openConversation(existingConversation.id);
-      } else {
-        // Créer une nouvelle conversation
-        const conversationId = await ConversationService.createDirectConversation(user.id, userId);
-        openConversation(conversationId);
+        console.log('✅ Conversation existante trouvée:', existingConversation.id);
+        openConversation(existingConversation.id, {
+          name: userName,
+          username: userUsername,
+          avatar: ''
+        });
+        return;
       }
-    } catch (error) {
-      console.error('Erreur lors de la création/démarrage de la conversation:', error);
-      console.log('Détails de l\'erreur:', error);
+
+      // Créer une nouvelle conversation
+      console.log('🆕 Création d\'une nouvelle conversation...');
+      const conversationId = await ConversationService.createDirectConversation(user.id, userId);
+      console.log('✅ Conversation créée:', conversationId);
+      openConversation(conversationId, {
+        name: userName,
+        username: userUsername,
+        avatar: ''
+      });
       
-      // En cas d'erreur, créer une conversation de test
-      console.log('Création d\'une conversation de test...');
-      const testConversationId = `test-conversation-${userId}-${Date.now()}`;
-      openConversation(testConversationId);
+      // Déclencher un événement pour rafraîchir la liste des conversations
+      window.dispatchEvent(new CustomEvent('conversationCreated', { 
+        detail: { conversationId, userName, userUsername } 
+      }));
+      
+    } catch (error) {
+      console.error('❌ Erreur avec le système réel:', error);
+      console.log('🚨 Impossible de créer la conversation - base de données non déployée');
+      
+      // Ne pas créer de conversation de test - forcer l'utilisateur à déployer la base
+      alert('Erreur: Le système de conversation n\'est pas déployé. Veuillez exécuter le script SQL dans Supabase.');
     }
   }, [user, openConversation]);
 
   const value: ConversationContextType = {
     isConversationOpen,
     currentConversationId,
+    currentFriendInfo,
     openConversation,
     closeConversation,
     startConversationWithUser

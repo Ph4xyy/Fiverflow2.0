@@ -10,7 +10,7 @@ interface ConversationSystemProps {
 }
 
 const ConversationSystem: React.FC<ConversationSystemProps> = ({ isOpen, onClose }) => {
-  const { isConversationOpen, currentConversationId, closeConversation } = useConversationManager();
+  const { isConversationOpen, currentConversationId, currentFriendInfo, closeConversation } = useConversationManager();
   const [currentView, setCurrentView] = useState<'menu' | 'chat'>('menu');
   const [selectedConversation, setSelectedConversation] = useState<{
     id: string;
@@ -76,21 +76,26 @@ const ConversationSystem: React.FC<ConversationSystemProps> = ({ isOpen, onClose
   // Si une conversation est ouverte via le contexte, passer en mode chat
   React.useEffect(() => {
     if (isConversationOpen && currentConversationId) {
+      console.log('🎯 Ouverture de la conversation:', currentConversationId);
+      console.log('👤 Informations de l\'ami:', currentFriendInfo);
       setCurrentView('chat');
-      // TODO: Charger les données de la conversation
+      
+      // Créer une conversation avec les vraies données de l'ami
       setSelectedConversation({
         id: currentConversationId,
-        title: 'Conversation',
-        otherParticipant: {
+        title: currentFriendInfo ? `Conversation avec ${currentFriendInfo.name}` : 'Conversation',
+        otherParticipant: currentFriendInfo || {
           name: 'Utilisateur',
           username: 'utilisateur',
           avatar: ''
         }
       });
     }
-  }, [isConversationOpen, currentConversationId]);
+  }, [isConversationOpen, currentConversationId, currentFriendInfo]);
 
-  if (!isOpen) return null;
+  if (!isOpen && !isConversationOpen) return null;
+
+  console.log('🎨 ConversationSystem rendu:', { isOpen, isConversationOpen, currentView, selectedConversation });
 
   return (
     <>
@@ -99,6 +104,7 @@ const ConversationSystem: React.FC<ConversationSystemProps> = ({ isOpen, onClose
           isOpen={isOpen}
           onClose={handleClose}
           onSelectConversation={handleSelectConversation}
+          useRealData={true}
         />
       )}
       
@@ -117,6 +123,7 @@ const ConversationSystem: React.FC<ConversationSystemProps> = ({ isOpen, onClose
               conversationTitle={selectedConversation.title}
               otherParticipant={selectedConversation.otherParticipant}
               onClose={handleBackToMenu}
+              onBack={() => setCurrentView('menu')}
             />
           </div>
         </div>
