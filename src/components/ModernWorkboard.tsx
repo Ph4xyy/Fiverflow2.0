@@ -42,10 +42,6 @@ import {
   ChevronDown
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, closestCenter } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 
 interface ModernWorkboardProps {}
 
@@ -58,7 +54,7 @@ interface TaskFormData {
   order_id?: string;
 }
 
-// Composant TaskCard draggable
+// Composant TaskCard moderne et fonctionnel
 interface TaskCardProps {
   task: any;
   onEdit: (task: any) => void;
@@ -67,34 +63,17 @@ interface TaskCardProps {
   onStatusChange: (taskId: string, status: string) => void;
   getPriorityColor: (priority: string) => string;
   completed?: boolean;
-  isDragging?: boolean;
 }
 
-const DraggableTaskCard: React.FC<TaskCardProps> = ({
+const TaskCard: React.FC<TaskCardProps> = ({
   task,
   onEdit,
   onDelete,
   onStartTimer,
   onStatusChange,
   getPriorityColor,
-  completed = false,
-  isDragging = false
+  completed = false
 }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging: isDraggingContext
-  } = useSortable({ id: task.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDraggingContext ? 0.5 : 1,
-  };
-
   const [showDropdown, setShowDropdown] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -120,46 +99,38 @@ const DraggableTaskCard: React.FC<TaskCardProps> = ({
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`p-4 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200 ${completed ? 'opacity-60' : ''} ${isDragging ? 'shadow-lg scale-105' : ''}`}
-    >
+    <div className={`group p-4 rounded-xl bg-gradient-to-br from-[#35414e] to-[#2a3441] hover:from-[#3d4a57] hover:to-[#35414e] transition-all duration-300 border border-[#4a5568] hover:border-[#9c68f2]/30 ${completed ? 'opacity-60' : ''}`}>
+      {/* Header avec titre et actions */}
       <div className="flex items-start justify-between mb-3">
-        <div 
-          {...attributes}
-          {...listeners}
-          className="flex-1 cursor-grab active:cursor-grabbing pr-2"
-        >
-          <h4 className={`font-medium text-white ${completed ? 'line-through' : ''}`}>{task.title}</h4>
+        <div className="flex-1 pr-3">
+          <h4 className={`font-semibold text-white text-lg ${completed ? 'line-through' : ''}`}>
+            {task.title}
+          </h4>
+          {task.description && (
+            <p className={`text-sm text-gray-300 mt-1 line-clamp-2 ${completed ? 'line-through' : ''}`}>
+              {task.description}
+            </p>
+          )}
         </div>
-        <div className="flex items-center space-x-1">
+        
+        <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowPreview(!showPreview);
-            }}
-            className="text-gray-400 hover:text-white p-1 rounded hover:bg-[#4a5568] transition-colors"
+            onClick={() => setShowPreview(!showPreview)}
+            className="p-2 rounded-lg bg-[#4a5568]/50 hover:bg-[#9c68f2]/20 text-gray-400 hover:text-white transition-all"
             title="Preview task"
           >
             <Eye className="w-4 h-4" />
           </button>
           <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(task);
-            }}
-            className="text-blue-400 hover:text-blue-300 p-1 rounded hover:bg-[#4a5568] transition-colors"
+            onClick={() => onEdit(task)}
+            className="p-2 rounded-lg bg-[#4a5568]/50 hover:bg-blue-500/20 text-gray-400 hover:text-blue-400 transition-all"
             title="Edit task"
           >
             <Edit className="w-4 h-4" />
           </button>
           <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(task.id);
-            }}
-            className="text-red-400 hover:text-red-300 p-1 rounded hover:bg-[#4a5568] transition-colors"
+            onClick={() => onDelete(task.id)}
+            className="p-2 rounded-lg bg-[#4a5568]/50 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all"
             title="Delete task"
           >
             <Trash2 className="w-4 h-4" />
@@ -167,95 +138,91 @@ const DraggableTaskCard: React.FC<TaskCardProps> = ({
         </div>
       </div>
       
-      {task.description && (
-        <p className={`text-sm text-gray-400 mb-3 ${completed ? 'line-through' : ''}`}>{task.description}</p>
-      )}
-      
+      {/* Preview Modal */}
       {showPreview && (
-        <div className="mb-3 p-4 bg-[#2a3441] rounded-lg border border-[#4a5568]">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h5 className="text-sm font-semibold text-white">Task Details</h5>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowPreview(false);
-                }}
-                className="text-gray-400 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <span className="text-gray-400">Priority:</span>
-                <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ml-2 ${getPriorityColor(task.priority)}`}>
-                  <Flag className="w-3 h-3 mr-1" />
-                  {task.priority}
+        <div className="mb-4 p-4 bg-[#1e2938] rounded-xl border border-[#9c68f2]/20 shadow-xl">
+          <div className="flex items-center justify-between mb-4">
+            <h5 className="text-lg font-semibold text-white">Task Details</h5>
+            <button
+              onClick={() => setShowPreview(false)}
+              className="p-1 rounded-lg hover:bg-[#4a5568] text-gray-400 hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-400">Priority:</span>
+                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+                    <Flag className="w-3 h-3 mr-1" />
+                    {task.priority}
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-400">Status:</span>
+                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(task.status)} ${getStatusBgColor(task.status)}`}>
+                    {getStatusLabel(task.status)}
+                  </div>
                 </div>
               </div>
               
-              <div>
-                <span className="text-gray-400">Status:</span>
-                <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ml-2 ${getStatusColor(task.status)} ${getStatusBgColor(task.status)}`}>
-                  {getStatusLabel(task.status)}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-400">Estimated:</span>
+                  <span className="text-white font-medium">{task.estimated_hours || 0}h</span>
                 </div>
-              </div>
-              
-              <div>
-                <span className="text-gray-400">Estimated:</span>
-                <span className="text-white ml-2">{task.estimated_hours || 0}h</span>
-              </div>
-              
-              <div>
-                <span className="text-gray-400">Actual:</span>
-                <span className="text-white ml-2">{task.actual_hours || 0}h</span>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-400">Actual:</span>
+                  <span className="text-white font-medium">{task.actual_hours || 0}h</span>
+                </div>
               </div>
             </div>
             
             {task.due_date && (
-              <div className="text-sm">
-                <span className="text-gray-400">Due Date:</span>
-                <span className="text-white ml-2">{new Date(task.due_date).toLocaleDateString()}</span>
+              <div className="flex items-center justify-between p-3 bg-[#2a3441] rounded-lg">
+                <span className="text-sm text-gray-400">Due Date:</span>
+                <span className="text-white font-medium">{new Date(task.due_date).toLocaleDateString()}</span>
               </div>
             )}
             
             {task.order_id && (
-              <div className="text-sm">
-                <span className="text-gray-400">Order:</span>
-                <span className="text-white ml-2">{task.order?.title || 'Unknown Order'}</span>
+              <div className="flex items-center justify-between p-3 bg-[#2a3441] rounded-lg">
+                <span className="text-sm text-gray-400">Order:</span>
+                <span className="text-white font-medium">{task.order?.title || 'Unknown Order'}</span>
               </div>
             )}
             
             {task.description && (
-              <div className="text-sm">
-                <span className="text-gray-400">Description:</span>
-                <p className="text-white mt-1 text-xs leading-relaxed">{task.description}</p>
+              <div className="p-3 bg-[#2a3441] rounded-lg">
+                <span className="text-sm text-gray-400 block mb-2">Description:</span>
+                <p className="text-white text-sm leading-relaxed">{task.description}</p>
               </div>
             )}
           </div>
         </div>
       )}
       
+      {/* Footer avec badges et actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
             <Flag className="w-3 h-3 mr-1" />
             {task.priority}
           </span>
-          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(task.status)} ${getStatusBgColor(task.status)}`}>
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(task.status)} ${getStatusBgColor(task.status)}`}>
             {getStatusLabel(task.status)}
           </span>
         </div>
         
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-2">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onStartTimer(task.id);
-            }}
-            className="text-green-400 hover:text-green-300 p-1 rounded hover:bg-[#4a5568] transition-colors"
+            onClick={() => onStartTimer(task.id)}
+            className="p-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-400 hover:text-green-300 transition-all"
             title="Start timer"
           >
             <Play className="w-4 h-4" />
@@ -264,29 +231,26 @@ const DraggableTaskCard: React.FC<TaskCardProps> = ({
           {/* Dropdown pour changer le statut */}
           <div className="relative">
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowDropdown(!showDropdown);
-              }}
-              className="text-gray-400 hover:text-white p-1 rounded hover:bg-[#4a5568] transition-colors"
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="p-2 rounded-lg bg-[#4a5568]/50 hover:bg-[#9c68f2]/20 text-gray-400 hover:text-white transition-all"
               title="Change status"
             >
               <ChevronDown className="w-4 h-4" />
             </button>
             
             {showDropdown && (
-              <div className="absolute right-0 top-full mt-1 w-48 bg-[#1e2938] border border-[#35414e] rounded-lg shadow-xl z-50">
+              <div className="absolute right-0 top-full mt-2 w-52 bg-[#1e2938] border border-[#35414e] rounded-xl shadow-2xl z-50">
                 <div className="py-2">
                   {statusOptions.map(option => (
                     <button
                       key={option.value}
-                      onClick={(e) => {
-                        e.stopPropagation();
+                      onClick={() => {
                         onStatusChange(task.id, option.value);
                         setShowDropdown(false);
                       }}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-[#35414e] flex items-center gap-2 transition-colors ${option.color}`}
+                      className={`w-full text-left px-4 py-3 text-sm hover:bg-[#35414e] flex items-center gap-3 transition-colors ${option.color}`}
                     >
+                      <div className={`w-2 h-2 rounded-full ${option.bgColor}`}></div>
                       {option.label}
                     </button>
                   ))}
@@ -314,7 +278,6 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
   
   // État du formulaire de tâche
   const [taskForm, setTaskForm] = useState<TaskFormData>({
@@ -464,39 +427,6 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
       toast.success('Task status updated!');
     } catch (error) {
       toast.error('Failed to update task status');
-    }
-  };
-
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
-  };
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveId(null);
-
-    if (!over) return;
-
-    const taskId = active.id as string;
-    const newStatus = over.id as string;
-
-    // Vérifier si le statut a changé
-    const task = tasks.find(t => t.id === taskId);
-    if (task && task.status !== newStatus) {
-      console.log('🔄 Changing task status:', { taskId, oldStatus: task.status, newStatus });
-      try {
-        const success = await updateTask(taskId, { status: newStatus });
-        if (success) {
-          toast.success(`Task moved to ${newStatus}`);
-          console.log('✅ Task status updated successfully');
-        } else {
-          toast.error('Failed to update task status');
-          console.error('❌ Failed to update task status');
-        }
-      } catch (error) {
-        console.error('❌ Error updating task status:', error);
-        toast.error('Failed to update task status');
-      }
     }
   };
 
@@ -726,144 +656,112 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
 
         {/* Contenu selon le mode de vue */}
         {viewMode === 'kanban' && (
-          <DndContext
-            collisionDetection={closestCenter}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
-              {/* Pending */}
-              <SortableContext id="pending" items={filteredTasks.filter(t => t.status === 'pending').map(t => t.id)} strategy={verticalListSortingStrategy}>
-                <ModernCard title="Pending">
-                  <div className="space-y-4">
-                    {filteredTasks.filter(t => t.status === 'pending').map(task => (
-                      <DraggableTaskCard 
-                        key={task.id} 
-                        task={task} 
-                        onEdit={handleEditTask}
-                        onDelete={setShowDeleteConfirm}
-                        onStartTimer={handleStartTimer}
-                        onStatusChange={handleStatusChange}
-                        getPriorityColor={getPriorityColor}
-                      />
-                    ))}
-                  </div>
-                </ModernCard>
-              </SortableContext>
+          <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
+            {/* Pending */}
+            <ModernCard title="Pending">
+              <div className="space-y-4">
+                {filteredTasks.filter(t => t.status === 'pending').map(task => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    onEdit={handleEditTask}
+                    onDelete={setShowDeleteConfirm}
+                    onStartTimer={handleStartTimer}
+                    onStatusChange={handleStatusChange}
+                    getPriorityColor={getPriorityColor}
+                  />
+                ))}
+              </div>
+            </ModernCard>
 
-              {/* In Progress */}
-              <SortableContext id="in_progress" items={filteredTasks.filter(t => t.status === 'in_progress').map(t => t.id)} strategy={verticalListSortingStrategy}>
-                <ModernCard title="In Progress">
-                  <div className="space-y-4">
-                    {filteredTasks.filter(t => t.status === 'in_progress').map(task => (
-                      <DraggableTaskCard 
-                        key={task.id} 
-                        task={task} 
-                        onEdit={handleEditTask}
-                        onDelete={setShowDeleteConfirm}
-                        onStartTimer={handleStartTimer}
-                        onStatusChange={handleStatusChange}
-                        getPriorityColor={getPriorityColor}
-                      />
-                    ))}
-                  </div>
-                </ModernCard>
-              </SortableContext>
+            {/* In Progress */}
+            <ModernCard title="In Progress">
+              <div className="space-y-4">
+                {filteredTasks.filter(t => t.status === 'in_progress').map(task => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    onEdit={handleEditTask}
+                    onDelete={setShowDeleteConfirm}
+                    onStartTimer={handleStartTimer}
+                    onStatusChange={handleStatusChange}
+                    getPriorityColor={getPriorityColor}
+                  />
+                ))}
+              </div>
+            </ModernCard>
 
-              {/* On Hold */}
-              <SortableContext id="on_hold" items={filteredTasks.filter(t => t.status === 'on_hold').map(t => t.id)} strategy={verticalListSortingStrategy}>
-                <ModernCard title="On Hold">
-                  <div className="space-y-4">
-                    {filteredTasks.filter(t => t.status === 'on_hold').map(task => (
-                      <DraggableTaskCard 
-                        key={task.id} 
-                        task={task} 
-                        onEdit={handleEditTask}
-                        onDelete={setShowDeleteConfirm}
-                        onStartTimer={handleStartTimer}
-                        onStatusChange={handleStatusChange}
-                        getPriorityColor={getPriorityColor}
-                      />
-                    ))}
-                  </div>
-                </ModernCard>
-              </SortableContext>
+            {/* On Hold */}
+            <ModernCard title="On Hold">
+              <div className="space-y-4">
+                {filteredTasks.filter(t => t.status === 'on_hold').map(task => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    onEdit={handleEditTask}
+                    onDelete={setShowDeleteConfirm}
+                    onStartTimer={handleStartTimer}
+                    onStatusChange={handleStatusChange}
+                    getPriorityColor={getPriorityColor}
+                  />
+                ))}
+              </div>
+            </ModernCard>
 
-              {/* Completed */}
-              <SortableContext id="completed" items={filteredTasks.filter(t => t.status === 'completed').map(t => t.id)} strategy={verticalListSortingStrategy}>
-                <ModernCard title="Completed">
-                  <div className="space-y-4">
-                    {filteredTasks.filter(t => t.status === 'completed').map(task => (
-                      <DraggableTaskCard 
-                        key={task.id} 
-                        task={task} 
-                        onEdit={handleEditTask}
-                        onDelete={setShowDeleteConfirm}
-                        onStartTimer={handleStartTimer}
-                        onStatusChange={handleStatusChange}
-                        getPriorityColor={getPriorityColor}
-                        completed={true}
-                      />
-                    ))}
-                  </div>
-                </ModernCard>
-              </SortableContext>
+            {/* Completed */}
+            <ModernCard title="Completed">
+              <div className="space-y-4">
+                {filteredTasks.filter(t => t.status === 'completed').map(task => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    onEdit={handleEditTask}
+                    onDelete={setShowDeleteConfirm}
+                    onStartTimer={handleStartTimer}
+                    onStatusChange={handleStatusChange}
+                    getPriorityColor={getPriorityColor}
+                    completed={true}
+                  />
+                ))}
+              </div>
+            </ModernCard>
 
-              {/* Cancelled */}
-              <SortableContext id="cancelled" items={filteredTasks.filter(t => t.status === 'cancelled').map(t => t.id)} strategy={verticalListSortingStrategy}>
-                <ModernCard title="Cancelled">
-                  <div className="space-y-4">
-                    {filteredTasks.filter(t => t.status === 'cancelled').map(task => (
-                      <DraggableTaskCard 
-                        key={task.id} 
-                        task={task} 
-                        onEdit={handleEditTask}
-                        onDelete={setShowDeleteConfirm}
-                        onStartTimer={handleStartTimer}
-                        onStatusChange={handleStatusChange}
-                        getPriorityColor={getPriorityColor}
-                        completed={true}
-                      />
-                    ))}
-                  </div>
-                </ModernCard>
-              </SortableContext>
+            {/* Cancelled */}
+            <ModernCard title="Cancelled">
+              <div className="space-y-4">
+                {filteredTasks.filter(t => t.status === 'cancelled').map(task => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    onEdit={handleEditTask}
+                    onDelete={setShowDeleteConfirm}
+                    onStartTimer={handleStartTimer}
+                    onStatusChange={handleStatusChange}
+                    getPriorityColor={getPriorityColor}
+                    completed={true}
+                  />
+                ))}
+              </div>
+            </ModernCard>
 
-              {/* Archived */}
-              <SortableContext id="archived" items={filteredTasks.filter(t => t.status === 'archived').map(t => t.id)} strategy={verticalListSortingStrategy}>
-                <ModernCard title="Archived">
-                  <div className="space-y-4">
-                    {filteredTasks.filter(t => t.status === 'archived').map(task => (
-                      <DraggableTaskCard 
-                        key={task.id} 
-                        task={task} 
-                        onEdit={handleEditTask}
-                        onDelete={setShowDeleteConfirm}
-                        onStartTimer={handleStartTimer}
-                        onStatusChange={handleStatusChange}
-                        getPriorityColor={getPriorityColor}
-                        completed={true}
-                      />
-                    ))}
-                  </div>
-                </ModernCard>
-              </SortableContext>
-            </div>
-            
-            <DragOverlay>
-              {activeId ? (
-                <DraggableTaskCard 
-                  task={tasks.find(t => t.id === activeId)!} 
-                  onEdit={handleEditTask}
-                  onDelete={setShowDeleteConfirm}
-                  onStartTimer={handleStartTimer}
-                  onStatusChange={handleStatusChange}
-                  getPriorityColor={getPriorityColor}
-                  isDragging={true}
-                />
-              ) : null}
-            </DragOverlay>
-          </DndContext>
+            {/* Archived */}
+            <ModernCard title="Archived">
+              <div className="space-y-4">
+                {filteredTasks.filter(t => t.status === 'archived').map(task => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    onEdit={handleEditTask}
+                    onDelete={setShowDeleteConfirm}
+                    onStartTimer={handleStartTimer}
+                    onStatusChange={handleStatusChange}
+                    getPriorityColor={getPriorityColor}
+                    completed={true}
+                  />
+                ))}
+              </div>
+            </ModernCard>
+          </div>
         )}
 
         {viewMode === 'list' && (

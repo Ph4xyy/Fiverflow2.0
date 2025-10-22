@@ -94,6 +94,20 @@ const CalendarPageNew: React.FC = () => {
             };
           });
 
+        // Convertir TOUTES les tâches en événements (même sans due_date)
+        const allTaskEvents: Event[] = tasks.map(task => {
+          const eventDate = task.due_date || new Date().toISOString().split('T')[0];
+          return {
+            id: `task-${task.id}`,
+            title: `📋 ${task.title}`,
+            date: eventDate,
+            time: '09:00',
+            type: 'deadline' as const,
+            priority: task.priority as 'low' | 'medium' | 'high',
+            description: task.description
+          };
+        });
+
         // Convertir les commandes avec due_date en événements
         const orderEvents: Event[] = orders
           .filter(order => order.due_date)
@@ -128,11 +142,11 @@ const CalendarPageNew: React.FC = () => {
         }));
 
         // Combiner tous les événements
-        const allEvents = [...taskEvents, ...orderEvents, ...calendarEventObjects];
+        const allEvents = [...allTaskEvents, ...orderEvents, ...calendarEventObjects];
         setEvents(allEvents);
         
         console.log('✅ Calendar events loaded:', {
-          tasks: taskEvents.length,
+          tasks: allTaskEvents.length,
           orders: orderEvents.length,
           calendar: calendarEventObjects.length,
           total: allEvents.length
@@ -155,22 +169,6 @@ const CalendarPageNew: React.FC = () => {
           due_date: t.due_date,
           status: t.status
         })));
-        
-        // Si aucune tâche n'a de due_date, créer une tâche de test
-        if (tasks.length > 0 && taskEvents.length === 0) {
-          console.log('⚠️ No tasks with due_date found. Creating a test task...');
-          // Créer un événement de test pour vérifier que le calendrier fonctionne
-          const testEvent: Event = {
-            id: 'test-task',
-            title: '📋 Test Task (No due_date)',
-            date: new Date().toISOString().split('T')[0],
-            time: '10:00',
-            type: 'deadline',
-            priority: 'medium',
-            description: 'This is a test task to verify calendar functionality'
-          };
-          setEvents([testEvent]);
-        }
       } catch (error) {
         console.error('Error loading calendar data:', error);
       } finally {
