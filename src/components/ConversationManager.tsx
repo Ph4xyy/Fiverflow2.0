@@ -64,6 +64,12 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({ chil
       }
     } catch (error) {
       console.error('Erreur lors de la création/démarrage de la conversation:', error);
+      console.log('Détails de l\'erreur:', error);
+      
+      // En cas d'erreur, créer une conversation de test
+      console.log('Création d\'une conversation de test...');
+      const testConversationId = `test-conversation-${userId}-${Date.now()}`;
+      openConversation(testConversationId);
     }
   }, [user, openConversation]);
 

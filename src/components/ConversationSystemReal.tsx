@@ -5,6 +5,7 @@ import ConversationChat from './ConversationChat';
 import { useConversationManager } from './ConversationManager';
 import { ConversationService } from '../services/conversationService';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
 interface ConversationSystemRealProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ const ConversationSystemReal: React.FC<ConversationSystemRealProps> = ({ isOpen,
         console.log('✅ Système de conversation réel activé');
       } catch (error) {
         console.log('⚠️ Système de conversation en mode test (base de données non configurée)');
+        console.log('Erreur:', error);
         setIsRealSystemEnabled(false);
       }
     };
@@ -96,6 +98,30 @@ const ConversationSystemReal: React.FC<ConversationSystemRealProps> = ({ isOpen,
       setCurrentView('chat');
     } catch (error) {
       console.error('Erreur lors du démarrage de la conversation:', error);
+      // En cas d'erreur, utiliser le mode test
+      console.log('Basculement vers le mode test...');
+      setIsRealSystemEnabled(false);
+      
+      // Retry avec le mode test
+      const mockUsers = {
+        '1': { name: 'John Doe', username: 'johndoe', avatar: '' },
+        '2': { name: 'Jane Smith', username: 'janesmith', avatar: '' },
+        '3': { name: 'Mike Johnson', username: 'mikej', avatar: '' }
+      };
+      
+      const user = mockUsers[userId as keyof typeof mockUsers] || { 
+        name: 'Utilisateur', 
+        username: 'utilisateur', 
+        avatar: '' 
+      };
+      
+      setSelectedConversation({
+        id: `conversation-${userId}`,
+        title: `Conversation avec ${user.name}`,
+        otherParticipant: user
+      });
+      
+      setCurrentView('chat');
     }
   };
 
