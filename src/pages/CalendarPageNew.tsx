@@ -137,6 +137,24 @@ const CalendarPageNew: React.FC = () => {
           calendar: calendarEventObjects.length,
           total: allEvents.length
         });
+        
+        // Debug: afficher les tâches sans due_date
+        const tasksWithoutDueDate = tasks.filter(task => !task.due_date);
+        if (tasksWithoutDueDate.length > 0) {
+          console.log('⚠️ Tasks without due_date:', tasksWithoutDueDate.map(t => ({
+            id: t.id,
+            title: t.title,
+            due_date: t.due_date
+          })));
+        }
+        
+        // Debug: afficher toutes les tâches
+        console.log('📋 All tasks:', tasks.map(t => ({
+          id: t.id,
+          title: t.title,
+          due_date: t.due_date,
+          status: t.status
+        })));
       } catch (error) {
         console.error('Error loading calendar data:', error);
       } finally {
