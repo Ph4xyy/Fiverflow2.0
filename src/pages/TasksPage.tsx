@@ -54,7 +54,7 @@ const WorkboardPage: React.FC = () => {
         {/* Carte sombre + scope pour forcer le nouveau thème à l’intérieur */}
         <div className={`${cardClass} p-0 bg-[#0B0E14] border-[#1C2230] min-w-0 overflow-hidden`}>
           <div className="task-scope p-4 sm:p-5">
-            <TaskManager showRecentTimeEntries={false} />
+            <TaskManager showRecentTimeEntries={true} />
           </div>
         </div>
 

@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 
 export interface Task {
   id: string;
-  order_id: string;
+  order_id?: string;
   title: string;
   description?: string;
   status: 'todo' | 'in_progress' | 'completed';
@@ -106,12 +106,12 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
         .from('tasks')
         .select(`
           *,
-          orders!inner(
+          orders(
             title,
-            clients!inner(name, user_id)
+            clients(name, user_id)
           )
         `)
-        .eq('orders.clients.user_id', user.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       // Filtrer par order_id si spécifié
@@ -126,12 +126,12 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       // Transformer les données des tâches
       const transformedTasks: Task[] = tasksData?.map(task => ({
         ...task,
-        order: {
+        order: task.orders ? {
           title: (task.orders as any).title,
           client: {
             name: (task.orders as any).clients.name
           }
-        }
+        } : undefined
       })) || [];
 
       // Récupérer les entrées de temps
@@ -190,8 +190,8 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       return false;
     }
 
-    if (!taskData.title || !taskData.order_id) {
-      toast.error('Title and order are required');
+    if (!taskData.title) {
+      toast.error('Title is required');
       return false;
     }
 
@@ -199,7 +199,8 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       const { error } = await supabase
         .from('tasks')
         .insert({
-          order_id: taskData.order_id,
+          user_id: user.id,
+          order_id: taskData.order_id || null,
           title: taskData.title,
           description: taskData.description || null,
           status: taskData.status || 'todo',

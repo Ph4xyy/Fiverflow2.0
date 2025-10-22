@@ -96,10 +96,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
       return;
     }
 
-    if (!formData.order_id) {
-      toast.error('Please select an order');
-      return;
-    }
+    // order_id n'est plus obligatoire pour le workboard général
 
     if (!isSupabaseConfigured || !supabase) {
       toast.error('Database not configured');
@@ -113,7 +110,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
       const taskData = {
         title: formData.title.trim(),
         description: formData.description.trim() || null,
-        order_id: formData.order_id,
+        order_id: formData.order_id || null,
         status: formData.status,
         priority: formData.priority,
         estimated_hours: formData.estimated_hours,
@@ -201,15 +198,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, task, o
           {!orderId && (
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Order *
+                Order (Optional)
               </label>
               <select
                 value={formData.order_id}
                 onChange={(e) => setFormData({ ...formData, order_id: e.target.value })}
                 className="w-full px-3 py-3 border border-[#1C2230] rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-[#0E121A] text-slate-100"
-                required
               >
-                <option value="">Select an order</option>
+                <option value="">No specific order (general task)</option>
                 {orders.map((order) => (
                   <option key={order.id} value={order.id}>
                     {order.title} - {order.client.name}

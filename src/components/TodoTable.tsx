@@ -393,6 +393,7 @@ const TodoTable: React.FC = () => {
         priority: optimistic.priority,
         parent_id: optimistic.parent_id,
         position: optimistic.position,
+        order_id: null, // Tâches générales sans order spécifique
       };
       if (colorPersistSupportedRef.current) {
         payload.color = optimistic.color;

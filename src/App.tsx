@@ -40,7 +40,7 @@ import DashboardExample from './pages/DashboardExample';
 import ProtectedRoute from './components/ProtectedRoute';
 import CalendarPageNew from './pages/CalendarPageNew';
 import PricingPageNew from './pages/PricingPageNew';
-import WorkboardPageNew from './pages/WorkboardPageNew';
+import WorkboardPage from './pages/TasksPage';
 import ProfilePageNew from './pages/ProfilePageNew';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import ProfileRedirect from './pages/ProfileRedirect';
@@ -127,7 +127,7 @@ function AppContent() {
           <Route path="/tasks" element={
             <InstantProtectedRoute>
               <SubscriptionGuard requiredPlan="boost" pageName="workboard" description="Tableau de travail disponible avec Boost">
-                <WorkboardPageNew />
+                <WorkboardPage />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
