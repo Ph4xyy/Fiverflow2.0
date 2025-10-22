@@ -122,6 +122,7 @@ const ConversationSystem: React.FC<ConversationSystemProps> = ({ isOpen, onClose
               conversationTitle={selectedConversation.title}
               otherParticipant={selectedConversation.otherParticipant}
               onClose={handleBackToMenu}
+              onBack={() => setCurrentView('menu')}
             />
           </div>
         </div>

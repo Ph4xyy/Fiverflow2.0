@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Smile, Paperclip, MoreVertical, Info } from 'lucide-react';
+import { Send, Smile, Paperclip, MoreVertical, Info, ArrowLeft } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -22,13 +22,15 @@ interface ConversationChatProps {
     avatar: string;
   };
   onClose: () => void;
+  onBack?: () => void;
 }
 
 const ConversationChat: React.FC<ConversationChatProps> = ({
   conversationId,
   conversationTitle,
   otherParticipant,
-  onClose
+  onClose,
+  onBack
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -49,8 +51,20 @@ const ConversationChat: React.FC<ConversationChatProps> = ({
   const loadMessages = async () => {
     setLoading(true);
     try {
-      // Pour l'instant, utiliser des données de test
-      // TODO: Remplacer par les vraies données quand la DB sera créée
+      console.log('📨 Chargement des messages pour la conversation:', conversationId);
+      
+      // Essayer de charger les vrais messages
+      try {
+        const { ConversationService } = await import('../services/conversationService');
+        const realMessages = await ConversationService.getConversationMessages(conversationId);
+        console.log('✅ Messages réels chargés:', realMessages);
+        setMessages(realMessages);
+        return;
+      } catch (error) {
+        console.log('⚠️ Erreur avec les vrais messages, utilisation des données de test:', error);
+      }
+      
+      // Fallback vers les données de test
       const mockMessages: Message[] = [
         {
           id: '1',
@@ -73,17 +87,6 @@ const ConversationChat: React.FC<ConversationChatProps> = ({
           sender_name: 'Moi',
           sender_username: 'moi',
           sender_avatar: ''
-        },
-        {
-          id: '3',
-          content: 'Super ! J\'ai un nouveau projet à te proposer',
-          sender_id: otherParticipant.username,
-          created_at: new Date(Date.now() - 900000).toISOString(),
-          is_edited: false,
-          is_deleted: false,
-          sender_name: otherParticipant.name,
-          sender_username: otherParticipant.username,
-          sender_avatar: otherParticipant.avatar
         }
       ];
       
@@ -100,8 +103,33 @@ const ConversationChat: React.FC<ConversationChatProps> = ({
     
     setSending(true);
     try {
-      // Pour l'instant, simuler l'envoi de message
-      // TODO: Remplacer par les vraies données quand la DB sera créée
+      console.log('📤 Envoi du message:', newMessage.trim());
+      
+      // Essayer d'envoyer le vrai message
+      try {
+        const { ConversationService } = await import('../services/conversationService');
+        const { useAuth } = await import('../contexts/AuthContext');
+        
+        // Récupérer l'utilisateur actuel (simulation)
+        const currentUserId = 'me'; // TODO: Récupérer le vrai ID utilisateur
+        
+        const sentMessage = await ConversationService.sendMessage(
+          conversationId, 
+          currentUserId, 
+          newMessage.trim()
+        );
+        
+        if (sentMessage) {
+          console.log('✅ Message envoyé avec succès:', sentMessage);
+          setMessages(prev => [...prev, sentMessage]);
+          setNewMessage('');
+          return;
+        }
+      } catch (error) {
+        console.log('⚠️ Erreur avec l\'envoi réel, simulation:', error);
+      }
+      
+      // Fallback vers la simulation
       const tempMessage: Message = {
         id: Date.now().toString(),
         content: newMessage.trim(),
@@ -114,7 +142,6 @@ const ConversationChat: React.FC<ConversationChatProps> = ({
         sender_avatar: ''
       };
       
-      // Ajouter le message à la liste
       setMessages(prev => [...prev, tempMessage]);
       setNewMessage('');
       
@@ -209,6 +236,15 @@ const ConversationChat: React.FC<ConversationChatProps> = ({
         </div>
         
         <div className="flex items-center gap-2">
+          {onBack && (
+            <button 
+              onClick={onBack}
+              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+              title="Retour à la liste"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-400" />
+            </button>
+          )}
           <button className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
             <Info className="w-5 h-5 text-gray-400" />
           </button>
