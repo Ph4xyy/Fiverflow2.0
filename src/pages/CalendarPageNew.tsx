@@ -6,6 +6,7 @@ import SubscriptionManager from '../components/SubscriptionManager';
 import { useTasks } from '../hooks/useTasks';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useOrders } from '../hooks/useOrders';
 import { 
   Calendar as CalendarIcon, 
   Plus, 
@@ -35,6 +36,7 @@ interface Event {
 const CalendarPageNew: React.FC = () => {
   const { user } = useAuth();
   const { tasks, loading: tasksLoading } = useTasks();
+  const { orders, loading: ordersLoading } = useOrders();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -43,16 +45,21 @@ const CalendarPageNew: React.FC = () => {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [events, setEvents] = useState<Event[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Charger les événements du calendrier depuis la base de données
   useEffect(() => {
     const loadCalendarEvents = async () => {
       if (!isSupabaseConfigured || !supabase || !user) {
         console.log('Supabase not configured or no user');
+        setLoading(false);
         return;
       }
 
       try {
+        setLoading(true);
+        console.log('📅 Loading calendar events...');
+
         // Récupérer les événements du calendrier
         const { data: calendarData, error: calendarError } = await supabase
           .from('calendar_events')
@@ -62,7 +69,6 @@ const CalendarPageNew: React.FC = () => {
 
         if (calendarError) {
           console.error('Error loading calendar events:', calendarError);
-          return;
         }
 
         setCalendarEvents(calendarData || []);
@@ -72,12 +78,25 @@ const CalendarPageNew: React.FC = () => {
           .filter(task => task.due_date)
           .map(task => ({
             id: `task-${task.id}`,
-            title: task.title,
+            title: `📋 ${task.title}`,
             date: task.due_date!,
-            time: '09:00', // Heure par défaut
+            time: '09:00',
             type: 'deadline' as const,
             priority: task.priority as 'low' | 'medium' | 'high',
             description: task.description
+          }));
+
+        // Convertir les commandes avec deadline en événements
+        const orderEvents: Event[] = orders
+          .filter(order => order.deadline)
+          .map(order => ({
+            id: `order-${order.id}`,
+            title: `📦 ${order.title}`,
+            date: order.deadline!,
+            time: '17:00', // Heure par défaut pour les deadlines
+            type: 'deadline' as const,
+            priority: 'high' as const, // Les deadlines de commandes sont importantes
+            description: `Commande pour ${order.client?.name || 'Client'}`
           }));
 
         // Convertir les événements du calendrier en format Event
@@ -93,14 +112,27 @@ const CalendarPageNew: React.FC = () => {
         }));
 
         // Combiner tous les événements
-        setEvents([...taskEvents, ...calendarEventObjects]);
+        const allEvents = [...taskEvents, ...orderEvents, ...calendarEventObjects];
+        setEvents(allEvents);
+        
+        console.log('✅ Calendar events loaded:', {
+          tasks: taskEvents.length,
+          orders: orderEvents.length,
+          calendar: calendarEventObjects.length,
+          total: allEvents.length
+        });
       } catch (error) {
         console.error('Error loading calendar data:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadCalendarEvents();
-  }, [user, tasks]);
+    // Charger seulement si les données sont prêtes
+    if (!tasksLoading && !ordersLoading) {
+      loadCalendarEvents();
+    }
+  }, [user, tasks, orders, tasksLoading, ordersLoading]);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -187,6 +219,22 @@ const CalendarPageNew: React.FC = () => {
   };
 
   const days = getDaysInMonth(currentDate);
+
+  // Afficher un indicateur de chargement
+  if (loading || tasksLoading || ordersLoading) {
+    return (
+      <Layout>
+        <div className="p-6 space-y-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+              <p className="text-gray-400">Loading calendar events...</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -435,24 +483,35 @@ const CalendarPageNew: React.FC = () => {
               </div>
             </ModernCard>
 
-            {/* Statistiques rapides */}
+            {/* Statistiques réelles */}
             <ModernCard title="Statistics" icon={<Users size={20} className="text-white" />}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-400">Total events</span>
+                  <span className="text-lg font-semibold text-white">{events.length}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-400">Tasks with deadline</span>
+                  <span className="text-lg font-semibold text-white">
+                    {tasks.filter(task => task.due_date).length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-400">Orders with deadline</span>
+                  <span className="text-lg font-semibold text-white">
+                    {orders.filter(order => order.deadline).length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-400">Events this month</span>
-                  <span className="text-lg font-semibold text-white">24</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Meetings</span>
-                  <span className="text-lg font-semibold text-white">12</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Deadlines</span>
-                  <span className="text-lg font-semibold text-white">8</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Reminders</span>
-                  <span className="text-lg font-semibold text-white">4</span>
+                  <span className="text-lg font-semibold text-white">
+                    {events.filter(event => {
+                      const eventDate = new Date(event.date);
+                      const currentMonth = currentDate.getMonth();
+                      const currentYear = currentDate.getFullYear();
+                      return eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
+                    }).length}
+                  </span>
                 </div>
               </div>
             </ModernCard>
