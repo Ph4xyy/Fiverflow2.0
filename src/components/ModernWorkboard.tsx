@@ -29,20 +29,152 @@ import {
   Target,
   TrendingUp,
   Users,
-  Activity
+  Activity,
+  X,
+  Save,
+  AlertCircle,
+  ArrowRight,
+  ArrowLeft,
+  List
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface ModernWorkboardProps {}
 
+interface TaskFormData {
+  title: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high';
+  estimated_hours: number;
+  due_date: string;
+}
+
+// Composant TaskCard pour éviter la duplication
+interface TaskCardProps {
+  task: any;
+  onEdit: (task: any) => void;
+  onDelete: (taskId: string) => void;
+  onStartTimer: (taskId: string) => void;
+  onStatusChange: (taskId: string, status: string) => void;
+  getPriorityColor: (priority: string) => string;
+  completed?: boolean;
+}
+
+const TaskCard: React.FC<TaskCardProps> = ({
+  task,
+  onEdit,
+  onDelete,
+  onStartTimer,
+  onStatusChange,
+  getPriorityColor,
+  completed = false
+}) => {
+  const getStatusActions = () => {
+    switch (task.status) {
+      case 'todo':
+        return (
+          <button
+            onClick={() => onStatusChange(task.id, 'in_progress')}
+            className="text-blue-400 hover:text-blue-300 p-1"
+            title="Move to In Progress"
+          >
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        );
+      case 'in_progress':
+        return (
+          <button
+            onClick={() => onStatusChange(task.id, 'completed')}
+            className="text-green-400 hover:text-green-300 p-1"
+            title="Mark as completed"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+          </button>
+        );
+      case 'completed':
+        return (
+          <button
+            onClick={() => onStatusChange(task.id, 'in_progress')}
+            className="text-blue-400 hover:text-blue-300 p-1"
+            title="Reopen task"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className={`p-4 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] transition-colors ${completed ? 'opacity-60' : ''}`}>
+      <div className="flex items-start justify-between mb-3">
+        <h4 className={`font-medium text-white ${completed ? 'line-through' : ''}`}>{task.title}</h4>
+        <div className="flex items-center space-x-1">
+          <button 
+            onClick={() => onEdit(task)}
+            className="text-gray-400 hover:text-white p-1"
+            title="Edit task"
+          >
+            <Edit className="w-4 h-4" />
+          </button>
+          <button 
+            onClick={() => onDelete(task.id)}
+            className="text-gray-400 hover:text-red-400 p-1"
+            title="Delete task"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+      
+      {task.description && (
+        <p className={`text-sm text-gray-400 mb-3 ${completed ? 'line-through' : ''}`}>{task.description}</p>
+      )}
+      
+      <div className="flex items-center justify-between">
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+          <Flag className="w-3 h-3 mr-1" />
+          {task.priority}
+        </span>
+        
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => onStartTimer(task.id)}
+            className="text-green-400 hover:text-green-300 p-1"
+            title="Start timer"
+          >
+            <Play className="w-4 h-4" />
+          </button>
+          {getStatusActions()}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
   const { user } = useAuth();
-  const { tasks, timeEntries, loading, activeTimer, startTimer, stopTimer, refetchTasks } = useTasks();
+  const { tasks, timeEntries, loading, activeTimer, startTimer, stopTimer, refetchTasks, createTask, updateTask, deleteTask } = useTasks();
   
   const [viewMode, setViewMode] = useState<'kanban' | 'list' | 'calendar'>('kanban');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  
+  // États pour les modals
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [editingTask, setEditingTask] = useState<any>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  
+  // État du formulaire de tâche
+  const [taskForm, setTaskForm] = useState<TaskFormData>({
+    title: '',
+    description: '',
+    priority: 'medium',
+    estimated_hours: 1,
+    due_date: ''
+  });
 
   // Statistiques calculées
   const totalTasks = tasks.length;
@@ -99,6 +231,90 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
     }
   };
 
+  // Gestion du formulaire de tâche
+  const handleTaskFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!taskForm.title.trim()) {
+      toast.error('Task title is required');
+      return;
+    }
+
+    try {
+      const taskData = {
+        title: taskForm.title.trim(),
+        description: taskForm.description.trim() || null,
+        priority: taskForm.priority,
+        estimated_hours: taskForm.estimated_hours,
+        due_date: taskForm.due_date || null,
+        status: 'todo' as const
+      };
+
+      if (editingTask) {
+        await updateTask(editingTask.id, taskData);
+        toast.success('Task updated successfully!');
+      } else {
+        await createTask(taskData);
+        toast.success('Task created successfully!');
+      }
+
+      // Reset form
+      setTaskForm({
+        title: '',
+        description: '',
+        priority: 'medium',
+        estimated_hours: 1,
+        due_date: ''
+      });
+      setShowTaskModal(false);
+      setEditingTask(null);
+    } catch (error) {
+      toast.error('Failed to save task');
+    }
+  };
+
+  const handleEditTask = (task: any) => {
+    setEditingTask(task);
+    setTaskForm({
+      title: task.title,
+      description: task.description || '',
+      priority: task.priority,
+      estimated_hours: task.estimated_hours || 1,
+      due_date: task.due_date || ''
+    });
+    setShowTaskModal(true);
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await deleteTask(taskId);
+      toast.success('Task deleted successfully!');
+      setShowDeleteConfirm(null);
+    } catch (error) {
+      toast.error('Failed to delete task');
+    }
+  };
+
+  const handleStatusChange = async (taskId: string, newStatus: string) => {
+    try {
+      await updateTask(taskId, { status: newStatus });
+      toast.success('Task status updated!');
+    } catch (error) {
+      toast.error('Failed to update task status');
+    }
+  };
+
+  const resetTaskForm = () => {
+    setTaskForm({
+      title: '',
+      description: '',
+      priority: 'medium',
+      estimated_hours: 1,
+      due_date: ''
+    });
+    setEditingTask(null);
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -120,11 +336,48 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
             <p className="text-gray-400">Project management & task tracking</p>
           </div>
           <div className="flex gap-3">
+            {/* Mode de vue */}
+            <div className="flex items-center bg-[#35414e] rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('kanban')}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  viewMode === 'kanban' 
+                    ? 'bg-[#9c68f2] text-white' 
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <BarChart3 className="w-4 h-4 mr-1 inline" />
+                Kanban
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  viewMode === 'list' 
+                    ? 'bg-[#9c68f2] text-white' 
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <List className="w-4 h-4 mr-1 inline" />
+                List
+              </button>
+              <button
+                onClick={() => setViewMode('calendar')}
+                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  viewMode === 'calendar' 
+                    ? 'bg-[#9c68f2] text-white' 
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <Calendar className="w-4 h-4 mr-1 inline" />
+                Calendar
+              </button>
+            </div>
+            
             <ModernButton onClick={() => setShowFilters(!showFilters)} size="sm">
               <Filter className="mr-2" size={16} />
               Filters
             </ModernButton>
-            <ModernButton size="sm">
+            <ModernButton onClick={() => setShowTaskModal(true)} size="sm">
               <Plus className="mr-2" size={16} />
               New Task
             </ModernButton>
@@ -254,121 +507,294 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
           </div>
         </ModernCard>
 
-        {/* Vue Kanban avec ModernCard */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* To Do */}
-          <ModernCard title="To Do">
-            <div className="space-y-4">
-              {filteredTasks.filter(t => t.status === 'todo').map(task => (
-                <div key={task.id} className="p-4 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] transition-colors">
-                  <div className="flex items-start justify-between mb-3">
-                    <h4 className="font-medium text-white">{task.title}</h4>
-                    <button className="text-gray-400 hover:text-white">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                  </div>
-                  
-                  {task.description && (
-                    <p className="text-sm text-gray-400 mb-3">{task.description}</p>
-                  )}
-                  
-                  <div className="flex items-center justify-between">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-                      <Flag className="w-3 h-3 mr-1" />
-                      {task.priority}
-                    </span>
-                    
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleStartTimer(task.id)}
-                        className="text-green-400 hover:text-green-300 p-1"
-                        title="Start timer"
-                      >
-                        <Play className="w-4 h-4" />
-                      </button>
-                      <button className="text-gray-400 hover:text-white p-1">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ModernCard>
+        {/* Contenu selon le mode de vue */}
+        {viewMode === 'kanban' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* To Do */}
+            <ModernCard title="To Do">
+              <div className="space-y-4">
+                {filteredTasks.filter(t => t.status === 'todo').map(task => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    onEdit={handleEditTask}
+                    onDelete={setShowDeleteConfirm}
+                    onStartTimer={handleStartTimer}
+                    onStatusChange={handleStatusChange}
+                    getPriorityColor={getPriorityColor}
+                  />
+                ))}
+              </div>
+            </ModernCard>
 
-          {/* In Progress */}
-          <ModernCard title="In Progress">
-            <div className="space-y-4">
-              {filteredTasks.filter(t => t.status === 'in_progress').map(task => (
-                <div key={task.id} className="p-4 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] transition-colors">
-                  <div className="flex items-start justify-between mb-3">
-                    <h4 className="font-medium text-white">{task.title}</h4>
-                    <button className="text-gray-400 hover:text-white">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                  </div>
-                  
-                  {task.description && (
-                    <p className="text-sm text-gray-400 mb-3">{task.description}</p>
-                  )}
-                  
-                  <div className="flex items-center justify-between">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-                      <Flag className="w-3 h-3 mr-1" />
-                      {task.priority}
-                    </span>
-                    
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleStartTimer(task.id)}
-                        className="text-green-400 hover:text-green-300 p-1"
-                        title="Start timer"
-                      >
-                        <Play className="w-4 h-4" />
-                      </button>
-                      <button className="text-gray-400 hover:text-white p-1">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ModernCard>
+            {/* In Progress */}
+            <ModernCard title="In Progress">
+              <div className="space-y-4">
+                {filteredTasks.filter(t => t.status === 'in_progress').map(task => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    onEdit={handleEditTask}
+                    onDelete={setShowDeleteConfirm}
+                    onStartTimer={handleStartTimer}
+                    onStatusChange={handleStatusChange}
+                    getPriorityColor={getPriorityColor}
+                  />
+                ))}
+              </div>
+            </ModernCard>
 
-          {/* Completed */}
-          <ModernCard title="Completed">
-            <div className="space-y-4">
-              {filteredTasks.filter(t => t.status === 'completed').map(task => (
-                <div key={task.id} className="p-4 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] transition-colors opacity-60">
-                  <div className="flex items-start justify-between mb-3">
-                    <h4 className="font-medium text-white line-through">{task.title}</h4>
-                    <button className="text-gray-400 hover:text-white">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                  </div>
-                  
-                  {task.description && (
-                    <p className="text-sm text-gray-400 mb-3 line-through">{task.description}</p>
-                  )}
-                  
-                  <div className="flex items-center justify-between">
+            {/* Completed */}
+            <ModernCard title="Completed">
+              <div className="space-y-4">
+                {filteredTasks.filter(t => t.status === 'completed').map(task => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    onEdit={handleEditTask}
+                    onDelete={setShowDeleteConfirm}
+                    onStartTimer={handleStartTimer}
+                    onStatusChange={handleStatusChange}
+                    getPriorityColor={getPriorityColor}
+                    completed={true}
+                  />
+                ))}
+              </div>
+            </ModernCard>
+          </div>
+        )}
+
+        {viewMode === 'list' && (
+          <ModernCard title="All Tasks">
+            <div className="space-y-3">
+              {filteredTasks.map(task => (
+                <div key={task.id} className="flex items-center justify-between p-4 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] transition-colors">
+                  <div className="flex items-center space-x-4 flex-1">
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => handleStatusChange(task.id, task.status === 'completed' ? 'todo' : 'completed')}
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                          task.status === 'completed' 
+                            ? 'bg-green-500 border-green-500 text-white' 
+                            : 'border-gray-400 hover:border-green-400'
+                        }`}
+                      >
+                        {task.status === 'completed' && <CheckCircle2 className="w-3 h-3" />}
+                      </button>
+                      
+                      <div className="flex-1">
+                        <h4 className={`font-medium text-white ${task.status === 'completed' ? 'line-through opacity-60' : ''}`}>
+                          {task.title}
+                        </h4>
+                        {task.description && (
+                          <p className={`text-sm text-gray-400 ${task.status === 'completed' ? 'line-through opacity-60' : ''}`}>
+                            {task.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
                       <Flag className="w-3 h-3 mr-1" />
                       {task.priority}
                     </span>
                     
-                    <div className="flex items-center space-x-2">
-                      <button className="text-gray-400 hover:text-white p-1">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
+                      {task.status.replace('_', ' ')}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handleStartTimer(task.id)}
+                      className="text-green-400 hover:text-green-300 p-1"
+                      title="Start timer"
+                    >
+                      <Play className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleEditTask(task)}
+                      className="text-gray-400 hover:text-white p-1"
+                      title="Edit task"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => setShowDeleteConfirm(task.id)}
+                      className="text-gray-400 hover:text-red-400 p-1"
+                      title="Delete task"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
           </ModernCard>
-        </div>
+        )}
+
+        {viewMode === 'calendar' && (
+          <ModernCard title="Calendar View">
+            <div className="text-center py-12">
+              <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">Calendar View</h3>
+              <p className="text-gray-400 mb-4">Calendar view will be implemented soon</p>
+              <ModernButton onClick={() => setViewMode('kanban')} variant="secondary">
+                Switch to Kanban
+              </ModernButton>
+            </div>
+          </ModernCard>
+        )}
+
+        {/* Modal de création/édition de tâche */}
+        {showTaskModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-[#1e2938] rounded-xl border border-[#35414e] w-full max-w-md">
+              <div className="flex items-center justify-between p-6 border-b border-[#35414e]">
+                <h3 className="text-xl font-semibold text-white">
+                  {editingTask ? 'Edit Task' : 'New Task'}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowTaskModal(false);
+                    resetTaskForm();
+                  }}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              <form onSubmit={handleTaskFormSubmit} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Task Title *
+                  </label>
+                  <input
+                    type="text"
+                    value={taskForm.title}
+                    onChange={(e) => setTaskForm({...taskForm, title: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg bg-[#35414e] border border-[#4a5568] text-white placeholder-gray-400 focus:border-[#9c68f2] focus:ring-1 focus:ring-[#9c68f2]"
+                    placeholder="Enter task title..."
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    value={taskForm.description}
+                    onChange={(e) => setTaskForm({...taskForm, description: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg bg-[#35414e] border border-[#4a5568] text-white placeholder-gray-400 focus:border-[#9c68f2] focus:ring-1 focus:ring-[#9c68f2]"
+                    placeholder="Enter task description..."
+                    rows={3}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Priority
+                    </label>
+                    <select
+                      value={taskForm.priority}
+                      onChange={(e) => setTaskForm({...taskForm, priority: e.target.value as any})}
+                      className="w-full px-3 py-2 rounded-lg bg-[#35414e] border border-[#4a5568] text-white focus:border-[#9c68f2] focus:ring-1 focus:ring-[#9c68f2]"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Estimated Hours
+                    </label>
+                    <input
+                      type="number"
+                      min="0.5"
+                      step="0.5"
+                      value={taskForm.estimated_hours}
+                      onChange={(e) => setTaskForm({...taskForm, estimated_hours: parseFloat(e.target.value)})}
+                      className="w-full px-3 py-2 rounded-lg bg-[#35414e] border border-[#4a5568] text-white placeholder-gray-400 focus:border-[#9c68f2] focus:ring-1 focus:ring-[#9c68f2]"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Due Date
+                  </label>
+                  <input
+                    type="date"
+                    value={taskForm.due_date}
+                    onChange={(e) => setTaskForm({...taskForm, due_date: e.target.value})}
+                    className="w-full px-3 py-2 rounded-lg bg-[#35414e] border border-[#4a5568] text-white focus:border-[#9c68f2] focus:ring-1 focus:ring-[#9c68f2]"
+                  />
+                </div>
+                
+                <div className="flex items-center justify-end space-x-3 pt-4">
+                  <ModernButton
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      setShowTaskModal(false);
+                      resetTaskForm();
+                    }}
+                  >
+                    Cancel
+                  </ModernButton>
+                  <ModernButton type="submit">
+                    <Save className="mr-2" size={16} />
+                    {editingTask ? 'Update Task' : 'Create Task'}
+                  </ModernButton>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de confirmation de suppression */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-[#1e2938] rounded-xl border border-[#35414e] w-full max-w-md">
+              <div className="p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                    <AlertCircle className="w-5 h-5 text-red-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Delete Task</h3>
+                    <p className="text-sm text-gray-400">This action cannot be undone</p>
+                  </div>
+                </div>
+                
+                <p className="text-gray-300 mb-6">
+                  Are you sure you want to delete this task? All associated time entries will also be removed.
+                </p>
+                
+                <div className="flex items-center justify-end space-x-3">
+                  <ModernButton
+                    variant="secondary"
+                    onClick={() => setShowDeleteConfirm(null)}
+                  >
+                    Cancel
+                  </ModernButton>
+                  <ModernButton
+                    variant="danger"
+                    onClick={() => handleDeleteTask(showDeleteConfirm)}
+                  >
+                    <Trash2 className="mr-2" size={16} />
+                    Delete Task
+                  </ModernButton>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
