@@ -86,13 +86,13 @@ const CalendarPageNew: React.FC = () => {
             description: task.description
           }));
 
-        // Convertir les commandes avec deadline en événements
+        // Convertir les commandes avec due_date en événements
         const orderEvents: Event[] = orders
-          .filter(order => order.deadline)
+          .filter(order => order.due_date)
           .map(order => ({
             id: `order-${order.id}`,
             title: `📦 ${order.title}`,
-            date: order.deadline!,
+            date: order.due_date!,
             time: '17:00', // Heure par défaut pour les deadlines
             type: 'deadline' as const,
             priority: 'high' as const, // Les deadlines de commandes sont importantes
@@ -497,9 +497,9 @@ const CalendarPageNew: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Orders with deadline</span>
+                  <span className="text-sm text-gray-400">Orders with due_date</span>
                   <span className="text-lg font-semibold text-white">
-                    {orders.filter(order => order.deadline).length}
+                    {orders.filter(order => order.due_date).length}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
