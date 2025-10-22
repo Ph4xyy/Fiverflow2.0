@@ -5,7 +5,8 @@ import { ConversationService } from '../services/conversationService';
 interface ConversationContextType {
   isConversationOpen: boolean;
   currentConversationId: string | null;
-  openConversation: (conversationId: string) => void;
+  currentFriendInfo: { name: string; username: string; avatar: string } | null;
+  openConversation: (conversationId: string, friendInfo?: { name: string; username: string; avatar: string }) => void;
   closeConversation: () => void;
   startConversationWithUser: (userId: string, userName: string, userUsername: string) => Promise<void>;
 }
@@ -28,15 +29,24 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({ chil
   const { user } = useAuth();
   const [isConversationOpen, setIsConversationOpen] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [currentFriendInfo, setCurrentFriendInfo] = useState<{
+    name: string;
+    username: string;
+    avatar: string;
+  } | null>(null);
 
-  const openConversation = useCallback((conversationId: string) => {
+  const openConversation = useCallback((conversationId: string, friendInfo?: { name: string; username: string; avatar: string }) => {
     setCurrentConversationId(conversationId);
+    if (friendInfo) {
+      setCurrentFriendInfo(friendInfo);
+    }
     setIsConversationOpen(true);
   }, []);
 
   const closeConversation = useCallback(() => {
     setIsConversationOpen(false);
     setCurrentConversationId(null);
+    setCurrentFriendInfo(null);
   }, []);
 
   const startConversationWithUser = useCallback(async (
@@ -71,7 +81,11 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({ chil
       console.log('🆕 Création d\'une nouvelle conversation...');
       const conversationId = await ConversationService.createDirectConversation(user.id, userId);
       console.log('✅ Conversation créée:', conversationId);
-      openConversation(conversationId);
+      openConversation(conversationId, {
+        name: userName,
+        username: userUsername,
+        avatar: '' // TODO: Récupérer l'avatar depuis le profil
+      });
       
     } catch (error) {
       console.error('❌ Erreur avec le système réel:', error);
@@ -80,13 +94,18 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({ chil
       // En cas d'erreur, créer une conversation de test qui fonctionne
       const testConversationId = `conversation-${user.id}-${userId}-${Date.now()}`;
       console.log('🧪 Conversation de test créée:', testConversationId);
-      openConversation(testConversationId);
+      openConversation(testConversationId, {
+        name: userName,
+        username: userUsername,
+        avatar: '' // TODO: Récupérer l'avatar depuis le profil
+      });
     }
   }, [user, openConversation]);
 
   const value: ConversationContextType = {
     isConversationOpen,
     currentConversationId,
+    currentFriendInfo,
     openConversation,
     closeConversation,
     startConversationWithUser
