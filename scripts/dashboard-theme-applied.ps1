@@ -25,3 +25,4 @@ Write-Host "- Layout: Same as dashboard layout" -ForegroundColor White
 Write-Host ""
 Write-Host "The workboard now perfectly matches the dashboard theme!" -ForegroundColor Green
 Write-Host "To test: npm run dev then http://localhost:5173/tasks" -ForegroundColor Yellow
+

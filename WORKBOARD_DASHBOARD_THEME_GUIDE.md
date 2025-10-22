@@ -82,3 +82,4 @@ Le workboard est maintenant :
 ---
 
 **Le workboard respecte maintenant parfaitement le thème du dashboard !** 🎉
+
