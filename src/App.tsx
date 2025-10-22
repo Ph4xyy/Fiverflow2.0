@@ -26,8 +26,7 @@ import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
 import LoadingDiagnostic from './components/LoadingDiagnostic';
 import SubscriptionGuard from './components/SubscriptionGuard';
-import NavigationWithConversation from './components/NavigationWithConversation';
-import { ConversationProvider } from './components/ConversationManager';
+import Layout from './components/Layout';
 
 // Hook pour le préchargement des données
 import { usePreloadData } from './hooks/usePreloadData';
@@ -80,10 +79,9 @@ function AppContent() {
   usePreloadData();
 
   return (
-    <ConversationProvider>
-      <NavigationWithConversation>
-        <Suspense fallback={null}>
-          <Routes>
+    <Layout>
+      <Suspense fallback={null}>
+        <Routes>
           {/* Redirection racine intelligente */}
           <Route path="/" element={<RootRedirect />} />
           
@@ -193,8 +191,7 @@ function AppContent() {
       
       {/* Diagnostic de chargement - visible avec Ctrl+Shift+L */}
       <LoadingDiagnostic />
-      </NavigationWithConversation>
-    </ConversationProvider>
+    </Layout>
   );
 }
 

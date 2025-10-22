@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
-import MessagingSystem from '../components/MessagingSystem';
 import ThemeSelector from '../components/ThemeSelector';
 import StatusSelector from '../components/StatusSelector';
 import ImageUpload from '../components/ImageUpload';
@@ -655,7 +654,6 @@ const ProfilePageNewClean: React.FC = () => {
                 <X size={20} className="text-gray-400" />
               </button>
             </div>
-            <MessagingSystem />
           </ModernCard>
         )}
 
