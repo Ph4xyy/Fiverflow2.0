@@ -384,9 +384,9 @@ export default function NetworkPage() {
             <div className="flex items-start space-x-3">
               <AlertCircle className="text-blue-400 mt-0.5 flex-shrink-0" size={20} />
               <div>
-                <h3 className="text-blue-300 font-medium">{'Demo Mode Active'}</h3>
-                <p className="text-blue-400 text-sm mt-1">
-                  {'We\'re showing demo data because we couldn\'t connect to the database. Your actual referral data will appear once the connection is restored.'}
+                <h3 className="text-red-300 font-medium">{'Database Connection Error'}</h3>
+                <p className="text-red-400 text-sm mt-1">
+                  {'Unable to connect to the database. Please check your configuration and try again.'}
                 </p>
                 <button
                   onClick={handleRetry}

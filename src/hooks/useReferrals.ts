@@ -35,31 +35,8 @@ interface UseReferralsReturn {
 }
 
 // Mock data for when Supabase is not configured
-const mockReferrals: ReferralData[] = [
-  {
-    id: '1',
-    referred_id: 'mock-referred-1',
-    subscription_status: 'paid',
-    created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    referred_user: { email: 'john.doe@example.com', name: 'John Doe' }
-  },
-  {
-    id: '2',
-    referred_id: 'mock-referred-2',
-    subscription_status: 'trial',
-    created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    referred_user: { email: 'jane.smith@example.com', name: 'Jane Smith' }
-  }
-];
-
-const mockReferralLogs: ReferralLog[] = [
-  {
-    id: '1',
-    amount_earned: 22.0,
-    date: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-    referred_user: { email: 'john.doe@example.com', name: 'John Doe' }
-  }
-];
+const mockReferrals: ReferralData[] = [];
+const mockReferralLogs: ReferralLog[] = [];
 
 export const useReferrals = (): UseReferralsReturn => {
   const { user } = useAuth();

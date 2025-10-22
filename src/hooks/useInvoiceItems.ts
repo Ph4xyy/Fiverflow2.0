@@ -45,31 +45,10 @@ export function useInvoiceItems(invoiceId?: string) {
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      // Demo data
-      const demo: InvoiceItem[] = [
-        {
-          id: `demo-item-1-${targetInvoiceId}`,
-          invoice_id: targetInvoiceId,
-          description: "Web Development",
-          quantity: 10,
-          unit_price: 75,
-          line_total: 750,
-          position: 1,
-          created_at: new Date().toISOString()
-        },
-        {
-          id: `demo-item-2-${targetInvoiceId}`,
-          invoice_id: targetInvoiceId,
-          description: "UI/UX Design",
-          quantity: 5,
-          unit_price: 100,
-          line_total: 500,
-          position: 2,
-          created_at: new Date().toISOString()
-        }
-      ];
-      setItems(demo);
+      console.error('Supabase not configured - cannot fetch invoice items');
+      setItems([]);
       setLoading(false);
+      setError('Database not configured');
       return;
     }
 

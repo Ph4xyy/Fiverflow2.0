@@ -56,16 +56,16 @@ export const usePlanLimits = (): UsePlanLimitsReturn => {
       return;
     }
 
-    // If Supabase is not configured, use mock data
+    // If Supabase is not configured, return empty limits
     if (!isSupabaseConfigured || !supabase) {
-      console.log('🎭 Using mock plan limits data');
+      console.error('Supabase not configured - cannot fetch plan limits');
       setLimits({
-        maxClients: 5,
-        maxOrdersPerMonth: 10,
-        currentClients: 2,
-        currentMonthOrders: 3,
-        canAddClient: true,
-        canAddOrder: true
+        maxClients: 0,
+        maxOrdersPerMonth: 0,
+        currentClients: 0,
+        currentMonthOrders: 0,
+        canAddClient: false,
+        canAddOrder: false
       });
       setLoading(false);
       return;

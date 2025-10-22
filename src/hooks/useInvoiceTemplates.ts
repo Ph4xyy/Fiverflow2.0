@@ -17,20 +17,10 @@ export function useInvoiceTemplates(userId?: string | null) {
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      const demo: InvoiceTemplate[] = [
-        {
-          id: "demo-1",
-          user_id: "demo",
-          name: "Minimal",
-          is_default: true,
-          schema: defaultSchema(),
-          variables: defaultSchema().variables || [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ];
-      setItems(demo);
+      console.error('Supabase not configured - cannot fetch invoice templates');
+      setItems([]);
       setLoading(false);
+      setError('Database not configured');
       return;
     }
 
@@ -63,21 +53,8 @@ export function useInvoiceTemplates(userId?: string | null) {
       const schema = defaultSchema();
 
       if (!isSupabaseConfigured || !supabase || !userId) {
-        const id = `demo-${Date.now()}`;
-        setItems((prev) => [
-          {
-            id,
-            user_id: "demo",
-            name,
-            is_default: prev.length === 0,
-            schema,
-            variables: schema.variables || [],
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          ...prev,
-        ]);
-        return { id };
+        console.error('Supabase not configured - cannot create invoice template');
+        throw new Error('Database not configured');
       }
 
       const { data, error } = await supabase
@@ -137,19 +114,8 @@ export function useInvoiceTemplates(userId?: string | null) {
       const copiedName = `${tpl.name} (copy)`;
 
       if (!isSupabaseConfigured || !supabase || !userId) {
-        const newId = `demo-${Date.now()}`;
-        setItems((prev) => [
-          {
-            ...tpl,
-            id: newId,
-            name: copiedName,
-            is_default: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          ...prev,
-        ]);
-        return;
+        console.error('Supabase not configured - cannot duplicate invoice template');
+        throw new Error('Database not configured');
       }
 
       const { error } = await supabase.from("invoice_templates").insert([

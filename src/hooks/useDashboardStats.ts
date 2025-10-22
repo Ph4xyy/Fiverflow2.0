@@ -68,47 +68,10 @@ export const useDashboardStats = () => {
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      // Mode démo avec des données fictives
-      const demoStats: DashboardStats = {
-        totalClients: 42,
-        newClientsThisMonth: 8,
-        clientsGrowth: 12,
-        totalOrders: 89,
-        ordersThisMonth: 15,
-        ordersGrowth: 5,
-        totalRevenue: 12456,
-        revenueThisMonth: 3200,
-        revenueGrowth: 8,
-        pendingRevenue: 2100,
-        completionRate: 78,
-        averageOrderValue: 140,
-        averageDeliveryTime: 5.2,
-        recentOrders: [
-          { id: '1', title: 'Website Redesign', client_name: 'Acme Corp', status: 'completed', created_at: new Date().toISOString() },
-          { id: '2', title: 'Mobile App', client_name: 'Tech Startup', status: 'in_progress', created_at: new Date(Date.now() - 86400000).toISOString() },
-          { id: '3', title: 'Logo Design', client_name: 'John Doe', status: 'pending', created_at: new Date(Date.now() - 172800000).toISOString() },
-        ],
-        monthlyRevenue: [
-          { month: 'Jan', revenue: 3200 },
-          { month: 'Feb', revenue: 2800 },
-          { month: 'Mar', revenue: 4100 },
-          { month: 'Apr', revenue: 3600 },
-          { month: 'May', revenue: 4800 },
-          { month: 'Jun', revenue: 5200 },
-        ],
-        ordersByStatus: [
-          { status: 'completed', count: 45 },
-          { status: 'in_progress', count: 23 },
-          { status: 'pending', count: 21 },
-        ],
-        topClients: [
-          { name: 'Acme Corp', revenue: 3200, orders: 8 },
-          { name: 'Tech Startup', revenue: 2800, orders: 6 },
-          { name: 'John Doe', revenue: 1500, orders: 3 },
-        ],
-      };
-      setStats(demoStats);
+      console.error('Supabase not configured - cannot fetch dashboard stats');
+      setStats(null);
       setLoading(false);
+      setError('Database not configured');
       return;
     }
 

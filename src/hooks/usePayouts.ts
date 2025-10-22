@@ -42,33 +42,8 @@ interface UsePayoutsReturn {
 }
 
 // Mock data for when Supabase is not configured
-const mockPayoutDetails: PayoutDetails = {
-  user_id: 'mock-user',
-  stripe_account_id: 'acct_mock123',
-  account_status: 'verified',
-  payout_enabled: true,
-  bank_account_last4: '4242',
-  bank_account_country: 'US',
-  minimum_payout_amount: 20.00,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString()
-};
-
-const mockPayoutRequests: PayoutRequest[] = [
-  {
-    id: '1',
-    user_id: 'mock-user',
-    amount_requested: 50.00,
-    amount_fee: 0.25,
-    amount_net: 49.75,
-    status: 'completed',
-    stripe_transfer_id: 'tr_mock123',
-    requested_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    processed_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-    failure_reason: null,
-    notes: null
-  }
-];
+const mockPayoutDetails: PayoutDetails | null = null;
+const mockPayoutRequests: PayoutRequest[] = [];
 
 export const usePayouts = (): UsePayoutsReturn => {
   const { user } = useAuth();
@@ -81,14 +56,14 @@ export const usePayouts = (): UsePayoutsReturn => {
   const fetchPayoutData = useCallback(async () => {
     console.log('💰 Fetching payout data...');
     
-    // If Supabase is not configured, use mock data
+    // If Supabase is not configured, return empty data
     if (!isSupabaseConfigured || !supabase) {
-      console.log('🎭 Using mock payout data');
-      setPayoutDetails(mockPayoutDetails);
-      setPayoutRequests(mockPayoutRequests);
-      setAvailableEarnings(125.50);
+      console.error('Supabase not configured - cannot fetch payout data');
+      setPayoutDetails(null);
+      setPayoutRequests([]);
+      setAvailableEarnings(0);
       setLoading(false);
-      setError(null);
+      setError('Database not configured');
       return;
     }
 

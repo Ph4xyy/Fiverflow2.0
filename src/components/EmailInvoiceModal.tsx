@@ -64,10 +64,8 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, 
       toast.loading("Envoi de l'email…", { id: toastId });
 
       if (!isSupabaseConfigured || !supabase) {
-        // DEMO: simuler
-        await new Promise((r) => setTimeout(r, 800));
-        toast.success("Email envoyé (demo)", { id: toastId });
-        onClose();
+        console.error('Supabase not configured - cannot send email');
+        toast.error('Database not configured', { id: toastId });
         return;
       }
 
