@@ -71,10 +71,10 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'text-red-600 bg-red-50 border-red-200';
-      case 'medium': return 'text-amber-600 bg-amber-50 border-amber-200';
-      case 'low': return 'text-green-600 bg-green-50 border-green-200';
-      default: return 'text-slate-600 bg-slate-50 border-slate-200';
+      case 'high': return 'text-red-400 bg-red-500/20 border-red-500/30';
+      case 'medium': return 'text-amber-400 bg-amber-500/20 border-amber-500/30';
+      case 'low': return 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30';
+      default: return 'text-slate-400 bg-slate-500/20 border-slate-500/30';
     }
   };
 
@@ -112,9 +112,9 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        {/* Header moderne */}
-        <div className="bg-white border-b border-slate-200 sticky top-0 z-40">
+      <div className="min-h-screen bg-gradient-to-br from-[#0B0E14] to-[#0F141C]">
+        {/* Header moderne avec thème sombre */}
+        <div className="bg-[#0F141C] border-b border-[#1C2230] sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center space-x-4">
@@ -122,15 +122,15 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                   <Target className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-900">Workboard</h1>
-                  <p className="text-sm text-slate-500">Project management & task tracking</p>
+                  <h1 className="text-2xl font-bold text-white">Workboard</h1>
+                  <p className="text-sm text-slate-400">Project management & task tracking</p>
                 </div>
               </div>
               
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="inline-flex items-center px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition-colors"
+                  className="inline-flex items-center px-3 py-2 border border-[#1C2230] rounded-lg text-sm font-medium text-slate-300 bg-[#111722] hover:bg-[#141B27] transition-colors"
                 >
                   <Filter className="w-4 h-4 mr-2" />
                   Filters
@@ -146,52 +146,52 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Statistiques modernes */}
+          {/* Statistiques modernes avec thème sombre */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-[#0F141C] rounded-xl p-6 border border-[#1C2230] shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Total Tasks</p>
-                  <p className="text-3xl font-bold text-slate-900">{totalTasks}</p>
+                  <p className="text-sm font-medium text-slate-400">Total Tasks</p>
+                  <p className="text-3xl font-bold text-white">{totalTasks}</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <BarChart3 className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="w-6 h-6 text-blue-400" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-[#0F141C] rounded-xl p-6 border border-[#1C2230] shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Completed</p>
-                  <p className="text-3xl font-bold text-emerald-600">{completedTasks}</p>
+                  <p className="text-sm font-medium text-slate-400">Completed</p>
+                  <p className="text-3xl font-bold text-emerald-400">{completedTasks}</p>
                 </div>
-                <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                <div className="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-[#0F141C] rounded-xl p-6 border border-[#1C2230] shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">In Progress</p>
-                  <p className="text-3xl font-bold text-blue-600">{inProgressTasks}</p>
+                  <p className="text-sm font-medium text-slate-400">In Progress</p>
+                  <p className="text-3xl font-bold text-blue-400">{inProgressTasks}</p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Activity className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                  <Activity className="w-6 h-6 text-blue-400" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-[#0F141C] rounded-xl p-6 border border-[#1C2230] shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Completion Rate</p>
-                  <p className="text-3xl font-bold text-purple-600">{completionRate.toFixed(0)}%</p>
+                  <p className="text-sm font-medium text-slate-400">Completion Rate</p>
+                  <p className="text-3xl font-bold text-purple-400">{completionRate.toFixed(0)}%</p>
                 </div>
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-purple-600" />
+                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-purple-400" />
                 </div>
               </div>
             </div>
@@ -221,8 +221,8 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
             </div>
           )}
 
-          {/* Barre de recherche et filtres */}
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm mb-8">
+          {/* Barre de recherche et filtres avec thème sombre */}
+          <div className="bg-[#0F141C] rounded-xl p-6 border border-[#1C2230] shadow-sm mb-8">
             <div className="flex items-center space-x-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -231,7 +231,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                   placeholder="Search tasks..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-[#1C2230] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#111722] text-white placeholder-slate-400"
                 />
               </div>
               
@@ -241,7 +241,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     filterStatus === 'all' 
                       ? 'bg-blue-600 text-white' 
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      : 'bg-[#111722] text-slate-300 hover:bg-[#141B27] border border-[#1C2230]'
                   }`}
                 >
                   All
@@ -251,7 +251,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     filterStatus === 'todo' 
                       ? 'bg-blue-600 text-white' 
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      : 'bg-[#111722] text-slate-300 hover:bg-[#141B27] border border-[#1C2230]'
                   }`}
                 >
                   To Do
@@ -261,7 +261,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     filterStatus === 'in_progress' 
                       ? 'bg-blue-600 text-white' 
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      : 'bg-[#111722] text-slate-300 hover:bg-[#141B27] border border-[#1C2230]'
                   }`}
                 >
                   In Progress
@@ -271,7 +271,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                   className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                     filterStatus === 'completed' 
                       ? 'bg-blue-600 text-white' 
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      : 'bg-[#111722] text-slate-300 hover:bg-[#141B27] border border-[#1C2230]'
                   }`}
                 >
                   Completed
@@ -280,30 +280,30 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
             </div>
           </div>
 
-          {/* Vue Kanban moderne */}
+          {/* Vue Kanban moderne avec thème sombre */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* To Do */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
-              <div className="p-6 border-b border-slate-200">
+            <div className="bg-[#0F141C] rounded-xl border border-[#1C2230] shadow-sm">
+              <div className="p-6 border-b border-[#1C2230]">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-slate-900">To Do</h3>
-                  <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm font-medium">
+                  <h3 className="text-lg font-semibold text-white">To Do</h3>
+                  <span className="bg-[#111722] text-slate-300 px-3 py-1 rounded-full text-sm font-medium border border-[#1C2230]">
                     {filteredTasks.filter(t => t.status === 'todo').length}
                   </span>
                 </div>
               </div>
               <div className="p-6 space-y-4">
                 {filteredTasks.filter(t => t.status === 'todo').map(task => (
-                  <div key={task.id} className="bg-slate-50 rounded-lg p-4 border border-slate-200 hover:shadow-md transition-shadow">
+                  <div key={task.id} className="bg-[#111722] rounded-lg p-4 border border-[#1C2230] hover:shadow-md transition-shadow hover:bg-[#141B27]">
                     <div className="flex items-start justify-between mb-3">
-                      <h4 className="font-medium text-slate-900">{task.title}</h4>
-                      <button className="text-slate-400 hover:text-slate-600">
+                      <h4 className="font-medium text-white">{task.title}</h4>
+                      <button className="text-slate-400 hover:text-slate-200">
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
                     </div>
                     
                     {task.description && (
-                      <p className="text-sm text-slate-600 mb-3">{task.description}</p>
+                      <p className="text-sm text-slate-400 mb-3">{task.description}</p>
                     )}
                     
                     <div className="flex items-center justify-between">
@@ -315,12 +315,12 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => handleStartTimer(task.id)}
-                          className="text-emerald-600 hover:text-emerald-700 p-1"
+                          className="text-emerald-400 hover:text-emerald-300 p-1"
                           title="Start timer"
                         >
                           <Play className="w-4 h-4" />
                         </button>
-                        <button className="text-slate-400 hover:text-slate-600 p-1">
+                        <button className="text-slate-400 hover:text-slate-200 p-1">
                           <Edit className="w-4 h-4" />
                         </button>
                       </div>
@@ -331,27 +331,27 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
             </div>
 
             {/* In Progress */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
-              <div className="p-6 border-b border-slate-200">
+            <div className="bg-[#0F141C] rounded-xl border border-[#1C2230] shadow-sm">
+              <div className="p-6 border-b border-[#1C2230]">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-slate-900">In Progress</h3>
-                  <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                  <h3 className="text-lg font-semibold text-white">In Progress</h3>
+                  <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm font-medium border border-blue-500/30">
                     {filteredTasks.filter(t => t.status === 'in_progress').length}
                   </span>
                 </div>
               </div>
               <div className="p-6 space-y-4">
                 {filteredTasks.filter(t => t.status === 'in_progress').map(task => (
-                  <div key={task.id} className="bg-blue-50 rounded-lg p-4 border border-blue-200 hover:shadow-md transition-shadow">
+                  <div key={task.id} className="bg-[#111722] rounded-lg p-4 border border-[#1C2230] hover:shadow-md transition-shadow hover:bg-[#141B27]">
                     <div className="flex items-start justify-between mb-3">
-                      <h4 className="font-medium text-slate-900">{task.title}</h4>
-                      <button className="text-slate-400 hover:text-slate-600">
+                      <h4 className="font-medium text-white">{task.title}</h4>
+                      <button className="text-slate-400 hover:text-slate-200">
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
                     </div>
                     
                     {task.description && (
-                      <p className="text-sm text-slate-600 mb-3">{task.description}</p>
+                      <p className="text-sm text-slate-400 mb-3">{task.description}</p>
                     )}
                     
                     <div className="flex items-center justify-between">
@@ -363,12 +363,12 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => handleStartTimer(task.id)}
-                          className="text-emerald-600 hover:text-emerald-700 p-1"
+                          className="text-emerald-400 hover:text-emerald-300 p-1"
                           title="Start timer"
                         >
                           <Play className="w-4 h-4" />
                         </button>
-                        <button className="text-slate-400 hover:text-slate-600 p-1">
+                        <button className="text-slate-400 hover:text-slate-200 p-1">
                           <Edit className="w-4 h-4" />
                         </button>
                       </div>
@@ -379,37 +379,37 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
             </div>
 
             {/* Completed */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
-              <div className="p-6 border-b border-slate-200">
+            <div className="bg-[#0F141C] rounded-xl border border-[#1C2230] shadow-sm">
+              <div className="p-6 border-b border-[#1C2230]">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-slate-900">Completed</h3>
-                  <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium">
+                  <h3 className="text-lg font-semibold text-white">Completed</h3>
+                  <span className="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-sm font-medium border border-emerald-500/30">
                     {filteredTasks.filter(t => t.status === 'completed').length}
                   </span>
                 </div>
               </div>
               <div className="p-6 space-y-4">
                 {filteredTasks.filter(t => t.status === 'completed').map(task => (
-                  <div key={task.id} className="bg-emerald-50 rounded-lg p-4 border border-emerald-200 hover:shadow-md transition-shadow">
+                  <div key={task.id} className="bg-[#111722] rounded-lg p-4 border border-[#1C2230] hover:shadow-md transition-shadow hover:bg-[#141B27]">
                     <div className="flex items-start justify-between mb-3">
-                      <h4 className="font-medium text-slate-900 line-through">{task.title}</h4>
-                      <button className="text-slate-400 hover:text-slate-600">
+                      <h4 className="font-medium text-white line-through opacity-60">{task.title}</h4>
+                      <button className="text-slate-400 hover:text-slate-200">
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
                     </div>
                     
                     {task.description && (
-                      <p className="text-sm text-slate-600 mb-3 line-through">{task.description}</p>
+                      <p className="text-sm text-slate-400 mb-3 line-through opacity-60">{task.description}</p>
                     )}
                     
                     <div className="flex items-center justify-between">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)} opacity-60`}>
                         <Flag className="w-3 h-3 mr-1" />
                         {task.priority}
                       </span>
                       
                       <div className="flex items-center space-x-2">
-                        <button className="text-slate-400 hover:text-slate-600 p-1">
+                        <button className="text-slate-400 hover:text-slate-200 p-1">
                           <Edit className="w-4 h-4" />
                         </button>
                       </div>
