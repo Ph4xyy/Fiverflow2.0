@@ -155,6 +155,22 @@ const CalendarPageNew: React.FC = () => {
           due_date: t.due_date,
           status: t.status
         })));
+        
+        // Si aucune tâche n'a de due_date, créer une tâche de test
+        if (tasks.length > 0 && taskEvents.length === 0) {
+          console.log('⚠️ No tasks with due_date found. Creating a test task...');
+          // Créer un événement de test pour vérifier que le calendrier fonctionne
+          const testEvent: Event = {
+            id: 'test-task',
+            title: '📋 Test Task (No due_date)',
+            date: new Date().toISOString().split('T')[0],
+            time: '10:00',
+            type: 'deadline',
+            priority: 'medium',
+            description: 'This is a test task to verify calendar functionality'
+          };
+          setEvents([testEvent]);
+        }
       } catch (error) {
         console.error('Error loading calendar data:', error);
       } finally {
@@ -354,6 +370,31 @@ const CalendarPageNew: React.FC = () => {
             <ModernButton size="sm">
               <Plus size={16} className="mr-2" />
               New Event
+            </ModernButton>
+            <ModernButton 
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                // Créer une tâche de test avec due_date
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                const testEvent: Event = {
+                  id: `test-task-${Date.now()}`,
+                  title: '📋 Test Task with Due Date',
+                  date: tomorrow.toISOString().split('T')[0],
+                  time: '14:00',
+                  type: 'deadline',
+                  priority: 'high',
+                  description: 'This is a test task created from calendar'
+                };
+                
+                setEvents(prev => [...prev, testEvent]);
+                console.log('✅ Test task created:', testEvent);
+              }}
+            >
+              Add Test Task
             </ModernButton>
           </div>
         </div>

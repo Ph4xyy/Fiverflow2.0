@@ -123,12 +123,16 @@ const DraggableTaskCard: React.FC<TaskCardProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      className={`p-4 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200 cursor-grab active:cursor-grabbing ${completed ? 'opacity-60' : ''} ${isDragging ? 'shadow-lg scale-105' : ''}`}
+      className={`p-4 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200 ${completed ? 'opacity-60' : ''} ${isDragging ? 'shadow-lg scale-105' : ''}`}
     >
       <div className="flex items-start justify-between mb-3">
-        <h4 className={`font-medium text-white ${completed ? 'line-through' : ''}`}>{task.title}</h4>
+        <div 
+          {...attributes}
+          {...listeners}
+          className="flex-1 cursor-grab active:cursor-grabbing pr-2"
+        >
+          <h4 className={`font-medium text-white ${completed ? 'line-through' : ''}`}>{task.title}</h4>
+        </div>
         <div className="flex items-center space-x-1">
           <button 
             onClick={(e) => {
@@ -479,7 +483,20 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
     // Vérifier si le statut a changé
     const task = tasks.find(t => t.id === taskId);
     if (task && task.status !== newStatus) {
-      await handleStatusChange(taskId, newStatus);
+      console.log('🔄 Changing task status:', { taskId, oldStatus: task.status, newStatus });
+      try {
+        const success = await updateTask(taskId, { status: newStatus });
+        if (success) {
+          toast.success(`Task moved to ${newStatus}`);
+          console.log('✅ Task status updated successfully');
+        } else {
+          toast.error('Failed to update task status');
+          console.error('❌ Failed to update task status');
+        }
+      } catch (error) {
+        console.error('❌ Error updating task status:', error);
+        toast.error('Failed to update task status');
+      }
     }
   };
 
