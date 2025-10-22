@@ -3,6 +3,7 @@ import Layout from './Layout';
 import ModernCard from './ModernCard';
 import ModernButton from './ModernButton';
 import { useTasks } from '../hooks/useTasks';
+import { useOrders } from '../hooks/useOrders';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   Plus, 
@@ -35,7 +36,9 @@ import {
   AlertCircle,
   ArrowRight,
   ArrowLeft,
-  List
+  List,
+  Archive,
+  RefreshCw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -47,6 +50,7 @@ interface TaskFormData {
   priority: 'low' | 'medium' | 'high';
   estimated_hours: number;
   due_date: string;
+  order_id?: string;
 }
 
 // Composant TaskCard pour éviter la duplication
@@ -73,33 +77,99 @@ const TaskCard: React.FC<TaskCardProps> = ({
     switch (task.status) {
       case 'pending':
         return (
-          <button
-            onClick={() => onStatusChange(task.id, 'in_progress')}
-            className="text-blue-400 hover:text-blue-300 p-1"
-            title="Move to In Progress"
-          >
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={() => onStatusChange(task.id, 'in_progress')}
+              className="text-blue-400 hover:text-blue-300 p-1"
+              title="Move to In Progress"
+            >
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onStatusChange(task.id, 'on_hold')}
+              className="text-yellow-400 hover:text-yellow-300 p-1"
+              title="Put on Hold"
+            >
+              <Pause className="w-4 h-4" />
+            </button>
+          </div>
         );
       case 'in_progress':
+        return (
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={() => onStatusChange(task.id, 'completed')}
+              className="text-green-400 hover:text-green-300 p-1"
+              title="Mark as completed"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onStatusChange(task.id, 'on_hold')}
+              className="text-yellow-400 hover:text-yellow-300 p-1"
+              title="Put on Hold"
+            >
+              <Pause className="w-4 h-4" />
+            </button>
+          </div>
+        );
+      case 'on_hold':
+        return (
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={() => onStatusChange(task.id, 'in_progress')}
+              className="text-blue-400 hover:text-blue-300 p-1"
+              title="Resume task"
+            >
+              <Play className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onStatusChange(task.id, 'cancelled')}
+              className="text-red-400 hover:text-red-300 p-1"
+              title="Cancel task"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        );
+      case 'completed':
+        return (
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={() => onStatusChange(task.id, 'in_progress')}
+              className="text-blue-400 hover:text-blue-300 p-1"
+              title="Reopen task"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onStatusChange(task.id, 'archived')}
+              className="text-gray-400 hover:text-gray-300 p-1"
+              title="Archive task"
+            >
+              <Archive className="w-4 h-4" />
+            </button>
+          </div>
+        );
+      case 'cancelled':
+        return (
+          <button
+            onClick={() => onStatusChange(task.id, 'pending')}
+            className="text-blue-400 hover:text-blue-300 p-1"
+            title="Restart task"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        );
+      case 'archived':
         return (
           <button
             onClick={() => onStatusChange(task.id, 'completed')}
             className="text-green-400 hover:text-green-300 p-1"
-            title="Mark as completed"
-          >
-            <CheckCircle2 className="w-4 h-4" />
-          </button>
-        );
-      case 'completed':
-        return (
-          <button
-            onClick={() => onStatusChange(task.id, 'in_progress')}
-            className="text-blue-400 hover:text-blue-300 p-1"
-            title="Reopen task"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
+              title="Unarchive task"
+            >
+              <Archive className="w-4 h-4" />
+            </button>
         );
       default:
         return null;
@@ -156,6 +226,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
 const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
   const { user } = useAuth();
   const { tasks, timeEntries, loading, activeTimer, startTimer, stopTimer, refetchTasks, createTask, updateTask, deleteTask } = useTasks();
+  const { orders, loading: ordersLoading } = useOrders();
   
   const [viewMode, setViewMode] = useState<'kanban' | 'list' | 'calendar'>('kanban');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -173,7 +244,8 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
     description: '',
     priority: 'medium',
     estimated_hours: 1,
-    due_date: ''
+    due_date: '',
+    order_id: ''
   });
 
   // Statistiques calculées
@@ -181,6 +253,9 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
   const completedTasks = tasks.filter(t => t.status === 'completed').length;
   const inProgressTasks = tasks.filter(t => t.status === 'in_progress').length;
   const pendingTasks = tasks.filter(t => t.status === 'pending').length;
+  const onHoldTasks = tasks.filter(t => t.status === 'on_hold').length;
+  const cancelledTasks = tasks.filter(t => t.status === 'cancelled').length;
+  const archivedTasks = tasks.filter(t => t.status === 'archived').length;
   const totalEstimatedHours = tasks.reduce((sum, t) => sum + (t.estimated_hours || 0), 0);
   const totalActualHours = tasks.reduce((sum, t) => sum + (t.actual_hours || 0), 0);
   const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
@@ -199,6 +274,9 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
       case 'pending': return 'bg-gray-100 text-gray-800 border-gray-200';
       case 'in_progress': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'completed': return 'bg-green-100 text-green-800 border-green-200';
+      case 'on_hold': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
+      case 'archived': return 'bg-gray-100 text-gray-600 border-gray-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -247,6 +325,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
         priority: taskForm.priority,
         estimated_hours: taskForm.estimated_hours,
         due_date: taskForm.due_date || null,
+        order_id: taskForm.order_id || null,
         status: 'pending' as const
       };
 
@@ -509,14 +588,35 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
               >
                 Completed
               </ModernButton>
+              <ModernButton
+                onClick={() => setFilterStatus('on_hold')}
+                variant={filterStatus === 'on_hold' ? 'primary' : 'secondary'}
+                size="sm"
+              >
+                On Hold
+              </ModernButton>
+              <ModernButton
+                onClick={() => setFilterStatus('cancelled')}
+                variant={filterStatus === 'cancelled' ? 'primary' : 'secondary'}
+                size="sm"
+              >
+                Cancelled
+              </ModernButton>
+              <ModernButton
+                onClick={() => setFilterStatus('archived')}
+                variant={filterStatus === 'archived' ? 'primary' : 'secondary'}
+                size="sm"
+              >
+                Archived
+              </ModernButton>
             </div>
           </div>
         </ModernCard>
 
         {/* Contenu selon le mode de vue */}
         {viewMode === 'kanban' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* To Do */}
+          <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
+            {/* Pending */}
             <ModernCard title="Pending">
               <div className="space-y-4">
                 {filteredTasks.filter(t => t.status === 'pending').map(task => (
@@ -550,10 +650,63 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
               </div>
             </ModernCard>
 
+            {/* On Hold */}
+            <ModernCard title="On Hold">
+              <div className="space-y-4">
+                {filteredTasks.filter(t => t.status === 'on_hold').map(task => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    onEdit={handleEditTask}
+                    onDelete={setShowDeleteConfirm}
+                    onStartTimer={handleStartTimer}
+                    onStatusChange={handleStatusChange}
+                    getPriorityColor={getPriorityColor}
+                  />
+                ))}
+              </div>
+            </ModernCard>
+
             {/* Completed */}
             <ModernCard title="Completed">
               <div className="space-y-4">
                 {filteredTasks.filter(t => t.status === 'completed').map(task => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    onEdit={handleEditTask}
+                    onDelete={setShowDeleteConfirm}
+                    onStartTimer={handleStartTimer}
+                    onStatusChange={handleStatusChange}
+                    getPriorityColor={getPriorityColor}
+                    completed={true}
+                  />
+                ))}
+              </div>
+            </ModernCard>
+
+            {/* Cancelled */}
+            <ModernCard title="Cancelled">
+              <div className="space-y-4">
+                {filteredTasks.filter(t => t.status === 'cancelled').map(task => (
+                  <TaskCard 
+                    key={task.id} 
+                    task={task} 
+                    onEdit={handleEditTask}
+                    onDelete={setShowDeleteConfirm}
+                    onStartTimer={handleStartTimer}
+                    onStatusChange={handleStatusChange}
+                    getPriorityColor={getPriorityColor}
+                    completed={true}
+                  />
+                ))}
+              </div>
+            </ModernCard>
+
+            {/* Archived */}
+            <ModernCard title="Archived">
+              <div className="space-y-4">
+                {filteredTasks.filter(t => t.status === 'archived').map(task => (
                   <TaskCard 
                     key={task.id} 
                     task={task} 
@@ -697,6 +850,24 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                     placeholder="Enter task description..."
                     rows={3}
                   />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Order (Optional)
+                  </label>
+                  <select
+                    value={taskForm.order_id || ''}
+                    onChange={(e) => setTaskForm({...taskForm, order_id: e.target.value || undefined})}
+                    className="w-full px-3 py-2 rounded-lg bg-[#35414e] border border-[#4a5568] text-white focus:border-[#9c68f2] focus:ring-1 focus:ring-[#9c68f2]"
+                  >
+                    <option value="">No Order</option>
+                    {orders.map(order => (
+                      <option key={order.id} value={order.id}>
+                        {order.title} - {order.budget ? `$${order.budget}` : 'No Budget'}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
