@@ -39,7 +39,6 @@ interface TaskRow {
   status: TaskStatus;
   priority: TaskPriority;
   due_date?: string | null; // yyyy-mm-dd
-  client_id?: UUID | null;
   order_id?: UUID | null;
   parent_id?: UUID | null;
   list_id?: UUID | null;
@@ -54,14 +53,12 @@ interface TaskRow {
   _loading?: boolean;
 }
 
-interface ClientLite { id: UUID; name: string }
 interface OrderLite { id: UUID; title: string }
 
 type ColumnKey =
   | 'task'
   | 'status'
   | 'priority'
-  | 'client'
   | 'order'
   | 'due'
   | 'comments'
@@ -81,7 +78,7 @@ const SELECT_BASE =
 const SELECT_CHEVRON = 'pointer-events-none absolute right-3 text-slate-400';
 
 const DEFAULT_COLUMNS: ColumnKey[] = [
-  'task', 'status', 'priority', 'client', 'order', 'due', 'comments', 'tags'
+  'task', 'status', 'priority', 'order', 'due', 'comments', 'tags'
 ];
 
 const COLOR_SWATCHES = [
@@ -149,7 +146,6 @@ const usePopover = () => {
 const TodoTable: React.FC = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [clients, setClients] = useState<ClientLite[]>([]);
   const [orders, setOrders] = useState<OrderLite[]>([]);
   const [rows, setRows] = useState<TaskRow[]>([]);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -202,12 +198,6 @@ const TodoTable: React.FC = () => {
     }
     setLoading(true);
     try {
-      const cPromise = supabase
-        .from('clients')
-        .select('id,name')
-          .eq('user_id', user.id)
-        .order('name', { ascending: true });
-
       let oRes = await supabase
         .from('orders')
         .select('id,title')
@@ -224,7 +214,7 @@ const TodoTable: React.FC = () => {
         .from('tasks')
         .select(`
           id, user_id, title, description, status, priority, due_date,
-          client_id, order_id, parent_id, list_id, comments_count,
+          order_id, parent_id, list_id, comments_count,
           color, labels, "position", collapsed
         `)
         .eq('user_id', user.id)
@@ -236,19 +226,15 @@ const TodoTable: React.FC = () => {
           .from('tasks')
           .select(`
             id, user_id, title, description, status, priority, due_date,
-            client_id, order_id, parent_id, list_id
+            order_id, parent_id, list_id
           `)
           .eq('user_id', user.id)
           .order('id', { ascending: true });
       }
 
-      const cRes = await cPromise;
-
-      if (cRes.error) throw cRes.error;
       if (oRes.error) throw oRes.error;
       if (tRes.error) throw tRes.error;
 
-      setClients(cRes.data || []);
       setOrders(oRes.data || []);
 
       const raw = (tRes.data || []) as TaskRow[];
@@ -631,25 +617,6 @@ const TodoTable: React.FC = () => {
     );
   };
 
-  const ClientCell: React.FC<{ t: TaskRow }> = ({ t: task }) => (
-    <div className="flex items-center gap-2">
-      <div className="shrink-0 p-2 rounded-2xl bg-[#111722] ring-1 ring-inset ring-[#20293C]">
-        <Building2 size={16} className="text-slate-300" />
-      </div>
-      <div className={SELECT_WRAPPER}>
-        <select
-          value={task.client_id || ''}
-          onChange={(e) => updateTask(task.id, { client_id: e.target.value || null })}
-          className={SELECT_BASE}
-          aria-label={'Client'}
-        >
-          <option value="">—</option>
-          {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
-        <ChevronDown size={16} className={SELECT_CHEVRON} />
-      </div>
-    </div>
-  );
 
   const OrderCell: React.FC<{ t: TaskRow }> = ({ t: task }) => (
     <div className="flex items-center gap-2">
@@ -881,7 +848,6 @@ const TodoTable: React.FC = () => {
                   {visibleCols.includes('task') && <th scope="col" className="px-4 py-3 w-[32%]">{'Task'}</th>}
                   {visibleCols.includes('status') && <th scope="col" className="px-4 py-3 w-[10%]">{'Status'}</th>}
                   {visibleCols.includes('priority') && <th scope="col" className="px-4 py-3 w-[10%]">{'Priority'}</th>}
-                  {visibleCols.includes('client') && <th scope="col" className="px-4 py-3 hidden md:table-cell md:w-[12%]">{'Client'}</th>}
                   {visibleCols.includes('order') && <th scope="col" className="px-4 py-3 hidden md:table-cell md:w-[12%]">{'Order'}</th>}
                   {visibleCols.includes('due') && <th scope="col" className="px-4 py-3 w-[10%]">{'Due'}</th>}
                   {visibleCols.includes('comments') && <th scope="col" className="px-4 py-3 hidden lg:table-cell lg:w-[6%]">{'Comments'}</th>}
@@ -908,7 +874,6 @@ const TodoTable: React.FC = () => {
                       )}
                       {visibleCols.includes('status') && <td className={`${CELL_BASE}`}><StatusCell t={taskRow} /></td>}
                       {visibleCols.includes('priority') && <td className={`${CELL_BASE}`}><PriorityCell t={taskRow} /></td>}
-                      {visibleCols.includes('client') && <td className={`${CELL_BASE} hidden md:table-cell`}><ClientCell t={taskRow} /></td>}
                       {visibleCols.includes('order') && <td className={`${CELL_BASE} hidden md:table-cell`}><OrderCell t={taskRow} /></td>}
                       {visibleCols.includes('due') && <td className={`${CELL_BASE}`}><DueCell t={taskRow} /></td>}
                       {visibleCols.includes('comments') && (
