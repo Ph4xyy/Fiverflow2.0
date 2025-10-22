@@ -98,16 +98,10 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({ chil
       
     } catch (error) {
       console.error('❌ Erreur avec le système réel:', error);
-      console.log('🔄 Basculement vers le mode test...');
+      console.log('🚨 Impossible de créer la conversation - base de données non déployée');
       
-      // En cas d'erreur, créer une conversation de test qui fonctionne
-      const testConversationId = `conversation-${user.id}-${userId}-${Date.now()}`;
-      console.log('🧪 Conversation de test créée:', testConversationId);
-      openConversation(testConversationId, {
-        name: userName,
-        username: userUsername,
-        avatar: ''
-      });
+      // Ne pas créer de conversation de test - forcer l'utilisateur à déployer la base
+      alert('Erreur: Le système de conversation n\'est pas déployé. Veuillez exécuter le script SQL dans Supabase.');
     }
   }, [user, openConversation]);
 
