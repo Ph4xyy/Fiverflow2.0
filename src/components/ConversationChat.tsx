@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Smile, Paperclip, MoreVertical, Phone, Video, Info } from 'lucide-react';
+import { Send, Smile, Paperclip, MoreVertical, Info } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -209,12 +209,6 @@ const ConversationChat: React.FC<ConversationChatProps> = ({
         </div>
         
         <div className="flex items-center gap-2">
-          <button className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
-            <Phone className="w-5 h-5 text-gray-400" />
-          </button>
-          <button className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
-            <Video className="w-5 h-5 text-gray-400" />
-          </button>
           <button className="p-2 hover:bg-gray-700 rounded-lg transition-colors">
             <Info className="w-5 h-5 text-gray-400" />
           </button>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MessageCircle, Search, Plus, Users, Settings, Bell, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { ConversationService } from '../services/conversationService';
 
 interface Conversation {
   id: string;
@@ -18,9 +19,10 @@ interface ConversationMenuProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectConversation?: (conversation: Conversation) => void;
+  useRealData?: boolean;
 }
 
-const ConversationMenu: React.FC<ConversationMenuProps> = ({ isOpen, onClose, onSelectConversation }) => {
+const ConversationMenu: React.FC<ConversationMenuProps> = ({ isOpen, onClose, onSelectConversation, useRealData = false }) => {
   const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,32 +41,37 @@ const ConversationMenu: React.FC<ConversationMenuProps> = ({ isOpen, onClose, on
     
     setLoading(true);
     try {
-      // Pour l'instant, utiliser des données de test
-      // TODO: Remplacer par les vraies données quand la DB sera créée
-      setConversations([
-        {
-          id: '1',
-          title: 'Conversation avec John Doe',
-          type: 'direct',
-          last_message_content: 'Salut ! Comment ça va ?',
-          last_message_at: new Date().toISOString(),
-          unread_count: 2,
-          other_participant_name: 'John Doe',
-          other_participant_username: 'johndoe',
-          other_participant_avatar: ''
-        },
-        {
-          id: '2',
-          title: 'Conversation avec Jane Smith',
-          type: 'direct',
-          last_message_content: 'Merci pour le projet !',
-          last_message_at: new Date(Date.now() - 3600000).toISOString(),
-          unread_count: 0,
-          other_participant_name: 'Jane Smith',
-          other_participant_username: 'janesmith',
-          other_participant_avatar: ''
-        }
-      ]);
+      if (useRealData) {
+        // Utiliser les vraies données
+        const { data } = await ConversationService.getUserConversations(user.id);
+        setConversations(data || []);
+      } else {
+        // Utiliser des données de test
+        setConversations([
+          {
+            id: '1',
+            title: 'Conversation avec John Doe',
+            type: 'direct',
+            last_message_content: 'Salut ! Comment ça va ?',
+            last_message_at: new Date().toISOString(),
+            unread_count: 2,
+            other_participant_name: 'John Doe',
+            other_participant_username: 'johndoe',
+            other_participant_avatar: ''
+          },
+          {
+            id: '2',
+            title: 'Conversation avec Jane Smith',
+            type: 'direct',
+            last_message_content: 'Merci pour le projet !',
+            last_message_at: new Date(Date.now() - 3600000).toISOString(),
+            unread_count: 0,
+            other_participant_name: 'Jane Smith',
+            other_participant_username: 'janesmith',
+            other_participant_avatar: ''
+          }
+        ]);
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des conversations:', error);
     } finally {
