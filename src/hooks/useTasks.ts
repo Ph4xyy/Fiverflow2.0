@@ -206,7 +206,26 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       if (error) throw error;
 
       toast.success('Task created successfully!');
-      await refetchTasks();
+      // Recharger les tâches
+      const { data: newTasksData, error: fetchError } = await supabase
+        .from('tasks')
+        .select(`
+          id, title, description, status, priority, due_date, created_at, updated_at,
+          order_id, estimated_hours, actual_hours, completed_at, user_id
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (!fetchError && newTasksData) {
+        const transformedTasks: Task[] = newTasksData.map(task => ({
+          ...task,
+          estimated_hours: task.estimated_hours || 0,
+          actual_hours: task.actual_hours || 0,
+          order: undefined
+        }));
+        setTasks(transformedTasks);
+      }
+      
       return true;
     } catch (error) {
       console.error('Error creating task:', error);
@@ -230,7 +249,26 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       if (error) throw error;
 
       toast.success('Task updated successfully!');
-      await refetchTasks();
+      // Recharger les tâches
+      const { data: newTasksData, error: fetchError } = await supabase
+        .from('tasks')
+        .select(`
+          id, title, description, status, priority, due_date, created_at, updated_at,
+          order_id, estimated_hours, actual_hours, completed_at, user_id
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (!fetchError && newTasksData) {
+        const transformedTasks: Task[] = newTasksData.map(task => ({
+          ...task,
+          estimated_hours: task.estimated_hours || 0,
+          actual_hours: task.actual_hours || 0,
+          order: undefined
+        }));
+        setTasks(transformedTasks);
+      }
+      
       return true;
     } catch (error) {
       console.error('Error updating task:', error);
