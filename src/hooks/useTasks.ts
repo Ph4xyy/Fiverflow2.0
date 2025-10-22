@@ -205,7 +205,7 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
           order_id: taskData.order_id || null,
           title: taskData.title,
           description: taskData.description || null,
-          status: taskData.status || 'todo',
+          status: taskData.status || 'pending',
           priority: taskData.priority || 'medium',
           estimated_hours: taskData.estimated_hours || 0,
           due_date: taskData.due_date || null

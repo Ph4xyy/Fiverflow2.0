@@ -71,7 +71,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
 }) => {
   const getStatusActions = () => {
     switch (task.status) {
-      case 'todo':
+      case 'pending':
         return (
           <button
             onClick={() => onStatusChange(task.id, 'in_progress')}
@@ -180,7 +180,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(t => t.status === 'completed').length;
   const inProgressTasks = tasks.filter(t => t.status === 'in_progress').length;
-  const todoTasks = tasks.filter(t => t.status === 'todo').length;
+  const pendingTasks = tasks.filter(t => t.status === 'pending').length;
   const totalEstimatedHours = tasks.reduce((sum, t) => sum + (t.estimated_hours || 0), 0);
   const totalActualHours = tasks.reduce((sum, t) => sum + (t.actual_hours || 0), 0);
   const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
@@ -196,7 +196,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'todo': return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'pending': return 'bg-gray-100 text-gray-800 border-gray-200';
       case 'in_progress': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'completed': return 'bg-green-100 text-green-800 border-green-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -247,7 +247,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
         priority: taskForm.priority,
         estimated_hours: taskForm.estimated_hours,
         due_date: taskForm.due_date || null,
-        status: 'todo' as const
+        status: 'pending' as const
       };
 
       if (editingTask) {
@@ -489,11 +489,11 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                 All
               </ModernButton>
               <ModernButton
-                onClick={() => setFilterStatus('todo')}
-                variant={filterStatus === 'todo' ? 'primary' : 'secondary'}
+                onClick={() => setFilterStatus('pending')}
+                variant={filterStatus === 'pending' ? 'primary' : 'secondary'}
                 size="sm"
               >
-                To Do
+                Pending
               </ModernButton>
               <ModernButton
                 onClick={() => setFilterStatus('in_progress')}
@@ -517,9 +517,9 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
         {viewMode === 'kanban' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* To Do */}
-            <ModernCard title="To Do">
+            <ModernCard title="Pending">
               <div className="space-y-4">
-                {filteredTasks.filter(t => t.status === 'todo').map(task => (
+                {filteredTasks.filter(t => t.status === 'pending').map(task => (
                   <TaskCard 
                     key={task.id} 
                     task={task} 
