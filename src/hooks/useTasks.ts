@@ -463,7 +463,7 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
 
   const refetchTasks = useCallback(async () => {
     await fetchTasks();
-  }, []);
+  }, [user, orderId]);
 
   useEffect(() => {
     fetchTasks();
