@@ -1,5 +1,5 @@
--- Migration pour créer la table calendar_events
--- Correction: utilisation de start_time et end_time au lieu de start et end (mots réservés)
+-- Script SQL corrigé pour créer la table calendar_events
+-- Le mot "end" est réservé en SQL, on utilise "end_time" à la place
 
 CREATE TABLE IF NOT EXISTS calendar_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -18,15 +18,15 @@ CREATE TABLE IF NOT EXISTS calendar_events (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Index pour améliorer les performances
+-- Créer les index pour les performances
 CREATE INDEX IF NOT EXISTS idx_calendar_events_user_id ON calendar_events(user_id);
 CREATE INDEX IF NOT EXISTS idx_calendar_events_start ON calendar_events(start_time);
 CREATE INDEX IF NOT EXISTS idx_calendar_events_related_task ON calendar_events(related_task_id);
 
--- RLS (Row Level Security)
+-- Activer RLS (Row Level Security)
 ALTER TABLE calendar_events ENABLE ROW LEVEL SECURITY;
 
--- Politiques de sécurité
+-- Créer les politiques de sécurité
 CREATE POLICY "Users can view own calendar events" ON calendar_events
   FOR SELECT USING (auth.uid() = user_id);
 
@@ -39,7 +39,7 @@ CREATE POLICY "Users can update own calendar events" ON calendar_events
 CREATE POLICY "Users can delete own calendar events" ON calendar_events
   FOR DELETE USING (auth.uid() = user_id);
 
--- Trigger pour updated_at
+-- Fonction pour mettre à jour updated_at
 CREATE OR REPLACE FUNCTION update_calendar_events_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -48,7 +48,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Trigger pour updated_at
 CREATE TRIGGER update_calendar_events_updated_at
   BEFORE UPDATE ON calendar_events
   FOR EACH ROW
   EXECUTE FUNCTION update_calendar_events_updated_at();
+
+-- Vérifier que la table a été créée
+SELECT 'Table calendar_events créée avec succès!' as message;

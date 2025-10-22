@@ -58,7 +58,7 @@ const CalendarPageNew: React.FC = () => {
           .from('calendar_events')
           .select('*')
           .eq('user_id', user.id)
-          .order('start', { ascending: true });
+          .order('start_time', { ascending: true });
 
         if (calendarError) {
           console.error('Error loading calendar events:', calendarError);
@@ -84,8 +84,8 @@ const CalendarPageNew: React.FC = () => {
         const calendarEventObjects: Event[] = (calendarData || []).map(event => ({
           id: `event-${event.id}`,
           title: event.title,
-          date: event.start.split('T')[0],
-          time: event.start.split('T')[1]?.substring(0, 5) || '09:00',
+          date: event.start_time.split('T')[0],
+          time: event.start_time.split('T')[1]?.substring(0, 5) || '09:00',
           type: event.type || 'meeting' as const,
           priority: event.priority || 'medium' as const,
           attendees: event.attendees || [],
