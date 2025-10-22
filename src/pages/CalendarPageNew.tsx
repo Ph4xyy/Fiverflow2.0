@@ -3,6 +3,9 @@ import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import SubscriptionManager from '../components/SubscriptionManager';
+import { useTasks } from '../hooks/useTasks';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import { 
   Calendar as CalendarIcon, 
   Plus, 
@@ -30,39 +33,74 @@ interface Event {
 }
 
 const CalendarPageNew: React.FC = () => {
+  const { user } = useAuth();
+  const { tasks, loading: tasksLoading } = useTasks();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [filterType, setFilterType] = useState<string>('');
   const [filterPriority, setFilterPriority] = useState<string>('');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-  const [events, setEvents] = useState<Event[]>([
-    {
-      id: '1',
-      title: 'Client meeting - Alpha Project',
-      date: '2024-01-15',
-      time: '14:00',
-      type: 'meeting',
-      attendees: ['Jean Dupont', 'Marie Martin'],
-      priority: 'high'
-    },
-    {
-      id: '2',
-      title: 'Deadline - Beta Delivery',
-      date: '2024-01-18',
-      time: '17:00',
-      type: 'deadline',
-      priority: 'urgent'
-    },
-    {
-      id: '3',
-      title: 'Reminder - Monthly billing',
-      date: '2024-01-20',
-      time: '09:00',
-      type: 'reminder',
-      priority: 'medium'
-    }
-  ]);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
+
+  // Charger les événements du calendrier depuis la base de données
+  useEffect(() => {
+    const loadCalendarEvents = async () => {
+      if (!isSupabaseConfigured || !supabase || !user) {
+        console.log('Supabase not configured or no user');
+        return;
+      }
+
+      try {
+        // Récupérer les événements du calendrier
+        const { data: calendarData, error: calendarError } = await supabase
+          .from('calendar_events')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('start', { ascending: true });
+
+        if (calendarError) {
+          console.error('Error loading calendar events:', calendarError);
+          return;
+        }
+
+        setCalendarEvents(calendarData || []);
+
+        // Convertir les tâches avec due_date en événements
+        const taskEvents: Event[] = tasks
+          .filter(task => task.due_date)
+          .map(task => ({
+            id: `task-${task.id}`,
+            title: task.title,
+            date: task.due_date!,
+            time: '09:00', // Heure par défaut
+            type: 'deadline' as const,
+            priority: task.priority as 'low' | 'medium' | 'high',
+            description: task.description
+          }));
+
+        // Convertir les événements du calendrier en format Event
+        const calendarEventObjects: Event[] = (calendarData || []).map(event => ({
+          id: `event-${event.id}`,
+          title: event.title,
+          date: event.start.split('T')[0],
+          time: event.start.split('T')[1]?.substring(0, 5) || '09:00',
+          type: event.type || 'meeting' as const,
+          priority: event.priority || 'medium' as const,
+          attendees: event.attendees || [],
+          location: event.location
+        }));
+
+        // Combiner tous les événements
+        setEvents([...taskEvents, ...calendarEventObjects]);
+      } catch (error) {
+        console.error('Error loading calendar data:', error);
+      }
+    };
+
+    loadCalendarEvents();
+  }, [user, tasks]);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
