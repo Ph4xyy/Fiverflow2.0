@@ -184,12 +184,20 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       return false;
     }
 
+    if (!user) {
+      toast.error('User not authenticated');
+      return false;
+    }
+
     if (!taskData.title) {
       toast.error('Title is required');
       return false;
     }
 
     try {
+      console.log('Creating task with data:', taskData);
+      console.log('User ID:', user.id);
+      
       const { error } = await supabase
         .from('tasks')
         .insert({
