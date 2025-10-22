@@ -22,7 +22,7 @@ BEGIN
         c.id,
         c.title,
         COALESCE(m.content, '') as last_message,
-        COALESCE(m.created_at, c.updated_at) as last_message_at,
+        COALESCE(m.message_created_at, c.updated_at) as last_message_at,
         COALESCE(up.full_name, 'Utilisateur') as other_participant_name,
         COALESCE(up.username, 'utilisateur') as other_participant_username,
         COALESCE(up.avatar_url, '') as other_participant_avatar,
@@ -34,7 +34,7 @@ BEGIN
         SELECT DISTINCT ON (conversation_id) 
             conversation_id, 
             content, 
-            created_at
+            created_at as message_created_at
         FROM messages 
         ORDER BY conversation_id, created_at DESC
     ) m ON c.id = m.conversation_id
@@ -45,7 +45,7 @@ BEGIN
         FROM conversation_participants
         WHERE user_id = user_id_param
     )
-    ORDER BY COALESCE(m.created_at, c.updated_at) DESC;
+    ORDER BY COALESCE(m.message_created_at, c.updated_at) DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
