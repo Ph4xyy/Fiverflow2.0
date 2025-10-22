@@ -206,14 +206,14 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       if (error) throw error;
 
       toast.success('Task created successfully!');
-      await fetchTasks();
+      await refetchTasks();
       return true;
     } catch (error) {
       console.error('Error creating task:', error);
       toast.error('Failed to create task');
       return false;
     }
-  }, [fetchTasks]);
+  }, [refetchTasks]);
 
   const updateTask = useCallback(async (taskId: string, updates: Partial<Task>): Promise<boolean> => {
     if (!isSupabaseConfigured || !supabase) {
@@ -230,14 +230,14 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       if (error) throw error;
 
       toast.success('Task updated successfully!');
-      await fetchTasks();
+      await refetchTasks();
       return true;
     } catch (error) {
       console.error('Error updating task:', error);
       toast.error('Failed to update task');
       return false;
     }
-  }, [fetchTasks]);
+  }, [refetchTasks]);
 
   const deleteTask = useCallback(async (taskId: string): Promise<boolean> => {
     if (!isSupabaseConfigured || !supabase) {

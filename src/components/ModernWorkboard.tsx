@@ -251,11 +251,17 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
       };
 
       if (editingTask) {
-        await updateTask(editingTask.id, taskData);
-        toast.success('Task updated successfully!');
+        const success = await updateTask(editingTask.id, taskData);
+        if (!success) {
+          toast.error('Failed to update task');
+          return;
+        }
       } else {
-        await createTask(taskData);
-        toast.success('Task created successfully!');
+        const success = await createTask(taskData);
+        if (!success) {
+          toast.error('Failed to create task');
+          return;
+        }
       }
 
       // Reset form
