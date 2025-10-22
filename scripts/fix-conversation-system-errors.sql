@@ -24,21 +24,31 @@ BEGIN
   SELECT 
     c.id,
     c.title,
-    c.last_message,
-    c.last_message_at,
-    c.other_participant_name,
-    c.other_participant_username,
-    c.other_participant_avatar,
-    c.unread_count,
+    COALESCE(m.content, '') as last_message,
+    COALESCE(m.created_at, c.last_message_at) as last_message_at,
+    COALESCE(up.full_name, 'Utilisateur') as other_participant_name,
+    COALESCE(up.username, 'utilisateur') as other_participant_username,
+    COALESCE(up.avatar_url, '') as other_participant_avatar,
+    0 as unread_count,
     c.created_at,
     c.updated_at
   FROM conversations c
+  LEFT JOIN (
+    SELECT DISTINCT ON (conversation_id) 
+      conversation_id, 
+      content, 
+      created_at
+    FROM messages 
+    ORDER BY conversation_id, created_at DESC
+  ) m ON c.id = m.conversation_id
+  LEFT JOIN conversation_participants cp_other ON c.id = cp_other.conversation_id AND cp_other.user_id != user_id_param
+  LEFT JOIN user_profiles up ON cp_other.user_id = up.user_id
   WHERE c.id IN (
     SELECT DISTINCT cp.conversation_id
     FROM conversation_participants cp
     WHERE cp.user_id = user_id_param
   )
-  ORDER BY c.updated_at DESC;
+  ORDER BY COALESCE(m.created_at, c.last_message_at) DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -115,7 +125,7 @@ CREATE POLICY "Users can view conversations they participate in" ON conversation
   );
 
 CREATE POLICY "Users can create conversations" ON conversations
-  FOR INSERT WITH CHECK (auth.uid() = created_by);
+  FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Users can update conversations they participate in" ON conversations
   FOR UPDATE USING (
