@@ -104,6 +104,7 @@ const ConversationSystem: React.FC<ConversationSystemProps> = ({ isOpen, onClose
           isOpen={isOpen}
           onClose={handleClose}
           onSelectConversation={handleSelectConversation}
+          useRealData={true}
         />
       )}
       

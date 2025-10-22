@@ -73,7 +73,11 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({ chil
 
       if (existingConversation) {
         console.log('✅ Conversation existante trouvée:', existingConversation.id);
-        openConversation(existingConversation.id);
+        openConversation(existingConversation.id, {
+          name: userName,
+          username: userUsername,
+          avatar: ''
+        });
         return;
       }
 
@@ -84,8 +88,13 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({ chil
       openConversation(conversationId, {
         name: userName,
         username: userUsername,
-        avatar: '' // TODO: Récupérer l'avatar depuis le profil
+        avatar: ''
       });
+      
+      // Déclencher un événement pour rafraîchir la liste des conversations
+      window.dispatchEvent(new CustomEvent('conversationCreated', { 
+        detail: { conversationId, userName, userUsername } 
+      }));
       
     } catch (error) {
       console.error('❌ Erreur avec le système réel:', error);
@@ -97,7 +106,7 @@ export const ConversationProvider: React.FC<ConversationProviderProps> = ({ chil
       openConversation(testConversationId, {
         name: userName,
         username: userUsername,
-        avatar: '' // TODO: Récupérer l'avatar depuis le profil
+        avatar: ''
       });
     }
   }, [user, openConversation]);

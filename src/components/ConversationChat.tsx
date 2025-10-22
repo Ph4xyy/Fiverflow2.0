@@ -64,33 +64,9 @@ const ConversationChat: React.FC<ConversationChatProps> = ({
         console.log('⚠️ Erreur avec les vrais messages, utilisation des données de test:', error);
       }
       
-      // Fallback vers les données de test
-      const mockMessages: Message[] = [
-        {
-          id: '1',
-          content: 'Salut ! Comment ça va ?',
-          sender_id: otherParticipant.username,
-          created_at: new Date(Date.now() - 3600000).toISOString(),
-          is_edited: false,
-          is_deleted: false,
-          sender_name: otherParticipant.name,
-          sender_username: otherParticipant.username,
-          sender_avatar: otherParticipant.avatar
-        },
-        {
-          id: '2',
-          content: 'Ça va bien, merci ! Et toi ?',
-          sender_id: 'me',
-          created_at: new Date(Date.now() - 1800000).toISOString(),
-          is_edited: false,
-          is_deleted: false,
-          sender_name: 'Moi',
-          sender_username: 'moi',
-          sender_avatar: ''
-        }
-      ];
-      
-      setMessages(mockMessages);
+      // Pas de messages par défaut - conversation vide
+      console.log('📭 Conversation vide - pas de messages par défaut');
+      setMessages([]);
     } catch (error) {
       console.error('Erreur lors du chargement des messages:', error);
     } finally {
@@ -145,21 +121,7 @@ const ConversationChat: React.FC<ConversationChatProps> = ({
       setMessages(prev => [...prev, tempMessage]);
       setNewMessage('');
       
-      // Simuler une réponse automatique après 2 secondes
-      setTimeout(() => {
-        const autoReply: Message = {
-          id: (Date.now() + 1).toString(),
-          content: 'Merci pour votre message ! Je vous répondrai bientôt.',
-          sender_id: otherParticipant.username,
-          created_at: new Date().toISOString(),
-          is_edited: false,
-          is_deleted: false,
-          sender_name: otherParticipant.name,
-          sender_username: otherParticipant.username,
-          sender_avatar: otherParticipant.avatar
-        };
-        setMessages(prev => [...prev, autoReply]);
-      }, 2000);
+      // Pas de réponse automatique - conversation réelle
       
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message:', error);
