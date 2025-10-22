@@ -38,9 +38,14 @@ import {
   ArrowLeft,
   List,
   Archive,
-  RefreshCw
+  RefreshCw,
+  ChevronDown
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, closestCenter } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface ModernWorkboardProps {}
 
@@ -73,6 +78,25 @@ const TaskCard: React.FC<TaskCardProps> = ({
   getPriorityColor,
   completed = false
 }) => {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+
+  const statusOptions = [
+    { value: 'pending', label: 'Pending', color: 'text-gray-400' },
+    { value: 'in_progress', label: 'In Progress', color: 'text-blue-400' },
+    { value: 'on_hold', label: 'On Hold', color: 'text-yellow-400' },
+    { value: 'completed', label: 'Completed', color: 'text-green-400' },
+    { value: 'cancelled', label: 'Cancelled', color: 'text-red-400' },
+    { value: 'archived', label: 'Archived', color: 'text-gray-500' }
+  ];
+
+  const getStatusLabel = (status: string) => {
+    return statusOptions.find(option => option.value === status)?.label || status;
+  };
+
+  const getStatusColor = (status: string) => {
+    return statusOptions.find(option => option.value === status)?.color || 'text-gray-400';
+  };
   const getStatusActions = () => {
     switch (task.status) {
       case 'pending':
@@ -182,6 +206,13 @@ const TaskCard: React.FC<TaskCardProps> = ({
         <h4 className={`font-medium text-white ${completed ? 'line-through' : ''}`}>{task.title}</h4>
         <div className="flex items-center space-x-1">
           <button 
+            onClick={() => setShowPreview(!showPreview)}
+            className="text-gray-400 hover:text-white p-1"
+            title="Preview task"
+          >
+            <Eye className="w-4 h-4" />
+          </button>
+          <button 
             onClick={() => onEdit(task)}
             className="text-gray-400 hover:text-white p-1"
             title="Edit task"
@@ -202,6 +233,33 @@ const TaskCard: React.FC<TaskCardProps> = ({
         <p className={`text-sm text-gray-400 mb-3 ${completed ? 'line-through' : ''}`}>{task.description}</p>
       )}
       
+      {showPreview && (
+        <div className="mb-3 p-3 bg-[#2a3441] rounded-lg">
+          <div className="text-sm text-gray-300 mb-2">
+            <strong>Description:</strong> {task.description || 'No description'}
+          </div>
+          <div className="text-sm text-gray-300 mb-2">
+            <strong>Priority:</strong> <span className={getPriorityColor(task.priority)}>{task.priority}</span>
+          </div>
+          <div className="text-sm text-gray-300 mb-2">
+            <strong>Status:</strong> <span className={getStatusColor(task.status)}>{getStatusLabel(task.status)}</span>
+          </div>
+          <div className="text-sm text-gray-300 mb-2">
+            <strong>Estimated Hours:</strong> {task.estimated_hours || 0}h
+          </div>
+          {task.due_date && (
+            <div className="text-sm text-gray-300 mb-2">
+              <strong>Due Date:</strong> {new Date(task.due_date).toLocaleDateString()}
+            </div>
+          )}
+          {task.order_id && (
+            <div className="text-sm text-gray-300">
+              <strong>Order:</strong> {task.order?.title || 'Unknown Order'}
+            </div>
+          )}
+        </div>
+      )}
+      
       <div className="flex items-center justify-between">
         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
           <Flag className="w-3 h-3 mr-1" />
@@ -216,6 +274,37 @@ const TaskCard: React.FC<TaskCardProps> = ({
           >
             <Play className="w-4 h-4" />
           </button>
+          
+          {/* Dropdown pour changer le statut */}
+          <div className="relative">
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="text-gray-400 hover:text-white p-1"
+              title="Change status"
+            >
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            
+            {showDropdown && (
+              <div className="absolute right-0 top-full mt-1 w-48 bg-[#1e2938] border border-[#35414e] rounded-lg shadow-lg z-50">
+                <div className="py-2">
+                  {statusOptions.map(option => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        onStatusChange(task.id, option.value);
+                        setShowDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-[#35414e] flex items-center gap-2 ${option.color}`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          
           {getStatusActions()}
         </div>
       </div>
@@ -237,6 +326,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   
   // État du formulaire de tâche
   const [taskForm, setTaskForm] = useState<TaskFormData>({
@@ -386,6 +476,26 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
       toast.success('Task status updated!');
     } catch (error) {
       toast.error('Failed to update task status');
+    }
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (!over) return;
+
+    const taskId = active.id as string;
+    const newStatus = over.id as string;
+
+    // Vérifier si le statut a changé
+    const task = tasks.find(t => t.id === taskId);
+    if (task && task.status !== newStatus) {
+      await handleStatusChange(taskId, newStatus);
     }
   };
 
@@ -615,112 +725,144 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
 
         {/* Contenu selon le mode de vue */}
         {viewMode === 'kanban' && (
-          <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
-            {/* Pending */}
-            <ModernCard title="Pending">
-              <div className="space-y-4">
-                {filteredTasks.filter(t => t.status === 'pending').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    onEdit={handleEditTask}
-                    onDelete={setShowDeleteConfirm}
-                    onStartTimer={handleStartTimer}
-                    onStatusChange={handleStatusChange}
-                    getPriorityColor={getPriorityColor}
-                  />
-                ))}
-              </div>
-            </ModernCard>
+          <DndContext
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
+              {/* Pending */}
+              <SortableContext id="pending" items={filteredTasks.filter(t => t.status === 'pending').map(t => t.id)} strategy={verticalListSortingStrategy}>
+                <ModernCard title="Pending">
+                  <div className="space-y-4">
+                    {filteredTasks.filter(t => t.status === 'pending').map(task => (
+                      <TaskCard 
+                        key={task.id} 
+                        task={task} 
+                        onEdit={handleEditTask}
+                        onDelete={setShowDeleteConfirm}
+                        onStartTimer={handleStartTimer}
+                        onStatusChange={handleStatusChange}
+                        getPriorityColor={getPriorityColor}
+                      />
+                    ))}
+                  </div>
+                </ModernCard>
+              </SortableContext>
 
-            {/* In Progress */}
-            <ModernCard title="In Progress">
-              <div className="space-y-4">
-                {filteredTasks.filter(t => t.status === 'in_progress').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    onEdit={handleEditTask}
-                    onDelete={setShowDeleteConfirm}
-                    onStartTimer={handleStartTimer}
-                    onStatusChange={handleStatusChange}
-                    getPriorityColor={getPriorityColor}
-                  />
-                ))}
-              </div>
-            </ModernCard>
+              {/* In Progress */}
+              <SortableContext id="in_progress" items={filteredTasks.filter(t => t.status === 'in_progress').map(t => t.id)} strategy={verticalListSortingStrategy}>
+                <ModernCard title="In Progress">
+                  <div className="space-y-4">
+                    {filteredTasks.filter(t => t.status === 'in_progress').map(task => (
+                      <TaskCard 
+                        key={task.id} 
+                        task={task} 
+                        onEdit={handleEditTask}
+                        onDelete={setShowDeleteConfirm}
+                        onStartTimer={handleStartTimer}
+                        onStatusChange={handleStatusChange}
+                        getPriorityColor={getPriorityColor}
+                      />
+                    ))}
+                  </div>
+                </ModernCard>
+              </SortableContext>
 
-            {/* On Hold */}
-            <ModernCard title="On Hold">
-              <div className="space-y-4">
-                {filteredTasks.filter(t => t.status === 'on_hold').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    onEdit={handleEditTask}
-                    onDelete={setShowDeleteConfirm}
-                    onStartTimer={handleStartTimer}
-                    onStatusChange={handleStatusChange}
-                    getPriorityColor={getPriorityColor}
-                  />
-                ))}
-              </div>
-            </ModernCard>
+              {/* On Hold */}
+              <SortableContext id="on_hold" items={filteredTasks.filter(t => t.status === 'on_hold').map(t => t.id)} strategy={verticalListSortingStrategy}>
+                <ModernCard title="On Hold">
+                  <div className="space-y-4">
+                    {filteredTasks.filter(t => t.status === 'on_hold').map(task => (
+                      <TaskCard 
+                        key={task.id} 
+                        task={task} 
+                        onEdit={handleEditTask}
+                        onDelete={setShowDeleteConfirm}
+                        onStartTimer={handleStartTimer}
+                        onStatusChange={handleStatusChange}
+                        getPriorityColor={getPriorityColor}
+                      />
+                    ))}
+                  </div>
+                </ModernCard>
+              </SortableContext>
 
-            {/* Completed */}
-            <ModernCard title="Completed">
-              <div className="space-y-4">
-                {filteredTasks.filter(t => t.status === 'completed').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    onEdit={handleEditTask}
-                    onDelete={setShowDeleteConfirm}
-                    onStartTimer={handleStartTimer}
-                    onStatusChange={handleStatusChange}
-                    getPriorityColor={getPriorityColor}
-                    completed={true}
-                  />
-                ))}
-              </div>
-            </ModernCard>
+              {/* Completed */}
+              <SortableContext id="completed" items={filteredTasks.filter(t => t.status === 'completed').map(t => t.id)} strategy={verticalListSortingStrategy}>
+                <ModernCard title="Completed">
+                  <div className="space-y-4">
+                    {filteredTasks.filter(t => t.status === 'completed').map(task => (
+                      <TaskCard 
+                        key={task.id} 
+                        task={task} 
+                        onEdit={handleEditTask}
+                        onDelete={setShowDeleteConfirm}
+                        onStartTimer={handleStartTimer}
+                        onStatusChange={handleStatusChange}
+                        getPriorityColor={getPriorityColor}
+                        completed={true}
+                      />
+                    ))}
+                  </div>
+                </ModernCard>
+              </SortableContext>
 
-            {/* Cancelled */}
-            <ModernCard title="Cancelled">
-              <div className="space-y-4">
-                {filteredTasks.filter(t => t.status === 'cancelled').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    onEdit={handleEditTask}
-                    onDelete={setShowDeleteConfirm}
-                    onStartTimer={handleStartTimer}
-                    onStatusChange={handleStatusChange}
-                    getPriorityColor={getPriorityColor}
-                    completed={true}
-                  />
-                ))}
-              </div>
-            </ModernCard>
+              {/* Cancelled */}
+              <SortableContext id="cancelled" items={filteredTasks.filter(t => t.status === 'cancelled').map(t => t.id)} strategy={verticalListSortingStrategy}>
+                <ModernCard title="Cancelled">
+                  <div className="space-y-4">
+                    {filteredTasks.filter(t => t.status === 'cancelled').map(task => (
+                      <TaskCard 
+                        key={task.id} 
+                        task={task} 
+                        onEdit={handleEditTask}
+                        onDelete={setShowDeleteConfirm}
+                        onStartTimer={handleStartTimer}
+                        onStatusChange={handleStatusChange}
+                        getPriorityColor={getPriorityColor}
+                        completed={true}
+                      />
+                    ))}
+                  </div>
+                </ModernCard>
+              </SortableContext>
 
-            {/* Archived */}
-            <ModernCard title="Archived">
-              <div className="space-y-4">
-                {filteredTasks.filter(t => t.status === 'archived').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    onEdit={handleEditTask}
-                    onDelete={setShowDeleteConfirm}
-                    onStartTimer={handleStartTimer}
-                    onStatusChange={handleStatusChange}
-                    getPriorityColor={getPriorityColor}
-                    completed={true}
-                  />
-                ))}
-              </div>
-            </ModernCard>
-          </div>
+              {/* Archived */}
+              <SortableContext id="archived" items={filteredTasks.filter(t => t.status === 'archived').map(t => t.id)} strategy={verticalListSortingStrategy}>
+                <ModernCard title="Archived">
+                  <div className="space-y-4">
+                    {filteredTasks.filter(t => t.status === 'archived').map(task => (
+                      <TaskCard 
+                        key={task.id} 
+                        task={task} 
+                        onEdit={handleEditTask}
+                        onDelete={setShowDeleteConfirm}
+                        onStartTimer={handleStartTimer}
+                        onStatusChange={handleStatusChange}
+                        getPriorityColor={getPriorityColor}
+                        completed={true}
+                      />
+                    ))}
+                  </div>
+                </ModernCard>
+              </SortableContext>
+            </div>
+            
+            <DragOverlay>
+              {activeId ? (
+                <TaskCard 
+                  task={tasks.find(t => t.id === activeId)!} 
+                  onEdit={handleEditTask}
+                  onDelete={setShowDeleteConfirm}
+                  onStartTimer={handleStartTimer}
+                  onStatusChange={handleStatusChange}
+                  getPriorityColor={getPriorityColor}
+                  isDragging={true}
+                />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         )}
 
         {viewMode === 'list' && (

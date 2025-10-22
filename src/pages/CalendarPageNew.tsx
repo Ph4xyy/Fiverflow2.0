@@ -76,28 +76,44 @@ const CalendarPageNew: React.FC = () => {
         // Convertir les tâches avec due_date en événements
         const taskEvents: Event[] = tasks
           .filter(task => task.due_date)
-          .map(task => ({
-            id: `task-${task.id}`,
-            title: `📋 ${task.title}`,
-            date: task.due_date!,
-            time: '09:00',
-            type: 'deadline' as const,
-            priority: task.priority as 'low' | 'medium' | 'high',
-            description: task.description
-          }));
+          .map(task => {
+            console.log('📋 Task with due_date:', {
+              id: task.id,
+              title: task.title,
+              due_date: task.due_date,
+              priority: task.priority
+            });
+            return {
+              id: `task-${task.id}`,
+              title: `📋 ${task.title}`,
+              date: task.due_date!,
+              time: '09:00',
+              type: 'deadline' as const,
+              priority: task.priority as 'low' | 'medium' | 'high',
+              description: task.description
+            };
+          });
 
         // Convertir les commandes avec due_date en événements
         const orderEvents: Event[] = orders
           .filter(order => order.due_date)
-          .map(order => ({
-            id: `order-${order.id}`,
-            title: `📦 ${order.title}`,
-            date: order.due_date!,
-            time: '17:00', // Heure par défaut pour les deadlines
-            type: 'deadline' as const,
-            priority: 'high' as const, // Les deadlines de commandes sont importantes
-            description: `Commande pour ${order.client?.name || 'Client'}`
-          }));
+          .map(order => {
+            console.log('📦 Order with due_date:', {
+              id: order.id,
+              title: order.title,
+              due_date: order.due_date,
+              budget: order.budget
+            });
+            return {
+              id: `order-${order.id}`,
+              title: `📦 ${order.title}`,
+              date: order.due_date!,
+              time: '17:00', // Heure par défaut pour les deadlines
+              type: 'deadline' as const,
+              priority: 'high' as const, // Les deadlines de commandes sont importantes
+              description: `Commande pour ${order.client?.name || 'Client'}`
+            };
+          });
 
         // Convertir les événements du calendrier en format Event
         const calendarEventObjects: Event[] = (calendarData || []).map(event => ({
@@ -168,7 +184,18 @@ const CalendarPageNew: React.FC = () => {
 
   const getEventsForDate = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
-    let filteredEvents = events.filter(event => event.date === dateStr);
+    console.log('🔍 Looking for events on date:', dateStr);
+    
+    let filteredEvents = events.filter(event => {
+      console.log('📅 Checking event:', {
+        id: event.id,
+        title: event.title,
+        eventDate: event.date,
+        targetDate: dateStr,
+        matches: event.date === dateStr
+      });
+      return event.date === dateStr;
+    });
     
     // Apply filters
     if (filterType) {
@@ -178,6 +205,7 @@ const CalendarPageNew: React.FC = () => {
       filteredEvents = filteredEvents.filter(event => event.priority === filterPriority);
     }
     
+    console.log('✅ Found events for', dateStr, ':', filteredEvents.length);
     return filteredEvents;
   };
 
