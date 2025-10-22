@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import Layout, { cardClass } from '../components/Layout';
+import Layout from './Layout';
+import ModernCard from './ModernCard';
+import ModernButton from './ModernButton';
 import { useTasks } from '../hooks/useTasks';
 import { useAuth } from '../contexts/AuthContext';
 import { 
@@ -62,19 +64,19 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'todo': return 'bg-slate-100 text-slate-800 border-slate-200';
+      case 'todo': return 'bg-gray-100 text-gray-800 border-gray-200';
       case 'in_progress': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'completed': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-      default: return 'bg-slate-100 text-slate-800 border-slate-200';
+      case 'completed': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'text-red-400 bg-red-500/20 border-red-500/30';
-      case 'medium': return 'text-amber-400 bg-amber-500/20 border-amber-500/30';
-      case 'low': return 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30';
-      default: return 'text-slate-400 bg-slate-500/20 border-slate-500/30';
+      case 'medium': return 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30';
+      case 'low': return 'text-green-400 bg-green-500/20 border-green-500/30';
+      default: return 'text-gray-400 bg-gray-500/20 border-gray-500/30';
     }
   };
 
@@ -100,11 +102,9 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-slate-600">Loading workboard...</p>
-          </div>
+        <div className="p-6 flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#9c68f2]" />
+          <p className="ml-3 text-gray-400">Loading workboard...</p>
         </div>
       </Layout>
     );
@@ -112,313 +112,262 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-[#0B0E14] to-[#0F141C]">
-        {/* Header moderne avec thème sombre */}
-        <div className="bg-[#0F141C] border-b border-[#1C2230] sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                  <Target className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-white">Workboard</h1>
-                  <p className="text-sm text-slate-400">Project management & task tracking</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="inline-flex items-center px-3 py-2 border border-[#1C2230] rounded-lg text-sm font-medium text-slate-300 bg-[#111722] hover:bg-[#141B27] transition-colors"
-                >
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filters
-                </button>
-                
-                <button className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl">
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Task
-                </button>
-              </div>
-            </div>
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Workboard</h1>
+            <p className="text-gray-400">Project management & task tracking</p>
+          </div>
+          <div className="flex gap-3">
+            <ModernButton onClick={() => setShowFilters(!showFilters)} size="sm">
+              <Filter className="mr-2" size={16} />
+              Filters
+            </ModernButton>
+            <ModernButton size="sm">
+              <Plus className="mr-2" size={16} />
+              New Task
+            </ModernButton>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Statistiques modernes avec thème sombre */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-[#0F141C] rounded-xl p-6 border border-[#1C2230] shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-400">Total Tasks</p>
-                  <p className="text-3xl font-bold text-white">{totalTasks}</p>
-                </div>
-                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                  <BarChart3 className="w-6 h-6 text-blue-400" />
-                </div>
+        {/* Statistiques avec ModernCard */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <ModernCard title="Total Tasks">
+            <div className="relative">
+              <div className="text-3xl font-bold text-white mb-2">{totalTasks}</div>
+              <div className="flex items-center text-sm text-gray-400">
+                <BarChart3 size={16} className="mr-1" />
+                All tasks
+              </div>
+              <div className="absolute top-0 right-0 opacity-50">
+                <BarChart3 size={20} className="text-gray-400" />
               </div>
             </div>
+          </ModernCard>
 
-            <div className="bg-[#0F141C] rounded-xl p-6 border border-[#1C2230] shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-400">Completed</p>
-                  <p className="text-3xl font-bold text-emerald-400">{completedTasks}</p>
-                </div>
-                <div className="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-400" />
-                </div>
+          <ModernCard title="Completed">
+            <div className="relative">
+              <div className="text-3xl font-bold text-white mb-2">{completedTasks}</div>
+              <div className="flex items-center text-sm text-green-400">
+                <CheckCircle2 size={16} className="mr-1" />
+                {completionRate.toFixed(0)}% completion rate
+              </div>
+              <div className="absolute top-0 right-0 opacity-50">
+                <CheckCircle2 size={20} className="text-gray-400" />
               </div>
             </div>
+          </ModernCard>
 
-            <div className="bg-[#0F141C] rounded-xl p-6 border border-[#1C2230] shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-400">In Progress</p>
-                  <p className="text-3xl font-bold text-blue-400">{inProgressTasks}</p>
-                </div>
-                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                  <Activity className="w-6 h-6 text-blue-400" />
-                </div>
+          <ModernCard title="In Progress">
+            <div className="relative">
+              <div className="text-3xl font-bold text-white mb-2">{inProgressTasks}</div>
+              <div className="flex items-center text-sm text-blue-400">
+                <Activity size={16} className="mr-1" />
+                Active tasks
+              </div>
+              <div className="absolute top-0 right-0 opacity-50">
+                <Activity size={20} className="text-gray-400" />
               </div>
             </div>
+          </ModernCard>
 
-            <div className="bg-[#0F141C] rounded-xl p-6 border border-[#1C2230] shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between">
+          <ModernCard title="Time Tracking">
+            <div className="relative">
+              <div className="text-3xl font-bold text-white mb-2">{formatDuration(totalActualHours)}</div>
+              <div className="flex items-center text-sm text-purple-400">
+                <Timer size={16} className="mr-1" />
+                Total tracked
+              </div>
+              <div className="absolute top-0 right-0 opacity-50">
+                <Timer size={20} className="text-gray-400" />
+              </div>
+            </div>
+          </ModernCard>
+        </div>
+
+        {/* Timer actif */}
+        {activeTimer && (
+          <ModernCard gradient>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
                 <div>
-                  <p className="text-sm font-medium text-slate-400">Completion Rate</p>
-                  <p className="text-3xl font-bold text-purple-400">{completionRate.toFixed(0)}%</p>
-                </div>
-                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-purple-400" />
+                  <p className="font-semibold text-white">Timer Active</p>
+                  <p className="text-sm text-white/80">
+                    {activeTimer.task ? `Task: ${activeTimer.task.title}` : 'General work'}
+                  </p>
                 </div>
               </div>
+              <ModernButton onClick={handleStopTimer} variant="secondary">
+                <Pause className="mr-2" size={16} />
+                Stop Timer
+              </ModernButton>
+            </div>
+          </ModernCard>
+        )}
+
+        {/* Barre de recherche et filtres */}
+        <ModernCard>
+          <div className="flex items-center space-x-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search tasks..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-[#35414e] rounded-lg focus:ring-2 focus:ring-[#9c68f2] focus:border-transparent bg-[#1e2938] text-white placeholder-gray-400"
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <ModernButton
+                onClick={() => setFilterStatus('all')}
+                variant={filterStatus === 'all' ? 'primary' : 'secondary'}
+                size="sm"
+              >
+                All
+              </ModernButton>
+              <ModernButton
+                onClick={() => setFilterStatus('todo')}
+                variant={filterStatus === 'todo' ? 'primary' : 'secondary'}
+                size="sm"
+              >
+                To Do
+              </ModernButton>
+              <ModernButton
+                onClick={() => setFilterStatus('in_progress')}
+                variant={filterStatus === 'in_progress' ? 'primary' : 'secondary'}
+                size="sm"
+              >
+                In Progress
+              </ModernButton>
+              <ModernButton
+                onClick={() => setFilterStatus('completed')}
+                variant={filterStatus === 'completed' ? 'primary' : 'secondary'}
+                size="sm"
+              >
+                Completed
+              </ModernButton>
             </div>
           </div>
+        </ModernCard>
 
-          {/* Timer actif */}
-          {activeTimer && (
-            <div className="bg-gradient-to-r from-emerald-500 to-blue-600 rounded-xl p-6 mb-8 text-white">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
-                  <div>
-                    <p className="font-semibold">Timer Active</p>
-                    <p className="text-sm opacity-90">
-                      {activeTimer.task ? `Task: ${activeTimer.task.title}` : 'General work'}
-                    </p>
+        {/* Vue Kanban avec ModernCard */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* To Do */}
+          <ModernCard title="To Do">
+            <div className="space-y-4">
+              {filteredTasks.filter(t => t.status === 'todo').map(task => (
+                <div key={task.id} className="p-4 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] transition-colors">
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-medium text-white">{task.title}</h4>
+                    <button className="text-gray-400 hover:text-white">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </button>
                   </div>
-                </div>
-                <button
-                  onClick={handleStopTimer}
-                  className="inline-flex items-center px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-                >
-                  <Pause className="w-4 h-4 mr-2" />
-                  Stop Timer
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Barre de recherche et filtres avec thème sombre */}
-          <div className="bg-[#0F141C] rounded-xl p-6 border border-[#1C2230] shadow-sm mb-8">
-            <div className="flex items-center space-x-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search tasks..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-[#1C2230] rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-[#111722] text-white placeholder-slate-400"
-                />
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setFilterStatus('all')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    filterStatus === 'all' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-[#111722] text-slate-300 hover:bg-[#141B27] border border-[#1C2230]'
-                  }`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setFilterStatus('todo')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    filterStatus === 'todo' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-[#111722] text-slate-300 hover:bg-[#141B27] border border-[#1C2230]'
-                  }`}
-                >
-                  To Do
-                </button>
-                <button
-                  onClick={() => setFilterStatus('in_progress')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    filterStatus === 'in_progress' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-[#111722] text-slate-300 hover:bg-[#141B27] border border-[#1C2230]'
-                  }`}
-                >
-                  In Progress
-                </button>
-                <button
-                  onClick={() => setFilterStatus('completed')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    filterStatus === 'completed' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-[#111722] text-slate-300 hover:bg-[#141B27] border border-[#1C2230]'
-                  }`}
-                >
-                  Completed
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Vue Kanban moderne avec thème sombre */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* To Do */}
-            <div className="bg-[#0F141C] rounded-xl border border-[#1C2230] shadow-sm">
-              <div className="p-6 border-b border-[#1C2230]">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">To Do</h3>
-                  <span className="bg-[#111722] text-slate-300 px-3 py-1 rounded-full text-sm font-medium border border-[#1C2230]">
-                    {filteredTasks.filter(t => t.status === 'todo').length}
-                  </span>
-                </div>
-              </div>
-              <div className="p-6 space-y-4">
-                {filteredTasks.filter(t => t.status === 'todo').map(task => (
-                  <div key={task.id} className="bg-[#111722] rounded-lg p-4 border border-[#1C2230] hover:shadow-md transition-shadow hover:bg-[#141B27]">
-                    <div className="flex items-start justify-between mb-3">
-                      <h4 className="font-medium text-white">{task.title}</h4>
-                      <button className="text-slate-400 hover:text-slate-200">
-                        <MoreHorizontal className="w-4 h-4" />
+                  
+                  {task.description && (
+                    <p className="text-sm text-gray-400 mb-3">{task.description}</p>
+                  )}
+                  
+                  <div className="flex items-center justify-between">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+                      <Flag className="w-3 h-3 mr-1" />
+                      {task.priority}
+                    </span>
+                    
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleStartTimer(task.id)}
+                        className="text-green-400 hover:text-green-300 p-1"
+                        title="Start timer"
+                      >
+                        <Play className="w-4 h-4" />
+                      </button>
+                      <button className="text-gray-400 hover:text-white p-1">
+                        <Edit className="w-4 h-4" />
                       </button>
                     </div>
-                    
-                    {task.description && (
-                      <p className="text-sm text-slate-400 mb-3">{task.description}</p>
-                    )}
-                    
-                    <div className="flex items-center justify-between">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-                        <Flag className="w-3 h-3 mr-1" />
-                        {task.priority}
-                      </span>
-                      
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleStartTimer(task.id)}
-                          className="text-emerald-400 hover:text-emerald-300 p-1"
-                          title="Start timer"
-                        >
-                          <Play className="w-4 h-4" />
-                        </button>
-                        <button className="text-slate-400 hover:text-slate-200 p-1">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* In Progress */}
-            <div className="bg-[#0F141C] rounded-xl border border-[#1C2230] shadow-sm">
-              <div className="p-6 border-b border-[#1C2230]">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">In Progress</h3>
-                  <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm font-medium border border-blue-500/30">
-                    {filteredTasks.filter(t => t.status === 'in_progress').length}
-                  </span>
                 </div>
-              </div>
-              <div className="p-6 space-y-4">
-                {filteredTasks.filter(t => t.status === 'in_progress').map(task => (
-                  <div key={task.id} className="bg-[#111722] rounded-lg p-4 border border-[#1C2230] hover:shadow-md transition-shadow hover:bg-[#141B27]">
-                    <div className="flex items-start justify-between mb-3">
-                      <h4 className="font-medium text-white">{task.title}</h4>
-                      <button className="text-slate-400 hover:text-slate-200">
-                        <MoreHorizontal className="w-4 h-4" />
+              ))}
+            </div>
+          </ModernCard>
+
+          {/* In Progress */}
+          <ModernCard title="In Progress">
+            <div className="space-y-4">
+              {filteredTasks.filter(t => t.status === 'in_progress').map(task => (
+                <div key={task.id} className="p-4 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] transition-colors">
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-medium text-white">{task.title}</h4>
+                    <button className="text-gray-400 hover:text-white">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  {task.description && (
+                    <p className="text-sm text-gray-400 mb-3">{task.description}</p>
+                  )}
+                  
+                  <div className="flex items-center justify-between">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+                      <Flag className="w-3 h-3 mr-1" />
+                      {task.priority}
+                    </span>
+                    
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleStartTimer(task.id)}
+                        className="text-green-400 hover:text-green-300 p-1"
+                        title="Start timer"
+                      >
+                        <Play className="w-4 h-4" />
+                      </button>
+                      <button className="text-gray-400 hover:text-white p-1">
+                        <Edit className="w-4 h-4" />
                       </button>
                     </div>
-                    
-                    {task.description && (
-                      <p className="text-sm text-slate-400 mb-3">{task.description}</p>
-                    )}
-                    
-                    <div className="flex items-center justify-between">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-                        <Flag className="w-3 h-3 mr-1" />
-                        {task.priority}
-                      </span>
-                      
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleStartTimer(task.id)}
-                          className="text-emerald-400 hover:text-emerald-300 p-1"
-                          title="Start timer"
-                        >
-                          <Play className="w-4 h-4" />
-                        </button>
-                        <button className="text-slate-400 hover:text-slate-200 p-1">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Completed */}
-            <div className="bg-[#0F141C] rounded-xl border border-[#1C2230] shadow-sm">
-              <div className="p-6 border-b border-[#1C2230]">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">Completed</h3>
-                  <span className="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-sm font-medium border border-emerald-500/30">
-                    {filteredTasks.filter(t => t.status === 'completed').length}
-                  </span>
                 </div>
-              </div>
-              <div className="p-6 space-y-4">
-                {filteredTasks.filter(t => t.status === 'completed').map(task => (
-                  <div key={task.id} className="bg-[#111722] rounded-lg p-4 border border-[#1C2230] hover:shadow-md transition-shadow hover:bg-[#141B27]">
-                    <div className="flex items-start justify-between mb-3">
-                      <h4 className="font-medium text-white line-through opacity-60">{task.title}</h4>
-                      <button className="text-slate-400 hover:text-slate-200">
-                        <MoreHorizontal className="w-4 h-4" />
+              ))}
+            </div>
+          </ModernCard>
+
+          {/* Completed */}
+          <ModernCard title="Completed">
+            <div className="space-y-4">
+              {filteredTasks.filter(t => t.status === 'completed').map(task => (
+                <div key={task.id} className="p-4 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] transition-colors opacity-60">
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-medium text-white line-through">{task.title}</h4>
+                    <button className="text-gray-400 hover:text-white">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  {task.description && (
+                    <p className="text-sm text-gray-400 mb-3 line-through">{task.description}</p>
+                  )}
+                  
+                  <div className="flex items-center justify-between">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+                      <Flag className="w-3 h-3 mr-1" />
+                      {task.priority}
+                    </span>
+                    
+                    <div className="flex items-center space-x-2">
+                      <button className="text-gray-400 hover:text-white p-1">
+                        <Edit className="w-4 h-4" />
                       </button>
                     </div>
-                    
-                    {task.description && (
-                      <p className="text-sm text-slate-400 mb-3 line-through opacity-60">{task.description}</p>
-                    )}
-                    
-                    <div className="flex items-center justify-between">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)} opacity-60`}>
-                        <Flag className="w-3 h-3 mr-1" />
-                        {task.priority}
-                      </span>
-                      
-                      <div className="flex items-center space-x-2">
-                        <button className="text-slate-400 hover:text-slate-200 p-1">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          </div>
+          </ModernCard>
         </div>
       </div>
     </Layout>
