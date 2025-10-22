@@ -101,15 +101,12 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       setLoading(true);
       setError(null);
 
-      // Construire la requête pour les tâches
+      // Construire la requête pour les tâches (version compatible)
       let tasksQuery = supabase
         .from('tasks')
         .select(`
-          *,
-          orders(
-            title,
-            clients(name, user_id)
-          )
+          id, title, description, status, priority, due_date, created_at, updated_at,
+          order_id, estimated_hours, actual_hours, completed_at, user_id
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
@@ -123,15 +120,12 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
 
       if (tasksError) throw tasksError;
 
-      // Transformer les données des tâches
+      // Transformer les données des tâches (version compatible)
       const transformedTasks: Task[] = tasksData?.map(task => ({
         ...task,
-        order: task.orders ? {
-          title: (task.orders as any).title,
-          client: {
-            name: (task.orders as any).clients.name
-          }
-        } : undefined
+        estimated_hours: task.estimated_hours || 0,
+        actual_hours: task.actual_hours || 0,
+        order: undefined // Sera chargé séparément si nécessaire
       })) || [];
 
       // Récupérer les entrées de temps
