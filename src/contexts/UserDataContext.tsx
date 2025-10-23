@@ -1,40 +1,34 @@
-// 🔥 AUTHENTIFICATION SUPPRIMÉE - UserDataContext simplifié
+/**
+ * UserDataContext - ALIAS DE COMPATIBILITÉ vers le nouveau GlobalAuthProvider
+ * 
+ * Ce fichier maintient la compatibilité avec l'ancien système
+ * en redirigeant vers le nouveau GlobalAuthProvider
+ */
 
-import React, { createContext, useContext } from 'react';
-
-interface UserDataContextType {
-  role: 'admin' | 'user' | null;
-  loading: boolean;
-  refreshUserRole: () => Promise<void>;
-}
-
-const UserDataContext = createContext<UserDataContextType | undefined>(undefined);
+import React from 'react';
+import { useGlobalAuth } from './GlobalAuthProvider';
 
 /**
- * 🔥 AUTHENTIFICATION SUPPRIMÉE - UserDataProvider simplifié
- * Plus d'authentification, rôle par défaut
+ * UserDataProvider - ALIAS DE COMPATIBILITÉ
+ * Redirige vers le nouveau GlobalAuthProvider
  */
 export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // 🔥 AUTHENTIFICATION SUPPRIMÉE - Valeurs par défaut
-  const contextValue: UserDataContextType = {
-    role: 'user', // Rôle par défaut
-    loading: false, // Plus de loading
-    refreshUserRole: async () => {
-      console.log('🔄 UserDataContext: refreshUserRole disabled - auth system removed');
-    }
-  };
-
-  return (
-    <UserDataContext.Provider value={contextValue}>
-      {children}
-    </UserDataContext.Provider>
-  );
+  // Ce provider est maintenant un alias vers GlobalAuthProvider
+  // Il est maintenu pour la compatibilité mais ne fait rien
+  // car GlobalAuthProvider est déjà utilisé dans App.tsx
+  return <>{children}</>;
 };
 
-export const useUserData = (): UserDataContextType => {
-  const context = useContext(UserDataContext);
-  if (!context) {
-    throw new Error('useUserData must be used within a UserDataProvider');
-  }
-  return context;
+/**
+ * useUserData - ALIAS DE COMPATIBILITÉ
+ * Redirige vers le nouveau useGlobalAuth
+ */
+export const useUserData = () => {
+  const { isAdmin, profileLoading, refreshUserData } = useGlobalAuth();
+  
+  return {
+    role: isAdmin ? 'admin' : 'user',
+    loading: profileLoading,
+    refreshUserRole: refreshUserData,
+  };
 };
