@@ -36,11 +36,9 @@ import RootRedirect from './components/RootRedirect';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardExample from './pages/DashboardExample';
-import ProtectedRoute from './components/ProtectedRoute';
 import CalendarPageNew from './pages/CalendarPageNew';
 import PricingPageNew from './pages/PricingPageNew';
 import WorkboardPage from './pages/TasksPage';
-import ProfilePageNew from './pages/ProfilePageNew';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import ProfileRedirect from './pages/ProfileRedirect';
 import ProfileUsername from './pages/ProfileUsername';
@@ -153,6 +151,7 @@ function AppContent() {
           <Route path="/upgrade" element={<InstantProtectedRoute><UpgradePageNew /></InstantProtectedRoute>} />
           <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
           <Route path="/referrals" element={<InstantProtectedRoute><ReferralsPage /></InstantProtectedRoute>} />
+
 
           {/* Administration */}
           <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />

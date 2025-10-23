@@ -7,6 +7,7 @@ import StatusSelector from '../components/StatusSelector';
 import ImageUpload from '../components/ImageUpload';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 import { ProfileService, ProfileData, PrivacySettings } from '../services/profileService';
 import { ProjectsService, Project as UserProject } from '../services/projectsService';
 import { SkillsService, Skill as UserSkill } from '../services/skillsService';
@@ -20,7 +21,6 @@ import {
   Calendar, 
   Users, 
   Star, 
-  MessageSquare, 
   Share2, 
   Plus,
   Globe,
@@ -61,10 +61,10 @@ interface Achievement {
 
 const ProfilePageNewClean: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'activity'>('overview');
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
-  const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const [isOwnProfile] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -213,6 +213,7 @@ const ProfilePageNewClean: React.FC = () => {
     }
   };
 
+
   if (isLoading) {
     return (
       <Layout>
@@ -354,14 +355,6 @@ const ProfilePageNewClean: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <ModernButton 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setIsMessagingOpen(!isMessagingOpen)}
-                      >
-                        <MessageSquare size={16} className="mr-2" />
-                        Message
-                      </ModernButton>
                       <ModernButton size="sm">
                         <Share2 size={16} className="mr-2" />
                         Suivre
