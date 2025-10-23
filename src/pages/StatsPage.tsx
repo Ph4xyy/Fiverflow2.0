@@ -348,8 +348,15 @@ const StatsPage: React.FC = () => {
                   <XAxis dataKey="date" tick={{ fill: COLORS.txtMuted, fontSize: 12 }} />
                   <YAxis tick={{ fill: COLORS.txtMuted, fontSize: 12 }} />
                   <Tooltip
-                    contentStyle={{ background: COLORS.bgCard, border: `1px solid ${COLORS.ring}`, color: COLORS.txt }}
-                    labelStyle={{ color: COLORS.txtMuted }}
+                    contentStyle={{ 
+                      background: '#1e2938', 
+                      border: '1px solid #35414e', 
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                    }}
+                    labelStyle={{ color: '#94a3b8', fontSize: '12px' }}
+                    itemStyle={{ color: '#ffffff', fontSize: '14px' }}
                   />
                   <Line type="monotone" dataKey="revenue" stroke={COLORS.sky} strokeWidth={2} dot={false} />
                 </LineChart>
@@ -369,8 +376,15 @@ const StatsPage: React.FC = () => {
                   <XAxis dataKey="date" tick={{ fill: COLORS.txtMuted, fontSize: 12 }} />
                   <YAxis tick={{ fill: COLORS.txtMuted, fontSize: 12 }} />
                   <Tooltip
-                    contentStyle={{ background: COLORS.bgCard, border: `1px solid ${COLORS.ring}`, color: COLORS.txt }}
-                    labelStyle={{ color: COLORS.txtMuted }}
+                    contentStyle={{ 
+                      background: '#1e2938', 
+                      border: '1px solid #35414e', 
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                    }}
+                    labelStyle={{ color: '#94a3b8', fontSize: '12px' }}
+                    itemStyle={{ color: '#ffffff', fontSize: '14px' }}
                   />
                   <Area type="monotone" dataKey="cumulative" stroke={COLORS.green} fill="#16a34a20" strokeWidth={2} />
                 </AreaChart>
@@ -390,8 +404,15 @@ const StatsPage: React.FC = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip
-                    contentStyle={{ background: COLORS.bgCard, border: `1px solid ${COLORS.ring}`, color: COLORS.txt }}
-                    labelStyle={{ color: COLORS.txtMuted }}
+                    contentStyle={{ 
+                      background: '#1e2938', 
+                      border: '1px solid #35414e', 
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                    }}
+                    labelStyle={{ color: '#94a3b8', fontSize: '12px' }}
+                    itemStyle={{ color: '#ffffff', fontSize: '14px' }}
                   />
                   <Legend verticalAlign="bottom" height={24} wrapperStyle={{ color: COLORS.txtMuted, fontSize: 12 }} />
                   <Pie
@@ -424,8 +445,15 @@ const StatsPage: React.FC = () => {
                   <XAxis dataKey="date" tick={{ fill: COLORS.txtMuted, fontSize: 12 }} />
                   <YAxis tick={{ fill: COLORS.txtMuted, fontSize: 12 }} />
                   <Tooltip
-                    contentStyle={{ background: COLORS.bgCard, border: `1px solid ${COLORS.ring}`, color: COLORS.txt }}
-                    labelStyle={{ color: COLORS.txtMuted }}
+                    contentStyle={{ 
+                      background: '#1e2938', 
+                      border: '1px solid #35414e', 
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                    }}
+                    labelStyle={{ color: '#94a3b8', fontSize: '12px' }}
+                    itemStyle={{ color: '#ffffff', fontSize: '14px' }}
                   />
                   {allStatuses.map((s, idx) => {
                     const c =
@@ -435,6 +463,139 @@ const StatsPage: React.FC = () => {
                   })}
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* ADDITIONAL STATISTICS ROW */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          {/* Client Growth Trend */}
+          <div className={`${cardClass} p-4`}>
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="text-blue-400" size={18} />
+              <h2 className="text-lg font-semibold text-white">{'Client Growth Trend'}</h2>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">New Clients This Month</span>
+                <span className="text-lg font-bold text-white">{stats?.totalClients || 0}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Growth Rate</span>
+                <span className="text-lg font-bold text-emerald-400">+{stats?.clientsGrowth || 0}%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Retention Rate</span>
+                <span className="text-lg font-bold text-blue-400">{completionRate}%</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Order Performance */}
+          <div className={`${cardClass} p-4`}>
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="text-purple-400" size={18} />
+              <h2 className="text-lg font-semibold text-white">{'Order Performance'}</h2>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Total Orders</span>
+                <span className="text-lg font-bold text-white">{orderVolume}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Avg. Order Value</span>
+                <span className="text-lg font-bold text-purple-400">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(averageOrderValue)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Pending Orders</span>
+                <span className="text-lg font-bold text-amber-400">{pendingOrdersCount}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Revenue Breakdown */}
+          <div className={`${cardClass} p-4`}>
+            <div className="flex items-center gap-2 mb-3">
+              <DollarSign className="text-green-400" size={18} />
+              <h2 className="text-lg font-semibold text-white">{'Revenue Breakdown'}</h2>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Total Revenue</span>
+                <span className="text-lg font-bold text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(totalRevenue)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Pending Revenue</span>
+                <span className="text-lg font-bold text-amber-400">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(pendingRevenue)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Revenue Growth</span>
+                <span className="text-lg font-bold text-emerald-400">+{stats?.revenueGrowth || 0}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* PERFORMANCE METRICS ROW */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          {/* Delivery Performance */}
+          <div className={`${cardClass} p-4`}>
+            <div className="flex items-center gap-2 mb-3">
+              <Clock className="text-orange-400" size={18} />
+              <h2 className="text-lg font-semibold text-white">{'Delivery Performance'}</h2>
+            </div>
+            <div className="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadialBarChart
+                  innerRadius="60%"
+                  outerRadius="90%"
+                  data={[{ name: 'Avg Delivery', value: averageDeliveryTime }]}
+                  startAngle={180}
+                  endAngle={0}
+                >
+                  <RadialBar dataKey="value" fill="#f59e0b" cornerRadius={8} />
+                  <Legend
+                    content={() => (
+                      <div className="text-center mt-2 text-slate-300">
+                        <span className="text-2xl font-bold text-white">{averageDeliveryTime.toFixed(1)}</span>
+                        <div className="text-xs text-slate-400">Days Average</div>
+                      </div>
+                    )}
+                  />
+                </RadialBarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Order Status Distribution */}
+          <div className={`${cardClass} p-4`}>
+            <div className="flex items-center gap-2 mb-3">
+              <BarChart3 className="text-indigo-400" size={18} />
+              <h2 className="text-lg font-semibold text-white">{'Order Status Distribution'}</h2>
+            </div>
+            <div className="space-y-3">
+              {pieData.map((status, index) => {
+                const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+                const total = pieData.reduce((sum, item) => sum + item.value, 0);
+                const percentage = total > 0 ? Math.round((status.value / total) * 100) : 0;
+                return (
+                  <div key={index} className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-4 h-4 rounded-full" 
+                        style={{ backgroundColor: colors[index % colors.length] }}
+                      />
+                      <span className="text-sm text-slate-300 capitalize">{status.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-white">{status.value}</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-slate-700 text-slate-300">
+                        {percentage}%
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

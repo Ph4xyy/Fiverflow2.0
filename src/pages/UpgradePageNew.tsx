@@ -89,7 +89,7 @@ const UpgradePageNew: React.FC = () => {
       id: 'boost',
       name: 'Boost',
       subtitle: 'For active freelancers',
-      price: isYearly ? '240' : '24',
+      price: isYearly ? '240' : '22',
       period: isYearly ? 'year' : 'month',
       description: 'Increase your productivity with advanced tools and more capacity.',
       features: [
@@ -134,7 +134,7 @@ const UpgradePageNew: React.FC = () => {
       id: 'scale',
       name: 'Scale',
       subtitle: 'For businesses',
-      price: isYearly ? '590' : '59',
+      price: isYearly ? '390' : '39',
       period: isYearly ? 'year' : 'month',
       description: 'The complete solution to scale your business to new heights.',
       features: [

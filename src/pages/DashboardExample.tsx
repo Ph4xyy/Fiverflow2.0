@@ -213,18 +213,32 @@ const DashboardExample: React.FC = () => {
         >
           <div className="h-64 flex items-center justify-center">
             <div className="w-full">
-              <div className="grid grid-cols-6 gap-2 h-full">
+              <div className="grid grid-cols-6 gap-3 h-full">
                 {stats.monthlyRevenue.map((month, index) => {
                   const maxRevenue = Math.max(...stats.monthlyRevenue.map(m => m.revenue));
                   const height = maxRevenue > 0 ? (month.revenue / maxRevenue) * 100 : 0;
+                  const isHighest = month.revenue === maxRevenue;
                   return (
-                    <div key={index} className="flex flex-col justify-end">
-                      <div 
-                        className="bg-gradient-to-t from-blue-500 to-blue-400 rounded-t"
-                        style={{ height: `${height}%` }}
-                      />
-                      <div className="text-xs text-gray-400 mt-2 text-center">{month.month}</div>
-                      <div className="text-xs text-gray-500 text-center">
+                    <div key={index} className="flex flex-col justify-end group">
+                      <div className="relative">
+                        <div 
+                          className={`rounded-t-lg transition-all duration-300 group-hover:scale-105 ${
+                            isHighest 
+                              ? 'bg-gradient-to-t from-emerald-500 via-emerald-400 to-emerald-300 shadow-lg shadow-emerald-500/25' 
+                              : 'bg-gradient-to-t from-blue-500 via-blue-400 to-blue-300'
+                          }`}
+                          style={{ height: `${Math.max(height, 8)}%` }}
+                        />
+                        {isHighest && (
+                          <div className="absolute -top-1 left-1/2 transform -translate-x-1/2">
+                            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-2 text-center font-medium">{month.month}</div>
+                      <div className={`text-xs text-center font-semibold transition-colors ${
+                        isHighest ? 'text-emerald-400' : 'text-gray-500'
+                      }`}>
                         {new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(month.revenue)}
                       </div>
                     </div>
@@ -241,20 +255,55 @@ const DashboardExample: React.FC = () => {
         >
           <div className="h-64 flex items-center justify-center">
             <div className="w-full">
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {stats.ordersByStatus.map((status, index) => {
-                  const colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500'];
+                  const colors = [
+                    { bg: 'bg-blue-500', ring: 'ring-blue-500/20', text: 'text-blue-400' },
+                    { bg: 'bg-emerald-500', ring: 'ring-emerald-500/20', text: 'text-emerald-400' },
+                    { bg: 'bg-amber-500', ring: 'ring-amber-500/20', text: 'text-amber-400' },
+                    { bg: 'bg-rose-500', ring: 'ring-rose-500/20', text: 'text-rose-400' },
+                    { bg: 'bg-purple-500', ring: 'ring-purple-500/20', text: 'text-purple-400' }
+                  ];
+                  const colorSet = colors[index % colors.length];
                   const total = stats.ordersByStatus.reduce((sum, s) => sum + s.count, 0);
                   const percentage = total > 0 ? Math.round((status.count / total) * 100) : 0;
+                  const isHighest = status.count === Math.max(...stats.ordersByStatus.map(s => s.count));
+                  
                   return (
-                    <div key={index} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-full ${colors[index % colors.length]}`} />
-                        <span className="text-sm text-gray-300 capitalize">{status.status}</span>
+                    <div key={index} className={`group relative p-3 rounded-lg border transition-all duration-300 hover:scale-105 ${
+                      isHighest 
+                        ? `${colorSet.ring} bg-gradient-to-r from-slate-800/50 to-slate-700/50 border-slate-600` 
+                        : 'border-slate-700 hover:border-slate-600'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-4 h-4 rounded-full ${colorSet.bg} shadow-lg ${
+                            isHighest ? 'animate-pulse' : ''
+                          }`} />
+                          <span className={`text-sm font-medium capitalize ${
+                            isHighest ? colorSet.text : 'text-gray-300'
+                          }`}>
+                            {status.status}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm font-bold text-white">
+                            {status.count}
+                          </div>
+                          <div className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                            isHighest 
+                              ? `${colorSet.bg} text-white` 
+                              : 'bg-slate-700 text-gray-300'
+                          }`}>
+                            {percentage}%
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-sm text-white">
-                        {status.count} ({percentage}%)
-                      </div>
+                      {isHighest && (
+                        <div className="absolute -top-1 -right-1">
+                          <div className="w-3 h-3 bg-emerald-400 rounded-full animate-ping"></div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}

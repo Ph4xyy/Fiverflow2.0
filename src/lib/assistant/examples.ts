@@ -17,7 +17,7 @@ export const QUICK_EXAMPLES: QuickExample[] = [
     id: 'fr-create-task',
     title: 'Créer une tâche',
     description: 'Ajouter une nouvelle tâche avec échéance',
-    prompt: 'Créer une tâche "Réviser le design" pour demain 14h',
+    prompt: 'Create a task "Review the design" for tomorrow at 2 PM',
     category: 'tasks',
     language: 'fr',
   },

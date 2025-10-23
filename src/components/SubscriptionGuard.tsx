@@ -52,7 +52,7 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
 
           {/* Description */}
           <p className="text-gray-400 mb-6">
-            {description || `Cette page nécessite un abonnement ${requiredPlan.toUpperCase()}.`}
+            {description || `This page requires a ${requiredPlan.toUpperCase()} subscription.`}
           </p>
 
           {/* Plan actuel */}
@@ -62,7 +62,7 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
               {subscription?.plan_name === 'boost' && <Zap size={20} className="text-blue-500" />}
               {subscription?.plan_name === 'scale' && <TrendingUp size={20} className="text-purple-500" />}
               <span className="text-white font-semibold">
-                Plan Actuel: {subscription?.plan_display_name || 'Launch'}
+                Current Plan: {subscription?.plan_display_name || 'Launch'}
               </span>
             </div>
             <p className="text-gray-400 text-sm">
@@ -74,7 +74,7 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
 
           {/* Plans disponibles */}
           <div className="space-y-3 mb-6">
-            <h3 className="text-white font-semibold mb-3">Plans Disponibles:</h3>
+            <h3 className="text-white font-semibold mb-3">Available Plans:</h3>
             
             <div className="bg-[#35414e] rounded-lg p-3">
               <div className="flex items-center justify-between">
@@ -82,7 +82,7 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
                   <Crown size={16} className="text-yellow-500" />
                   <span className="text-white font-medium">Launch</span>
                 </div>
-                <span className="text-green-400 font-semibold">Gratuit</span>
+                <span className="text-green-400 font-semibold">Free</span>
               </div>
               <p className="text-gray-400 text-sm mt-1">Dashboard, Clients (5 max), Orders (10 max)</p>
             </div>
@@ -93,9 +93,9 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
                   <Zap size={16} className="text-blue-500" />
                   <span className="text-white font-medium">Boost</span>
                 </div>
-                <span className="text-blue-400 font-semibold">24€/mois</span>
+                <span className="text-blue-400 font-semibold">$22/mois</span>
               </div>
-              <p className="text-gray-400 text-sm mt-1">Tout de Launch + Calendar, Referrals, Workboard</p>
+              <p className="text-gray-400 text-sm mt-1">Everything from Launch + Calendar, Referrals, Workboard</p>
             </div>
 
             <div className="bg-[#35414e] rounded-lg p-3">
@@ -104,9 +104,9 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
                   <TrendingUp size={16} className="text-purple-500" />
                   <span className="text-white font-medium">Scale</span>
                 </div>
-                <span className="text-purple-400 font-semibold">59€/mois</span>
+                <span className="text-purple-400 font-semibold">$39/mois</span>
               </div>
-              <p className="text-gray-400 text-sm mt-1">Tout de Boost + Stats, Invoices</p>
+              <p className="text-gray-400 text-sm mt-1">Everything from Boost + Stats, Invoices</p>
             </div>
           </div>
 
@@ -117,7 +117,7 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
               className="w-full"
             >
               <Crown size={16} className="mr-2" />
-              Voir les Plans
+              View Plans
             </ModernButton>
             
             <ModernButton

@@ -404,7 +404,7 @@ const ProfilePageNewClean: React.FC = () => {
                           value={profileData.professional_title || ''}
                           onChange={(e) => setProfileData({...profileData, professional_title: e.target.value})}
                           className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                          placeholder="Développeur, Designer, etc."
+                          placeholder="Developer, Designer, etc."
                         />
                       </div>
                     </div>
@@ -790,7 +790,7 @@ const ProfilePageNewClean: React.FC = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Social Links */}
-            <ModernCard title="Réseaux sociaux" icon={<Globe size={20} className="text-white" />}>
+            <ModernCard title="Social Networks" icon={<Globe size={20} className="text-white" />}>
               <SocialLinks socialNetworks={socialNetworks} />
             </ModernCard>
 

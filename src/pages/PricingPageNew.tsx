@@ -40,67 +40,67 @@ const PricingPageNew: React.FC = () => {
     {
       id: 'lunch',
       name: 'Lunch',
-      subtitle: 'Parfait pour commencer',
+      subtitle: 'Perfect to get started',
       price: billingPeriod === 'yearly' ? '0' : '0',
-      period: 'gratuit',
-      description: 'Toutes les fonctionnalités essentielles pour débuter votre activité freelance.',
+      period: 'free',
+      description: 'All essential features to start your freelance business.',
       features: [
-        'Jusqu\'à 5 clients',
-        'Jusqu\'à 10 commandes par mois',
-        'Calendrier de base',
-        'Facturation simple',
-        'Support par email',
-        'Tableau de bord basique'
+        'Up to 5 clients',
+        'Up to 10 orders per month',
+        'Basic calendar',
+        'Simple billing',
+        'Email support',
+        'Basic dashboard'
       ],
       icon: <Users size={24} />,
       gradient: false,
-      buttonText: 'Commencer gratuitement',
+      buttonText: 'Start for free',
       buttonVariant: 'outline'
     },
     {
       id: 'boost',
       name: 'Boost',
-      subtitle: 'Pour les freelances actifs',
-      price: billingPeriod === 'yearly' ? '19' : '24',
-      period: 'mois',
-      description: 'Augmentez votre productivité avec des outils avancés et plus de capacité.',
+      subtitle: 'For active freelancers',
+      price: billingPeriod === 'yearly' ? '19' : '22',
+      period: 'month',
+      description: 'Increase your productivity with advanced tools and more capacity.',
       features: [
-        'Clients illimités',
-        'Commandes illimitées',
-        'Calendrier avancé',
-        'Facturation professionnelle',
-        'Statistiques détaillées',
-        'Support prioritaire',
-        'Templates personnalisés',
-        'Intégrations tierces'
+        'Unlimited clients',
+        'Unlimited orders',
+        'Advanced calendar',
+        'Professional billing',
+        'Detailed statistics',
+        'Priority support',
+        'Custom templates',
+        'Third-party integrations'
       ],
       icon: <Zap size={24} />,
       gradient: true,
       popular: true,
-      buttonText: 'Essayer Boost',
+      buttonText: 'Try Boost',
       buttonVariant: 'primary'
     },
     {
       id: 'scale',
       name: 'Scale',
-      subtitle: 'Pour les entreprises',
-      price: billingPeriod === 'yearly' ? '49' : '59',
-      period: 'mois',
-      description: 'La solution complète pour faire évoluer votre entreprise vers de nouveaux sommets.',
+      subtitle: 'For businesses',
+      price: billingPeriod === 'yearly' ? '39' : '39',
+      period: 'month',
+      description: 'The complete solution to scale your business to new heights.',
       features: [
-        'Tout de Boost',
-        'Gestion d\'équipe',
-        'API complète',
-        'Rapports avancés',
-        'Support 24/7',
-        'Formation personnalisée',
-        'Intégrations premium',
-        'Sauvegarde automatique',
-        'Multi-comptes'
+        'Everything from Boost',
+        'Team management',
+        'Complete API',
+        'Advanced reports',
+        '24/7 support',
+        'Custom training',
+        'Premium integrations',
+        'Automatic backup',
+        'Multi-accounts'
       ],
       icon: <Rocket size={24} />,
       gradient: true,
-      buttonText: 'Choisir Scale',
+      buttonText: 'Choose Scale',
       buttonVariant: 'primary'
     }
   ];
@@ -183,7 +183,7 @@ const PricingPageNew: React.FC = () => {
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                   <div className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] text-white px-4 py-1 rounded-full text-sm font-medium flex items-center gap-1">
                     <Star size={16} />
-                    Le plus populaire
+                    Most Popular
                   </div>
                 </div>
               )}
@@ -200,7 +200,7 @@ const PricingPageNew: React.FC = () => {
                   <p className="text-gray-400 mb-4">{plan.subtitle}</p>
                   <div className="mb-4">
                     <span className="text-4xl font-bold text-white">
-                      {plan.price === '0' ? 'Gratuit' : `€${plan.price}`}
+                      {plan.price === '0' ? 'Free' : `$${plan.price}`}
                     </span>
                     {plan.price !== '0' && (
                       <span className="text-gray-400 ml-2">/{plan.period}</span>
@@ -271,20 +271,20 @@ const PricingPageNew: React.FC = () => {
           <div className="space-y-6">
             {[
               {
-                question: "Puis-je changer de plan à tout moment ?",
-                answer: "Oui, vous pouvez upgrader ou downgrader votre plan à tout moment. Les changements prennent effet immédiatement."
+                question: "Can I change my plan at any time?",
+                answer: "Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately."
               },
               {
-                question: "Y a-t-il des frais de configuration ?",
-                answer: "Non, il n'y a aucun frais de configuration. Vous payez seulement votre abonnement mensuel ou annuel."
+                question: "Are there any setup fees?",
+                answer: "No, there are no setup fees. You only pay your monthly or annual subscription."
               },
               {
-                question: "Que se passe-t-il si j'annule mon abonnement ?",
-                answer: "Vous gardez accès à toutes les fonctionnalités jusqu'à la fin de votre période de facturation."
+                question: "What happens if I cancel my subscription?",
+                answer: "You keep access to all features until the end of your billing period."
               },
               {
-                question: "Proposez-vous un essai gratuit ?",
-                answer: "Le plan Lunch est entièrement gratuit. Pour Boost et Scale, nous offrons un essai de 14 jours."
+                question: "Do you offer a free trial?",
+                answer: "The Launch plan is completely free. For Boost and Scale, we offer a 14-day trial."
               }
             ].map((faq, index) => (
               <ModernCard key={index}>
