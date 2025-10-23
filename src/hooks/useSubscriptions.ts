@@ -20,33 +20,19 @@ export const useSubscriptions = () => {
 
     try {
       setError(null);
-      console.log('📋 Fetching subscriptions...');
+      console.log('📋 Fetching personal subscriptions...');
       
-      // Utiliser la table user_subscriptions au lieu de subscriptions
+      // Récupérer les souscriptions personnelles de l'utilisateur
       const { data, error: fetchError } = await supabase
-        .from('user_subscriptions')
-        .select(`
-          *,
-          subscription_plans!inner(
-            name,
-            display_name,
-            price_monthly,
-            price_yearly,
-            currency,
-            max_projects,
-            max_clients,
-            max_storage_gb,
-            max_team_members,
-            features
-          )
-        `)
+        .from('user_personal_subscriptions')
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (fetchError) {
-        console.error('Error fetching subscriptions:', fetchError);
-        // Si la table n'existe pas, utiliser des données mock
-        console.log('Using mock subscription data');
+        console.error('Error fetching personal subscriptions:', fetchError);
+        // Si la table n'existe pas encore, initialiser avec une liste vide
+        console.log('Personal subscriptions table not found, initializing empty list');
         setSubscriptions([]);
         setLoading(false);
         return;
@@ -55,24 +41,24 @@ export const useSubscriptions = () => {
       // Transformer les données pour correspondre à l'interface Subscription
       const transformedSubscriptions: Subscription[] = (data || []).map(sub => ({
         id: sub.id,
-        name: sub.subscription_plans?.display_name || 'Unknown Plan',
-        description: `Plan ${sub.subscription_plans?.display_name || 'Unknown'}`,
-        provider: 'FiverFlow',
-        category: 'productivity',
-        amount: sub.amount || 0,
-        currency: sub.currency || 'USD',
-        billing_cycle: sub.billing_cycle || 'monthly',
-        next_renewal_date: sub.end_date || new Date().toISOString().split('T')[0],
-        is_active: sub.status === 'active',
-        color: '#8b5cf6',
+        name: sub.name,
+        description: sub.description,
+        provider: sub.provider,
+        category: sub.category,
+        amount: sub.amount,
+        currency: sub.currency,
+        billing_cycle: sub.billing_cycle,
+        next_renewal_date: sub.next_renewal_date,
+        is_active: sub.is_active,
+        color: sub.color,
         created_at: sub.created_at,
         updated_at: sub.updated_at
       }));
 
       setSubscriptions(transformedSubscriptions);
-      console.log('✅ Subscriptions loaded:', transformedSubscriptions.length);
+      console.log('✅ Personal subscriptions loaded:', transformedSubscriptions.length);
     } catch (err: any) {
-      console.error('Error fetching subscriptions:', err);
+      console.error('Error fetching personal subscriptions:', err);
       setError(err?.message || 'Failed to fetch subscriptions');
       setSubscriptions([]);
     } finally {
@@ -87,10 +73,52 @@ export const useSubscriptions = () => {
     }
 
     try {
-      // Pour l'instant, on ne peut pas créer de nouvelles subscriptions via cette interface
-      // car cela nécessite une intégration Stripe
-      toast.error('Subscription creation requires Stripe integration');
-      return null;
+      console.log('📋 Creating personal subscription:', data);
+      
+      // Créer une souscription personnelle dans la table user_personal_subscriptions
+      const { data: newSub, error } = await supabase
+        .from('user_personal_subscriptions')
+        .insert({
+          user_id: user.id,
+          name: data.name,
+          description: data.description,
+          provider: data.provider,
+          category: data.category,
+          amount: data.amount,
+          currency: data.currency,
+          billing_cycle: data.billing_cycle,
+          next_renewal_date: data.next_renewal_date,
+          color: data.color,
+          is_active: true
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      // Ajouter la nouvelle souscription à la liste locale
+      const newSubscription: Subscription = {
+        id: newSub.id,
+        name: newSub.name,
+        description: newSub.description,
+        provider: newSub.provider,
+        category: newSub.category,
+        amount: newSub.amount,
+        currency: newSub.currency,
+        billing_cycle: newSub.billing_cycle,
+        next_renewal_date: newSub.next_renewal_date,
+        is_active: newSub.is_active,
+        color: newSub.color,
+        created_at: newSub.created_at,
+        updated_at: newSub.updated_at
+      };
+
+      setSubscriptions(prev => [newSubscription, ...prev]);
+      toast.success('Subscription created successfully!');
+      
+      return newSubscription;
     } catch (err: any) {
       console.error('Error creating subscription:', err);
       toast.error(err?.message || 'Failed to create subscription');
@@ -122,9 +150,20 @@ export const useSubscriptions = () => {
     }
 
     try {
-      // Pour l'instant, on ne peut pas supprimer les subscriptions via cette interface
-      toast.error('Subscription cancellation requires admin access');
-      return false;
+      console.log('📋 Deleting personal subscription:', id);
+      
+      const { error } = await supabase
+        .from('user_personal_subscriptions')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Retirer de la liste locale
+      setSubscriptions(prev => prev.filter(sub => sub.id !== id));
+      toast.success('Subscription deleted successfully!');
+      return true;
     } catch (err: any) {
       console.error('Error deleting subscription:', err);
       toast.error(err?.message || 'Failed to delete subscription');
@@ -171,10 +210,10 @@ export const useSubscriptions = () => {
       }
 
       const { error } = await supabase
-        .from('user_subscriptions')
+        .from('user_personal_subscriptions')
         .update({ 
-          end_date: nextDate.toISOString().split('T')[0],
-          status: 'active'
+          next_renewal_date: nextDate.toISOString().split('T')[0],
+          is_active: true
         })
         .eq('id', id)
         .eq('user_id', user.id);
