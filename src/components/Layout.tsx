@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 // Import logo
 import LogoImage from '../assets/LogoFiverFlow.png';
-import ErrorBoundary from './ErrorBoundary';
+// import ErrorBoundary from './ErrorBoundary'; // Non utilisé pour le moment
 
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import NotificationsDropdown from './NotificationsDropdown';
@@ -12,6 +12,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
 import UserProfileManager from '../utils/userProfileManager';
+import { handleError406 } from '../utils/errorDiagnostic';
 
 import { 
   Menu, 
@@ -25,7 +26,7 @@ import {
   Crown,
   User,
   LogOut,
-  Network,
+  // Network, // Non utilisé pour le moment
   Lock,
   CheckCircle2,
   Shield,
@@ -49,9 +50,9 @@ export const buttonClass = 'bg-[#35414e] hover:bg-[#3d4a57] text-white';
 export const gradientClass = 'bg-gradient-to-r from-[#9c68f2] to-[#422ca5]';
 
 /* ---------- Helper: détecte admin ---------- */
-const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
+const useIsAdminFromEverywhere = (user: any) => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [adminCheckLoading, setAdminCheckLoading] = useState(true);
+  const [, setAdminCheckLoading] = useState(true);
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -74,9 +75,28 @@ const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
         // Utiliser la nouvelle classe utilitaire sans RPC
         const isAdmin = await UserProfileManager.checkAdminStatus(user);
         setIsAdmin(isAdmin);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erreur lors de la vérification admin:', error);
-        setIsAdmin(false);
+        
+        // Si c'est une erreur 406, essayer le contournement
+        if (error?.code === 'PGRST301' || error?.message?.includes('406')) {
+          console.log('🔧 Layout: Erreur 406 détectée, tentative de contournement...');
+          try {
+            const fallbackData = await handleError406(user.id);
+            if (fallbackData) {
+              setIsAdmin(fallbackData.is_admin || false);
+              console.log('✅ Layout: Contournement réussi pour la vérification admin');
+            } else {
+              setIsAdmin(false);
+              console.warn('⚠️ Layout: Contournement échoué, utilisateur non-admin par défaut');
+            }
+          } catch (fallbackError) {
+            console.error('❌ Layout: Erreur lors du contournement:', fallbackError);
+            setIsAdmin(false);
+          }
+        } else {
+          setIsAdmin(false);
+        }
       } finally {
         setAdminCheckLoading(false);
       }

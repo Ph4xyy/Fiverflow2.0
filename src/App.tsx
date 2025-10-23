@@ -27,6 +27,7 @@ import AnalyticsWrapper from './components/AnalyticsWrapper';
 import LoadingDiagnostic from './components/LoadingDiagnostic';
 import SubscriptionGuard from './components/SubscriptionGuard';
 import Layout from './components/Layout';
+import Error406Diagnostic from './components/Error406Diagnostic';
 
 // Hook pour le préchargement des données
 import { usePreloadData } from './hooks/usePreloadData';
@@ -164,6 +165,11 @@ function AppContent() {
 
           {/* Administration */}
           <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+
+          {/* Diagnostic Erreur 406 (développement uniquement) */}
+          {import.meta.env.DEV && (
+            <Route path="/error-406-diagnostic" element={<InstantProtectedRoute><Error406Diagnostic /></InstantProtectedRoute>} />
+          )}
 
           {/* Pages légales */}
           <Route path="/terms-of-service" element={<TermsOfService />} />
