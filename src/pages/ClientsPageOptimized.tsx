@@ -297,8 +297,7 @@ const ClientsPageOptimized: React.FC = () => {
 
   // 🔥 NAVIGATION INSTANTANÉE - Plus jamais de loading screen
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -548,7 +547,6 @@ const ClientsPageOptimized: React.FC = () => {
           onEdit={editFromView}
         />
       </div>
-    </Layout>
   );
 };
 

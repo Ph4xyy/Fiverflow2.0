@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Layout from '../components/Layout';
+
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import { 
@@ -139,8 +139,7 @@ const PricingPageNew: React.FC = () => {
   ];
 
   return (
-    <Layout>
-      <div className="p-6 space-y-12">
+    <div className="p-6 space-y-12">
         {/* Header */}
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-white mb-4">
@@ -296,7 +295,6 @@ const PricingPageNew: React.FC = () => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import { useDashboardStats } from '../hooks/useDashboardStats';
@@ -53,43 +52,36 @@ const DashboardExample: React.FC = () => {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="p-6 flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-          <p className="ml-3 text-gray-400">Loading dashboard...</p>
-        </div>
-      </Layout>
+      <div className="p-6 flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+        <p className="ml-3 text-gray-400">Loading dashboard...</p>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Layout>
-        <div className="p-6 text-center">
-          <p className="text-red-400 font-semibold">Error loading dashboard</p>
-          <p className="text-sm text-slate-400 mt-1">{error}</p>
-          <ModernButton onClick={refetch} className="mt-4">
-            <RefreshCw className="mr-2" size={16} />
-            Retry
-          </ModernButton>
-        </div>
-      </Layout>
+      <div className="p-6 text-center">
+        <p className="text-red-400 font-semibold">Error loading dashboard</p>
+        <p className="text-sm text-slate-400 mt-1">{error}</p>
+        <ModernButton onClick={refetch} className="mt-4">
+          <RefreshCw className="mr-2" size={16} />
+          Retry
+        </ModernButton>
+      </div>
     );
   }
 
   if (!stats) {
     return (
-      <Layout>
-        <div className="p-6 text-center">
-          <p className="text-gray-400">No data available</p>
-        </div>
-      </Layout>
+      <div className="p-6 text-center">
+        <p className="text-gray-400">No data available</p>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -354,7 +346,7 @@ const DashboardExample: React.FC = () => {
           onSuccess={handleFormSuccess}
         />
       </div>
-    </Layout>
+    </div>
   );
 };
 

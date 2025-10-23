@@ -1,6 +1,6 @@
 // src/pages/NetworkPage.tsx
 import React, { useState, useEffect } from 'react';
-import Layout from '../components/Layout';
+
 import PlanRestrictedPage from '../components/PlanRestrictedPage';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
@@ -27,7 +27,6 @@ import {
   Ban as Bank,
   Loader2
 } from 'lucide-react';
-
 
 export default function NetworkPage() {
   const { user } = useAuth();
@@ -319,12 +318,10 @@ export default function NetworkPage() {
   // 🔒 Gate the whole page to paid users only
   if (restrictionsLoading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
           <p className="ml-3 text-zinc-400">Loading...</p>
         </div>
-      </Layout>
     );
   }
 
@@ -377,8 +374,7 @@ export default function NetworkPage() {
   }
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6">
         {(referralError || payoutError) && (
           <div className="mb-6 rounded-xl p-4 border border-blue-800 bg-blue-900/20">
             <div className="flex items-start space-x-3">
@@ -779,6 +775,5 @@ export default function NetworkPage() {
           onSuccess={handlePayoutSuccess}
         />
       </div>
-    </Layout>
   );
 }

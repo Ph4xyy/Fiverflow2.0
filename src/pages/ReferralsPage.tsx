@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useReferral } from '../contexts/ReferralContext';
 import { useReferral as useReferralHook } from '../hooks/useReferral';
-import Layout from '../components/Layout';
+
 import { 
   Copy, 
   ExternalLink, 
@@ -116,21 +116,18 @@ const ReferralsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <RefreshCw className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4" />
             <p className="text-slate-400">Chargement des données de parrainage...</p>
           </div>
         </div>
-      </Layout>
     );
   }
 
   if (error) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <XCircle className="w-8 h-8 text-red-500 mx-auto mb-4" />
             <p className="text-red-400 mb-4">Erreur lors du chargement des données</p>
@@ -142,13 +139,11 @@ const ReferralsPage: React.FC = () => {
             </button>
           </div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -501,7 +496,6 @@ const ReferralsPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 

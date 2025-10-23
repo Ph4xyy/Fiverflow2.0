@@ -164,12 +164,10 @@ const StatsPage: React.FC = () => {
   // -------------------- ACCESS --------------------
   if (planLoading || statsLoading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
           <p className="ml-3 text-gray-400">{'Loading...'}</p>
         </div>
-      </Layout>
     );
   }
 
@@ -187,8 +185,7 @@ const StatsPage: React.FC = () => {
 
   if (statsError) {
     return (
-      <Layout>
-        <div className="p-6 text-center">
+      <div className="p-6 text-center">
           <p className="text-red-400 font-semibold">Error loading statistics</p>
           <p className="text-sm text-slate-400 mt-1">{statsError}</p>
           <button
@@ -198,24 +195,20 @@ const StatsPage: React.FC = () => {
             Retry
           </button>
         </div>
-      </Layout>
     );
   }
 
   if (!stats) {
     return (
-      <Layout>
-        <div className="p-6 text-center">
+      <div className="p-6 text-center">
           <p className="text-gray-400">No statistics available</p>
         </div>
-      </Layout>
     );
   }
 
   // -------------------- RENDER --------------------
   return (
-    <Layout>
-      <div className="space-y-6 p-4 sm:p-6">
+    <div className="space-y-6 p-4 sm:p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
@@ -509,7 +502,6 @@ const StatsPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 

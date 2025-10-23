@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Layout from '../components/Layout';
+
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import { 
@@ -229,8 +229,7 @@ const UpgradePageNew: React.FC = () => {
   ];
 
   return (
-    <Layout>
-      <div className="p-6 space-y-12">
+    <div className="p-6 space-y-12">
         {/* Hero Section */}
         <div className="text-center max-w-4xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-6">
@@ -480,7 +479,6 @@ const UpgradePageNew: React.FC = () => {
           </ModernCard>
         </div>
       </div>
-    </Layout>
   );
 };
 

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import ThemeSelector from '../components/ThemeSelector';
@@ -573,8 +572,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
   // recentActivity supprimé - utilise maintenant les vraies données
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6">
         {/* Header Profile */}
         <ModernCard className="relative overflow-hidden p-0">
           {/* Background gradient */}
@@ -1566,7 +1564,6 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 

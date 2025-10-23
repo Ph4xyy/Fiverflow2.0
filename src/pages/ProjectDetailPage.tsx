@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Layout from '../components/Layout';
+
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import { useAuth } from '../contexts/AuthContext';
@@ -101,21 +101,18 @@ const ProjectDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="p-6 flex items-center justify-center min-h-[400px]">
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <Loader2 size={48} className="mx-auto text-[#9c68f2] animate-spin mb-4" />
             <p className="text-gray-400">Chargement du projet...</p>
           </div>
         </div>
-      </Layout>
     );
   }
 
   if (!project) {
     return (
-      <Layout>
-        <div className="p-6 text-center">
+      <div className="p-6 text-center">
           <h1 className="text-2xl font-bold text-white mb-4">Projet non trouvé</h1>
           <p className="text-gray-400 mb-6">Ce projet n'existe pas ou a été supprimé</p>
           <ModernButton onClick={() => navigate('/profile')}>
@@ -123,13 +120,11 @@ const ProjectDetailPage: React.FC = () => {
             Retour au profil
           </ModernButton>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <button
@@ -393,7 +388,6 @@ const ProjectDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 
