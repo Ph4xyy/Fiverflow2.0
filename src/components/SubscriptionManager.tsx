@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { Subscription, CreateSubscriptionData, BillingCycle } from '@/types/subscription';
-import { Button } from '@/components/ui/Button';
-import { Dialog, DialogContent, DialogHeader, DialogFooter } from '@/components/ui/Dialog';
+import ModernButton from '@/components/ModernButton';
+import ModernCard from '@/components/ModernCard';
 import { 
   Plus, 
   Edit2, 
@@ -13,7 +13,10 @@ import {
   MoreVertical,
   CheckCircle,
   XCircle,
-  X
+  X,
+  Play,
+  Pause,
+  Eye
 } from 'lucide-react';
 import { formatDateSafe } from '@/utils/dateUtils';
 
@@ -253,22 +256,21 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
 
         {/* Footer */}
         <div className="flex justify-between mt-8 pt-6 border-t border-[#1C2230] px-6 pb-6">
-          <button
+          <ModernButton
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border rounded-lg transition-colors border-[#1C2230] text-slate-200 hover:bg-[#0E121A]"
+            variant="outline"
           >
             Annuler
-          </button>
+          </ModernButton>
 
-          <button
+          <ModernButton
             type="submit"
             onClick={handleSubmit}
             disabled={!formData.name || !formData.amount || !formData.next_renewal_date}
-            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {subscription ? 'Mettre à jour' : 'Créer'}
-          </button>
+          </ModernButton>
         </div>
       </div>
     </div>
@@ -379,49 +381,53 @@ const SubscriptionPreview: React.FC<{
         {/* Footer */}
         <div className="flex justify-between p-6 border-t border-[#1C2230]">
           <div className="flex gap-2">
-            <button
+            <ModernButton
               onClick={onToggle}
-              className={`px-3 py-2 text-sm border rounded-lg transition-colors ${
+              size="sm"
+              className={
                 subscription.is_active
-                  ? 'bg-red-600 hover:bg-red-700 text-white border-red-600'
-                  : 'bg-green-600 hover:bg-green-700 text-white border-green-600'
-              }`}
+                  ? 'bg-[#f43f5e] hover:bg-[#e11d48] text-white border-[#f43f5e]'
+                  : 'bg-[#22c55e] hover:bg-[#16a34a] text-white border-[#22c55e]'
+              }
             >
               {subscription.is_active ? (
                 <>
-                  <XCircle size={16} className="mr-2 inline" />
+                  <Pause size={16} />
                   Désactiver
                 </>
               ) : (
                 <>
-                  <CheckCircle size={16} className="mr-2 inline" />
+                  <Play size={16} />
                   Activer
                 </>
               )}
-            </button>
+            </ModernButton>
           </div>
           
           <div className="flex gap-2">
-            <button
+            <ModernButton
               onClick={onEdit}
-              className="px-3 py-2 text-sm bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200"
+              size="sm"
             >
-              <Edit2 size={16} className="mr-2 inline" />
+              <Edit2 size={16} />
               Modifier
-            </button>
-            <button
+            </ModernButton>
+            <ModernButton
               onClick={onDelete}
-              className="px-3 py-2 text-sm border rounded-lg transition-colors border-red-600 text-red-400 hover:bg-red-600 hover:text-white"
+              variant="outline"
+              size="sm"
+              className="border-[#f43f5e] text-[#f43f5e] hover:bg-[#f43f5e] hover:text-white"
             >
-              <Trash2 size={16} className="mr-2 inline" />
+              <Trash2 size={16} />
               Supprimer
-            </button>
-            <button
+            </ModernButton>
+            <ModernButton
               onClick={onClose}
-              className="px-3 py-2 text-sm border rounded-lg transition-colors border-[#1C2230] text-slate-200 hover:bg-[#0E121A]"
+              variant="outline"
+              size="sm"
             >
               Fermer
-            </button>
+            </ModernButton>
           </div>
         </div>
       </div>
@@ -510,165 +516,155 @@ const SubscriptionManager: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-[#0E121A] rounded-xl p-6 border border-[#1C2230]">
-        <div className="flex items-center justify-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
-          <p className="ml-4 text-slate-400">Loading subscriptions...</p>
+      <ModernCard className="min-h-[200px] flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#9c68f2]" />
+          <p className="text-white">Loading subscriptions...</p>
         </div>
-      </div>
+      </ModernCard>
     );
   }
 
   return (
-    <div className="bg-[#0E121A] rounded-xl p-6 border border-[#1C2230]">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 grid place-items-center">
-            <CreditCard className="text-white" size={18} />
-          </div>
+    <>
+      <ModernCard title="Subscription Management" icon={<CreditCard className="text-white" size={20} />}>
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-xl font-semibold text-white">Subscription Management</h2>
-            <p className="text-sm text-slate-400">Track your subscriptions and renewals</p>
+            <p className="text-[#94a3b8] text-sm">Track your subscriptions and renewals</p>
           </div>
+          <ModernButton onClick={() => setShowForm(true)}>
+            <Plus size={16} />
+            New Subscription
+          </ModernButton>
         </div>
-        <Button
-          onClick={() => setShowForm(true)}
-          className="bg-purple-600 hover:bg-purple-700"
-        >
-          <Plus size={16} className="mr-2" />
-          New Subscription
-        </Button>
-      </div>
 
-      {subscriptions.length === 0 ? (
-        <div className="text-center py-12">
-          <CreditCard size={48} className="mx-auto text-slate-600 mb-4" />
-          <h3 className="text-lg font-medium text-slate-300 mb-2">No subscriptions</h3>
-          <p className="text-slate-500 mb-4">Start by adding your first subscription</p>
-          <Button
-            onClick={() => setShowForm(true)}
-            className="bg-purple-600 hover:bg-purple-700"
-          >
-            <Plus size={16} className="mr-2" />
-            Add Subscription
-          </Button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {subscriptions.map((subscription) => (
-            <div
-              key={subscription.id}
-              className="relative bg-[#121722] rounded-lg p-4 border border-[#1C2230] hover:border-[#2A3441] transition-colors cursor-pointer group"
-              style={{ borderLeft: `4px solid ${subscription.color || '#8b5cf6'}` }}
-              onClick={() => handleViewSubscription(subscription)}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-white truncate">{subscription.name}</h3>
-                  {subscription.provider && (
-                    <p className="text-sm text-slate-400 truncate">{subscription.provider}</p>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowActions(showActions === subscription.id ? null : subscription.id);
-                    }}
-                    className="p-1 hover:bg-[#1C2230] rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <MoreVertical size={16} className="text-slate-400" />
-                  </button>
-                  {subscription.is_active ? (
-                    <CheckCircle size={16} className="text-green-500" />
-                  ) : (
-                    <XCircle size={16} className="text-red-500" />
-                  )}
-                </div>
-              </div>
-
-              {subscription.description && (
-                <p className="text-sm text-slate-400 mb-3 line-clamp-2">{subscription.description}</p>
-              )}
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-400">Amount</span>
-                  <span className="font-semibold text-white">
-                    {formatCurrency(subscription.amount, subscription.currency)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-400">Cycle</span>
-                  <span className="text-sm text-slate-300">
-                    {formatBillingCycle(subscription.billing_cycle)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-400">Next renewal</span>
-                  <span className="text-sm text-slate-300">
-                    {formatDateSafe(subscription.next_renewal_date)}
-                  </span>
-                </div>
-              </div>
-
-              {showActions === subscription.id && (
-                <div className="absolute top-2 right-2 bg-[#0E121A] border border-[#1C2230] rounded-lg p-2 shadow-lg z-10">
-                  <div className="flex flex-col gap-1">
+        {subscriptions.length === 0 ? (
+          <div className="text-center py-12">
+            <CreditCard size={48} className="mx-auto text-[#64748b] mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">No subscriptions</h3>
+            <p className="text-[#94a3b8] mb-4">Start by adding your first subscription</p>
+            <ModernButton onClick={() => setShowForm(true)}>
+              <Plus size={16} />
+              Add Subscription
+            </ModernButton>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {subscriptions.map((subscription) => (
+              <div
+                key={subscription.id}
+                className="relative bg-[#0B0E14] rounded-xl p-4 border border-[#1C2230] hover:border-[#35414e] transition-all duration-200 cursor-pointer group hover:shadow-lg"
+                style={{ borderLeft: `4px solid ${subscription.color || '#9c68f2'}` }}
+                onClick={() => handleViewSubscription(subscription)}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-white truncate">{subscription.name}</h3>
+                    {subscription.provider && (
+                      <p className="text-sm text-[#94a3b8] truncate">{subscription.provider}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setEditingSubscription(subscription);
-                        setShowActions(null);
+                        setShowActions(showActions === subscription.id ? null : subscription.id);
                       }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-[#121722] rounded"
+                      className="p-1 hover:bg-[#1C2230] rounded opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <Edit2 size={14} />
-                      Edit
+                      <MoreVertical size={16} className="text-[#94a3b8]" />
                     </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggle(subscription.id);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-[#121722] rounded"
-                    >
-                      {subscription.is_active ? (
-                        <>
-                          <XCircle size={14} />
-                          Deactivate
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle size={14} />
-                          Activate
-                        </>
-                      )}
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(subscription.id);
-                      }}
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-[#121722] rounded"
-                    >
-                      <Trash2 size={14} />
-                      Delete
-                    </button>
+                    {subscription.is_active ? (
+                      <CheckCircle size={16} className="text-[#22c55e]" />
+                    ) : (
+                      <XCircle size={16} className="text-[#f43f5e]" />
+                    )}
                   </div>
                 </div>
-              )}
 
-              {/* Click indicator */}
-              <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="text-xs text-slate-500 bg-[#0E121A] px-2 py-1 rounded">
-                  Click to view
+                {subscription.description && (
+                  <p className="text-sm text-[#94a3b8] mb-3 line-clamp-2">{subscription.description}</p>
+                )}
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#94a3b8]">Amount</span>
+                    <span className="font-semibold text-white">
+                      {formatCurrency(subscription.amount, subscription.currency)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#94a3b8]">Cycle</span>
+                    <span className="text-sm text-white">
+                      {formatBillingCycle(subscription.billing_cycle)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-[#94a3b8]">Next renewal</span>
+                    <span className="text-sm text-white">
+                      {formatDateSafe(subscription.next_renewal_date)}
+                    </span>
+                  </div>
+                </div>
+
+                {showActions === subscription.id && (
+                  <div className="absolute top-2 right-2 bg-[#0B0E14] border border-[#35414e] rounded-xl p-2 shadow-xl z-10">
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingSubscription(subscription);
+                          setShowActions(null);
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-[#1C2230] rounded-lg transition-colors"
+                      >
+                        <Edit2 size={14} />
+                        Edit
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggle(subscription.id);
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-[#1C2230] rounded-lg transition-colors"
+                      >
+                        {subscription.is_active ? (
+                          <>
+                            <Pause size={14} />
+                            Deactivate
+                          </>
+                        ) : (
+                          <>
+                            <Play size={14} />
+                            Activate
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(subscription.id);
+                        }}
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-[#f43f5e] hover:bg-[#1C2230] rounded-lg transition-colors"
+                      >
+                        <Trash2 size={14} />
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Click indicator */}
+                <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="text-xs text-[#94a3b8] bg-[#0B0E14] px-2 py-1 rounded-lg border border-[#1C2230]">
+                    Click to view
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </ModernCard>
 
       {showForm && (
         <SubscriptionForm
@@ -695,7 +691,7 @@ const SubscriptionManager: React.FC = () => {
           onToggle={handleToggleFromPreview}
         />
       )}
-    </div>
+    </>
   );
 };
 
