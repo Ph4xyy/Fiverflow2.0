@@ -77,12 +77,12 @@ const ProfileSettingsPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   const tabs = [
-    { id: 'general', label: 'Général', icon: <User size={20} /> },
-    { id: 'skills', label: 'Compétences', icon: <Award size={20} /> },
-    { id: 'social', label: 'Réseaux sociaux', icon: <Globe size={20} /> },
-    { id: 'projects', label: 'Projets', icon: <Briefcase size={20} /> },
-    { id: 'privacy', label: 'Confidentialité', icon: <Shield size={20} /> },
-    { id: 'appearance', label: 'Apparence', icon: <Palette size={20} /> }
+    { id: 'general', label: 'General', icon: <User size={20} /> },
+    { id: 'skills', label: 'Skills', icon: <Award size={20} /> },
+    { id: 'social', label: 'Social Networks', icon: <Globe size={20} /> },
+    { id: 'projects', label: 'Projects', icon: <Briefcase size={20} /> },
+    { id: 'privacy', label: 'Privacy', icon: <Shield size={20} /> },
+    { id: 'appearance', label: 'Appearance', icon: <Palette size={20} /> }
   ];
 
   const socialNetworkTemplates: SocialNetwork[] = [
@@ -116,7 +116,7 @@ const ProfileSettingsPage: React.FC = () => {
     },
     {
       id: 'website',
-      name: 'Site web',
+      name: 'Website',
       url: '',
       icon: <Globe size={20} />,
       color: '#6c757d'
@@ -198,7 +198,7 @@ const ProfileSettingsPage: React.FC = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Titre professionnel
+            Professional Title
           </label>
           <input
             type="text"
