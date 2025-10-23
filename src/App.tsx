@@ -167,7 +167,7 @@ function AppContent() {
           <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
 
           {/* Diagnostic Erreur 406 (développement uniquement) */}
-          {process.env.NODE_ENV === 'development' && (
+          {import.meta.env.DEV && (
             <Route path="/error-406-diagnostic" element={<InstantProtectedRoute><Error406Diagnostic /></InstantProtectedRoute>} />
           )}
 
@@ -197,7 +197,7 @@ function AppContent() {
       </Suspense>
       
       {/* Composants de debug - seulement en développement */}
-      {process.env.NODE_ENV === 'development' && (
+      {import.meta.env.DEV && (
         <>
           {/* Debug components removed for cleaner code */}
         </>

@@ -16,8 +16,8 @@ const originalConsole = {
 
 // Système de logging intelligent
 class ConsoleOverride {
-  private isProduction = process.env.NODE_ENV === 'production';
-  private isDevelopment = process.env.NODE_ENV === 'development';
+  private isProduction = import.meta.env.PROD;
+  private isDevelopment = import.meta.env.DEV;
   private easterEggActive = false;
 
   constructor() {
@@ -270,7 +270,7 @@ class ConsoleOverride {
 export const consoleOverride = new ConsoleOverride();
 
 // Auto-activation
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.DEV) {
   originalConsole.log('%c🥚 FiverFlow Easter Egg System activé !', 'color: #9c68f2; font-size: 16px; font-weight: bold;');
   originalConsole.log('%cTapez "ff:help" dans la console pour commencer !', 'color: #666; font-size: 12px;');
 }
