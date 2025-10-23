@@ -586,7 +586,7 @@ const CalendarPageNew: React.FC = () => {
                 {getEventsForDate(new Date()).map(event => (
                   <div 
                     key={event.id} 
-                    className={`p-4 rounded-xl border shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group ${getTypeColor(event.type)} ${getPriorityBorderColor(event.priority)}`}
+                    className="p-4 bg-[#35414e] rounded-xl border border-[#1C2230] shadow-lg hover:shadow-xl hover:border-[#35414e] transition-all duration-200 cursor-pointer group"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
@@ -595,18 +595,18 @@ const CalendarPageNew: React.FC = () => {
                         </div>
                         <div>
                           <span className="text-sm font-semibold text-white group-hover:text-white transition-colors">{event.title}</span>
-                          <div className="text-xs text-white/80 mt-1">{event.time}</div>
+                          <div className="text-xs text-[#94a3b8] mt-1">{event.time}</div>
                         </div>
                       </div>
                       <div className={`w-3 h-3 rounded-full ${getPriorityColor(event.priority)} shadow-sm`} />
                     </div>
                     {event.attendees && event.attendees.length > 0 && (
-                      <div className="text-xs text-white/70 bg-white/10 px-2 py-1 rounded-lg inline-block">
+                      <div className="text-xs text-[#94a3b8] bg-[#1C2230] px-2 py-1 rounded-lg inline-block">
                         👥 {event.attendees.length} participant{event.attendees.length > 1 ? 's' : ''}
                       </div>
                     )}
                     {event.location && (
-                      <div className="text-xs text-white/70 mt-2 flex items-center gap-1">
+                      <div className="text-xs text-[#94a3b8] mt-2 flex items-center gap-1">
                         <MapPin size={10} />
                         {event.location}
                       </div>
@@ -628,14 +628,14 @@ const CalendarPageNew: React.FC = () => {
             {/* Statistiques réelles */}
             <ModernCard title="Statistics" icon={<Users size={20} className="text-white" />}>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-[#0B0E14] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
+                <div className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#3b82f6] to-[#2563eb]"></div>
                     <span className="text-sm text-[#94a3b8]">Total events</span>
                   </div>
                   <span className="text-lg font-bold text-white">{events.length}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-[#0B0E14] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
+                <div className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed]"></div>
                     <span className="text-sm text-[#94a3b8]">Tasks with deadline</span>
@@ -644,7 +644,7 @@ const CalendarPageNew: React.FC = () => {
                     {tasks.filter(task => task.due_date).length}
                   </span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-[#0B0E14] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
+                <div className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#f59e0b] to-[#d97706]"></div>
                     <span className="text-sm text-[#94a3b8]">Orders with due_date</span>
@@ -653,7 +653,7 @@ const CalendarPageNew: React.FC = () => {
                     {orders.filter(order => order.due_date).length}
                   </span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-[#0B0E14] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
+                <div className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#06b6d4] to-[#0891b2]"></div>
                     <span className="text-sm text-[#94a3b8]">Events this month</span>
@@ -667,7 +667,7 @@ const CalendarPageNew: React.FC = () => {
                     }).length}
                   </span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-[#0B0E14] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
+                <div className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#22c55e] to-[#16a34a]"></div>
                     <span className="text-sm text-[#94a3b8]">Active subscriptions</span>
@@ -676,7 +676,7 @@ const CalendarPageNew: React.FC = () => {
                     {subscriptions.filter(sub => sub.is_active).length}
                   </span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-[#0B0E14] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
+                <div className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#f43f5e] to-[#e11d48]"></div>
                     <span className="text-sm text-[#94a3b8]">Renewals this month</span>
