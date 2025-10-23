@@ -26,7 +26,7 @@ export class ActivityService {
         
         // Si c'est une erreur 406, essayer le contournement
         if (error.code === 'PGRST301' || error.message.includes('406')) {
-          console.log('🔧 ActivityService: Erreur 406 détectée, tentative de contournement...');
+          // Erreur 406 détectée, tentative de contournement - logs supprimés pour la propreté
           try {
             // Essayer une requête alternative plus simple
             const { data: fallbackData, error: fallbackError } = await supabase
@@ -37,11 +37,11 @@ export class ActivityService {
               .limit(limit);
 
             if (!fallbackError && fallbackData) {
-              console.log('✅ ActivityService: Contournement réussi pour user_activity');
+              // Contournement réussi - logs supprimés pour la propreté
               return fallbackData as Activity[];
             }
           } catch (fallbackError) {
-            console.error('❌ ActivityService: Contournement échoué:', fallbackError);
+            // Contournement échoué - géré silencieusement
           }
         }
         
@@ -71,7 +71,7 @@ export class ActivityService {
         
         // Si c'est une erreur 406, essayer le contournement
         if (error.code === 'PGRST301' || error.message.includes('406')) {
-          console.log('🔧 ActivityService: Erreur 406 détectée pour getPublicActivity, tentative de contournement...');
+          // Erreur 406 détectée pour getPublicActivity, tentative de contournement - logs supprimés pour la propreté
           try {
             // Essayer une requête alternative plus simple
             const { data: fallbackData, error: fallbackError } = await supabase
@@ -83,11 +83,11 @@ export class ActivityService {
               .limit(limit);
 
             if (!fallbackError && fallbackData) {
-              console.log('✅ ActivityService: Contournement réussi pour getPublicActivity');
+              // Contournement réussi pour getPublicActivity - logs supprimés pour la propreté
               return fallbackData as Activity[];
             }
           } catch (fallbackError) {
-            console.error('❌ ActivityService: Contournement échoué pour getPublicActivity:', fallbackError);
+            // Contournement échoué pour getPublicActivity - géré silencieusement
           }
         }
         
@@ -127,7 +127,7 @@ export class ActivityService {
         
         // Si c'est une erreur 406, essayer le contournement
         if (error.code === 'PGRST301' || error.message.includes('406')) {
-          console.log('🔧 ActivityService: Erreur 406 détectée pour logActivity, tentative de contournement...');
+          // Erreur 406 détectée pour logActivity, tentative de contournement - logs supprimés pour la propreté
           try {
             // Essayer une insertion plus simple sans metadata
             const { data: fallbackData, error: fallbackError } = await supabase
@@ -142,11 +142,11 @@ export class ActivityService {
               .single();
 
             if (!fallbackError && fallbackData) {
-              console.log('✅ ActivityService: Contournement réussi pour logActivity');
+              // Contournement réussi pour logActivity - logs supprimés pour la propreté
               return fallbackData;
             }
           } catch (fallbackError) {
-            console.error('❌ ActivityService: Contournement échoué pour logActivity:', fallbackError);
+            // Contournement échoué pour logActivity - géré silencieusement
           }
         }
         

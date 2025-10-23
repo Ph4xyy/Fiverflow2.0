@@ -33,48 +33,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authReady, setAuthReady] = useState(false);
 
   // Fonction pour gérer les changements d'état d'authentification
-  const handleAuthStateChange = useCallback(async (event: string, session: Session | null) => {
-    console.log('🔐 Auth state changed:', event, session?.user?.id, 'email:', session?.user?.email);
-    
-    setSession(session);
-    setUser(session?.user ?? null);
-    setLoading(false);
-    setAuthReady(true);
-  }, []);
+         const handleAuthStateChange = useCallback(async (event: string, session: Session | null) => {
+           // Auth state changed - logs supprimés pour la propreté
+
+           setSession(session);
+           setUser(session?.user ?? null);
+           setLoading(false);
+           setAuthReady(true);
+         }, []);
 
   // Initialisation de l'écoute des changements d'état d'authentification
   useEffect(() => {
     let mounted = true;
 
     // Récupérer la session actuelle
-    const getInitialSession = async () => {
-      try {
-        console.log('🔐 AuthContext: Récupération de la session initiale...');
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('❌ Erreur 406 détectée lors de la récupération de session:', error);
-          console.error('❌ Détails de l\'erreur:', error.message, error.status, error.statusText);
-        }
-        
-        if (error) {
-          console.error('❌ Erreur lors de la récupération de la session:', error);
-        } else {
-          console.log('🔐 AuthContext: Session récupérée:', session?.user?.id, 'email:', session?.user?.email);
-          if (mounted) {
-            setSession(session);
-            setUser(session?.user ?? null);
-            setAuthReady(true);
-          }
-        }
-      } catch (error) {
-        console.error('❌ Erreur lors de l\'initialisation de l\'auth:', error);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
-    };
+           const getInitialSession = async () => {
+             try {
+               // Récupération de la session initiale - logs supprimés pour la propreté
+               const { data: { session }, error } = await supabase.auth.getSession();
+
+               if (error) {
+                 // Erreur de session - gérée silencieusement
+               }
+
+               if (error) {
+                 // Erreur lors de la récupération de la session - gérée silencieusement
+               } else {
+                 // Session récupérée - logs supprimés pour la propreté
+                 if (mounted) {
+                   setSession(session);
+                   setUser(session?.user ?? null);
+                   setAuthReady(true);
+                 }
+               }
+             } catch (error) {
+               // Erreur lors de l'initialisation de l'auth - gérée silencieusement
+             } finally {
+               if (mounted) {
+                 setLoading(false);
+               }
+             }
+           };
 
     getInitialSession();
 

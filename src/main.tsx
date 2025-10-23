@@ -6,6 +6,7 @@ import App from './App.tsx';
 import './index.css';
 import './utils/cleanAuth'; // Importer l'utilitaire de nettoyage
 import { ReferralTracker } from './services/referralTracker';
+import { easterEgg } from './utils/easterEgg';
 
 /** Initialisation du thème - sera géré par ThemeProvider */
 try {
@@ -15,6 +16,11 @@ try {
 /** Initialisation du tracking des parrainages */
 try {
   ReferralTracker.initialize();
+} catch {}
+
+/** Initialisation du système d'easter egg */
+try {
+  easterEgg.activate();
 } catch {}
 
 /** Pare-chocs global pour éviter l’écran blanc en cas d’erreur non rattrapée */
