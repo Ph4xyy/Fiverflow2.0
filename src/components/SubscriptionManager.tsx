@@ -69,12 +69,12 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
     color: subscription?.color || COLORS[0],
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.amount || !formData.next_renewal_date) {
       return;
     }
-    onSubmit(formData);
+    await onSubmit(formData);
     onClose();
   };
 
@@ -375,7 +375,7 @@ const SubscriptionPreview: React.FC<{
           <div className="flex gap-2">
             <button
               onClick={onToggle}
-              className={`px-4 py-2 border rounded-lg transition-colors ${
+              className={`px-3 py-2 text-sm border rounded-lg transition-colors ${
                 subscription.is_active
                   ? 'bg-red-600 hover:bg-red-700 text-white border-red-600'
                   : 'bg-green-600 hover:bg-green-700 text-white border-green-600'
@@ -383,12 +383,12 @@ const SubscriptionPreview: React.FC<{
             >
               {subscription.is_active ? (
                 <>
-                  <XCircle size={14} className="mr-1 inline" />
+                  <XCircle size={16} className="mr-2 inline" />
                   Désactiver
                 </>
               ) : (
                 <>
-                  <CheckCircle size={14} className="mr-1 inline" />
+                  <CheckCircle size={16} className="mr-2 inline" />
                   Activer
                 </>
               )}
@@ -398,21 +398,21 @@ const SubscriptionPreview: React.FC<{
           <div className="flex gap-2">
             <button
               onClick={onEdit}
-              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200"
+              className="px-3 py-2 text-sm bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200"
             >
-              <Edit2 size={14} className="mr-1 inline" />
+              <Edit2 size={16} className="mr-2 inline" />
               Modifier
             </button>
             <button
               onClick={onDelete}
-              className="px-4 py-2 border rounded-lg transition-colors border-red-600 text-red-400 hover:bg-red-600 hover:text-white"
+              className="px-3 py-2 text-sm border rounded-lg transition-colors border-red-600 text-red-400 hover:bg-red-600 hover:text-white"
             >
-              <Trash2 size={14} className="mr-1 inline" />
+              <Trash2 size={16} className="mr-2 inline" />
               Supprimer
             </button>
             <button
               onClick={onClose}
-              className="px-4 py-2 border rounded-lg transition-colors border-[#1C2230] text-slate-200 hover:bg-[#0E121A]"
+              className="px-3 py-2 text-sm border rounded-lg transition-colors border-[#1C2230] text-slate-200 hover:bg-[#0E121A]"
             >
               Fermer
             </button>
