@@ -55,6 +55,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ReferralsPage from './pages/ReferralsPage';
 import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
+import AIAssistantPage from './pages/AIAssistantPage';
 
 // Pages légales
 import PrivacyPolicy from "./components/PrivacyPolicy";
@@ -152,6 +153,14 @@ function AppContent() {
           <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
           <Route path="/referrals" element={<InstantProtectedRoute><ReferralsPage /></InstantProtectedRoute>} />
 
+          {/* Assistant AI */}
+          <Route path="/assistant" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="launch" pageName="assistant" description="Assistant AI disponible avec Launch">
+                <AIAssistantPage />
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
 
           {/* Administration */}
           <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />

@@ -34,6 +34,7 @@ import {
   Moon,
   Zap,
   Gift,
+  Bot,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -166,8 +167,15 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     },
   ];
 
-  // Section 2: AI (vide pour l'instant)
-  // const aiItems: any[] = [];
+  // Section 2: AI
+  const aiItems = [
+    { 
+      path: '/assistant', 
+      label: 'Assistant', 
+      icon: Bot,
+      restricted: false
+    },
+  ];
 
   // Section 3: Workspace
   const workspaceItems = [
@@ -374,10 +382,10 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               <div className="px-3 sm:px-4 pt-4 mb-2">
                 <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">AI</span>
               </div>
-              <div className="mx-3 sm:mx-4 mt-2">
-                <div className="text-xs text-gray-400 px-3 py-2 rounded-lg bg-[#35414e]">
-                  Coming soon!
-                </div>
+              <div className="space-y-1">
+                {aiItems.map((item) => (
+                  <LinkRow key={item.path} item={item} />
+                ))}
               </div>
 
               {/* -------- Section: Workspace -------- */}
