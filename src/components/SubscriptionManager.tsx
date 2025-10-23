@@ -79,217 +79,193 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
   };
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl bg-gradient-to-br from-[#0E121A] to-[#1a1f2e] border-[#1C2230] text-white overflow-hidden">
-        <div className="relative">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-50"></div>
-          
-          <DialogHeader className="relative z-10 mb-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 grid place-items-center">
-                <CreditCard className="text-white" size={24} />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white">
-                  {subscription ? 'Edit Subscription' : 'Add New Subscription'}
-                </h2>
-                <p className="text-gray-400 mt-1">
-                  {subscription ? 'Update your subscription details' : 'Track your recurring subscriptions'}
-                </p>
-              </div>
-            </div>
-          </DialogHeader>
-          
-          <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
-            {/* Service Information */}
-            <div className="bg-[#1a1f2e]/50 backdrop-blur-sm rounded-2xl p-6 border border-[#2a3441]/50">
-              <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                Service Information
-              </h3>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                    <span className="text-purple-400">*</span>
-                    Service Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-[#0E121A]/80 border border-[#2a3441] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
-                    placeholder="Netflix, Spotify, Adobe Creative Cloud..."
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                    <span className="text-purple-400">*</span>
-                    Provider
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.provider}
-                    onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
-                    className="w-full px-4 py-3 bg-[#0E121A]/80 border border-[#2a3441] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
-                    placeholder="Netflix Inc., Spotify AB, Adobe..."
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6 space-y-3">
-                <label className="text-sm font-medium text-gray-300">Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#0E121A]/80 border border-[#2a3441] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200 resize-none"
-                  placeholder="Brief description of what this subscription includes..."
-                  rows={3}
-                />
-              </div>
-            </div>
-
-            {/* Billing Information */}
-            <div className="bg-[#1a1f2e]/50 backdrop-blur-sm rounded-2xl p-6 border border-[#2a3441]/50">
-              <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-pink-500"></div>
-                Billing Information
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                    <span className="text-purple-400">*</span>
-                    Amount
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">$</span>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.amount}
-                      onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                      className="w-full pl-8 pr-4 py-3 bg-[#0E121A]/80 border border-[#2a3441] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
-                      placeholder="9.99"
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-300">Currency</label>
-                  <select
-                    value={formData.currency}
-                    onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                    className="w-full px-4 py-3 bg-[#0E121A]/80 border border-[#2a3441] rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
-                  >
-                    <option value="USD">USD - US Dollar</option>
-                    <option value="EUR">EUR - Euro</option>
-                    <option value="CAD">CAD - Canadian Dollar</option>
-                    <option value="GBP">GBP - British Pound</option>
-                  </select>
-                </div>
-                
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                    <span className="text-purple-400">*</span>
-                    Billing Cycle
-                  </label>
-                  <select
-                    value={formData.billing_cycle}
-                    onChange={(e) => setFormData({ ...formData, billing_cycle: e.target.value as BillingCycle })}
-                    className="w-full px-4 py-3 bg-[#0E121A]/80 border border-[#2a3441] rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
-                    required
-                  >
-                    {BILLING_CYCLES.map(cycle => (
-                      <option key={cycle.value} value={cycle.value}>{cycle.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                    <span className="text-purple-400">*</span>
-                    Next Renewal Date
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.next_renewal_date}
-                    onChange={(e) => setFormData({ ...formData, next_renewal_date: e.target.value })}
-                    className="w-full px-4 py-3 bg-[#0E121A]/80 border border-[#2a3441] rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-300">Category</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-4 py-3 bg-[#0E121A]/80 border border-[#2a3441] rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
-                  >
-                    {CATEGORIES.map(category => (
-                      <option key={category} value={category}>
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Customization */}
-            <div className="bg-[#1a1f2e]/50 backdrop-blur-sm rounded-2xl p-6 border border-[#2a3441]/50">
-              <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                Customization
-              </h3>
-              
-              <div className="space-y-4">
-                <label className="text-sm font-medium text-gray-300">Choose a color theme</label>
-                <div className="flex flex-wrap gap-3">
-                  {COLORS.map(color => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, color })}
-                      className={`w-12 h-12 rounded-xl border-2 transition-all duration-200 hover:scale-105 ${
-                        formData.color === color ? 'border-white shadow-lg shadow-white/20' : 'border-gray-500 hover:border-gray-300'
-                      }`}
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <DialogFooter className="flex justify-end gap-4 pt-6">
-              <Button
-                type="button"
-                onClick={onClose}
-                className="bg-[#1a1f2e]/50 border-[#2a3441] text-gray-300 hover:bg-[#2a3441] hover:text-white px-6 py-3 rounded-xl transition-all duration-200"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                onClick={handleSubmit}
-                disabled={!formData.name || !formData.amount || !formData.next_renewal_date}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-purple-500/25"
-              >
-                {subscription ? 'Update Subscription' : 'Create Subscription'}
-              </Button>
-            </DialogFooter>
-          </form>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-[#11151D] text-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#1C2230]">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-[#1C2230]">
+          <div>
+            <h2 className="text-xl font-bold">
+              {subscription ? 'Modifier l\'abonnement' : 'Nouvel abonnement'}
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-full p-2 text-slate-400 hover:bg-[#0E121A] hover:text-slate-200 transition-colors"
+          >
+            <X size={24} />
+          </button>
         </div>
-      </DialogContent>
-    </Dialog>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Service Name */}
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-300">
+              Nom du service *
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              placeholder="Netflix, Spotify, Adobe Creative Cloud..."
+              required
+            />
+          </div>
+
+          {/* Provider */}
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-300">
+              Fournisseur *
+            </label>
+            <input
+              type="text"
+              value={formData.provider}
+              onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
+              className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              placeholder="Netflix Inc., Spotify AB, Adobe..."
+              required
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-slate-300">
+              Description
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              placeholder="Description du service..."
+              rows={3}
+            />
+          </div>
+
+          {/* Amount and Currency */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-slate-300">
+                Montant *
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="9.99"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-slate-300">
+                Devise
+              </label>
+              <select
+                value={formData.currency}
+                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              >
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="CAD">CAD</option>
+                <option value="GBP">GBP</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Billing Cycle and Next Renewal */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-slate-300">
+                Cycle de facturation *
+              </label>
+              <select
+                value={formData.billing_cycle}
+                onChange={(e) => setFormData({ ...formData, billing_cycle: e.target.value as BillingCycle })}
+                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                required
+              >
+                {BILLING_CYCLES.map(cycle => (
+                  <option key={cycle.value} value={cycle.value}>{cycle.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-slate-300">
+                Prochain renouvellement *
+              </label>
+              <input
+                type="date"
+                value={formData.next_renewal_date}
+                onChange={(e) => setFormData({ ...formData, next_renewal_date: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Category and Color */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-slate-300">
+                Catégorie
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              >
+                {CATEGORIES.map(category => (
+                  <option key={category} value={category}>
+                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-slate-300">
+                Couleur
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {COLORS.map(color => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, color })}
+                    className={`w-8 h-8 rounded-full border-2 ${
+                      formData.color === color ? 'border-white' : 'border-[#1C2230]'
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </form>
+
+        {/* Footer */}
+        <div className="flex justify-between mt-8 pt-6 border-t border-[#1C2230] px-6 pb-6">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 border rounded-lg transition-colors border-[#1C2230] text-slate-200 hover:bg-[#0E121A]"
+          >
+            Annuler
+          </button>
+
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            disabled={!formData.name || !formData.amount || !formData.next_renewal_date}
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {subscription ? 'Mettre à jour' : 'Créer'}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -335,124 +311,115 @@ const SubscriptionPreview: React.FC<{
   const daysUntilRenewal = getDaysUntilRenewal();
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-[#0E121A] border-[#1C2230] text-white">
-        <DialogHeader className="border-b border-[#1C2230] pb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div 
-                className="w-14 h-14 rounded-xl flex items-center justify-center shadow-lg"
-                style={{ backgroundColor: subscription.color || '#8b5cf6' }}
-              >
-                <CreditCard className="text-white" size={24} />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-white">{subscription.name}</h2>
-                <p className="text-gray-400 text-sm">{subscription.provider}</p>
-              </div>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-[#11151D] text-white rounded-2xl shadow-2xl w-full max-w-lg border border-[#1C2230]">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-[#1C2230]">
+          <div className="flex items-center gap-4">
+            <div 
+              className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
+              style={{ backgroundColor: subscription.color || '#8b5cf6' }}
+            >
+              <CreditCard className="text-white" size={20} />
             </div>
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${subscription.is_active ? 'bg-green-400' : 'bg-red-400'}`}></div>
-              <span className={`text-sm font-medium ${subscription.is_active ? 'text-green-400' : 'text-red-400'}`}>
-                {subscription.is_active ? 'Active' : 'Inactive'}
-              </span>
+            <div>
+              <h2 className="text-lg font-bold">{subscription.name}</h2>
+              <p className="text-slate-400 text-sm">{subscription.provider}</p>
             </div>
           </div>
-        </DialogHeader>
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${subscription.is_active ? 'bg-green-400' : 'bg-red-400'}`}></div>
+            <span className={`text-sm font-medium ${subscription.is_active ? 'text-green-400' : 'text-red-400'}`}>
+              {subscription.is_active ? 'Actif' : 'Inactif'}
+            </span>
+          </div>
+        </div>
 
-        <div className="py-6 space-y-6">
+        {/* Content */}
+        <div className="p-6 space-y-6">
           {/* Description */}
           {subscription.description && (
             <div>
-              <h3 className="text-sm font-medium text-gray-300 mb-2">Description</h3>
-              <p className="text-gray-400 text-sm">{subscription.description}</p>
+              <h3 className="text-sm font-semibold text-slate-300 mb-2">Description</h3>
+              <p className="text-slate-400 text-sm">{subscription.description}</p>
             </div>
           )}
 
           {/* Main Info */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="text-sm font-medium text-gray-300 mb-2">Amount</h3>
-              <p className="text-2xl font-bold text-white">{formatCurrency(subscription.amount, subscription.currency)}</p>
-              <p className="text-xs text-gray-400">{formatBillingCycle(subscription.billing_cycle)}</p>
+              <h3 className="text-sm font-semibold text-slate-300 mb-2">Montant</h3>
+              <p className="text-xl font-bold">{formatCurrency(subscription.amount, subscription.currency)}</p>
+              <p className="text-xs text-slate-400">{formatBillingCycle(subscription.billing_cycle)}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-300 mb-2">Next Renewal</h3>
-              <p className="text-lg font-semibold text-white">{formatDateSafe(subscription.next_renewal_date)}</p>
-              <p className="text-xs text-gray-400">
-                {daysUntilRenewal > 0 ? `${daysUntilRenewal} days remaining` : 'Expired'}
+              <h3 className="text-sm font-semibold text-slate-300 mb-2">Prochain renouvellement</h3>
+              <p className="text-lg font-semibold">{formatDateSafe(subscription.next_renewal_date)}</p>
+              <p className="text-xs text-slate-400">
+                {daysUntilRenewal > 0 ? `${daysUntilRenewal} jours restants` : 'Expiré'}
               </p>
             </div>
           </div>
 
           {/* Category */}
           <div>
-            <h3 className="text-sm font-medium text-gray-300 mb-2">Category</h3>
+            <h3 className="text-sm font-semibold text-slate-300 mb-2">Catégorie</h3>
             <span className="inline-block px-3 py-1 bg-purple-500/20 text-purple-300 text-sm rounded-full">
               {getCategoryDisplay(subscription.category)}
             </span>
           </div>
         </div>
 
-        <DialogFooter className="border-t border-[#1C2230] pt-6">
-          <div className="flex justify-between w-full">
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onToggle}
-                className={`${
-                  subscription.is_active
-                    ? 'bg-red-600 hover:bg-red-700 text-white border-red-600'
-                    : 'bg-green-600 hover:bg-green-700 text-white border-green-600'
-                }`}
-              >
-                {subscription.is_active ? (
-                  <>
-                    <XCircle size={14} className="mr-1" />
-                    Deactivate
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle size={14} className="mr-1" />
-                    Activate
-                  </>
-                )}
-              </Button>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onEdit}
-                className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
-              >
-                <Edit2 size={14} className="mr-1" />
-                Edit
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onDelete}
-                className="bg-red-600 hover:bg-red-700 text-white border-red-600"
-              >
-                <Trash2 size={14} className="mr-1" />
-                Delete
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onClose}
-                className="bg-gray-600 hover:bg-gray-700 text-white border-gray-600"
-              >
-                Close
-              </Button>
-            </div>
+        {/* Footer */}
+        <div className="flex justify-between p-6 border-t border-[#1C2230]">
+          <div className="flex gap-2">
+            <button
+              onClick={onToggle}
+              className={`px-4 py-2 border rounded-lg transition-colors ${
+                subscription.is_active
+                  ? 'bg-red-600 hover:bg-red-700 text-white border-red-600'
+                  : 'bg-green-600 hover:bg-green-700 text-white border-green-600'
+              }`}
+            >
+              {subscription.is_active ? (
+                <>
+                  <XCircle size={14} className="mr-1 inline" />
+                  Désactiver
+                </>
+              ) : (
+                <>
+                  <CheckCircle size={14} className="mr-1 inline" />
+                  Activer
+                </>
+              )}
+            </button>
           </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          
+          <div className="flex gap-2">
+            <button
+              onClick={onEdit}
+              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg shadow-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-200"
+            >
+              <Edit2 size={14} className="mr-1 inline" />
+              Modifier
+            </button>
+            <button
+              onClick={onDelete}
+              className="px-4 py-2 border rounded-lg transition-colors border-red-600 text-red-400 hover:bg-red-600 hover:text-white"
+            >
+              <Trash2 size={14} className="mr-1 inline" />
+              Supprimer
+            </button>
+            <button
+              onClick={onClose}
+              className="px-4 py-2 border rounded-lg transition-colors border-[#1C2230] text-slate-200 hover:bg-[#0E121A]"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
