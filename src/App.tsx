@@ -12,7 +12,8 @@ import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 // Contextes pour la gestion d'état global
-import { GlobalAuthProvider } from './contexts/GlobalAuthProvider';
+import { AuthProvider } from './contexts/AuthContext';
+import { UserDataProvider } from './contexts/UserDataContext';
 import { LoadingProvider } from './contexts/LoadingContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -26,7 +27,6 @@ import AnalyticsWrapper from './components/AnalyticsWrapper';
 import LoadingDiagnostic from './components/LoadingDiagnostic';
 import SubscriptionGuard from './components/SubscriptionGuard';
 import Layout from './components/Layout';
-import NavigationTest from './components/NavigationTest';
 
 // Hook pour le préchargement des données
 import { usePreloadData } from './hooks/usePreloadData';
@@ -35,7 +35,6 @@ import { usePreloadData } from './hooks/usePreloadData';
 import RootRedirect from './components/RootRedirect';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-
 import DashboardExample from './pages/DashboardExample';
 import CalendarPageNew from './pages/CalendarPageNew';
 import PricingPageNew from './pages/PricingPageNew';
@@ -56,6 +55,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ReferralsPage from './pages/ReferralsPage';
 import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
+import AIAssistantPage from './pages/AIAssistantPage';
 
 // Pages légales
 import PrivacyPolicy from "./components/PrivacyPolicy";
@@ -153,14 +153,17 @@ function AppContent() {
           <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
           <Route path="/referrals" element={<InstantProtectedRoute><ReferralsPage /></InstantProtectedRoute>} />
 
+          {/* Assistant AI */}
+          <Route path="/assistant" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="launch" pageName="assistant" description="Assistant AI disponible avec Launch">
+                <AIAssistantPage />
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
 
           {/* Administration */}
           <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-
-          {/* Test de Navigation (développement uniquement) */}
-          {import.meta.env.DEV && (
-            <Route path="/navigation-test" element={<InstantProtectedRoute><NavigationTest /></InstantProtectedRoute>} />
-          )}
 
           {/* Pages légales */}
           <Route path="/terms-of-service" element={<TermsOfService />} />
@@ -207,21 +210,23 @@ function AppContent() {
 function App() {
   return (
     <AppErrorBoundary>
-      <GlobalAuthProvider>
+      <AuthProvider>
         <ThemeProvider>
           <ReferralProvider>
             <Router>
               <AnalyticsWrapper>
                 <LoadingProvider>
                   <CurrencyProvider>
-                    <AppContent />
+                    <UserDataProvider>
+                      <AppContent />
+                    </UserDataProvider>
                   </CurrencyProvider>
                 </LoadingProvider>
               </AnalyticsWrapper>
             </Router>
           </ReferralProvider>
         </ThemeProvider>
-      </GlobalAuthProvider>
+      </AuthProvider>
     </AppErrorBoundary>
   );
 }
