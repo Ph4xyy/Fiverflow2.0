@@ -551,12 +551,12 @@ const SubscriptionManager: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {subscriptions.map((subscription) => (
-              <div
-                key={subscription.id}
-                className="relative bg-[#0B0E14] rounded-xl p-4 border border-[#1C2230] hover:border-[#35414e] transition-all duration-200 cursor-pointer group hover:shadow-lg"
-                style={{ borderLeft: `4px solid ${subscription.color || '#9c68f2'}` }}
-                onClick={() => handleViewSubscription(subscription)}
-              >
+            <div
+              key={subscription.id}
+              className="relative bg-[#35414e] rounded-xl p-4 border border-[#1C2230] hover:border-[#35414e] transition-all duration-200 cursor-pointer group hover:shadow-lg"
+              style={{ borderLeft: `4px solid ${subscription.color || '#9c68f2'}` }}
+              onClick={() => handleViewSubscription(subscription)}
+            >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-white truncate">{subscription.name}</h3>
@@ -608,7 +608,7 @@ const SubscriptionManager: React.FC = () => {
                 </div>
 
                 {showActions === subscription.id && (
-                  <div className="absolute top-2 right-2 bg-[#0B0E14] border border-[#35414e] rounded-xl p-2 shadow-xl z-10">
+                  <div className="absolute top-2 right-2 bg-[#1e2938] border border-[#35414e] rounded-xl p-2 shadow-xl z-10">
                     <div className="flex flex-col gap-1">
                       <button
                         onClick={(e) => {
@@ -616,7 +616,7 @@ const SubscriptionManager: React.FC = () => {
                           setEditingSubscription(subscription);
                           setShowActions(null);
                         }}
-                        className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-[#1C2230] rounded-lg transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-[#35414e] rounded-lg transition-colors"
                       >
                         <Edit2 size={14} />
                         Edit
@@ -626,7 +626,7 @@ const SubscriptionManager: React.FC = () => {
                           e.stopPropagation();
                           handleToggle(subscription.id);
                         }}
-                        className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-[#1C2230] rounded-lg transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-white hover:bg-[#35414e] rounded-lg transition-colors"
                       >
                         {subscription.is_active ? (
                           <>
@@ -656,7 +656,7 @@ const SubscriptionManager: React.FC = () => {
 
                 {/* Click indicator */}
                 <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="text-xs text-[#94a3b8] bg-[#0B0E14] px-2 py-1 rounded-lg border border-[#1C2230]">
+                  <div className="text-xs text-[#94a3b8] bg-[#1e2938] px-2 py-1 rounded-lg border border-[#35414e]">
                     Click to view
                   </div>
                 </div>
