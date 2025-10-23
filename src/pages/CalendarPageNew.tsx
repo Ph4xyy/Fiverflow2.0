@@ -267,19 +267,37 @@ const CalendarPageNew: React.FC = () => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      case 'high': return 'bg-gradient-to-r from-[#f43f5e] to-[#e11d48]';
+      case 'medium': return 'bg-gradient-to-r from-[#f59e0b] to-[#d97706]';
+      case 'low': return 'bg-gradient-to-r from-[#22c55e] to-[#16a34a]';
+      default: return 'bg-gradient-to-r from-[#64748b] to-[#475569]';
+    }
+  };
+
+  const getPriorityBorderColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'border-[#f43f5e]';
+      case 'medium': return 'border-[#f59e0b]';
+      case 'low': return 'border-[#22c55e]';
+      default: return 'border-[#64748b]';
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'meeting': return <Users size={12} />;
-      case 'deadline': return <Clock size={12} />;
-      case 'reminder': return <Bell size={12} />;
-      default: return <CalendarIcon size={12} />;
+      case 'meeting': return <Users size={12} className="text-white" />;
+      case 'deadline': return <Clock size={12} className="text-white" />;
+      case 'reminder': return <Bell size={12} className="text-white" />;
+      default: return <CalendarIcon size={12} className="text-white" />;
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'meeting': return 'bg-gradient-to-r from-[#3b82f6] to-[#2563eb]';
+      case 'deadline': return 'bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed]';
+      case 'reminder': return 'bg-gradient-to-r from-[#06b6d4] to-[#0891b2]';
+      default: return 'bg-gradient-to-r from-[#64748b] to-[#475569]';
     }
   };
 
@@ -539,15 +557,17 @@ const CalendarPageNew: React.FC = () => {
                         {dayEvents.slice(0, 2).map(event => (
                           <div
                             key={event.id}
-                            className={`flex items-center gap-1 p-1 rounded text-xs text-white ${getPriorityColor(event.priority)}`}
+                            className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs text-white shadow-sm border ${getTypeColor(event.type)} ${getPriorityBorderColor(event.priority)} hover:shadow-md transition-all duration-200 cursor-pointer group`}
                           >
-                            {getTypeIcon(event.type)}
-                            <span className="truncate">{event.title}</span>
+                            <div className="flex-shrink-0">
+                              {getTypeIcon(event.type)}
+                            </div>
+                            <span className="truncate font-medium group-hover:font-semibold transition-all duration-200">{event.title}</span>
                           </div>
                         ))}
                         {dayEvents.length > 2 && (
-                          <div className="text-xs text-gray-400">
-                            +{dayEvents.length - 2} more
+                          <div className="text-xs text-[#94a3b8] bg-[#1C2230] px-2 py-1 rounded-lg border border-[#35414e] hover:bg-[#35414e] transition-colors cursor-pointer">
+                            +{dayEvents.length - 2} more events
                           </div>
                         )}
                       </div>
@@ -564,26 +584,42 @@ const CalendarPageNew: React.FC = () => {
             <ModernCard title="Today" icon={<Clock size={20} className="text-white" />}>
               <div className="space-y-3">
                 {getEventsForDate(new Date()).map(event => (
-                  <div key={event.id} className="p-3 bg-[#35414e] rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        {getTypeIcon(event.type)}
-                        <span className="text-sm font-medium text-white">{event.title}</span>
+                  <div 
+                    key={event.id} 
+                    className={`p-4 rounded-xl border shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group ${getTypeColor(event.type)} ${getPriorityBorderColor(event.priority)}`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0">
+                          {getTypeIcon(event.type)}
+                        </div>
+                        <div>
+                          <span className="text-sm font-semibold text-white group-hover:text-white transition-colors">{event.title}</span>
+                          <div className="text-xs text-white/80 mt-1">{event.time}</div>
+                        </div>
                       </div>
-                      <div className={`w-2 h-2 rounded-full ${getPriorityColor(event.priority)}`} />
+                      <div className={`w-3 h-3 rounded-full ${getPriorityColor(event.priority)} shadow-sm`} />
                     </div>
-                    <div className="text-xs text-gray-400">{event.time}</div>
-                    {event.attendees && (
-                      <div className="text-xs text-gray-400 mt-1">
-                        {event.attendees.length} participant(s)
+                    {event.attendees && event.attendees.length > 0 && (
+                      <div className="text-xs text-white/70 bg-white/10 px-2 py-1 rounded-lg inline-block">
+                        👥 {event.attendees.length} participant{event.attendees.length > 1 ? 's' : ''}
+                      </div>
+                    )}
+                    {event.location && (
+                      <div className="text-xs text-white/70 mt-2 flex items-center gap-1">
+                        <MapPin size={10} />
+                        {event.location}
                       </div>
                     )}
                   </div>
                 ))}
                 {getEventsForDate(new Date()).length === 0 && (
-                  <div className="text-center text-gray-400 py-4">
-                    <CalendarIcon size={32} className="mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No events today</p>
+                  <div className="text-center text-[#94a3b8] py-8">
+                    <div className="w-16 h-16 bg-[#1C2230] rounded-full flex items-center justify-center mx-auto mb-3">
+                      <CalendarIcon size={24} className="text-[#64748b]" />
+                    </div>
+                    <p className="text-sm font-medium">No events today</p>
+                    <p className="text-xs text-[#64748b] mt-1">Enjoy your free time!</p>
                   </div>
                 )}
               </div>
@@ -591,26 +627,38 @@ const CalendarPageNew: React.FC = () => {
 
             {/* Statistiques réelles */}
             <ModernCard title="Statistics" icon={<Users size={20} className="text-white" />}>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Total events</span>
-                  <span className="text-lg font-semibold text-white">{events.length}</span>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-[#0B0E14] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#3b82f6] to-[#2563eb]"></div>
+                    <span className="text-sm text-[#94a3b8]">Total events</span>
+                  </div>
+                  <span className="text-lg font-bold text-white">{events.length}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Tasks with deadline</span>
-                  <span className="text-lg font-semibold text-white">
+                <div className="flex items-center justify-between p-3 bg-[#0B0E14] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed]"></div>
+                    <span className="text-sm text-[#94a3b8]">Tasks with deadline</span>
+                  </div>
+                  <span className="text-lg font-bold text-white">
                     {tasks.filter(task => task.due_date).length}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Orders with due_date</span>
-                  <span className="text-lg font-semibold text-white">
+                <div className="flex items-center justify-between p-3 bg-[#0B0E14] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#f59e0b] to-[#d97706]"></div>
+                    <span className="text-sm text-[#94a3b8]">Orders with due_date</span>
+                  </div>
+                  <span className="text-lg font-bold text-white">
                     {orders.filter(order => order.due_date).length}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Events this month</span>
-                  <span className="text-lg font-semibold text-white">
+                <div className="flex items-center justify-between p-3 bg-[#0B0E14] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#06b6d4] to-[#0891b2]"></div>
+                    <span className="text-sm text-[#94a3b8]">Events this month</span>
+                  </div>
+                  <span className="text-lg font-bold text-white">
                     {events.filter(event => {
                       const eventDate = new Date(event.date);
                       const currentMonth = currentDate.getMonth();
@@ -619,15 +667,21 @@ const CalendarPageNew: React.FC = () => {
                     }).length}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Active subscriptions</span>
-                  <span className="text-lg font-semibold text-white">
+                <div className="flex items-center justify-between p-3 bg-[#0B0E14] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#22c55e] to-[#16a34a]"></div>
+                    <span className="text-sm text-[#94a3b8]">Active subscriptions</span>
+                  </div>
+                  <span className="text-lg font-bold text-white">
                     {subscriptions.filter(sub => sub.is_active).length}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Renewals this month</span>
-                  <span className="text-lg font-semibold text-white">
+                <div className="flex items-center justify-between p-3 bg-[#0B0E14] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#f43f5e] to-[#e11d48]"></div>
+                    <span className="text-sm text-[#94a3b8]">Renewals this month</span>
+                  </div>
+                  <span className="text-lg font-bold text-white">
                     {subscriptions.filter(sub => {
                       if (!sub.is_active || !sub.next_renewal_date) return false;
                       const renewalDate = new Date(sub.next_renewal_date);
