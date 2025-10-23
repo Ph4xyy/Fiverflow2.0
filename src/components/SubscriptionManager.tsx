@@ -74,8 +74,13 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
     if (!formData.name || !formData.amount || !formData.next_renewal_date) {
       return;
     }
-    await onSubmit(formData);
-    onClose();
+    try {
+      await onSubmit(formData);
+      onClose();
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      // Ne pas fermer le modal en cas d'erreur
+    }
   };
 
   return (
@@ -431,7 +436,12 @@ const SubscriptionManager: React.FC = () => {
   const [showActions, setShowActions] = useState<string | null>(null);
 
   const handleCreate = async (data: CreateSubscriptionData) => {
-    await createSubscription(data);
+    try {
+      await createSubscription(data);
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      throw error; // Re-throw pour que le formulaire puisse gérer l'erreur
+    }
   };
 
   const handleUpdate = async (data: CreateSubscriptionData) => {

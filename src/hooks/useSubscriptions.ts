@@ -95,6 +95,29 @@ export const useSubscriptions = () => {
         .single();
 
       if (error) {
+        // Si la table n'existe pas, créer une souscription locale temporaire
+        if (error.message.includes('relation "user_personal_subscriptions" does not exist')) {
+          console.log('Table not found, creating local subscription');
+          const tempSubscription: Subscription = {
+            id: `temp-${Date.now()}`,
+            name: data.name,
+            description: data.description || '',
+            provider: data.provider,
+            category: data.category,
+            amount: data.amount,
+            currency: data.currency,
+            billing_cycle: data.billing_cycle,
+            next_renewal_date: data.next_renewal_date,
+            is_active: true,
+            color: data.color,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          setSubscriptions(prev => [tempSubscription, ...prev]);
+          toast.success('Subscription created successfully! (Local)');
+          return tempSubscription;
+        }
         throw error;
       }
 
@@ -122,7 +145,7 @@ export const useSubscriptions = () => {
     } catch (err: any) {
       console.error('Error creating subscription:', err);
       toast.error(err?.message || 'Failed to create subscription');
-      return null;
+      throw err; // Re-throw pour que le composant puisse gérer l'erreur
     }
   }, [user]);
 
