@@ -4,6 +4,7 @@ import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import SubscriptionManager from '../components/SubscriptionManager';
 import { useTasks } from '../hooks/useTasks';
+import { useSubscriptions } from '../hooks/useSubscriptions';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useOrders } from '../hooks/useOrders';
@@ -37,6 +38,7 @@ const CalendarPageNew: React.FC = () => {
   const { user } = useAuth();
   const { tasks, loading: tasksLoading } = useTasks();
   const { orders, loading: ordersLoading } = useOrders();
+  const { subscriptions, loading: subscriptionsLoading } = useSubscriptions();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -141,14 +143,36 @@ const CalendarPageNew: React.FC = () => {
           location: event.location
         }));
 
+        // Convertir les abonnements en événements de renouvellement
+        const subscriptionEvents: Event[] = subscriptions
+          .filter(sub => sub.is_active && sub.next_renewal_date)
+          .map(sub => {
+            console.log('💳 Subscription renewal event:', {
+              id: sub.id,
+              name: sub.name,
+              renewal_date: sub.next_renewal_date,
+              amount: sub.amount
+            });
+            return {
+              id: `subscription-${sub.id}`,
+              title: `💳 ${sub.name} - $${sub.amount}`,
+              date: sub.next_renewal_date!,
+              time: '09:00',
+              type: 'reminder' as const,
+              priority: 'medium' as const,
+              description: `Renouvellement ${sub.billing_cycle} - ${sub.provider}`
+            };
+          });
+
         // Combiner tous les événements
-        const allEvents = [...allTaskEvents, ...orderEvents, ...calendarEventObjects];
+        const allEvents = [...allTaskEvents, ...orderEvents, ...calendarEventObjects, ...subscriptionEvents];
         setEvents(allEvents);
         
         console.log('✅ Calendar events loaded:', {
           tasks: allTaskEvents.length,
           orders: orderEvents.length,
           calendar: calendarEventObjects.length,
+          subscriptions: subscriptionEvents.length,
           total: allEvents.length
         });
         
@@ -177,10 +201,10 @@ const CalendarPageNew: React.FC = () => {
     };
 
     // Charger seulement si les données sont prêtes
-    if (!tasksLoading && !ordersLoading) {
+    if (!tasksLoading && !ordersLoading && !subscriptionsLoading) {
       loadCalendarEvents();
     }
-  }, [user, tasks, orders, tasksLoading, ordersLoading]);
+  }, [user, tasks, orders, subscriptions, tasksLoading, ordersLoading, subscriptionsLoading]);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -281,7 +305,7 @@ const CalendarPageNew: React.FC = () => {
   const days = getDaysInMonth(currentDate);
 
   // Afficher un indicateur de chargement
-  if (loading || tasksLoading || ordersLoading) {
+  if (loading || tasksLoading || ordersLoading || subscriptionsLoading) {
     return (
       <div className="p-6 space-y-6">
           <div className="flex items-center justify-center h-64">
@@ -592,6 +616,24 @@ const CalendarPageNew: React.FC = () => {
                       const currentMonth = currentDate.getMonth();
                       const currentYear = currentDate.getFullYear();
                       return eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
+                    }).length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-400">Active subscriptions</span>
+                  <span className="text-lg font-semibold text-white">
+                    {subscriptions.filter(sub => sub.is_active).length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-400">Renewals this month</span>
+                  <span className="text-lg font-semibold text-white">
+                    {subscriptions.filter(sub => {
+                      if (!sub.is_active || !sub.next_renewal_date) return false;
+                      const renewalDate = new Date(sub.next_renewal_date);
+                      const currentMonth = currentDate.getMonth();
+                      const currentYear = currentDate.getFullYear();
+                      return renewalDate.getMonth() === currentMonth && renewalDate.getFullYear() === currentYear;
                     }).length}
                   </span>
                 </div>
