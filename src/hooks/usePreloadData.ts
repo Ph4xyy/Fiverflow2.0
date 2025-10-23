@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useGlobalAuth } from '../contexts/GlobalAuthProvider';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 /**
@@ -9,7 +9,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
  * - Fonctionne en arrière-plan
  */
 export const usePreloadData = () => {
-  const { user, authReady } = useAuth();
+  const { user, authReady } = useGlobalAuth();
   const preloadedRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
