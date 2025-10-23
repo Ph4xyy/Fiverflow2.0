@@ -324,199 +324,133 @@ const SubscriptionPreview: React.FC<{
     return category.charAt(0).toUpperCase() + category.slice(1);
   };
 
-  const getStatusColor = (isActive: boolean) => {
-    return isActive ? 'text-green-400' : 'text-red-400';
+  const getDaysUntilRenewal = () => {
+    const renewalDate = new Date(subscription.next_renewal_date);
+    const today = new Date();
+    const diffTime = renewalDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
   };
 
-  const getStatusText = (isActive: boolean) => {
-    return isActive ? 'Active' : 'Inactive';
-  };
+  const daysUntilRenewal = getDaysUntilRenewal();
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl bg-gradient-to-br from-[#0E121A] to-[#1a1f2e] border-[#1C2230] text-white overflow-hidden">
-        <div className="relative">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-50"></div>
-          
-          <DialogHeader className="relative z-10 mb-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div 
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg"
-                  style={{ backgroundColor: subscription.color || '#8b5cf6' }}
-                >
-                  <CreditCard className="text-white" size={28} />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white">{subscription.name}</h2>
-                  {subscription.provider && (
-                    <p className="text-gray-400 mt-1">{subscription.provider}</p>
-                  )}
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className={`text-sm font-medium px-3 py-1 rounded-full ${subscription.is_active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                      {getStatusText(subscription.is_active)}
-                    </span>
-                    <span className="text-xs text-gray-500 px-2 py-1 rounded-full bg-gray-500/20">
-                      {getCategoryDisplay(subscription.category)}
-                    </span>
-                  </div>
-                </div>
+      <DialogContent className="max-w-2xl bg-[#0E121A] border-[#1C2230] text-white">
+        <DialogHeader className="border-b border-[#1C2230] pb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div 
+                className="w-14 h-14 rounded-xl flex items-center justify-center shadow-lg"
+                style={{ backgroundColor: subscription.color || '#8b5cf6' }}
+              >
+                <CreditCard className="text-white" size={24} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">{subscription.name}</h2>
+                <p className="text-gray-400 text-sm">{subscription.provider}</p>
               </div>
             </div>
-          </DialogHeader>
-        
-          <div className="relative z-10 space-y-8">
-            {/* Description */}
-            {subscription.description && (
-              <div className="bg-[#1a1f2e]/50 backdrop-blur-sm rounded-2xl p-6 border border-[#2a3441]/50">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  Description
-                </h3>
-                <p className="text-gray-300 leading-relaxed">{subscription.description}</p>
-              </div>
-            )}
-
-            {/* Main Info Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-[#1a1f2e]/50 backdrop-blur-sm rounded-2xl p-6 border border-[#2a3441]/50">
-                <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                  Billing Details
-                </h3>
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-300 mb-2">Amount</h4>
-                    <p className="text-3xl font-bold text-white">
-                      {formatCurrency(subscription.amount, subscription.currency)}
-                    </p>
-                    <p className="text-sm text-gray-400 mt-1">
-                      {formatBillingCycle(subscription.billing_cycle)}
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-300 mb-2">Next Renewal</h4>
-                    <p className="text-xl font-semibold text-white">
-                      {formatDateSafe(subscription.next_renewal_date)}
-                    </p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Calendar size={16} className="text-gray-400" />
-                      <span className="text-sm text-gray-400">
-                        {Math.ceil((new Date(subscription.next_renewal_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days remaining
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-[#1a1f2e]/50 backdrop-blur-sm rounded-2xl p-6 border border-[#2a3441]/50">
-                <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-pink-500"></div>
-                  Subscription Info
-                </h3>
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-300 mb-2">Category</h4>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-500/20 text-purple-300">
-                      {getCategoryDisplay(subscription.category)}
-                    </span>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-300 mb-2">Status</h4>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-3 h-3 rounded-full ${subscription.is_active ? 'bg-green-400' : 'bg-red-400'}`} />
-                      <span className={`font-semibold ${getStatusColor(subscription.is_active)}`}>
-                        {getStatusText(subscription.is_active)}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-300 mb-2">Provider</h4>
-                    <p className="text-white font-medium">{subscription.provider}</p>
-                  </div>
-                </div>
-              </div>
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${subscription.is_active ? 'bg-green-400' : 'bg-red-400'}`}></div>
+              <span className={`text-sm font-medium ${subscription.is_active ? 'text-green-400' : 'text-red-400'}`}>
+                {subscription.is_active ? 'Active' : 'Inactive'}
+              </span>
             </div>
+          </div>
+        </DialogHeader>
 
-            {/* Additional Info */}
-            <div className="bg-[#1a1f2e]/50 backdrop-blur-sm rounded-2xl p-6 border border-[#2a3441]/50">
-              <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                Additional Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-300 mb-2">Created</h4>
-                  <p className="text-white">
-                    {subscription.created_at ? formatDateSafe(subscription.created_at.split('T')[0]) : 'Unknown'}
-                  </p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-300 mb-2">Last Updated</h4>
-                  <p className="text-white">
-                    {subscription.updated_at ? formatDateSafe(subscription.updated_at.split('T')[0]) : 'Unknown'}
-                  </p>
-                </div>
-              </div>
+        <div className="py-6 space-y-6">
+          {/* Description */}
+          {subscription.description && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-300 mb-2">Description</h3>
+              <p className="text-gray-400 text-sm">{subscription.description}</p>
+            </div>
+          )}
+
+          {/* Main Info */}
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-sm font-medium text-gray-300 mb-2">Amount</h3>
+              <p className="text-2xl font-bold text-white">{formatCurrency(subscription.amount, subscription.currency)}</p>
+              <p className="text-xs text-gray-400">{formatBillingCycle(subscription.billing_cycle)}</p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-300 mb-2">Next Renewal</h3>
+              <p className="text-lg font-semibold text-white">{formatDateSafe(subscription.next_renewal_date)}</p>
+              <p className="text-xs text-gray-400">
+                {daysUntilRenewal > 0 ? `${daysUntilRenewal} days remaining` : 'Expired'}
+              </p>
             </div>
           </div>
 
-            <DialogFooter className="flex justify-between w-full pt-8">
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  onClick={onToggle}
-                  className={`${
-                    subscription.is_active
-                      ? 'bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30 px-6 py-3 rounded-xl transition-all duration-200'
-                      : 'bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30 px-6 py-3 rounded-xl transition-all duration-200'
-                  }`}
-                >
-                  {subscription.is_active ? (
-                    <>
-                      <XCircle size={18} className="mr-2" />
-                      Deactivate
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle size={18} className="mr-2" />
-                      Activate
-                    </>
-                  )}
-                </Button>
-              </div>
-              
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  onClick={onEdit}
-                  className="bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30 px-6 py-3 rounded-xl transition-all duration-200"
-                >
-                  <Edit2 size={18} className="mr-2" />
-                  Edit
-                </Button>
-                <Button
-                  type="button"
-                  onClick={onDelete}
-                  className="bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30 px-6 py-3 rounded-xl transition-all duration-200"
-                >
-                  <Trash2 size={18} className="mr-2" />
-                  Delete
-                </Button>
-                <Button
-                  type="button"
-                  onClick={onClose}
-                  className="bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30 px-6 py-3 rounded-xl transition-all duration-200"
-                >
-                  Close
-                </Button>
-              </div>
-            </DialogFooter>
+          {/* Category */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-300 mb-2">Category</h3>
+            <span className="inline-block px-3 py-1 bg-purple-500/20 text-purple-300 text-sm rounded-full">
+              {getCategoryDisplay(subscription.category)}
+            </span>
+          </div>
         </div>
+
+        <DialogFooter className="border-t border-[#1C2230] pt-6">
+          <div className="flex justify-between w-full">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onToggle}
+                className={`${
+                  subscription.is_active
+                    ? 'bg-red-600 hover:bg-red-700 text-white border-red-600'
+                    : 'bg-green-600 hover:bg-green-700 text-white border-green-600'
+                }`}
+              >
+                {subscription.is_active ? (
+                  <>
+                    <XCircle size={14} className="mr-1" />
+                    Deactivate
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle size={14} className="mr-1" />
+                    Activate
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEdit}
+                className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+              >
+                <Edit2 size={14} className="mr-1" />
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onDelete}
+                className="bg-red-600 hover:bg-red-700 text-white border-red-600"
+              >
+                <Trash2 size={14} className="mr-1" />
+                Delete
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onClose}
+                className="bg-gray-600 hover:bg-gray-700 text-white border-gray-600"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
