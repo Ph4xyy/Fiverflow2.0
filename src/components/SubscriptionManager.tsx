@@ -100,7 +100,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
               </div>
             </div>
           </DialogHeader>
-        
+          
           <form onSubmit={handleSubmit} className="relative z-10 space-y-8">
             {/* Service Information */}
             <div className="bg-[#1a1f2e]/50 backdrop-blur-sm rounded-2xl p-6 border border-[#2a3441]/50">
@@ -268,7 +268,6 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
                 </div>
               </div>
             </div>
-        </form>
 
             <DialogFooter className="flex justify-end gap-4 pt-6">
               <Button
@@ -517,7 +516,6 @@ const SubscriptionPreview: React.FC<{
                 </Button>
               </div>
             </DialogFooter>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
