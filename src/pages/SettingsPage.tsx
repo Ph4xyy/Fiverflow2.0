@@ -1263,38 +1263,38 @@ const SettingsPage: React.FC = () => {
             </ModernCard>
           </div>
         </div>
+
+        {/* Modales */}
+        <SkillModal
+          isOpen={isEditingSkill}
+          onClose={() => {
+            setIsEditingSkill(false);
+            setEditingSkill(null);
+          }}
+          onSuccess={() => {
+            // Recharger les skills
+            if (user) {
+              SkillsService.getUserSkills(user.id).then(setSkills);
+            }
+          }}
+          skill={editingSkill}
+        />
+
+        <AwardModal
+          isOpen={isEditingAward}
+          onClose={() => {
+            setIsEditingAward(false);
+            setEditingAward(null);
+          }}
+          onSuccess={() => {
+            // Recharger les awards
+            if (user) {
+              AwardsService.getUserAwards(user.id).then(setAwards);
+            }
+          }}
+          award={editingAward}
+        />
       </div>
-
-      {/* Modales */}
-      <SkillModal
-        isOpen={isEditingSkill}
-        onClose={() => {
-          setIsEditingSkill(false);
-          setEditingSkill(null);
-        }}
-        onSuccess={() => {
-          // Recharger les skills
-          if (user) {
-            SkillsService.getUserSkills(user.id).then(setSkills);
-          }
-        }}
-        skill={editingSkill}
-      />
-
-      <AwardModal
-        isOpen={isEditingAward}
-        onClose={() => {
-          setIsEditingAward(false);
-          setEditingAward(null);
-        }}
-        onSuccess={() => {
-          // Recharger les awards
-          if (user) {
-            AwardsService.getUserAwards(user.id).then(setAwards);
-          }
-        }}
-        award={editingAward}
-      />
   );
 };
 
