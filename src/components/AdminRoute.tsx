@@ -10,7 +10,7 @@ interface AdminRouteProps {
  */
 const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   // 🔥 AUTHENTIFICATION SUPPRIMÉE - Plus de vérification d'admin
-  console.log('🔐 AdminRoute: Auth disabled - allowing access to admin routes')
+  // Auth disabled - allowing access to admin routes - log supprimé pour la propreté
   
   return <>{children}</>
 }

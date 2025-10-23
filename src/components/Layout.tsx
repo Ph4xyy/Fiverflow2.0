@@ -57,13 +57,13 @@ const useIsAdminFromEverywhere = (user: any) => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user) {
-        console.log('🔍 Layout: Pas d\'utilisateur connecté');
+        // Pas d'utilisateur connecté - log supprimé pour la propreté
         setIsAdmin(false);
         setAdminCheckLoading(false);
         return;
       }
 
-      console.log('🔍 Layout: Vérification admin pour user:', user.id);
+      // Vérification admin pour user - log supprimé pour la propreté
 
       try {
         if (!supabase) {
@@ -80,12 +80,12 @@ const useIsAdminFromEverywhere = (user: any) => {
         
         // Si c'est une erreur 406, essayer le contournement
         if (error?.code === 'PGRST301' || error?.message?.includes('406')) {
-          console.log('🔧 Layout: Erreur 406 détectée, tentative de contournement...');
+          // Erreur 406 détectée, tentative de contournement - log supprimé pour la propreté
           try {
             const fallbackData = await handleError406(user.id);
             if (fallbackData) {
               setIsAdmin(fallbackData.is_admin || false);
-              console.log('✅ Layout: Contournement réussi pour la vérification admin');
+              // Contournement réussi pour la vérification admin - log supprimé pour la propreté
             } else {
               setIsAdmin(false);
               console.warn('⚠️ Layout: Contournement échoué, utilisateur non-admin par défaut');

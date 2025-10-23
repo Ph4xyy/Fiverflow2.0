@@ -12,7 +12,7 @@ interface InstantProtectedRouteProps {
  */
 const InstantProtectedRoute: React.FC<InstantProtectedRouteProps> = ({ children }) => {
   // 🔥 AUTHENTIFICATION SUPPRIMÉE - Plus de vérification d'auth
-  console.log('🛡️ InstantProtectedRoute: Auth disabled - allowing access to all routes');
+  // Auth disabled - allowing access to all routes - log supprimé pour la propreté
   
   return <>{children}</>;
 };

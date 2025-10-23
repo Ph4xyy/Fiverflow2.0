@@ -6,7 +6,7 @@ import App from './App.tsx';
 import './index.css';
 import './utils/cleanAuth'; // Importer l'utilitaire de nettoyage
 import { ReferralTracker } from './services/referralTracker';
-import { easterEgg } from './utils/easterEgg';
+import './utils/consoleOverride';
 
 /** Initialisation du thème - sera géré par ThemeProvider */
 try {
@@ -18,10 +18,8 @@ try {
   ReferralTracker.initialize();
 } catch {}
 
-/** Initialisation du système d'easter egg */
-try {
-  easterEgg.activate();
-} catch {}
+/** Initialisation du système de console override */
+// Le système de console override s'initialise automatiquement
 
 /** Pare-chocs global pour éviter l’écran blanc en cas d’erreur non rattrapée */
 class GlobalErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error?: any }> {

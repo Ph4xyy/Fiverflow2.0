@@ -18,7 +18,7 @@ export class ReferralTracker {
 
     if (referralCode && this.isValidReferralCode(referralCode)) {
       this.storeReferralCode(referralCode);
-      console.log('🎯 Referral code detected and stored:', referralCode);
+      // Referral code detected and stored - log supprimé pour la propreté
       return referralCode;
     }
 
@@ -39,7 +39,7 @@ export class ReferralTracker {
       
       document.cookie = `${this.COOKIE_NAME}=${code}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
       
-      console.log('✅ Referral code stored:', code);
+      // Referral code stored - log supprimé pour la propreté
     } catch (error) {
       console.error('Error storing referral code:', error);
     }
@@ -76,7 +76,7 @@ export class ReferralTracker {
     try {
       localStorage.removeItem(this.STORAGE_KEY);
       document.cookie = `${this.COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-      console.log('🧹 Referral code cleared');
+      // Referral code cleared - log supprimé pour la propreté
     } catch (error) {
       console.error('Error clearing referral code:', error);
     }
