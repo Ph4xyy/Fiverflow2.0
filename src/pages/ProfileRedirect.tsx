@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import Layout from '../components/Layout';
+
 import { Loader2 } from 'lucide-react';
 
 const ProfileRedirect: React.FC = () => {
@@ -44,8 +44,7 @@ const ProfileRedirect: React.FC = () => {
   }, [user, navigate]);
 
   return (
-    <Layout>
-      <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400">
@@ -53,7 +52,6 @@ const ProfileRedirect: React.FC = () => {
           </p>
         </div>
       </div>
-    </Layout>
   );
 };
 

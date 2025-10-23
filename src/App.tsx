@@ -26,8 +26,7 @@ import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
 import LoadingDiagnostic from './components/LoadingDiagnostic';
 import SubscriptionGuard from './components/SubscriptionGuard';
-import NavigationWithConversation from './components/NavigationWithConversation';
-import { ConversationProvider } from './components/ConversationManager';
+import Layout from './components/Layout';
 
 // Hook pour le préchargement des données
 import { usePreloadData } from './hooks/usePreloadData';
@@ -37,11 +36,9 @@ import RootRedirect from './components/RootRedirect';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardExample from './pages/DashboardExample';
-import ProtectedRoute from './components/ProtectedRoute';
 import CalendarPageNew from './pages/CalendarPageNew';
 import PricingPageNew from './pages/PricingPageNew';
 import WorkboardPage from './pages/TasksPage';
-import ProfilePageNew from './pages/ProfilePageNew';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import ProfileRedirect from './pages/ProfileRedirect';
 import ProfileUsername from './pages/ProfileUsername';
@@ -80,10 +77,9 @@ function AppContent() {
   usePreloadData();
 
   return (
-    <ConversationProvider>
-      <NavigationWithConversation>
-        <Suspense fallback={null}>
-          <Routes>
+    <Layout>
+      <Suspense fallback={null}>
+        <Routes>
           {/* Redirection racine intelligente */}
           <Route path="/" element={<RootRedirect />} />
           
@@ -156,6 +152,7 @@ function AppContent() {
           <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
           <Route path="/referrals" element={<InstantProtectedRoute><ReferralsPage /></InstantProtectedRoute>} />
 
+
           {/* Administration */}
           <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
 
@@ -193,8 +190,7 @@ function AppContent() {
       
       {/* Diagnostic de chargement - visible avec Ctrl+Shift+L */}
       <LoadingDiagnostic />
-      </NavigationWithConversation>
-    </ConversationProvider>
+    </Layout>
   );
 }
 

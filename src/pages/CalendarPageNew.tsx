@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '../components/Layout';
+
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import SubscriptionManager from '../components/SubscriptionManager';
@@ -283,8 +283,7 @@ const CalendarPageNew: React.FC = () => {
   // Afficher un indicateur de chargement
   if (loading || tasksLoading || ordersLoading) {
     return (
-      <Layout>
-        <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
@@ -292,13 +291,11 @@ const CalendarPageNew: React.FC = () => {
             </div>
           </div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -608,7 +605,6 @@ const CalendarPageNew: React.FC = () => {
           <SubscriptionManager />
         </div>
       </div>
-    </Layout>
   );
 };
 

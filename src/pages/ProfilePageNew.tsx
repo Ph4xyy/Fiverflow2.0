@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
-import MessagingSystem from '../components/MessagingSystem';
 import ThemeSelector from '../components/ThemeSelector';
 import StatusSelector from '../components/StatusSelector';
 import ImageUpload from '../components/ImageUpload';
@@ -15,8 +13,6 @@ import { AwardsService, Award as UserAward } from '../services/awardsService';
 import { ActivityService, Activity as UserActivity } from '../services/activityService';
 import { StatisticsService } from '../services/statisticsService';
 import { useProfile } from '../hooks/useProfile';
-import { useConversationManager } from '../components/ConversationManager';
-import { useNavigate } from 'react-router-dom';
 // import ProjectCard from '../components/ProjectCard';
 // import SocialLinks from '../components/SocialLinks';
 import { 
@@ -25,7 +21,6 @@ import {
   Calendar, 
   Users, 
   Star, 
-  MessageSquare, 
   Share2, 
   Plus,
   Globe,
@@ -60,22 +55,16 @@ interface ProfilePageNewProps {
 
 const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   
   // Utiliser le hook useProfile pour récupérer les données
   const { 
     profileData: profileDataFromHook, 
-    loading: profileLoading, 
-    error: profileError, 
     isOwnProfile 
   } = useProfile(username);
   
-  // Hook pour gérer les conversations
-  const { startConversationWithUser } = useConversationManager();
   const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'activity'>('overview');
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
-  const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   // isOwnProfile vient maintenant du hook useProfile
   const [isAdmin, setIsAdmin] = useState(false);
   // const [isLoading, setIsLoading] = useState(false);
@@ -500,20 +489,6 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
     }
   };
 
-  // Fonction pour démarrer une conversation
-  const handleStartConversation = async () => {
-    if (!profileDataFromHook || !user) return;
-    
-    const targetUserId = profileDataFromHook.user_id;
-    const targetUserName = profileDataFromHook.public_data?.full_name || profileData.full_name;
-    const targetUserUsername = profileDataFromHook.public_data?.username || profileData.username;
-    
-    try {
-      await startConversationWithUser(targetUserId, targetUserName, targetUserUsername);
-    } catch (error) {
-      console.error('Erreur lors du démarrage de la conversation:', error);
-    }
-  };
 
   const handleSaveSettings = async () => {
     if (!user) return;
@@ -597,8 +572,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
   // recentActivity supprimé - utilise maintenant les vraies données
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6">
         {/* Header Profile */}
         <ModernCard className="relative overflow-hidden p-0">
           {/* Background gradient */}
@@ -762,14 +736,6 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                     </>
                   ) : (
                     <>
-                      <ModernButton 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleStartConversation}
-                      >
-                        <MessageSquare size={16} className="mr-2" />
-                        Message
-                      </ModernButton>
                       <ModernButton variant="outline" size="sm">
                         <Share2 size={16} className="mr-2" />
                         Share
@@ -1255,21 +1221,6 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
             </>
           )}
 
-        {/* Messaging System */}
-        {isMessagingOpen && (
-          <ModernCard>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">Messages</h3>
-              <button 
-                onClick={() => setIsMessagingOpen(false)}
-                className="p-2 hover:bg-[#35414e] rounded-lg transition-colors"
-              >
-                <X size={20} className="text-gray-400" />
-              </button>
-            </div>
-            <MessagingSystem />
-          </ModernCard>
-        )}
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -1613,60 +1564,11 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 
 // Gestion des états de chargement et d'erreur
 const ProfilePageNewWithErrorHandling: React.FC<ProfilePageNewProps> = (props) => {
-  const { profileData, loading, error, isOwnProfile } = useProfile(props.username);
-  const navigate = useNavigate();
-
-  if (loading) {
-    return (
-      <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">Chargement du profil...</p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (error) {
-    return (
-      <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-8 max-w-md">
-              <div className="text-red-500 mb-4">
-                <X className="h-12 w-12 mx-auto" />
-              </div>
-              <h1 className="text-2xl font-bold text-red-700 dark:text-red-400 mb-2">
-                {error}
-              </h1>
-              <p className="text-red-600 dark:text-red-300 mb-6">
-                {error === 'Profil introuvable' 
-                  ? 'Ce profil n\'existe pas ou a été supprimé.'
-                  : 'Une erreur est survenue lors du chargement du profil.'
-                }
-              </p>
-              <ModernButton
-                onClick={() => navigate('/')}
-                variant="primary"
-                size="md"
-              >
-                Retour à l'accueil
-              </ModernButton>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
   return <ProfilePageNew {...props} />;
 };
 

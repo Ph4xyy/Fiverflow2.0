@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '../components/Layout';
+
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import { 
@@ -469,17 +469,14 @@ const ProfileSettingsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#9c68f2]"></div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="p-6">
+    <div className="p-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <button className="p-2 hover:bg-[#35414e] rounded-lg transition-colors">
@@ -548,7 +545,6 @@ const ProfileSettingsPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 

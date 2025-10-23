@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Layout from '../components/Layout';
 
 import { Plus, Search, Copy, Edit, Trash2, Eye } from 'lucide-react';
 
@@ -50,8 +49,7 @@ const TemplatesPage: React.FC = () => {
   const categories = [...new Set(templates.map(t => t.category))];
 
   return (
-    <Layout>
-      <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-0">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{'Message Templates'}</h1>
@@ -158,7 +156,6 @@ placeholder={'Search templates...'}
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import Layout from '../components/Layout';
+
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import { useAuth } from '../contexts/AuthContext';
@@ -1167,20 +1167,17 @@ const SettingsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="p-6 flex items-center justify-center min-h-[400px]">
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <Loader2 size={48} className="mx-auto text-[#9c68f2] animate-spin mb-4" />
             <p className="text-gray-400">Chargement des paramètres...</p>
           </div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="p-6">
+    <div className="p-6">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <Settings size={24} className="text-[#9c68f2]" />
@@ -1266,39 +1263,38 @@ const SettingsPage: React.FC = () => {
             </ModernCard>
           </div>
         </div>
+
+        {/* Modales */}
+        <SkillModal
+          isOpen={isEditingSkill}
+          onClose={() => {
+            setIsEditingSkill(false);
+            setEditingSkill(null);
+          }}
+          onSuccess={() => {
+            // Recharger les skills
+            if (user) {
+              SkillsService.getUserSkills(user.id).then(setSkills);
+            }
+          }}
+          skill={editingSkill}
+        />
+
+        <AwardModal
+          isOpen={isEditingAward}
+          onClose={() => {
+            setIsEditingAward(false);
+            setEditingAward(null);
+          }}
+          onSuccess={() => {
+            // Recharger les awards
+            if (user) {
+              AwardsService.getUserAwards(user.id).then(setAwards);
+            }
+          }}
+          award={editingAward}
+        />
       </div>
-
-      {/* Modales */}
-      <SkillModal
-        isOpen={isEditingSkill}
-        onClose={() => {
-          setIsEditingSkill(false);
-          setEditingSkill(null);
-        }}
-        onSuccess={() => {
-          // Recharger les skills
-          if (user) {
-            SkillsService.getUserSkills(user.id).then(setSkills);
-          }
-        }}
-        skill={editingSkill}
-      />
-
-      <AwardModal
-        isOpen={isEditingAward}
-        onClose={() => {
-          setIsEditingAward(false);
-          setEditingAward(null);
-        }}
-        onSuccess={() => {
-          // Recharger les awards
-          if (user) {
-            AwardsService.getUserAwards(user.id).then(setAwards);
-          }
-        }}
-        award={editingAward}
-      />
-    </Layout>
   );
 };
 

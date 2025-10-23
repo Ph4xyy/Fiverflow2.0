@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
-import MessagingSystem from '../components/MessagingSystem';
 import ThemeSelector from '../components/ThemeSelector';
 import StatusSelector from '../components/StatusSelector';
 import ImageUpload from '../components/ImageUpload';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 import { ProfileService, ProfileData, PrivacySettings } from '../services/profileService';
 import { ProjectsService, Project as UserProject } from '../services/projectsService';
 import { SkillsService, Skill as UserSkill } from '../services/skillsService';
@@ -21,7 +20,6 @@ import {
   Calendar, 
   Users, 
   Star, 
-  MessageSquare, 
   Share2, 
   Plus,
   Globe,
@@ -62,10 +60,10 @@ interface Achievement {
 
 const ProfilePageNewClean: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'activity'>('overview');
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
-  const [isMessagingOpen, setIsMessagingOpen] = useState(false);
   const [isOwnProfile] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -214,19 +212,17 @@ const ProfilePageNewClean: React.FC = () => {
     }
   };
 
+
   if (isLoading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#9c68f2]"></div>
-        </div>
-      </Layout>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#9c68f2]"></div>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6">
         {/* Header Profile */}
         <ModernCard className="relative overflow-hidden p-0">
           <div className="absolute inset-0 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] opacity-10" />
@@ -355,14 +351,6 @@ const ProfilePageNewClean: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <ModernButton 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setIsMessagingOpen(!isMessagingOpen)}
-                      >
-                        <MessageSquare size={16} className="mr-2" />
-                        Message
-                      </ModernButton>
                       <ModernButton size="sm">
                         <Share2 size={16} className="mr-2" />
                         Suivre
@@ -655,7 +643,6 @@ const ProfilePageNewClean: React.FC = () => {
                 <X size={20} className="text-gray-400" />
               </button>
             </div>
-            <MessagingSystem />
           </ModernCard>
         )}
 
@@ -840,7 +827,7 @@ const ProfilePageNewClean: React.FC = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

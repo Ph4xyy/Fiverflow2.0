@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '../components/Layout';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import { useAuth } from '../contexts/AuthContext';
@@ -456,8 +455,7 @@ const AdminDashboard: React.FC = () => {
   // Si l'utilisateur n'est pas admin, afficher un message d'erreur
   if (adminCheckLoading) {
     return (
-      <Layout>
-        <div className="p-6">
+      <div className="p-6">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <Activity className="w-8 h-8 animate-spin text-[#9c68f2] mx-auto mb-4" />
@@ -465,14 +463,12 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-      </Layout>
     );
   }
 
   if (!isAdmin) {
     return (
-      <Layout>
-        <div className="p-6">
+      <div className="p-6">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
@@ -481,13 +477,11 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
-      </Layout>
     );
   }
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -1075,7 +1069,6 @@ const AdminDashboard: React.FC = () => {
           </div>
         )}
       </div>
-    </Layout>
   );
 };
 
