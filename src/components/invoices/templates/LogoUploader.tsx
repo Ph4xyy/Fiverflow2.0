@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-// storage.ts supprimé lors du nettoyage - fonctionnalité désactivée
+import { getFileUrl, deleteFile } from "@/lib/storage";
 import toast from "react-hot-toast";
 
 type Props = {

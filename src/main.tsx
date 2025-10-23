@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 
 import App from './App.tsx';
 import './index.css';
-// cleanAuth.ts supprimé lors du nettoyage - plus nécessaire
+import './utils/cleanAuth'; // Importer l'utilitaire de nettoyage
 import { ReferralTracker } from './services/referralTracker';
 import './utils/consoleOverride';
 

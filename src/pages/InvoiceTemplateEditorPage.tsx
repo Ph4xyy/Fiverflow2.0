@@ -8,7 +8,7 @@ import type { InvoiceTemplate, TemplateSchema } from "../types/invoiceTemplate";
 import TemplateStylePanel from "../components/invoices/templates/TemplateStylePanel";
 import LogoUploader from "../components/invoices/templates/LogoUploader";
 import { renderInvoiceWithTemplateToPdf } from "../utils/invoiceTemplate";
-// storage.ts supprimé lors du nettoyage - fonctionnalité désactivée
+import { getFileUrl } from "../lib/storage";
 import toast from "react-hot-toast";
 
 const getSampleData = () => ({
