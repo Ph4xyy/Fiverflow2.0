@@ -12,7 +12,8 @@ import {
   CreditCard,
   MoreVertical,
   CheckCircle,
-  XCircle
+  XCircle,
+  X
 } from 'lucide-react';
 import { formatDateSafe } from '@/utils/dateUtils';
 
