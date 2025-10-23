@@ -98,7 +98,7 @@ const ProfilePageNewClean: React.FC = () => {
     { id: 'linkedin', name: 'LinkedIn', url: '', icon: <Globe size={20} />, color: '#0077b5' },
     { id: 'twitter', name: 'Twitter', url: '', icon: <Globe size={20} />, color: '#1da1f2' },
     { id: 'discord', name: 'Discord', url: '', icon: <Globe size={20} />, color: '#7289da' },
-    { id: 'website', name: 'Site web', url: '', icon: <Globe size={20} />, color: '#6c757d' }
+    { id: 'website', name: 'Website', url: '', icon: <Globe size={20} />, color: '#6c757d' }
   ]);
 
   // Charger les données du profil
@@ -191,7 +191,7 @@ const ProfilePageNewClean: React.FC = () => {
       
       if (success && privacySuccess) {
         setIsSettingsMenuOpen(false);
-        console.log('Paramètres sauvegardés avec succès');
+        console.log('Settings saved successfully');
       }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde des paramètres:', error);
@@ -397,7 +397,7 @@ const ProfilePageNewClean: React.FC = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Titre professionnel
+                          Professional Title
                         </label>
                         <input
                           type="text"
@@ -438,7 +438,7 @@ const ProfilePageNewClean: React.FC = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Site web
+                          Website
                         </label>
                         <input
                           type="url"
@@ -513,7 +513,7 @@ const ProfilePageNewClean: React.FC = () => {
                         }}
                       >
                         <Settings size={16} className="mr-2" />
-                        Paramètres avancés
+                        Advanced Settings
                       </ModernButton>
                       <button 
                         onClick={() => setIsSettingsMenuOpen(false)}
@@ -543,7 +543,7 @@ const ProfilePageNewClean: React.FC = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Téléphone
+                          Phone
                         </label>
                         <input
                           type="tel"
@@ -652,7 +652,7 @@ const ProfilePageNewClean: React.FC = () => {
             <div className="relative">
               <div>
                 <p className="text-2xl font-bold text-white">{projects.length}</p>
-                <p className="text-gray-400 text-sm">Projets</p>
+                <p className="text-gray-400 text-sm">Projects</p>
               </div>
               <Briefcase size={20} className="absolute top-0 right-0 text-[#9c68f2]" />
             </div>
