@@ -786,7 +786,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Titre professionnel
+                    Professional Title
                   </label>
                   <input
                     type="text"
@@ -798,7 +798,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Lieu
+                    Location
                   </label>
                   <input
                     type="text"
@@ -810,7 +810,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Site web
+                    Website
                   </label>
                   <input
                     type="url"
@@ -956,7 +956,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Titre professionnel
+                          Professional Title
                         </label>
                         <input
                           type="text"
@@ -968,7 +968,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Lieu
+                          Location
                         </label>
                         <input
                           type="text"
@@ -1485,7 +1485,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                   <div className="flex items-center gap-3">
                     <Globe size={16} className="text-gray-400" />
                     <a href={socialNetworks.website.startsWith('http') ? socialNetworks.website : `https://${socialNetworks.website}`} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9c68f2] hover:text-white transition-colors">
-                      Site web
+                      Website
                     </a>
                   </div>
                 )}

@@ -347,6 +347,13 @@ const OrdersPageModern: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Orders</h1>
+          <p className="text-gray-400">Track and manage your orders</p>
+        </div>
+      </div>
       {/* Header with Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className={`${cardClass} p-4`}>

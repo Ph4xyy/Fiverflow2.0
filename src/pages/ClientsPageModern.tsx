@@ -136,21 +136,98 @@ const ClientsPageModern: React.FC = () => {
     loadDistincts();
   }, [authReady, user]);
 
-  // 🔥 HOOK DE DONNÉES INSTANTANÉES
-  const { data: clients, loading, error, refetch } = useInstantPageData<ClientRow>({
-    table: 'clients',
-    select: 'id, name, company_name, platform, email_primary, country, client_status, created_at',
-    filters: {
-      search: debouncedSearch,
-      status,
-      platform,
-      country,
-    },
-    page,
-    pageSize: PAGE_SIZE,
-    onTotalChange: setTotal,
-    lastFetchedUserIdRef,
-  });
+  // Data
+  const [clients, setClients] = useState<ClientRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load clients
+  useEffect(() => {
+    const loadClients = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        if (!isSupabaseConfigured || !supabase) {
+          // Mock data for development
+          const mockClients: ClientRow[] = [
+            {
+              id: '1',
+              name: 'John Doe',
+              company_name: 'Acme Corp',
+              platform: 'Fiverr',
+              email_primary: 'john@acme.com',
+              country: 'United States',
+              client_status: 'active',
+              created_at: '2024-01-15'
+            },
+            {
+              id: '2',
+              name: 'Jane Smith',
+              company_name: 'Tech Solutions',
+              platform: 'Upwork',
+              email_primary: 'jane@tech.com',
+              country: 'Canada',
+              client_status: 'prospect',
+              created_at: '2024-01-20'
+            }
+          ];
+          setClients(mockClients);
+          setTotal(mockClients.length);
+          return;
+        }
+
+        let query = supabase
+          .from('clients')
+          .select('id, name, company_name, platform, email_primary, country, client_status, created_at', { count: 'exact' })
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        // Apply filters
+        if (debouncedSearch) {
+          query = query.or(`name.ilike.%${debouncedSearch}%,company_name.ilike.%${debouncedSearch}%,email_primary.ilike.%${debouncedSearch}%`);
+        }
+        if (status) {
+          query = query.eq('client_status', status);
+        }
+        if (platform) {
+          query = query.eq('platform', platform);
+        }
+        if (country) {
+          query = query.eq('country', country);
+        }
+
+        // Apply pagination
+        const from = (page - 1) * PAGE_SIZE;
+        const to = from + PAGE_SIZE - 1;
+        query = query.range(from, to);
+
+        const { data, error, count } = await query;
+
+        if (error) throw error;
+
+        setClients(data || []);
+        setTotal(count || 0);
+      } catch (err: any) {
+        console.error('Error loading clients:', err);
+        setError(err.message || 'Failed to load clients');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadClients();
+  }, [user, debouncedSearch, status, platform, country, page]);
+
+  const refetch = useCallback(() => {
+    // Reload clients
+    window.location.reload();
+  }, []);
 
   // Open create modal
   const openCreate = useCallback(() => {
@@ -282,6 +359,13 @@ const ClientsPageModern: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Clients</h1>
+          <p className="text-gray-400">Manage your client relationships</p>
+        </div>
+      </div>
       {/* Header with Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className={`${cardClass} p-4`}>
