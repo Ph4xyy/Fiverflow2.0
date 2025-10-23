@@ -238,19 +238,31 @@ export const checkSupabaseHealth = async (): Promise<{
       }
     }
 
-    // Test d'authentification si utilisateur connecté
-    if (sessionData?.session?.user) {
-      const { error: userError } = await supabase
-        .from('user_profiles')
-        .select('id')
-        .eq('user_id', sessionData.session.user.id)
-        .single();
+      // Test d'authentification si utilisateur connecté
+      if (sessionData?.session?.user) {
+        const { error: userError } = await supabase
+          .from('user_profiles')
+          .select('id')
+          .eq('user_id', sessionData.session.user.id)
+          .single();
 
-      if (userError) {
-        issues.push(`Erreur de profil utilisateur: ${userError.message}`);
-        recommendations.push('Vérifiez les politiques RLS pour user_profiles');
+        if (userError) {
+          issues.push(`Erreur de profil utilisateur: ${userError.message}`);
+          recommendations.push('Vérifiez les politiques RLS pour user_profiles');
+        }
+
+        // Test de la table user_activity
+        const { error: activityError } = await supabase
+          .from('user_activity')
+          .select('id')
+          .eq('user_id', sessionData.session.user.id)
+          .limit(1);
+
+        if (activityError) {
+          issues.push(`Erreur de user_activity: ${activityError.message}`);
+          recommendations.push('Vérifiez les politiques RLS pour user_activity');
+        }
       }
-    }
 
   } catch (error) {
     issues.push(`Erreur inattendue: ${error}`);

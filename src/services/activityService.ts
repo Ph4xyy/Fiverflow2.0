@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { handleError406 } from '../utils/errorDiagnostic';
 
 export interface Activity {
   id: string;
@@ -22,6 +23,28 @@ export class ActivityService {
 
       if (error) {
         console.error('Erreur lors du chargement de l\'activité:', error);
+        
+        // Si c'est une erreur 406, essayer le contournement
+        if (error.code === 'PGRST301' || error.message.includes('406')) {
+          console.log('🔧 ActivityService: Erreur 406 détectée, tentative de contournement...');
+          try {
+            // Essayer une requête alternative plus simple
+            const { data: fallbackData, error: fallbackError } = await supabase
+              .from('user_activity')
+              .select('id, user_id, type, title, created_at')
+              .eq('user_id', userId)
+              .order('created_at', { ascending: false })
+              .limit(limit);
+
+            if (!fallbackError && fallbackData) {
+              console.log('✅ ActivityService: Contournement réussi pour user_activity');
+              return fallbackData as Activity[];
+            }
+          } catch (fallbackError) {
+            console.error('❌ ActivityService: Contournement échoué:', fallbackError);
+          }
+        }
+        
         // Retourner un tableau vide au lieu de lancer une erreur
         return [];
       }
@@ -34,20 +57,49 @@ export class ActivityService {
   }
 
   static async getPublicActivity(userId: string, limit: number = 20): Promise<Activity[]> {
-    const { data, error } = await supabase
-      .from('user_activity')
-      .select('*')
-      .eq('user_id', userId)
-      .in('type', ['project_created', 'project_liked', 'skill_added'])
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    try {
+      const { data, error } = await supabase
+        .from('user_activity')
+        .select('*')
+        .eq('user_id', userId)
+        .in('type', ['project_created', 'project_liked', 'skill_added'])
+        .order('created_at', { ascending: false })
+        .limit(limit);
 
-    if (error) {
+      if (error) {
+        console.error('Erreur lors du chargement de l\'activité publique:', error);
+        
+        // Si c'est une erreur 406, essayer le contournement
+        if (error.code === 'PGRST301' || error.message.includes('406')) {
+          console.log('🔧 ActivityService: Erreur 406 détectée pour getPublicActivity, tentative de contournement...');
+          try {
+            // Essayer une requête alternative plus simple
+            const { data: fallbackData, error: fallbackError } = await supabase
+              .from('user_activity')
+              .select('id, user_id, type, title, created_at')
+              .eq('user_id', userId)
+              .in('type', ['project_created', 'project_liked', 'skill_added'])
+              .order('created_at', { ascending: false })
+              .limit(limit);
+
+            if (!fallbackError && fallbackData) {
+              console.log('✅ ActivityService: Contournement réussi pour getPublicActivity');
+              return fallbackData as Activity[];
+            }
+          } catch (fallbackError) {
+            console.error('❌ ActivityService: Contournement échoué pour getPublicActivity:', fallbackError);
+          }
+        }
+        
+        // Retourner un tableau vide au lieu de lancer une erreur
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
       console.error('Erreur lors du chargement de l\'activité publique:', error);
-      throw error;
+      return [];
     }
-
-    return data || [];
   }
 
   static async logActivity(
@@ -56,25 +108,57 @@ export class ActivityService {
     title: string,
     description: string,
     metadata?: any
-  ): Promise<Activity> {
-    const { data, error } = await supabase
-      .from('user_activity')
-      .insert([{
-        user_id: userId,
-        type,
-        title,
-        description,
-        metadata
-      }])
-      .select()
-      .single();
+  ): Promise<Activity | null> {
+    try {
+      const { data, error } = await supabase
+        .from('user_activity')
+        .insert([{
+          user_id: userId,
+          type,
+          title,
+          description,
+          metadata
+        }])
+        .select()
+        .single();
 
-    if (error) {
+      if (error) {
+        console.error('Erreur lors de l\'enregistrement de l\'activité:', error);
+        
+        // Si c'est une erreur 406, essayer le contournement
+        if (error.code === 'PGRST301' || error.message.includes('406')) {
+          console.log('🔧 ActivityService: Erreur 406 détectée pour logActivity, tentative de contournement...');
+          try {
+            // Essayer une insertion plus simple sans metadata
+            const { data: fallbackData, error: fallbackError } = await supabase
+              .from('user_activity')
+              .insert([{
+                user_id: userId,
+                type,
+                title,
+                description
+              }])
+              .select()
+              .single();
+
+            if (!fallbackError && fallbackData) {
+              console.log('✅ ActivityService: Contournement réussi pour logActivity');
+              return fallbackData;
+            }
+          } catch (fallbackError) {
+            console.error('❌ ActivityService: Contournement échoué pour logActivity:', fallbackError);
+          }
+        }
+        
+        // Retourner null au lieu de lancer une erreur
+        return null;
+      }
+
+      return data;
+    } catch (error) {
       console.error('Erreur lors de l\'enregistrement de l\'activité:', error);
-      throw error;
+      return null;
     }
-
-    return data;
   }
 
   static async logProjectCreated(projectId: string, projectTitle: string): Promise<void> {
