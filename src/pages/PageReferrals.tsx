@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useReferral } from '../contexts/ReferralContext';
-import { useTranslation } from '../hooks/useTranslation';
 
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
@@ -36,7 +35,6 @@ import {
 import { toast } from 'react-hot-toast';
 
 const PageReferrals: React.FC = () => {
-  const { t } = useTranslation();
   const { user } = useAuth();
   const { referralCode, referrerInfo, applyReferralCode } = useReferral();
   // Données mockées pour éviter les erreurs

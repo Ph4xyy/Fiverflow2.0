@@ -162,8 +162,8 @@ const PagePricing: React.FC = () => {
               Yearly
             </span>
             {!isYearly && (
-              <div className="text-green-400 text-sm font-medium">
-                Save 20% on yearly subscription
+              <div className="text-white text-sm">
+                Save <span className="font-bold">20%</span> on yearly subscription
               </div>
             )}
           </div>

@@ -18,7 +18,6 @@ import { LoadingProvider } from './contexts/LoadingContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ReferralProvider } from './contexts/ReferralContext';
-import { TranslationProvider } from './contexts/TranslationContext';
 
 // Composants de protection et d'interface
 import InstantProtectedRoute from './components/InstantProtectedRoute';
@@ -220,19 +219,17 @@ function App() {
       <AuthProvider>
         <ThemeProvider>
           <ReferralProvider>
-            <TranslationProvider>
-              <Router>
-                <AnalyticsWrapper>
-                  <LoadingProvider>
-                    <CurrencyProvider>
-                      <UserDataProvider>
-                        <AppContent />
-                      </UserDataProvider>
-                    </CurrencyProvider>
-                  </LoadingProvider>
-                </AnalyticsWrapper>
-              </Router>
-            </TranslationProvider>
+            <Router>
+              <AnalyticsWrapper>
+                <LoadingProvider>
+                  <CurrencyProvider>
+                    <UserDataProvider>
+                      <AppContent />
+                    </UserDataProvider>
+                  </CurrencyProvider>
+                </LoadingProvider>
+              </AnalyticsWrapper>
+            </Router>
           </ReferralProvider>
         </ThemeProvider>
       </AuthProvider>

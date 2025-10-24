@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
-import LanguageSelector from '../components/LanguageSelector';
-import { useTranslation } from '../hooks/useTranslation';
 import { 
   ArrowLeft, 
   User, 
@@ -50,7 +48,6 @@ interface Project {
 }
 
 const ProfileSettingsPage: React.FC = () => {
-  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('general');
   const [profileData, setProfileData] = useState<ProfileData>({
     full_name: '',
@@ -80,12 +77,12 @@ const ProfileSettingsPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   const tabs = [
-    { id: 'general', label: t.profile.sections.personal, icon: <User size={20} /> },
-    { id: 'skills', label: t.profile.sections.skills, icon: <Award size={20} /> },
-    { id: 'social', label: t.profile.sections.social, icon: <Globe size={20} /> },
-    { id: 'projects', label: t.profile.sections.projects, icon: <Briefcase size={20} /> },
-    { id: 'privacy', label: t.profile.sections.privacy, icon: <Shield size={20} /> },
-    { id: 'appearance', label: 'Apparence', icon: <Palette size={20} /> }
+    { id: 'general', label: 'Personal Information', icon: <User size={20} /> },
+    { id: 'skills', label: 'Skills', icon: <Award size={20} /> },
+    { id: 'social', label: 'Social Networks', icon: <Globe size={20} /> },
+    { id: 'projects', label: 'Projects', icon: <Briefcase size={20} /> },
+    { id: 'privacy', label: 'Privacy', icon: <Shield size={20} /> },
+    { id: 'appearance', label: 'Appearance', icon: <Palette size={20} /> }
   ];
 
   const socialNetworkTemplates: SocialNetwork[] = [
@@ -188,68 +185,68 @@ const ProfileSettingsPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            {t.profile.fields.fullName}
+            Full Name
           </label>
           <input
             type="text"
             value={profileData.full_name}
             onChange={(e) => setProfileData({...profileData, full_name: e.target.value})}
             className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-            placeholder={t.profile.fields.fullName}
+            placeholder="Full Name"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            {t.profile.fields.position}
+            Professional Title
           </label>
           <input
             type="text"
             value={profileData.professional_title}
             onChange={(e) => setProfileData({...profileData, professional_title: e.target.value})}
             className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-            placeholder={t.profile.fields.position}
+            placeholder="Professional Title"
           />
         </div>
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-2">
-          {t.profile.fields.bio}
+          Bio
         </label>
         <textarea
           value={profileData.bio}
           onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
           className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
           rows={4}
-          placeholder={t.profile.fields.bio}
+          placeholder="Bio"
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            {t.profile.fields.location}
+            Location
           </label>
           <input
             type="text"
             value={profileData.location}
             onChange={(e) => setProfileData({...profileData, location: e.target.value})}
             className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-            placeholder={t.profile.fields.location}
+            placeholder="Location"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            {t.profile.fields.website}
+            Website
           </label>
           <input
             type="url"
             value={profileData.website}
             onChange={(e) => setProfileData({...profileData, website: e.target.value})}
             className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-            placeholder={t.profile.fields.website}
+            placeholder="Website"
           />
         </div>
       </div>
@@ -487,11 +484,10 @@ const ProfileSettingsPage: React.FC = () => {
               <ArrowLeft size={20} className="text-white" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-white">{t.profile.title} {t.common.settings}</h1>
-              <p className="text-gray-400">{t.profile.subtitle}</p>
+              <h1 className="text-2xl font-bold text-white">Profile Settings</h1>
+              <p className="text-gray-400">Manage your profile and preferences</p>
             </div>
           </div>
-          <LanguageSelector />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -528,7 +524,7 @@ const ProfileSettingsPage: React.FC = () => {
                   variant="outline"
                   onClick={() => window.history.back()}
                 >
-                  {t.common.cancel}
+                  Cancel
                 </ModernButton>
                 <ModernButton 
                   onClick={handleSaveProfile}
@@ -537,12 +533,12 @@ const ProfileSettingsPage: React.FC = () => {
                   {isSaving ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      {t.common.loading}
+                      Loading...
                     </>
                   ) : (
                     <>
                       <Save size={16} className="mr-2" />
-                      {t.common.save}
+                      Save
                     </>
                   )}
                 </ModernButton>

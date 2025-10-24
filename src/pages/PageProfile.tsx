@@ -13,7 +13,6 @@ import { AwardsService, Award as UserAward } from '../services/awardsService';
 import { ActivityService, Activity as UserActivity } from '../services/activityService';
 import { StatisticsService } from '../services/statisticsService';
 import { useProfile } from '../hooks/useProfile';
-import { useTranslation } from '../hooks/useTranslation';
 // import ProjectCard from '../components/ProjectCard';
 // import SocialLinks from '../components/SocialLinks';
 import { 
@@ -55,7 +54,6 @@ interface PageProfileProps {
 }
 
 const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
-  const { t } = useTranslation();
   const { user } = useAuth();
   
   // Use the useProfile hook to retrieve data
@@ -744,7 +742,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
                         }}
                       >
                         <Edit3 size={16} className="mr-2" />
-                        {t.profile.editProfile}
+                        Edit Profile
                       </ModernButton>
                       <ModernButton 
                         variant="outline" 
