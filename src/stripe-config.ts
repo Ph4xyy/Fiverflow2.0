@@ -11,44 +11,24 @@ export interface StripeProduct {
 
 export const stripeProducts: StripeProduct[] = [
   {
-    id: 'prod_SjvBsfm6N3XXlv',
-    priceId: 'price_1RoRLDENcVsHr4WI6TViAPNb',
-    name: 'Pro Package',
-    description: 'Get access to all the Pro features !',
+    id: 'boost_monthly',
+    priceId: 'price_1SLqlIKF06h9za4ci2OnSIW0',
+    name: 'Boost',
+    description: 'Accès aux fonctionnalités Boost avec facturation mensuelle',
     mode: 'subscription',
-    price: '$22.00',
+    price: '$20.00',
     currency: 'USD',
     interval: 'month'
   },
   {
-    id: 'prod_SjvDz5X0EbxdqP',
-    priceId: 'price_1RoRMdENcVsHr4WIVRYCy8JL',
-    name: 'Excellence Package',
-    description: 'Get access to all the Excellence features !',
+    id: 'scale_monthly',
+    priceId: 'price_1SLqlhKF06h9za4cQ3qEQdO5',
+    name: 'Scale',
+    description: 'Accès aux fonctionnalités Scale avec facturation mensuelle',
     mode: 'subscription',
-    price: '$39.00',
+    price: '$35.00',
     currency: 'USD',
     interval: 'month'
-  },
-  {
-    id: 'prod_Sk1RNcZJIlp0Ig',
-    priceId: 'price_1RoXOgENcVsHr4WIitiOEaaz',
-    name: '1y pro package',
-    description: 'get access to all the features from the Pro package but for 1 year !',
-    mode: 'subscription',
-    price: 'C$216.00',
-    currency: 'CAD',
-    interval: 'year'
-  },
-  {
-    id: 'prod_Sk1QhNRnzlZqjC',
-    priceId: 'price_1RoXNwENcVsHr4WI3SP8AYYut(',
-    name: '1y Excellence Package',
-    description: 'get access to all the features from the Excellence package but for 1 year !',
-    mode: 'subscription',
-    price: '$396.00',
-    currency: 'USD',
-    interval: 'year'
   }
 ];
 

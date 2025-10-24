@@ -108,9 +108,8 @@ const AdminDashboard: React.FC = () => {
             </p>
         </div>
         </div>
-      </div>
-    </Layout>
-  );
+      </Layout>
+    );
   }
 
   return (

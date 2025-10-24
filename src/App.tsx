@@ -48,7 +48,6 @@ import PageClients from './pages/PageClients';
 import PageOrders from './pages/PageOrders';
 import TemplatesPage from './pages/TemplatesPage';
 import StatsPage from './pages/StatsPage';
-import PagePricing from './pages/PagePricing';
 import OnboardingPage from './pages/OnboardingPage';
 import NetworkPage from './pages/NetworkPage';
 import PageReferrals from './pages/PageReferrals';
@@ -59,6 +58,11 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminStatsPage from './pages/admin/AdminStatsPage';
 import AdminAIPage from './pages/admin/AdminAIPage';
+
+// Pages d'abonnement Stripe
+import SubscriptionPage from './pages/SubscriptionPage';
+import SuccessPage from './pages/SuccessPage';
+import CancelPage from './pages/CancelPage';
 
 // Pages légales
 import PrivacyPolicy from "./components/PrivacyPolicy";
@@ -89,6 +93,9 @@ function AppContent() {
           
           {/* Pages publiques */}
           <Route path="/pricing" element={<PagePricing />} />
+          <Route path="/subscription" element={<SubscriptionPage />} />
+          <Route path="/success" element={<SuccessPage />} />
+          <Route path="/cancel" element={<CancelPage />} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -164,11 +171,35 @@ function AppContent() {
             </InstantProtectedRoute>
           } />
 
-          {/* Administration */}
-          <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
-          <Route path="/admin/stats" element={<AdminRoute><AdminStatsPage /></AdminRoute>} />
-          <Route path="/admin/ai" element={<AdminRoute><AdminAIPage /></AdminRoute>} />
+          {/* Administration - Protection par abonnement Scale */}
+          <Route path="/admin/dashboard" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="Scale" pageType="admin">
+                <AdminRoute><AdminDashboard /></AdminRoute>
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
+          <Route path="/admin/users" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="Scale" pageType="admin">
+                <AdminRoute><AdminUsersPage /></AdminRoute>
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
+          <Route path="/admin/stats" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="Scale" pageType="admin">
+                <AdminRoute><AdminStatsPage /></AdminRoute>
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
+          <Route path="/admin/ai" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="Scale" pageType="admin">
+                <AdminRoute><AdminAIPage /></AdminRoute>
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
 
           {/* Diagnostic Erreur 406 (développement uniquement) */}
           {import.meta.env.DEV && (
