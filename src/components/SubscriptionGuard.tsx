@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSubscription } from '../hooks/useSubscription';
-import { Button } from './ui/button';
+import { Button } from './ui/Button';
 import { Lock, Crown, Star, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
