@@ -123,6 +123,11 @@ const MeetingForm: React.FC<MeetingFormProps> = ({ isOpen, onClose, onSuccess, s
       return;
     }
 
+    if (!formData.date) {
+      toast.error('Date is required');
+      return;
+    }
+
     setLoading(true);
     const toastId = toast.loading(meeting ? 'Updating meeting...' : 'Creating meeting...');
 
@@ -169,7 +174,23 @@ const MeetingForm: React.FC<MeetingFormProps> = ({ isOpen, onClose, onSuccess, s
     }
   };
 
-  const nextStep = () => currentStep < 2 && setCurrentStep(s => s + 1);
+  const nextStep = () => {
+    if (currentStep === 1) {
+      // Validation pour l'étape 1
+      if (!formData.title.trim()) {
+        toast.error('Meeting title is required');
+        return;
+      }
+      if (!formData.date) {
+        toast.error('Date is required');
+        return;
+      }
+    }
+    if (currentStep < 2) {
+      setCurrentStep(s => s + 1);
+    }
+  };
+  
   const prevStep = () => currentStep > 1 && setCurrentStep(s => s - 1);
 
   if (!isOpen) return null;

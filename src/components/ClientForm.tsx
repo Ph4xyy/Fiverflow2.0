@@ -326,7 +326,30 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
     }
   };
 
-  const nextStep = () => currentStep < 4 && setCurrentStep(s => s + 1);
+  const nextStep = () => {
+    if (currentStep === 1) {
+      // Validation pour l'étape 1
+      if (!formData.name.trim()) {
+        toast.error('Full name is required');
+        return;
+      }
+      if (!formData.platform) {
+        toast.error('Platform is required');
+        return;
+      }
+    }
+    if (currentStep === 2) {
+      // Validation pour l'étape 2
+      if (!formData.email_primary.trim()) {
+        toast.error('Primary email is required');
+        return;
+      }
+    }
+    if (currentStep < 4) {
+      setCurrentStep(s => s + 1);
+    }
+  };
+  
   const prevStep = () => currentStep > 1 && setCurrentStep(s => s - 1);
 
   if (!isOpen) return null;

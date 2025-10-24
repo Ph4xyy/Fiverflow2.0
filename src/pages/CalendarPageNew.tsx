@@ -4,6 +4,7 @@ import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import SubscriptionManager from '../components/SubscriptionManager';
 import CalendarActionModal from '../components/CalendarActionModal';
+import DayEventsModal from '../components/DayEventsModal';
 import MeetingForm from '../components/MeetingForm';
 import TaskForm from '../components/TaskForm';
 import { useTasks } from '../hooks/useTasks';
@@ -54,6 +55,7 @@ const CalendarPageNew: React.FC = () => {
   
   // États pour les modals
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
+  const [isDayEventsModalOpen, setIsDayEventsModalOpen] = useState(false);
   const [isMeetingFormOpen, setIsMeetingFormOpen] = useState(false);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [selectedDateString, setSelectedDateString] = useState<string>('');
@@ -61,7 +63,13 @@ const CalendarPageNew: React.FC = () => {
   // Fonctions de gestion des modals
   const handleDateClick = (dateString: string) => {
     setSelectedDateString(dateString);
-    setIsActionModalOpen(true);
+    // Vérifier s'il y a des événements pour cette date
+    const dayEvents = events.filter(event => event.date === dateString);
+    if (dayEvents.length > 0) {
+      setIsDayEventsModalOpen(true);
+    } else {
+      setIsActionModalOpen(true);
+    }
   };
 
   const handleMeetingSelect = () => {
@@ -72,10 +80,29 @@ const CalendarPageNew: React.FC = () => {
     setIsTaskFormOpen(true);
   };
 
+  const handleAddEvent = () => {
+    setIsActionModalOpen(true);
+  };
+
   const handleFormSuccess = () => {
     // Recharger les données
     loadCalendarEvents();
   };
+
+  // Fermer le dropdown de filtre quand on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.filter-dropdown') && !target.closest('[data-filter-button]')) {
+        setShowFilterDropdown(false);
+      }
+    };
+
+    if (showFilterDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showFilterDropdown]);
 
   // Charger les événements du calendrier depuis la base de données
   useEffect(() => {
@@ -377,6 +404,7 @@ const CalendarPageNew: React.FC = () => {
               <ModernButton 
                 variant="outline" 
                 size="sm"
+                data-filter-button
                 onClick={() => setShowFilterDropdown(!showFilterDropdown)}
               >
                 <Filter size={16} className="mr-2" />
@@ -385,7 +413,7 @@ const CalendarPageNew: React.FC = () => {
               
               {/* Dropdown Menu */}
               {showFilterDropdown && (
-                <div className="absolute top-full right-0 mt-2 w-48 bg-[#1e2938] border border-[#35414e] rounded-lg shadow-lg z-50">
+                <div className="filter-dropdown absolute top-full right-0 mt-2 w-48 bg-[#1e2938] border border-[#35414e] rounded-lg shadow-lg z-50">
                   <div className="py-2">
                     <button 
                       onClick={() => {
@@ -432,7 +460,14 @@ const CalendarPageNew: React.FC = () => {
                 </div>
               )}
             </div>
-            <ModernButton size="sm">
+            <ModernButton 
+              size="sm"
+              onClick={() => {
+                const today = new Date().toISOString().split('T')[0];
+                setSelectedDateString(today);
+                setIsActionModalOpen(true);
+              }}
+            >
               <Plus size={16} className="mr-2" />
               New Event
             </ModernButton>
@@ -739,6 +774,14 @@ const CalendarPageNew: React.FC = () => {
           selectedDate={selectedDateString}
           onSelectMeeting={handleMeetingSelect}
           onSelectTask={handleTaskSelect}
+        />
+
+        <DayEventsModal
+          isOpen={isDayEventsModalOpen}
+          onClose={() => setIsDayEventsModalOpen(false)}
+          selectedDate={selectedDateString}
+          events={events.filter(event => event.date === selectedDateString)}
+          onAddEvent={handleAddEvent}
         />
 
         <MeetingForm

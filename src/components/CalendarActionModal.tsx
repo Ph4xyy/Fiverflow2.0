@@ -52,48 +52,38 @@ const CalendarActionModal: React.FC<CalendarActionModalProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="space-y-4">
-              <ModernButton
+            <div className="space-y-3">
+              <button
                 onClick={() => {
                   onSelectMeeting();
                   onClose();
                 }}
-                className="w-full justify-start h-auto p-4"
-                variant="outline"
+                className="w-full flex items-center space-x-4 p-4 hover:bg-[#35414e] rounded-lg transition-colors"
               >
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-lg flex items-center justify-center">
-                    <Video className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-white">Schedule Meeting</div>
-                    <div className="text-sm text-gray-400">
-                      Plan a meeting with clients or team members
-                    </div>
+                <Video className="h-6 w-6 text-[#9c68f2]" />
+                <div className="text-left">
+                  <div className="font-semibold text-white">Schedule Meeting</div>
+                  <div className="text-sm text-gray-400">
+                    Plan a meeting with clients or team members
                   </div>
                 </div>
-              </ModernButton>
+              </button>
 
-              <ModernButton
+              <button
                 onClick={() => {
                   onSelectTask();
                   onClose();
                 }}
-                className="w-full justify-start h-auto p-4"
-                variant="outline"
+                className="w-full flex items-center space-x-4 p-4 hover:bg-[#35414e] rounded-lg transition-colors"
               >
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-lg flex items-center justify-center">
-                    <CheckSquare className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-white">Create Task</div>
-                    <div className="text-sm text-gray-400">
-                      Add a task or deadline to your calendar
-                    </div>
+                <CheckSquare className="h-6 w-6 text-[#9c68f2]" />
+                <div className="text-left">
+                  <div className="font-semibold text-white">Create Task</div>
+                  <div className="text-sm text-gray-400">
+                    Add a task or deadline to your calendar
                   </div>
                 </div>
-              </ModernButton>
+              </button>
             </div>
 
             {/* Footer */}

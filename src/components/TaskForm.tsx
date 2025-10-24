@@ -160,7 +160,19 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selecte
     }
   };
 
-  const nextStep = () => currentStep < 2 && setCurrentStep(s => s + 1);
+  const nextStep = () => {
+    if (currentStep === 1) {
+      // Validation pour l'étape 1
+      if (!formData.title.trim()) {
+        toast.error('Task title is required');
+        return;
+      }
+    }
+    if (currentStep < 2) {
+      setCurrentStep(s => s + 1);
+    }
+  };
+  
   const prevStep = () => currentStep > 1 && setCurrentStep(s => s - 1);
 
   if (!isOpen) return null;
