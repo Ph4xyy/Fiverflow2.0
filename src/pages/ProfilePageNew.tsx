@@ -56,7 +56,7 @@ interface ProfilePageNewProps {
 const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
   const { user } = useAuth();
   
-  // Utiliser le hook useProfile pour récupérer les données
+  // Use the useProfile hook to retrieve data
   const { 
     profileData: profileDataFromHook, 
     isOwnProfile 
@@ -65,15 +65,15 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'activity'>('overview');
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
-  // isOwnProfile vient maintenant du hook useProfile
+  // isOwnProfile now comes from the useProfile hook
   const [isAdmin, setIsAdmin] = useState(false);
   // const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUsernameCopied, setIsUsernameCopied] = useState(false);
   
-  // Profile data - utilise les données du hook ou des valeurs par défaut
+  // Profile data - uses hook data or default values
   const [profileData, setProfileData] = useState<ProfileData>({
-    full_name: 'Utilisateur',
+    full_name: 'User',
     professional_title: 'UI/UX Designer & Frontend Developer',
     location: 'Paris, France',
     bio: 'Passionate about design and development, I create exceptional user experiences for 5 years.',
@@ -102,7 +102,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
     }
   }, [profileDataFromHook, isOwnProfile, user?.email]);
 
-  // Charger les vraies données (statistiques, compétences, récompenses, etc.)
+  // Load real data (statistics, skills, awards, etc.)
   useEffect(() => {
     const loadRealData = async () => {
       if (!profileDataFromHook) return;
@@ -112,63 +112,63 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
       console.log('🔄 Chargement des données pour userId:', targetUserId);
       
       try {
-        // Charger les statistiques
+        // Load statistics
         try {
           const userStats = await StatisticsService.getUserStatistics(targetUserId);
           // Adapter les données au format attendu
           setStatistics({
             clients: userStats.totalClients || 0,
             orders: userStats.totalOrders || 0,
-            rating: 4.5, // Valeur par défaut
+            rating: 4.5, // Default value
             experience: Math.max(1, Math.floor((userStats.totalOrders || 0) / 10)) // Calcul basé sur les commandes
           });
-          console.log('✅ Statistiques chargées:', userStats);
+          console.log('✅ Statistics loaded:', userStats);
         } catch (error) {
-          console.warn('⚠️ Erreur statistiques:', error);
+          console.warn('⚠️ Statistics error:', error);
           setStatistics({ clients: 0, orders: 0, rating: 0, experience: 0 });
         }
 
-        // Charger les compétences
+        // Load skills
         try {
           const userSkills = await SkillsService.getUserSkills(targetUserId);
           setSkills(userSkills);
-          console.log('✅ Compétences chargées:', userSkills.length);
+          console.log('✅ Skills loaded:', userSkills.length);
         } catch (error) {
-          console.warn('⚠️ Erreur compétences:', error);
+          console.warn('⚠️ Skills error:', error);
           setSkills([]);
         }
 
-        // Charger les récompenses
+        // Load awards
         try {
           const userAwards = await AwardsService.getUserAwards(targetUserId);
           setAwards(userAwards);
-          console.log('✅ Récompenses chargées:', userAwards.length);
+          console.log('✅ Awards loaded:', userAwards.length);
         } catch (error) {
-          console.warn('⚠️ Erreur récompenses:', error);
+          console.warn('⚠️ Awards error:', error);
           setAwards([]);
         }
 
-        // Charger les commandes
+        // Load orders
         try {
           const userOrders = await OrdersService.getUserOrders(targetUserId);
           setOrders(userOrders);
           console.log('✅ Commandes chargées:', userOrders.length);
         } catch (error) {
-          console.warn('⚠️ Erreur commandes:', error);
+          console.warn('⚠️ Orders error:', error);
           setOrders([]);
         }
 
-        // Charger les activités
+        // Load activities
         try {
           const userActivities = await ActivityService.getUserActivity(targetUserId);
           setActivities(userActivities);
-          console.log('✅ Activités chargées:', userActivities.length);
+          console.log('✅ Activities loaded:', userActivities.length);
         } catch (error) {
-          console.warn('⚠️ Erreur activités:', error);
+          console.warn('⚠️ Activities error:', error);
           setActivities([]);
         }
 
-        console.log('📊 Données réelles chargées pour profil:', {
+        console.log('📊 Real data loaded for profile:', {
           userId: targetUserId,
           username: profileDataFromHook.public_data?.username,
           statistics: statistics,
@@ -179,7 +179,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
         });
 
       } catch (error) {
-        console.error('Erreur lors du chargement des données réelles:', error);
+        console.error('Error loading real data:', error);
         // En cas d'erreur, réinitialiser les données
         setStatistics({ clients: 0, orders: 0, rating: 0, experience: 0 });
         setSkills([]);
@@ -192,7 +192,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
     loadRealData();
   }, [profileDataFromHook]);
 
-  // Paramètres de confidentialité
+  // Privacy settings
   const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
     show_email: true,
     show_phone: true
@@ -217,15 +217,15 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
     website: ''
   });
 
-  // Charger les données du profil depuis la base de données
+  // Load profile data from database
     const loadProfileData = async () => {
       if (!user) {
-        console.log('🔍 ProfilePage: Pas d\'utilisateur connecté');
+        console.log('🔍 ProfilePage: No user connected');
         return;
       }
 
       // setIsLoading(true);
-      console.log('🔍 ProfilePage: Chargement du profil pour user:', user.id, 'email:', user.email);
+      console.log('🔍 ProfilePage: Loading profile for user:', user.id, 'email:', user.email);
 
       try {
         const data = await ProfileService.getProfile(user.id);
@@ -246,52 +246,52 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
           // Utiliser les données de l'utilisateur auth comme fallback
           setProfileData((prev: ProfileData) => ({
             ...prev,
-            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur',
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
             email: user.email || 'john@example.com'
           }));
         }
 
-        // Charger les compétences
+        // Load skills
         try {
           const userSkills = await SkillsService.getPublicSkills(user.id);
           setSkills(userSkills);
         } catch (error) {
-          console.error('Erreur lors du chargement des compétences:', error);
+          console.error('Error loading skills:', error);
         }
 
-        // Charger les récompenses
+        // Load awards
         try {
           const userAwards = await AwardsService.getPublicAwards(user.id);
           setAwards(userAwards);
         } catch (error) {
-          console.error('Erreur lors du chargement des récompenses:', error);
+          console.error('Error loading awards:', error);
         }
 
-        // Charger les commandes
+        // Load orders
         try {
           const userOrders = await OrdersService.getUserOrders(user.id);
           setOrders(userOrders);
         } catch (error) {
-          console.error('Erreur lors du chargement des commandes:', error);
+          console.error('Error loading orders:', error);
         }
 
-        // Charger l'activité
+        // Load activity
         try {
           const userActivity = await ActivityService.getUserActivity(user.id);
           setActivities(userActivity);
         } catch (error) {
-          console.error('Erreur lors du chargement de l\'activité:', error);
+          console.error('Error loading activity:', error);
         }
 
-        // Charger les statistiques
+        // Load statistics
         try {
           const userStats = await StatisticsService.getProfileStatistics(user.id);
           setStatistics(userStats);
         } catch (error) {
-          console.error('Erreur lors du chargement des statistiques:', error);
+          console.error('Error loading statistics:', error);
         }
 
-        // Charger les réseaux sociaux
+        // Load social networks
         if (data) {
           setSocialNetworks({
             github: data.github_url || '',
@@ -302,11 +302,11 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
           });
         }
       } catch (error) {
-        console.error('Erreur lors du chargement du profil:', error);
+        console.error('Error loading profile:', error);
         // Fallback vers les données auth
         setProfileData((prev: ProfileData) => ({
           ...prev,
-          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur',
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
           email: user.email || 'john@example.com'
         }));
       } finally {
@@ -319,36 +319,36 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
     if (!username && user) {
       loadProfileData();
       
-      // Charger aussi les vraies données pour le profil propre
+      // Also load real data for own profile
       const loadOwnData = async () => {
         try {
-          // Charger les statistiques
+          // Load statistics
           const userStats = await StatisticsService.getUserStatistics(user.id);
           // Adapter les données au format attendu
           setStatistics({
             clients: userStats.totalClients || 0,
             orders: userStats.totalOrders || 0,
-            rating: 4.5, // Valeur par défaut
+            rating: 4.5, // Default value
             experience: Math.max(1, Math.floor((userStats.totalOrders || 0) / 10)) // Calcul basé sur les commandes
           });
 
-          // Charger les compétences
+          // Load skills
           const userSkills = await SkillsService.getUserSkills(user.id);
           setSkills(userSkills);
 
-          // Charger les récompenses
+          // Load awards
           const userAwards = await AwardsService.getUserAwards(user.id);
           setAwards(userAwards);
 
-          // Charger les commandes
+          // Load orders
           const userOrders = await OrdersService.getUserOrders(user.id);
           setOrders(userOrders);
 
-          // Charger les activités
+          // Load activities
           const userActivities = await ActivityService.getUserActivity(user.id);
           setActivities(userActivities);
 
-          console.log('📊 Données propres chargées:', {
+          console.log('📊 Clean data loaded:', {
             statistics: userStats,
             skills: userSkills.length,
             awards: userAwards.length,
@@ -357,7 +357,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
           });
 
         } catch (error) {
-          console.error('Erreur lors du chargement des données propres:', error);
+          console.error('Error loading clean data:', error);
         }
       };
 
@@ -402,14 +402,14 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
           setIsAdmin(data.is_admin);
         }
       } catch (error) {
-        console.error('Erreur lors de la vérification du statut admin:', error);
+        console.error('Error checking admin status:', error);
       }
     };
 
     checkAdminStatus();
   }, [user]);
 
-  // Fonctions pour gérer les uploads d'images
+  // Functions to handle image uploads
   const handleAvatarUpload = async (file: File): Promise<string | null> => {
     if (!user) return null;
     return await ProfileService.uploadProfileImage(user.id, file, 'avatar');
@@ -430,7 +430,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
     return await ProfileService.deleteProfileImage(user.id, 'banner');
   };
 
-  // Fonction pour sauvegarder le profil
+  // Function to save profile
   const handleSaveProfile = async () => {
     if (!user) return;
 
@@ -463,19 +463,19 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
           });
         }
       } else {
-        console.error('Erreur lors de la sauvegarde du profil');
+        console.error('Error saving profile');
         // Ne pas afficher d'alerte, juste log l'erreur
       }
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
+      console.error('Error saving:', error);
       // Ne pas afficher d'alerte, juste log l'erreur
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Fonction pour sauvegarder les paramètres
-  // Fonction pour copier le username
+  // Function to save settings
+  // Function to copy username
   const handleCopyUsername = async () => {
     const usernameToCopy = profileDataFromHook?.public_data?.username || profileData.username;
     if (usernameToCopy) {
@@ -484,7 +484,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
         setIsUsernameCopied(true);
         setTimeout(() => setIsUsernameCopied(false), 2000);
       } catch (err) {
-        console.error('Erreur lors de la copie:', err);
+        console.error('Error copying:', err);
       }
     }
   };
@@ -528,18 +528,18 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
           });
         }
       } else {
-        console.error('Erreur lors de la sauvegarde des paramètres');
+        console.error('Error saving settings');
         // Ne pas afficher d'alerte, juste log l'erreur
       }
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
+      console.error('Error saving:', error);
       // Ne pas afficher d'alerte, juste log l'erreur
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Fonction pour changer le statut
+  // Function to change status
   const handleStatusChange = async (status: 'available' | 'busy' | 'away' | 'do_not_disturb') => {
     if (!user) return;
 
@@ -548,11 +548,11 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
       if (success) {
         setProfileData((prev: ProfileData) => ({ ...prev, status }));
       } else {
-        console.error('Erreur lors de la mise à jour du statut');
+        console.error('Error updating status');
         // Ne pas afficher d'alerte, juste log l'erreur
       }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour du statut:', error);
+      console.error('Error updating status:', error);
       // Ne pas afficher d'alerte, juste log l'erreur
     }
   };
@@ -584,7 +584,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
               {profileData.banner_url ? (
                 <img 
                   src={profileData.banner_url} 
-                  alt="Bannière" 
+                  alt="Banner" 
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -643,7 +643,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                   <div className="pb-4">
                     <div className="flex items-center gap-3 mb-2">
                       <div>
-                        <h1 className="text-3xl font-bold text-white">{profileData.full_name || 'Utilisateur'}</h1>
+                        <h1 className="text-3xl font-bold text-white">{profileData.full_name || 'User'}</h1>
                         {/* Username affiché en dessous du nom avec bouton de copie */}
                         {(profileDataFromHook?.public_data?.username || profileData.username) && (
                           <div className="flex items-center gap-2 mt-1 group">
@@ -673,8 +673,8 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                             {/* Tooltip */}
                             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
                               <div className="bg-gray-900 text-white text-sm rounded-lg px-3 py-2 whitespace-nowrap shadow-lg border border-gray-700">
-                                <div className="font-semibold">Administrateur</div>
-                                <div className="text-gray-300 text-xs">Accès complet au système</div>
+                                <div className="font-semibold">Administrator</div>
+                                <div className="text-gray-300 text-xs">Full system access</div>
                                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
                               </div>
                             </div>
@@ -890,12 +890,12 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                 {isSaving ? (
                   <>
                     <Loader2 size={16} className="mr-2 animate-spin" />
-                    Sauvegarde...
+                    Saving...
                   </>
                 ) : (
                   <>
                     <Save size={16} className="mr-2" />
-                    Sauvegarder
+                    Save
                   </>
                 )}
               </ModernButton>
@@ -940,7 +940,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Left Column - Profile Settings */}
                     <div className="space-y-4">
-                      <h4 className="text-lg font-semibold text-white mb-4">Informations de base</h4>
+                      <h4 className="text-lg font-semibold text-white mb-4">Basic Information</h4>
                       
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -1042,7 +1042,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                     <div className="space-y-6">
                       {/* Contact Section */}
                       <div>
-                        <h4 className="text-lg font-semibold text-white mb-4">Informations de contact</h4>
+                        <h4 className="text-lg font-semibold text-white mb-4">Contact Information</h4>
                         
                         <div className="space-y-4">
                           <div>
@@ -1081,7 +1081,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
 
                       {/* Social Networks Section */}
                       <div>
-                        <h4 className="text-lg font-semibold text-white mb-4">Réseaux sociaux</h4>
+                        <h4 className="text-lg font-semibold text-white mb-4">Social Networks</h4>
                         
                         <div className="space-y-4">
                           <div>
@@ -1205,12 +1205,12 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                       {isSaving ? (
                         <>
                           <Loader2 size={16} className="mr-2 animate-spin" />
-                          Sauvegarde...
+                          Saving...
                         </>
                       ) : (
                         <>
                           <Save size={16} className="mr-2" />
-                          Sauvegarder
+                          Save
                         </>
                       )}
                     </ModernButton>
@@ -1350,9 +1350,9 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                                   order.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
                                   'bg-red-500/20 text-red-400'
                                 }`}>
-                                  {order.status === 'completed' ? 'Terminé' :
-                                   order.status === 'in_progress' ? 'En cours' :
-                                   order.status === 'pending' ? 'En attente' : 'Annulé'}
+                                  {order.status === 'completed' ? 'Completed' :
+                                   order.status === 'in_progress' ? 'In Progress' :
+                                   order.status === 'pending' ? 'Pending' : 'Cancelled'}
                                 </span>
                                 {order.budget && (
                                   <span className="text-white font-medium">
@@ -1433,7 +1433,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Social Links */}
-            <ModernCard title="Réseaux sociaux" icon={<Globe size={20} className="text-white" />}>
+            <ModernCard title="Social Networks" icon={<Globe size={20} className="text-white" />}>
               <div className="space-y-3">
                 {socialNetworks.github && (
                   <div className="flex items-center gap-3">
