@@ -191,20 +191,20 @@ const SettingsPage: React.FC = () => {
           });
         }
 
-        // Charger les compétences
+        // Load skills
         const userSkills = await SkillsService.getUserSkills(user.id);
         setSkills(userSkills);
 
-        // Charger les récompenses
+        // Load awards
         const userAwards = await AwardsService.getUserAwards(user.id);
         setAwards(userAwards);
 
-        // Charger le thème
+        // Load theme
         if (data && data.theme) {
           setCurrentTheme(data.theme);
         }
       } catch (error) {
-        console.error('Erreur lors du chargement du profil:', error);
+        console.error('Error loading profile:', error);
       } finally {
         setIsLoading(false);
       }
@@ -219,13 +219,13 @@ const SettingsPage: React.FC = () => {
     
     setCurrentTheme(theme);
     
-    // Sauvegarder le thème en base de données
+    // Save theme to database
     try {
       await ProfileService.updateProfile(user.id, { theme });
-      showSuccessNotification('Thème sauvegardé !');
+      showSuccessNotification('Theme saved!');
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde du thème:', error);
-      showErrorNotification('Erreur lors de la sauvegarde du thème');
+      console.error('Error saving theme:', error);
+      showErrorNotification('Error saving theme');
     }
   };
 
@@ -251,9 +251,9 @@ const SettingsPage: React.FC = () => {
       
       if (success && privacySuccess) {
         // Show success message and navigate back
-        showSuccessNotification('Paramètres sauvegardés avec succès !');
+        showSuccessNotification('Settings saved successfully!');
         
-        // Recharger les données du profil
+        // Reload profile data
         const updatedData = await ProfileService.getProfile(user.id);
         if (updatedData) {
           setProfileData(updatedData);
@@ -273,11 +273,11 @@ const SettingsPage: React.FC = () => {
           navigate('/profile');
         }, 1500);
       } else {
-        showErrorNotification('Erreur lors de la sauvegarde des paramètres');
+        showErrorNotification('Error saving settings');
       }
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
-      showErrorNotification('Une erreur est survenue lors de la sauvegarde');
+      console.error('Error saving:', error);
+      showErrorNotification('An error occurred while saving');
     } finally {
       setIsSaving(false);
     }
@@ -290,11 +290,11 @@ const SettingsPage: React.FC = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Informations personnelles</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">Personal Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Nom complet
+                    Full Name
                   </label>
                   <input
                     type="text"
@@ -306,7 +306,7 @@ const SettingsPage: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Titre professionnel
+                    Professional Title
                   </label>
                   <input
                     type="text"
@@ -318,7 +318,7 @@ const SettingsPage: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Lieu
+                    Location
                   </label>
                   <input
                     type="text"
@@ -330,14 +330,14 @@ const SettingsPage: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Site web
+                    Website
                   </label>
                   <input
                     type="url"
                     value={profileData.website || ''}
                     onChange={(e) => setProfileData({...profileData, website: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                    placeholder="https://votre-site.com"
+                    placeholder="https://your-website.com"
                   />
                 </div>
               </div>
@@ -351,17 +351,17 @@ const SettingsPage: React.FC = () => {
                   onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
                   rows={4}
                   className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2] resize-none"
-                  placeholder="Parlez-nous de vous..."
+                  placeholder="Tell us about yourself..."
                 />
               </div>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Informations de contact</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">Contact Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Email de contact
+                    Contact Email
                   </label>
                   <input
                     type="email"
@@ -374,7 +374,7 @@ const SettingsPage: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Téléphone de contact
+                    Contact Phone
                   </label>
                   <input
                     type="tel"
@@ -393,14 +393,14 @@ const SettingsPage: React.FC = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Visibilité des informations</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">Information Visibility</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-[#35414e] rounded-lg">
                   <div className="flex items-center gap-3">
                     <Mail size={20} className="text-gray-400" />
                     <div>
-                      <div className="text-sm font-medium text-white">Afficher l'email</div>
-                      <div className="text-xs text-gray-400">Permet aux autres utilisateurs de voir votre email</div>
+                      <div className="text-sm font-medium text-white">Show email</div>
+                      <div className="text-xs text-gray-400">Allow other users to see your email</div>
                     </div>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
@@ -418,8 +418,8 @@ const SettingsPage: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <Phone size={20} className="text-gray-400" />
                     <div>
-                      <div className="text-sm font-medium text-white">Afficher le téléphone</div>
-                      <div className="text-xs text-gray-400">Permet aux autres utilisateurs de voir votre téléphone</div>
+                      <div className="text-sm font-medium text-white">Show phone</div>
+                      <div className="text-xs text-gray-400">Allow other users to see your phone</div>
                     </div>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
@@ -438,35 +438,35 @@ const SettingsPage: React.FC = () => {
             {/* Modification du mot de passe */}
             <ModernCard>
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Modifier le mot de passe</h3>
+                <h3 className="text-xl font-semibold text-white mb-4">Change Password</h3>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Mot de passe actuel
+                      Current Password
                     </label>
                     <input
                       type="password"
-                      placeholder="Entrez votre mot de passe actuel"
+                      placeholder="Enter your current password"
                       className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Nouveau mot de passe
+                      New Password
                     </label>
                     <input
                       type="password"
-                      placeholder="Entrez votre nouveau mot de passe"
+                      placeholder="Enter your new password"
                       className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Confirmer le nouveau mot de passe
+                      Confirm New Password
                     </label>
                     <input
                       type="password"
-                      placeholder="Confirmez votre nouveau mot de passe"
+                      placeholder="Confirm your new password"
                       className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                     />
                   </div>
@@ -474,7 +474,7 @@ const SettingsPage: React.FC = () => {
                     className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
                     style={getThemeButtonStyle('password')}
                   >
-                    Modifier le mot de passe
+                    Change Password
                   </button>
                 </div>
               </div>
@@ -483,11 +483,11 @@ const SettingsPage: React.FC = () => {
             {/* Modification de l'email */}
             <ModernCard>
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Modifier l'email</h3>
+                <h3 className="text-xl font-semibold text-white mb-4">Change Email</h3>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Email actuel
+                      Current Email
                     </label>
                     <input
                       type="email"
@@ -498,21 +498,21 @@ const SettingsPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Nouvel email
+                      New Email
                     </label>
                     <input
                       type="email"
-                      placeholder="Entrez votre nouvel email"
+                      placeholder="Enter your new email"
                       className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Confirmer le nouvel email
+                      Confirm New Email
                     </label>
                     <input
                       type="email"
-                      placeholder="Confirmez votre nouvel email"
+                      placeholder="Confirm your new email"
                       className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                     />
                   </div>
@@ -520,7 +520,7 @@ const SettingsPage: React.FC = () => {
                     className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
                     style={getThemeButtonStyle('email')}
                   >
-                    Modifier l'email
+                    Change Email
                   </button>
                 </div>
               </div>
@@ -532,8 +532,8 @@ const SettingsPage: React.FC = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Réseaux sociaux</h3>
-              <p className="text-gray-400 text-sm mb-6">Entrez votre nom d'utilisateur (sans @ ou https://), les liens seront générés automatiquement</p>
+              <h3 className="text-lg font-semibold text-white mb-4">Social Networks</h3>
+              <p className="text-gray-400 text-sm mb-6">Enter your username (without @ or https://), links will be generated automatically</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -548,12 +548,12 @@ const SettingsPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="nom d'utilisateur"
+                    placeholder="username"
                     value={socialNetworks.github}
                     onChange={(e) => setSocialNetworks({...socialNetworks, github: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
-                  <p className="text-xs text-gray-400 mt-1">github.com/{socialNetworks.github || 'votre-nom'}</p>
+                  <p className="text-xs text-gray-400 mt-1">github.com/{socialNetworks.github || 'your-name'}</p>
                 </div>
 
                 <div>
@@ -569,12 +569,12 @@ const SettingsPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="nom d'utilisateur"
+                    placeholder="username"
                     value={socialNetworks.linkedin}
                     onChange={(e) => setSocialNetworks({...socialNetworks, linkedin: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
-                  <p className="text-xs text-gray-400 mt-1">linkedin.com/in/{socialNetworks.linkedin || 'votre-nom'}</p>
+                  <p className="text-xs text-gray-400 mt-1">linkedin.com/in/{socialNetworks.linkedin || 'your-name'}</p>
                 </div>
 
                 <div>
@@ -590,12 +590,12 @@ const SettingsPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="nom d'utilisateur"
+                    placeholder="username"
                     value={socialNetworks.twitter}
                     onChange={(e) => setSocialNetworks({...socialNetworks, twitter: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
-                  <p className="text-xs text-gray-400 mt-1">twitter.com/{socialNetworks.twitter || 'votre-nom'}</p>
+                  <p className="text-xs text-gray-400 mt-1">twitter.com/{socialNetworks.twitter || 'your-name'}</p>
                 </div>
 
                 <div>
@@ -611,12 +611,12 @@ const SettingsPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="nom d'utilisateur"
+                    placeholder="username"
                     value={socialNetworks.instagram}
                     onChange={(e) => setSocialNetworks({...socialNetworks, instagram: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
-                  <p className="text-xs text-gray-400 mt-1">instagram.com/{socialNetworks.instagram || 'votre-nom'}</p>
+                  <p className="text-xs text-gray-400 mt-1">instagram.com/{socialNetworks.instagram || 'your-name'}</p>
                 </div>
 
                 <div>
@@ -632,12 +632,12 @@ const SettingsPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="nom d'utilisateur"
+                    placeholder="username"
                     value={socialNetworks.tiktok}
                     onChange={(e) => setSocialNetworks({...socialNetworks, tiktok: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
-                  <p className="text-xs text-gray-400 mt-1">tiktok.com/@{socialNetworks.tiktok || 'votre-nom'}</p>
+                  <p className="text-xs text-gray-400 mt-1">tiktok.com/@{socialNetworks.tiktok || 'your-name'}</p>
                 </div>
 
                 <div>
@@ -653,12 +653,12 @@ const SettingsPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    placeholder="nom de la chaîne"
+                    placeholder="channel name"
                     value={socialNetworks.youtube}
                     onChange={(e) => setSocialNetworks({...socialNetworks, youtube: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
                   />
-                  <p className="text-xs text-gray-400 mt-1">youtube.com/c/{socialNetworks.youtube || 'votre-chaine'}</p>
+                  <p className="text-xs text-gray-400 mt-1">youtube.com/c/{socialNetworks.youtube || 'your-channel'}</p>
                 </div>
 
                 <div>
@@ -687,12 +687,12 @@ const SettingsPage: React.FC = () => {
                       <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
                         <Globe size={12} className="text-white" />
                       </div>
-                      Site web
+                      Website
                     </div>
                   </label>
                   <input
                     type="url"
-                    placeholder="https://monsite.com"
+                    placeholder="https://mywebsite.com"
                     value={socialNetworks.website}
                     onChange={(e) => setSocialNetworks({...socialNetworks, website: e.target.value})}
                     className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
@@ -707,11 +707,11 @@ const SettingsPage: React.FC = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Préférences de notifications</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">Notification Preferences</h3>
               <div className="text-center py-12">
                 <Bell size={48} className="mx-auto text-gray-400 mb-4" />
                 <h3 className="text-lg font-semibold text-white mb-2">Notifications</h3>
-                <p className="text-gray-400">Les paramètres de notifications seront disponibles prochainement</p>
+                <p className="text-gray-400">Notification settings will be available soon</p>
               </div>
             </div>
           </div>
@@ -721,7 +721,7 @@ const SettingsPage: React.FC = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Préférences d'apparence</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">Appearance Preferences</h3>
               
               {/* Thème spécial Halloween */}
               <div className="mb-8">
@@ -740,8 +740,8 @@ const SettingsPage: React.FC = () => {
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-xl font-bold text-white mb-2">🎃 Thème Halloween</h4>
-                        <p className="text-orange-100 text-sm">Thème spécial avec fond grunge Halloween</p>
+                        <h4 className="text-xl font-bold text-white mb-2">🎃 Halloween Theme</h4>
+                        <p className="text-orange-100 text-sm">Special theme with Halloween grunge background</p>
                       </div>
                       <button 
                         onClick={() => handleThemeChange('halloween')}
@@ -751,7 +751,7 @@ const SettingsPage: React.FC = () => {
                             : 'bg-white/20 hover:bg-white/30 text-white'
                         }`}
                       >
-                        {currentTheme === 'halloween' ? 'Actif' : 'Activer'}
+                        {currentTheme === 'halloween' ? 'Active' : 'Activate'}
                       </button>
                     </div>
                   </div>
@@ -762,10 +762,10 @@ const SettingsPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-white font-semibold">Thème Sombre</h4>
+                    <h4 className="text-white font-semibold">Dark Theme</h4>
                     <div className="w-4 h-4 bg-gray-800 rounded-full border-2 border-gray-600"></div>
                   </div>
-                  <p className="text-gray-400 text-sm mb-3">Interface sombre classique</p>
+                  <p className="text-gray-400 text-sm mb-3">Classic dark interface</p>
                   <button 
                     onClick={() => handleThemeChange('dark')}
                     className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
@@ -773,82 +773,82 @@ const SettingsPage: React.FC = () => {
                       backgroundColor: themeColors.primary
                     }}
                   >
-                    {currentTheme === 'dark' ? 'Actif' : 'Activer'}
+                    {currentTheme === 'dark' ? 'Active' : 'Activate'}
                   </button>
                 </div>
 
                 <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-white font-semibold">Thème Clair</h4>
+                    <h4 className="text-white font-semibold">Light Theme</h4>
                     <div className="w-4 h-4 bg-white rounded-full border-2 border-gray-300"></div>
                   </div>
-                  <p className="text-gray-400 text-sm mb-3">Interface claire et moderne</p>
+                  <p className="text-gray-400 text-sm mb-3">Clean and modern interface</p>
                   <button 
                     onClick={() => handleThemeChange('light')}
                     className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
                     style={getThemeButtonStyle('light')}
                   >
-                    {currentTheme === 'light' ? 'Actif' : 'Activer'}
+                    {currentTheme === 'light' ? 'Active' : 'Activate'}
                   </button>
                 </div>
 
                 <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-white font-semibold">Thème Bleu</h4>
+                    <h4 className="text-white font-semibold">Blue Theme</h4>
                     <div className="w-4 h-4 bg-blue-600 rounded-full border-2 border-blue-400"></div>
                   </div>
-                  <p className="text-gray-400 text-sm mb-3">Interface avec accents bleus</p>
+                  <p className="text-gray-400 text-sm mb-3">Interface with blue accents</p>
                   <button 
                     onClick={() => handleThemeChange('blue')}
                     className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
                     style={getThemeButtonStyle('blue')}
                   >
-                    {currentTheme === 'blue' ? 'Actif' : 'Activer'}
+                    {currentTheme === 'blue' ? 'Active' : 'Activate'}
                   </button>
                 </div>
 
                 <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-white font-semibold">Thème Vert</h4>
+                    <h4 className="text-white font-semibold">Green Theme</h4>
                     <div className="w-4 h-4 bg-green-600 rounded-full border-2 border-green-400"></div>
                   </div>
-                  <p className="text-gray-400 text-sm mb-3">Interface avec accents verts</p>
+                  <p className="text-gray-400 text-sm mb-3">Interface with green accents</p>
                   <button 
                     onClick={() => handleThemeChange('green')}
                     className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
                     style={getThemeButtonStyle('green')}
                   >
-                    {currentTheme === 'green' ? 'Actif' : 'Activer'}
+                    {currentTheme === 'green' ? 'Active' : 'Activate'}
                   </button>
                 </div>
 
                 <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-white font-semibold">Thème Rose</h4>
+                    <h4 className="text-white font-semibold">Pink Theme</h4>
                     <div className="w-4 h-4 bg-pink-600 rounded-full border-2 border-pink-400"></div>
                   </div>
-                  <p className="text-gray-400 text-sm mb-3">Interface avec accents roses</p>
+                  <p className="text-gray-400 text-sm mb-3">Interface with pink accents</p>
                   <button 
                     onClick={() => handleThemeChange('pink')}
                     className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
                     style={getThemeButtonStyle('pink')}
                   >
-                    {currentTheme === 'pink' ? 'Actif' : 'Activer'}
+                    {currentTheme === 'pink' ? 'Active' : 'Activate'}
                   </button>
                 </div>
 
                 <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-white font-semibold">Thème Violet</h4>
+                    <h4 className="text-white font-semibold">Purple Theme</h4>
                     <div className="w-4 h-4 bg-purple-600 rounded-full border-2 border-purple-400"></div>
                   </div>
-                  <p className="text-gray-400 text-sm mb-3">Interface avec accents violets</p>
+                  <p className="text-gray-400 text-sm mb-3">Interface with purple accents</p>
                   <button 
                     onClick={() => handleThemeChange('purple')}
                     className="w-full py-2 rounded-lg transition-colors text-white hover:opacity-80"
                     style={getThemeButtonStyle('purple')}
                   >
-                    {currentTheme === 'purple' ? 'Actif' : 'Activer'}
+                    {currentTheme === 'purple' ? 'Active' : 'Activate'}
                   </button>
                 </div>
               </div>
@@ -864,8 +864,8 @@ const SettingsPage: React.FC = () => {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h3 className="text-xl font-semibold text-white">Compétences</h3>
-                    <p className="text-gray-400 text-sm">Gérez vos compétences et niveaux</p>
+                    <h3 className="text-xl font-semibold text-white">Skills</h3>
+                    <p className="text-gray-400 text-sm">Manage your skills and levels</p>
                   </div>
                   <ModernButton
                     onClick={() => {
@@ -874,7 +874,7 @@ const SettingsPage: React.FC = () => {
                     }}
                   >
                     <Plus size={16} className="mr-2" />
-                    Ajouter une compétence
+                    Add Skill
                   </ModernButton>
                 </div>
                 
@@ -892,8 +892,8 @@ const SettingsPage: React.FC = () => {
                             'bg-green-500/20 text-green-400'
                           }`}>
                             {skill.level === 'expert' ? 'Expert' :
-                             skill.level === 'advanced' ? 'Avancé' :
-                             skill.level === 'intermediate' ? 'Intermédiaire' : 'Débutant'}
+                             skill.level === 'advanced' ? 'Advanced' :
+                             skill.level === 'intermediate' ? 'Intermediate' : 'Beginner'}
                           </span>
                         </div>
                         <div className="flex gap-1 ml-2">
@@ -910,7 +910,7 @@ const SettingsPage: React.FC = () => {
                             onClick={async () => {
                               if (await SkillsService.deleteSkill(skill.id)) {
                                 setSkills(skills.filter(s => s.id !== skill.id));
-                                showSuccessNotification('Compétence supprimée');
+                                showSuccessNotification('Skill deleted');
                               }
                             }}
                             className="p-1 hover:bg-[#1e2938] rounded transition-colors"
@@ -925,8 +925,8 @@ const SettingsPage: React.FC = () => {
                   {skills.length === 0 && (
                     <div className="col-span-full text-center py-12 text-gray-400">
                       <Award size={48} className="mx-auto mb-4 opacity-50" />
-                      <p className="text-lg font-medium mb-2">Aucune compétence</p>
-                      <p className="text-sm">Ajoutez vos premières compétences</p>
+                      <p className="text-lg font-medium mb-2">No skills</p>
+                      <p className="text-sm">Add your first skills</p>
                     </div>
                   )}
                 </div>
@@ -938,8 +938,8 @@ const SettingsPage: React.FC = () => {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h3 className="text-xl font-semibold text-white">Récompenses</h3>
-                    <p className="text-gray-400 text-sm">Gérez vos récompenses et certifications</p>
+                    <h3 className="text-xl font-semibold text-white">Awards</h3>
+                    <p className="text-gray-400 text-sm">Manage your awards and certifications</p>
                   </div>
                   <ModernButton
                     onClick={() => {
@@ -948,7 +948,7 @@ const SettingsPage: React.FC = () => {
                     }}
                   >
                     <Plus size={16} className="mr-2" />
-                    Ajouter une récompense
+                    Add Award
                   </ModernButton>
                 </div>
                 
@@ -965,7 +965,7 @@ const SettingsPage: React.FC = () => {
                               <div className="flex items-center gap-3 text-xs text-gray-500">
                                 <span>{award.category}</span>
                                 <span>•</span>
-                                <span>{new Date(award.date_received).toLocaleDateString('fr-FR')}</span>
+                                <span>{new Date(award.date_received).toLocaleDateString('en-US')}</span>
                               </div>
                               {award.description && (
                                 <p className="text-sm text-gray-400 mt-2">{award.description}</p>
@@ -987,7 +987,7 @@ const SettingsPage: React.FC = () => {
                             onClick={async () => {
                               if (await AwardsService.deleteAward(award.id)) {
                                 setAwards(awards.filter(a => a.id !== award.id));
-                                showSuccessNotification('Récompense supprimée');
+                                showSuccessNotification('Award deleted');
                               }
                             }}
                             className="p-1 hover:bg-[#1e2938] rounded transition-colors"
@@ -1002,8 +1002,8 @@ const SettingsPage: React.FC = () => {
                   {awards.length === 0 && (
                     <div className="text-center py-12 text-gray-400">
                       <Award size={48} className="mx-auto mb-4 opacity-50" />
-                      <p className="text-lg font-medium mb-2">Aucune récompense</p>
-                      <p className="text-sm">Ajoutez vos premières récompenses</p>
+                      <p className="text-lg font-medium mb-2">No awards</p>
+                      <p className="text-sm">Add your first awards</p>
                     </div>
                   )}
                 </div>
@@ -1038,17 +1038,17 @@ const SettingsPage: React.FC = () => {
             {/* Historique des factures */}
             <ModernCard>
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Historique des factures</h3>
+                <h3 className="text-xl font-semibold text-white mb-4">Invoice History</h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg">
                     <div>
-                      <p className="text-white font-medium">Facture #001</p>
-                      <p className="text-sm text-gray-400">Plan Boost - Janvier 2024</p>
+                      <p className="text-white font-medium">Invoice #001</p>
+                      <p className="text-sm text-gray-400">Boost Plan - January 2024</p>
                     </div>
                     <div className="text-right">
                       <p className="text-white font-medium">29€</p>
                       <button className="text-[#9c68f2] hover:text-[#8a5cf0] text-sm">
-                        Télécharger
+                        Download
                       </button>
                     </div>
                   </div>
@@ -1068,7 +1068,7 @@ const SettingsPage: React.FC = () => {
       <div className="p-6 flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <Loader2 size={48} className="mx-auto text-[#9c68f2] animate-spin mb-4" />
-            <p className="text-gray-400">Chargement des paramètres...</p>
+            <p className="text-gray-400">Loading settings...</p>
           </div>
         </div>
     );
@@ -1079,7 +1079,7 @@ const SettingsPage: React.FC = () => {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <Settings size={24} className="text-[#9c68f2]" />
-            <h1 className="text-2xl font-bold text-white">Paramètres</h1>
+            <h1 className="text-2xl font-bold text-white">Settings</h1>
           </div>
           <button
             onClick={() => navigate('/profile')}
@@ -1095,7 +1095,7 @@ const SettingsPage: React.FC = () => {
             <ModernCard className="p-0">
               <div className="p-4">
                 <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                  Catégories
+                  Categories
                 </h3>
                 <nav className="space-y-1">
                   {categories.map((category) => (
@@ -1147,12 +1147,12 @@ const SettingsPage: React.FC = () => {
                     {isSaving ? (
                       <>
                         <Loader2 size={16} className="mr-2 animate-spin" />
-                        Sauvegarde...
+                        Saving...
                       </>
                     ) : (
                       <>
                         <Save size={16} className="mr-2" />
-                        Sauvegarder
+                        Save
                       </>
                     )}
                   </ModernButton>
@@ -1170,7 +1170,7 @@ const SettingsPage: React.FC = () => {
             setEditingSkill(null);
           }}
           onSuccess={() => {
-            // Recharger les skills
+            // Reload skills
             if (user) {
               SkillsService.getUserSkills(user.id).then(setSkills);
             }
@@ -1185,7 +1185,7 @@ const SettingsPage: React.FC = () => {
             setEditingAward(null);
           }}
           onSuccess={() => {
-            // Recharger les awards
+            // Reload awards
             if (user) {
               AwardsService.getUserAwards(user.id).then(setAwards);
             }
