@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import SubscriptionManager from '../components/SubscriptionManager';
+import CalendarActionModal from '../components/CalendarActionModal';
+import MeetingForm from '../components/MeetingForm';
+import TaskForm from '../components/TaskForm';
 import { useTasks } from '../hooks/useTasks';
 import { useSubscriptions } from '../hooks/useSubscriptions';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
@@ -48,6 +51,31 @@ const CalendarPageNew: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // États pour les modals
+  const [isActionModalOpen, setIsActionModalOpen] = useState(false);
+  const [isMeetingFormOpen, setIsMeetingFormOpen] = useState(false);
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  const [selectedDateString, setSelectedDateString] = useState<string>('');
+
+  // Fonctions de gestion des modals
+  const handleDateClick = (dateString: string) => {
+    setSelectedDateString(dateString);
+    setIsActionModalOpen(true);
+  };
+
+  const handleMeetingSelect = () => {
+    setIsMeetingFormOpen(true);
+  };
+
+  const handleTaskSelect = () => {
+    setIsTaskFormOpen(true);
+  };
+
+  const handleFormSuccess = () => {
+    // Recharger les données
+    loadCalendarEvents();
+  };
 
   // Charger les événements du calendrier depuis la base de données
   useEffect(() => {
@@ -546,7 +574,10 @@ const CalendarPageNew: React.FC = () => {
                         ${isToday ? 'border-[#9c68f2] bg-[#9c68f2]/10' : ''}
                         ${isSelected ? 'bg-[#35414e]' : 'hover:bg-[#35414e]/50'}
                       `}
-                      onClick={() => setSelectedDate(day.date)}
+                      onClick={() => {
+                        setSelectedDate(day.date);
+                        handleDateClick(day.date.toISOString().split('T')[0]);
+                      }}
                     >
                       <div className={`text-sm font-medium ${day.isCurrentMonth ? 'text-white' : 'text-gray-500'}`}>
                         {day.date.getDate()}
@@ -700,6 +731,29 @@ const CalendarPageNew: React.FC = () => {
         <div className="mt-6">
           <SubscriptionManager />
         </div>
+
+        {/* Modals */}
+        <CalendarActionModal
+          isOpen={isActionModalOpen}
+          onClose={() => setIsActionModalOpen(false)}
+          selectedDate={selectedDateString}
+          onSelectMeeting={handleMeetingSelect}
+          onSelectTask={handleTaskSelect}
+        />
+
+        <MeetingForm
+          isOpen={isMeetingFormOpen}
+          onClose={() => setIsMeetingFormOpen(false)}
+          onSuccess={handleFormSuccess}
+          selectedDate={selectedDateString}
+        />
+
+        <TaskForm
+          isOpen={isTaskFormOpen}
+          onClose={() => setIsTaskFormOpen(false)}
+          onSuccess={handleFormSuccess}
+          selectedDate={selectedDateString}
+        />
       </div>
   );
 };
