@@ -76,14 +76,16 @@ const PagePricing: React.FC = () => {
       yearlyPrice: 220, // 20% de réduction
       description: 'Idéal pour les freelancers actifs',
       features: [
-        { text: '5 projets actifs', included: true },
-        { text: '25 clients maximum', included: true },
-        { text: '10 Go de stockage', included: true },
+        { text: 'Projets illimités', included: true },
+        { text: 'Clients illimités', included: true },
+        { text: 'Stockage illimité', included: true },
         { text: 'Support prioritaire', included: true },
         { text: 'Templates premium', included: true },
         { text: 'Rapports avancés', included: true },
         { text: 'Intégrations complètes', included: true },
-        { text: 'API access', included: true }
+        { text: 'API access', included: true },
+        { text: 'Automatisations', included: true },
+        { text: 'Analytics avancés', included: true }
       ],
       popular: true,
       buttonText: 'Choisir Boost',
@@ -99,7 +101,7 @@ const PagePricing: React.FC = () => {
       features: [
         { text: 'Projets illimités', included: true },
         { text: 'Clients illimités', included: true },
-        { text: '50 Go de stockage', included: true },
+        { text: 'Stockage illimité', included: true },
         { text: 'Support dédié', included: true },
         { text: 'Templates premium', included: true },
         { text: 'Rapports avancés', included: true },
@@ -164,9 +166,9 @@ const PagePricing: React.FC = () => {
               Annuel
             </span>
             {isYearly && (
-              <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                -20%
-              </span>
+              <div className="text-green-400 text-sm font-medium">
+                Save 20% on yearly subscription
+              </div>
             )}
           </div>
         </div>
@@ -181,10 +183,10 @@ const PagePricing: React.FC = () => {
             return (
               <div
                 key={plan.id}
-                className={`relative bg-[#1e2938] rounded-2xl p-8 transition-all duration-300 hover:scale-105 ${
+                className={`relative bg-[#1e2938] rounded-2xl p-8 ${
                   plan.popular 
                     ? 'ring-2 ring-[#9c68f2] shadow-2xl shadow-[#9c68f2]/20' 
-                    : 'hover:shadow-xl'
+                    : ''
                 }`}
               >
                 {plan.popular && (
@@ -218,15 +220,11 @@ const PagePricing: React.FC = () => {
                 <div className="space-y-4 mb-8">
                   {plan.features.map((feature, index) => (
                     <div key={index} className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
-                        feature.included 
-                          ? 'bg-green-500' 
-                          : 'bg-gray-600'
-                      }`}>
-                        {feature.included && (
-                          <Check className="h-3 w-3 text-white" />
-                        )}
-                      </div>
+                      {feature.included ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <div className="h-4 w-4" />
+                      )}
                       <span className={`text-sm ${
                         feature.included ? 'text-white' : 'text-gray-500'
                       }`}>

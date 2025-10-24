@@ -50,7 +50,7 @@ const PageReferrals: React.FC = () => {
   const commissions: any[] = [];
   const loading = false;
   const error = null;
-  const referralLink = `https://fiverflow.com/register?ref=${referralCode}`;
+  const referralLink = `https://fiverflow.com/register?ref=${referralCode || 'user'}`;
 
   const [activeTab, setActiveTab] = useState<'overview' | 'referrals' | 'commissions'>('overview');
   const [copied, setCopied] = useState(false);

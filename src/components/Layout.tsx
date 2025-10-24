@@ -181,7 +181,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     },
     { 
       path: '/referrals', 
-      label: 'Parrainage', 
+      label: 'Referrals', 
       icon: Gift,
       restricted: false
     },
