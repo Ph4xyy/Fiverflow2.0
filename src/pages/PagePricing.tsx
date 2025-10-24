@@ -49,12 +49,12 @@ const PagePricing: React.FC = () => {
 
   const plans: Plan[] = [
     {
-      id: 'free',
-      name: 'Free',
-      subtitle: 'Pour commencer',
+      id: 'lunch',
+      name: 'Lunch',
+      subtitle: 'Plan gratuit',
       monthlyPrice: 0,
       yearlyPrice: 0,
-      description: 'Parfait pour découvrir FiverFlow',
+      description: 'Parfait pour commencer',
       features: [
         { text: '1 projet actif', included: true },
         { text: '5 clients maximum', included: true },
@@ -69,12 +69,12 @@ const PagePricing: React.FC = () => {
       buttonVariant: 'outline'
     },
     {
-      id: 'launch',
-      name: 'Launch',
+      id: 'boost',
+      name: 'Boost',
       subtitle: 'Pour les freelancers',
-      monthlyPrice: 29,
-      yearlyPrice: 290, // 20% de réduction
-      description: 'Idéal pour les freelancers indépendants',
+      monthlyPrice: 22,
+      yearlyPrice: 220, // 20% de réduction
+      description: 'Idéal pour les freelancers actifs',
       features: [
         { text: '5 projets actifs', included: true },
         { text: '25 clients maximum', included: true },
@@ -83,31 +83,9 @@ const PagePricing: React.FC = () => {
         { text: 'Templates premium', included: true },
         { text: 'Rapports avancés', included: true },
         { text: 'Intégrations complètes', included: true },
-        { text: 'API access', included: false }
+        { text: 'API access', included: true }
       ],
       popular: true,
-      buttonText: 'Choisir Launch',
-      buttonVariant: 'primary'
-    },
-    {
-      id: 'boost',
-      name: 'Boost',
-      subtitle: 'Pour les petites équipes',
-      monthlyPrice: 79,
-      yearlyPrice: 790, // 20% de réduction
-      description: 'Parfait pour les équipes en croissance',
-      features: [
-        { text: '15 projets actifs', included: true },
-        { text: '100 clients maximum', included: true },
-        { text: '50 Go de stockage', included: true },
-        { text: 'Support prioritaire', included: true },
-        { text: 'Templates premium', included: true },
-        { text: 'Rapports avancés', included: true },
-        { text: 'Intégrations complètes', included: true },
-        { text: 'API access', included: true },
-        { text: 'Collaboration équipe', included: true },
-        { text: 'Automatisations', included: true }
-      ],
       buttonText: 'Choisir Boost',
       buttonVariant: 'primary'
     },
@@ -115,13 +93,13 @@ const PagePricing: React.FC = () => {
       id: 'scale',
       name: 'Scale',
       subtitle: 'Pour les entreprises',
-      monthlyPrice: 199,
-      yearlyPrice: 1990, // 20% de réduction
+      monthlyPrice: 39,
+      yearlyPrice: 390, // 20% de réduction
       description: 'Solution complète pour les entreprises',
       features: [
         { text: 'Projets illimités', included: true },
         { text: 'Clients illimités', included: true },
-        { text: '200 Go de stockage', included: true },
+        { text: '50 Go de stockage', included: true },
         { text: 'Support dédié', included: true },
         { text: 'Templates premium', included: true },
         { text: 'Rapports avancés', included: true },
@@ -138,7 +116,7 @@ const PagePricing: React.FC = () => {
   ];
 
   const formatPrice = (price: number) => {
-    return price === 0 ? 'Gratuit' : `€${price}`;
+    return price === 0 ? 'Gratuit' : `$${price}`;
   };
 
   const getYearlyDiscount = (monthlyPrice: number) => {
@@ -194,7 +172,7 @@ const PagePricing: React.FC = () => {
         </div>
 
         {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           {plans.map((plan) => {
             const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
             const period = isYearly ? 'an' : 'mois';
@@ -231,7 +209,7 @@ const PagePricing: React.FC = () => {
                   </div>
                   {savings > 0 && (
                     <div className="text-green-400 text-sm font-medium">
-                      Économisez €{savings}/an
+                      Économisez ${savings}/an
                     </div>
                   )}
                   <p className="text-gray-300 text-sm mt-2">{plan.description}</p>
