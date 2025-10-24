@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
+import LanguageSelector from '../components/LanguageSelector';
+import { useTranslation } from '../hooks/useTranslation';
 import { 
   ArrowLeft, 
   User, 
@@ -48,6 +50,7 @@ interface Project {
 }
 
 const ProfileSettingsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('general');
   const [profileData, setProfileData] = useState<ProfileData>({
     full_name: '',
@@ -77,12 +80,12 @@ const ProfileSettingsPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   const tabs = [
-    { id: 'general', label: 'General', icon: <User size={20} /> },
-    { id: 'skills', label: 'Skills', icon: <Award size={20} /> },
-    { id: 'social', label: 'Social Networks', icon: <Globe size={20} /> },
-    { id: 'projects', label: 'Projects', icon: <Briefcase size={20} /> },
-    { id: 'privacy', label: 'Privacy', icon: <Shield size={20} /> },
-    { id: 'appearance', label: 'Appearance', icon: <Palette size={20} /> }
+    { id: 'general', label: t.profile.sections.personal, icon: <User size={20} /> },
+    { id: 'skills', label: t.profile.sections.skills, icon: <Award size={20} /> },
+    { id: 'social', label: t.profile.sections.social, icon: <Globe size={20} /> },
+    { id: 'projects', label: t.profile.sections.projects, icon: <Briefcase size={20} /> },
+    { id: 'privacy', label: t.profile.sections.privacy, icon: <Shield size={20} /> },
+    { id: 'appearance', label: 'Apparence', icon: <Palette size={20} /> }
   ];
 
   const socialNetworkTemplates: SocialNetwork[] = [
@@ -185,68 +188,68 @@ const ProfileSettingsPage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Nom complet
+            {t.profile.fields.fullName}
           </label>
           <input
             type="text"
             value={profileData.full_name}
             onChange={(e) => setProfileData({...profileData, full_name: e.target.value})}
             className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-            placeholder="Votre nom complet"
+            placeholder={t.profile.fields.fullName}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Professional Title
+            {t.profile.fields.position}
           </label>
           <input
             type="text"
             value={profileData.professional_title}
             onChange={(e) => setProfileData({...profileData, professional_title: e.target.value})}
             className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-            placeholder="Développeur, Designer, etc."
+            placeholder={t.profile.fields.position}
           />
         </div>
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-2">
-          Bio
+          {t.profile.fields.bio}
         </label>
         <textarea
           value={profileData.bio}
           onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
           className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
           rows={4}
-          placeholder="Parlez-nous de vous..."
+          placeholder={t.profile.fields.bio}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Localisation
+            {t.profile.fields.location}
           </label>
           <input
             type="text"
             value={profileData.location}
             onChange={(e) => setProfileData({...profileData, location: e.target.value})}
             className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-            placeholder="Paris, France"
+            placeholder={t.profile.fields.location}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
-            Site web
+            {t.profile.fields.website}
           </label>
           <input
             type="url"
             value={profileData.website}
             onChange={(e) => setProfileData({...profileData, website: e.target.value})}
             className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-            placeholder="https://votre-site.com"
+            placeholder={t.profile.fields.website}
           />
         </div>
       </div>
@@ -478,14 +481,17 @@ const ProfileSettingsPage: React.FC = () => {
   return (
     <div className="p-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <button className="p-2 hover:bg-[#35414e] rounded-lg transition-colors">
-            <ArrowLeft size={20} className="text-white" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-white">Paramètres du profil</h1>
-            <p className="text-gray-400">Gérez votre profil et vos préférences</p>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <button className="p-2 hover:bg-[#35414e] rounded-lg transition-colors">
+              <ArrowLeft size={20} className="text-white" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-white">{t.profile.title} {t.common.settings}</h1>
+              <p className="text-gray-400">{t.profile.subtitle}</p>
+            </div>
           </div>
+          <LanguageSelector />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -522,7 +528,7 @@ const ProfileSettingsPage: React.FC = () => {
                   variant="outline"
                   onClick={() => window.history.back()}
                 >
-                  Annuler
+                  {t.common.cancel}
                 </ModernButton>
                 <ModernButton 
                   onClick={handleSaveProfile}
@@ -531,12 +537,12 @@ const ProfileSettingsPage: React.FC = () => {
                   {isSaving ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Sauvegarde...
+                      {t.common.loading}
                     </>
                   ) : (
                     <>
                       <Save size={16} className="mr-2" />
-                      Sauvegarder
+                      {t.common.save}
                     </>
                   )}
                 </ModernButton>

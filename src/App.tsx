@@ -52,7 +52,7 @@ import StatsPage from './pages/StatsPage';
 import PageUpgrade from './pages/PageUpgrade';
 import OnboardingPage from './pages/OnboardingPage';
 import NetworkPage from './pages/NetworkPage';
-import ReferralsPage from './pages/ReferralsPage';
+import PageReferrals from './pages/PageReferrals';
 import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
 import AIAssistantPage from './pages/AIAssistantPage';
@@ -151,7 +151,7 @@ function AppContent() {
           } />
           <Route path="/upgrade" element={<InstantProtectedRoute><PageUpgrade /></InstantProtectedRoute>} />
           <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
-          <Route path="/referrals" element={<InstantProtectedRoute><ReferralsPage /></InstantProtectedRoute>} />
+          <Route path="/referrals" element={<InstantProtectedRoute><PageReferrals /></InstantProtectedRoute>} />
 
           {/* Assistant AI */}
           <Route path="/assistant" element={
