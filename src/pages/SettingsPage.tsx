@@ -147,9 +147,9 @@ const SettingsPage: React.FC = () => {
     },
     {
       id: 'subscription',
-      name: 'Abonnement & Paiement',
+      name: 'Subscription & Payment',
       icon: <CreditCard size={20} />,
-      description: 'Gérer votre abonnement et méthodes de paiement'
+      description: 'Manage your subscription and payment methods'
     }
   ];
 
@@ -1015,125 +1015,21 @@ const SettingsPage: React.FC = () => {
       case 'subscription':
         return (
           <div className="space-y-6">
-            {/* Plan actuel */}
+            {/* Subscription Management */}
             <ModernCard>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Plan actuel</h3>
-                <div className="bg-gradient-to-r from-[#9c68f2] to-[#8a5cf0] rounded-lg p-4 text-white">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-lg font-semibold">Lunch (Gratuit)</h4>
-                      <p className="text-sm opacity-90">Parfait pour débuter</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold">0€</p>
-                      <p className="text-sm opacity-90">/mois</p>
-                    </div>
-                  </div>
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Crown size={32} className="text-white" />
                 </div>
-              </div>
-            </ModernCard>
-
-            {/* Plans disponibles */}
-            <ModernCard>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Plans disponibles</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
-                    <div className="mb-3">
-                      <h4 className="text-white font-semibold">Lunch</h4>
-                    </div>
-                    <p className="text-2xl font-bold text-[#9c68f2] mb-2">0€<span className="text-sm text-gray-400">/mois</span></p>
-                    <ul className="text-sm text-gray-400 space-y-1 mb-4">
-                      <li>• Jusqu'à 5 clients</li>
-                      <li>• 10 commandes/mois</li>
-                      <li>• Calendrier basique</li>
-                      <li>• Support email</li>
-                    </ul>
-                    <ModernButton variant="outline" className="w-full" disabled>
-                      Plan actuel
-                    </ModernButton>
-                  </div>
-
-                  <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938] relative">
-                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">Populaire</span>
-                    </div>
-                    <div className="mb-3">
-                      <h4 className="text-white font-semibold">Boost</h4>
-                    </div>
-                    <p className="text-2xl font-bold text-[#9c68f2] mb-2">24€<span className="text-sm text-gray-400">/mois</span></p>
-                    <ul className="text-sm text-gray-400 space-y-1 mb-4">
-                      <li>• Clients illimités</li>
-                      <li>• Commandes illimitées</li>
-                      <li>• Statistiques avancées</li>
-                      <li>• Calendrier intelligent</li>
-                      <li>• Réseau de partenaires</li>
-                      <li>• Support prioritaire</li>
-                    </ul>
-                     <ModernButton 
-                       className="w-full"
-                       onClick={() => navigate('/upgrade')}
-                     >
-                       <Shield size={16} className="mr-2" />
-                       Sécurisé par Stripe
-                     </ModernButton>
-                  </div>
-
-                  <div className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938]">
-                    <div className="mb-3">
-                      <h4 className="text-white font-semibold">Scale</h4>
-                    </div>
-                    <p className="text-2xl font-bold text-[#9c68f2] mb-2">59€<span className="text-sm text-gray-400">/mois</span></p>
-                    <ul className="text-sm text-gray-400 space-y-1 mb-4">
-                      <li>• Tout Boost +</li>
-                      <li>• Gestion d'équipe</li>
-                      <li>• API avancée</li>
-                      <li>• Intégrations premium</li>
-                      <li>• Support dédié</li>
-                      <li>• Formation incluse</li>
-                    </ul>
-                     <ModernButton 
-                       variant="outline" 
-                       className="w-full"
-                       onClick={() => navigate('/upgrade')}
-                     >
-                       <Shield size={16} className="mr-2" />
-                       Sécurisé par Stripe
-                     </ModernButton>
-                  </div>
-                </div>
-              </div>
-            </ModernCard>
-
-            {/* Méthodes de paiement */}
-            <ModernCard>
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold text-white">Méthodes de paiement</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <Shield size={16} />
-                    <span>Sécurisé par Stripe</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="text-center py-8 text-gray-400">
-                    <CreditCard size={48} className="mx-auto mb-4 opacity-50" />
-                    <p className="text-lg font-medium mb-2">Aucune méthode de paiement</p>
-                    <p className="text-sm">Ajoutez une carte pour souscrire à un abonnement</p>
-                  </div>
-
-                  <ModernButton className="w-full">
-                    <Plus size={16} className="mr-2" />
-                    Ajouter une carte bancaire
-                  </ModernButton>
-                  
-                  <div className="text-xs text-gray-500 text-center">
-                    <p>🔒 Vos informations de paiement sont sécurisées par Stripe</p>
-                    <p>Nous ne stockons jamais vos données bancaires</p>
-                  </div>
-                </div>
+                <h3 className="text-2xl font-semibold text-white mb-2">Want to upgrade or change your plan?</h3>
+                <p className="text-gray-400 mb-6">Discover our premium plans and unlock new features for your freelance business</p>
+                <ModernButton 
+                  onClick={() => navigate('/upgrade')}
+                  className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5ae8] hover:to-[#3a2580]"
+                >
+                  <Crown size={16} className="mr-2" />
+                  View Plans & Upgrade
+                </ModernButton>
               </div>
             </ModernCard>
 

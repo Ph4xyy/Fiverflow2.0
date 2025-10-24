@@ -47,7 +47,7 @@ const ReferralsPage: React.FC = () => {
     }
   }, [user, refreshData]);
 
-  // Copier le lien de parrainage
+  // Copy referral link
   const copyReferralLink = async () => {
     if (!referralLink) return;
     
@@ -70,7 +70,7 @@ const ReferralsPage: React.FC = () => {
       try {
         await navigator.share({
           title: 'Rejoignez-moi sur FiverFlow',
-          text: 'Utilisez mon lien de parrainage pour vous inscrire !',
+          text: 'Use my referral link to sign up!',
           url: referralLink.url
         });
       } catch (error) {
@@ -119,7 +119,7 @@ const ReferralsPage: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <RefreshCw className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4" />
-            <p className="text-slate-400">Chargement des données de parrainage...</p>
+            <p className="text-slate-400">Loading referral data...</p>
           </div>
         </div>
     );
@@ -151,10 +151,10 @@ const ReferralsPage: React.FC = () => {
               <div>
                 <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
                   <Gift className="w-8 h-8 text-purple-500" />
-                  Parrainage
+                  Network
                 </h1>
                 <p className="text-slate-400">
-                  Gérez vos parrainages et gagnez des commissions
+                  Manage your referrals and earn commissions
                 </p>
               </div>
               <button
@@ -253,14 +253,14 @@ const ReferralsPage: React.FC = () => {
                 <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-700/50">
                   <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
                     <Share2 className="w-5 h-5 text-blue-500" />
-                    Votre lien de parrainage
+                    Your referral link
                   </h3>
                   
                   {referralLink ? (
                     <div className="space-y-4">
                       <div className="flex items-center gap-3 p-4 bg-slate-700/50 rounded-lg">
                         <div className="flex-1">
-                          <p className="text-slate-300 text-sm mb-1">Code de parrainage</p>
+                          <p className="text-slate-300 text-sm mb-1">Referral code</p>
                           <p className="text-white font-mono text-lg">{referralLink.code}</p>
                         </div>
                         <button
@@ -318,7 +318,7 @@ const ReferralsPage: React.FC = () => {
                   ) : (
                     <div className="text-center py-8">
                       <Gift className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-                      <p className="text-slate-400">Chargement du lien de parrainage...</p>
+                      <p className="text-slate-400">Loading referral link...</p>
                     </div>
                   )}
                 </div>

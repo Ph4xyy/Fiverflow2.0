@@ -99,6 +99,15 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
         email: isOwnProfile ? (user?.email || prev.email) : '',
         phone: isOwnProfile ? prev.phone : ''
       }));
+
+      // Load social networks from public data
+      setSocialNetworks({
+        github: publicData.github_url || '',
+        linkedin: publicData.linkedin_url || '',
+        twitter: publicData.twitter_url || '',
+        discord: publicData.discord_username || '',
+        website: publicData.website || ''
+      });
     }
   }, [profileDataFromHook, isOwnProfile, user?.email]);
 
@@ -641,9 +650,45 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
 
                   {/* Basic Info */}
                   <div className="pb-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div>
-                        <h1 className="text-3xl font-bold text-white">{profileData.full_name || 'User'}</h1>
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h1 className="text-3xl font-bold text-white">{profileData.full_name || 'User'}</h1>
+                          {/* Badges */}
+                          <div className="flex items-center gap-2">
+                            {/* Badge Administrateur */}
+                            {isAdmin && (
+                              <div className="relative group">
+                                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center cursor-pointer">
+                                  <Shield size={16} className="text-white" />
+                                </div>
+                                {/* Tooltip */}
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                                  <div className="bg-gray-900 text-white text-sm rounded-lg px-3 py-2 whitespace-nowrap shadow-lg border border-gray-700">
+                                    <div className="font-semibold">Administrator</div>
+                                    <div className="text-gray-300 text-xs">Full system access</div>
+                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Badge Abonnement */}
+                            <div className="relative group">
+                              <div className="w-8 h-8 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center cursor-pointer">
+                                <Crown size={16} className="text-white" />
+                              </div>
+                              {/* Tooltip */}
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                                <div className="bg-gray-900 text-white text-sm rounded-lg px-3 py-2 whitespace-nowrap shadow-lg border border-gray-700">
+                                  <div className="font-semibold">Subscriber</div>
+                                  <div className="text-gray-300 text-xs">Subscribed for 3 months</div>
+                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                         {/* Username affiché en dessous du nom avec bouton de copie */}
                         {(profileDataFromHook?.public_data?.username || profileData.username) && (
                           <div className="flex items-center gap-2 mt-1 group">
@@ -661,30 +706,6 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                             </button>
                           </div>
                         )}
-                      </div>
-                      {/* Badges */}
-                      <div className="flex items-center gap-2">
-                        {/* Badge Administrateur */}
-                        {isAdmin && (
-                          <div className="relative group">
-                            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center cursor-pointer">
-                              <Shield size={16} className="text-white" />
-                            </div>
-                            {/* Tooltip */}
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
-                              <div className="bg-gray-900 text-white text-sm rounded-lg px-3 py-2 whitespace-nowrap shadow-lg border border-gray-700">
-                                <div className="font-semibold">Administrator</div>
-                                <div className="text-gray-300 text-xs">Full system access</div>
-                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Badge Abonnement - supprimé temporairement */}
-                        <div className="w-8 h-8 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center cursor-pointer">
-                          <Crown size={16} className="text-white" />
-                        </div>
                       </div>
                     </div>
                     <p className="text-lg text-gray-400 mb-2">{profileData.professional_title || 'Professionnel'}</p>
@@ -1294,7 +1315,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                   <div>
                     <h3 className="text-lg font-semibold text-white mb-3">About</h3>
                     <p className="text-gray-400 leading-relaxed">
-                      {profileData.bio || 'Aucune bio disponible.'}
+                      <div className="whitespace-pre-line">{profileData.bio || 'No bio available.'}</div>
                     </p>
                   </div>
 

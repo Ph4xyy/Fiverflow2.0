@@ -44,11 +44,11 @@ const AIAssistantPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Détecter la langue de l'utilisateur
+  // Detect user language
   const userLanguage = navigator.language.startsWith('fr') ? 'fr' : 'en';
   const examples = getExamplesForLanguage(userLanguage);
 
-  // Auto-scroll vers le bas
+  // Auto-scroll to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -57,7 +57,7 @@ const AIAssistantPage: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Message de bienvenue initial
+  // Initial welcome message
   useEffect(() => {
     if (messages.length === 0) {
       const welcomeMessage: AssistantMessage = {
@@ -72,7 +72,7 @@ const AIAssistantPage: React.FC = () => {
     }
   }, [userLanguage]);
 
-  // Gérer l'envoi d'un message
+  // Handle sending a message
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
@@ -88,10 +88,10 @@ const AIAssistantPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Parser l'intention
+      // Parse intent
       const intent = parseIntent(inputValue.trim());
       
-      // Exécuter l'action
+      // Execute action
       const result = await assistantExecute(user!, intent);
 
       const assistantMessage: AssistantMessage = {
@@ -125,12 +125,12 @@ const AIAssistantPage: React.FC = () => {
     }
   };
 
-  // Gérer la confirmation
+  // Handle confirmation
   const handleConfirmation = async (confirmed: boolean) => {
     if (!pendingConfirmation) return;
 
     if (confirmed) {
-      // Relancer l'action avec confirmation
+      // Restart action with confirmation
       const intent = pendingConfirmation.metadata?.intent;
       if (intent) {
         setIsLoading(true);
@@ -161,7 +161,7 @@ const AIAssistantPage: React.FC = () => {
       const cancelMessage: AssistantMessage = {
         id: Date.now().toString(),
         type: 'assistant',
-        content: '❌ Action annulée.',
+        content: '❌ Action cancelled.',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, cancelMessage]);
@@ -170,7 +170,7 @@ const AIAssistantPage: React.FC = () => {
     setPendingConfirmation(null);
   };
 
-  // Gérer les touches du clavier
+  // Handle keyboard keys
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -267,7 +267,7 @@ const AIAssistantPage: React.FC = () => {
             <button
               onClick={() => useExample('/help')}
               className="p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              title={userLanguage === 'fr' ? 'Aide' : 'Help'}
+              title="Help"
             >
               <HelpCircle size={18} />
             </button>
