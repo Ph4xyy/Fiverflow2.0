@@ -340,10 +340,15 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
               <User className="mr-2 text-[#9c68f2]" size={20} />
               Basic Information
             </h3>
+            <p className="text-sm text-gray-400 mb-4">
+              Fields marked with <span className="text-red-400">*</span> are required. All other fields are optional.
+            </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className={labelCls}>Full Name *</label>
+                <label className={labelCls}>
+                  Full Name <span className="text-red-400">*</span>
+                </label>
                 <input
                   type="text"
                   value={formData.name}
@@ -366,7 +371,9 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
               </div>
 
               <div>
-                <label className={labelCls}>Client Type *</label>
+                <label className={labelCls}>
+                  Client Type <span className="text-red-400">*</span>
+                </label>
                 <select
                   value={formData.client_type}
                   onChange={(e) => setFormData({ ...formData, client_type: e.target.value })}
@@ -379,7 +386,9 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
               </div>
 
               <div>
-                <label className={labelCls}>Platform *</label>
+                <label className={labelCls}>
+                  Platform <span className="text-red-400">*</span>
+                </label>
                 <select
                   value={formData.platform}
                   onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
@@ -402,6 +411,9 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
               <Mail className="mr-2 text-[#9c68f2]" size={20} />
               Contact & Location
             </h3>
+            <p className="text-sm text-gray-400 mb-4">
+              All contact information is optional. You can fill in as much or as little as needed.
+            </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -509,6 +521,9 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
               <Briefcase className="mr-2 text-[#9c68f2]" size={20} />
               Business & Projects
             </h3>
+            <p className="text-sm text-gray-400 mb-4">
+              Help us understand your client's business needs and project requirements.
+            </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -593,6 +608,9 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
               <MessageSquare className="mr-2 text-[#9c68f2]" size={20} />
               Management & Communication
             </h3>
+            <p className="text-sm text-gray-400 mb-4">
+              Set up how you'll manage and communicate with this client.
+            </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -824,7 +842,10 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   {currentStep < 4 ? (
                     <ModernButton
                       type="button"
-                      onClick={nextStep}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        nextStep();
+                      }}
                     >
                       Next
                     </ModernButton>
