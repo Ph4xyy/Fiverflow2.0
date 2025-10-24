@@ -2,13 +2,14 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import Layout, { cardClass } from '@/components/Layout';
 import ModernButton from '@/components/ModernButton';
+import ModernCard from '@/components/ModernCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useInstantPageData } from '@/hooks/useInstantPageData';
 
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import ClientForm from '@/components/ClientForm';
 import ClientViewModal, { FullClient } from '@/components/ClientViewModal';
-import { Plus, Search, X, ChevronLeft, ChevronRight, Filter, Users } from 'lucide-react';
+import { Plus, Search, X, ChevronLeft, ChevronRight, Filter, Users, Eye, Edit, Trash2, Mail, Phone, MapPin, Building } from 'lucide-react';
 import toast from 'react-hot-toast';
 import SubscriptionLimits from '@/components/SubscriptionLimits';
 
@@ -299,77 +300,84 @@ const ClientsPageOptimized: React.FC = () => {
   return (
     <div className="p-6 space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Clients</h1>
-            <p className="text-gray-400">Search, filter and manage your clients</p>
-            {/* Limites d'abonnement */}
-            <div className="mt-2">
-              <SubscriptionLimits 
-                resource="clients" 
-                currentCount={clients?.length || 0}
-                onUpgrade={() => window.location.href = '/upgrade'}
-              />
+        <ModernCard className="relative overflow-hidden p-0">
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] opacity-10" />
+          
+          <div className="relative p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-2">Clients</h1>
+                <p className="text-gray-400">Search, filter and manage your clients</p>
+                {/* Limites d'abonnement */}
+                <div className="mt-2">
+                  <SubscriptionLimits 
+                    resource="clients" 
+                    currentCount={clients?.length || 0}
+                    onUpgrade={() => window.location.href = '/upgrade'}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                {/* Search */}
+                <div className="relative w-full sm:w-80">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search (name, email, company, platform)…"
+                    className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-[#1e2938]
+                               bg-[#35414e] text-white placeholder-gray-400
+                               focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-transparent"
+                    type="text"
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch('')}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-[#1e2938]"
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4 text-gray-400" />
+                    </button>
+                  )}
+                </div>
+
+                <ModernButton onClick={openCreate} size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Client
+                </ModernButton>
+              </div>
             </div>
           </div>
-
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            {/* Search */}
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={'Search (name, email, company, platform)…'}
-                className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-[#1C2230]
-                           bg-[#11151D]/95 text-slate-100 placeholder-slate-400
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                type="text"
-              />
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-[#141922]"
-                  aria-label={'Clear search'}
-                >
-                  <X className="h-4 w-4 text-slate-400" />
-                </button>
-              )}
-            </div>
-
-            <ModernButton onClick={openCreate} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Nouveau Client
-            </ModernButton>
-          </div>
-        </div>
+        </ModernCard>
 
         {/* Filters */}
-        <div className={`${cardClass} p-3 sm:p-4`}>
-          <div className="flex items-center gap-2 mb-3 text-slate-200">
-            <Filter className="h-4 w-4" />
-            <span className="text-sm font-medium">{'Filters'}</span>
+        <ModernCard>
+          <div className="flex items-center gap-2 mb-4 text-white">
+            <Filter className="h-4 w-4 text-[#9c68f2]" />
+            <span className="text-sm font-medium">Filters</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="px-3 py-2.5 rounded-xl border border-[#1C2230] bg-[#11151D]/95 text-slate-100 focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2.5 rounded-lg border border-[#1e2938] bg-[#35414e] text-white focus:ring-2 focus:ring-[#9c68f2]"
             >
-              <option value="">{'Status (all)'}</option>
-              <option value="prospect">{'Prospect'}</option>
-              <option value="active">{'Active'}</option>
-              <option value="inactive">{'Inactive'}</option>
-              <option value="completed">{'Project completed'}</option>
+              <option value="">Status (all)</option>
+              <option value="prospect">Prospect</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="completed">Project completed</option>
             </select>
 
             <select
               value={platform}
               onChange={(e) => setPlatform(e.target.value)}
-              className="px-3 py-2.5 rounded-xl border border-[#1C2230] bg-[#11151D]/95 text-slate-100 focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2.5 rounded-lg border border-[#1e2938] bg-[#35414e] text-white focus:ring-2 focus:ring-[#9c68f2]"
             >
-              <option value="">{'Platform (all)'}</option>
+              <option value="">Platform (all)</option>
               {platformOptions.map((p) => (
                 <option key={p} value={p}>{p}</option>
               ))}
@@ -378,145 +386,165 @@ const ClientsPageOptimized: React.FC = () => {
             <select
               value={country}
               onChange={(e) => setCountry(e.target.value)}
-              className="px-3 py-2.5 rounded-xl border border-[#1C2230] bg-[#11151D]/95 text-slate-100 focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2.5 rounded-lg border border-[#1e2938] bg-[#35414e] text-white focus:ring-2 focus:ring-[#9c68f2]"
             >
-              <option value="">{'Country (all)'}</option>
+              <option value="">Country (all)</option>
               {countryOptions.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
 
-            <button
-              onClick={clearAll}
-              className="px-3 py-2.5 rounded-xl border border-[#1C2230] hover:bg-[#141922] text-slate-200"
-            >
-{'Reset'}
-            </button>
+            <ModernButton onClick={clearAll} variant="outline" size="sm">
+              Reset
+            </ModernButton>
           </div>
-        </div>
+        </ModernCard>
 
-        {/* Table */}
-        <div className={`${cardClass}`}>
-          {/* 🔥 NAVIGATION INSTANTANÉE - Plus jamais de loading screen */}
-          {error ? (
+        {/* Clients Grid */}
+        {error ? (
+          <ModernCard>
             <div className="p-6 text-center">
-              <p className="text-red-400 font-semibold">{'Unable to load clients'}</p>
-              <p className="text-sm text-slate-400 mt-1">{error.message}</p>
-              <button
-                onClick={refresh}
-                className="mt-4 px-4 py-2 rounded-xl btn-primary"
-              >
-                {'Retry'}
-              </button>
+              <p className="text-red-400 font-semibold">Unable to load clients</p>
+              <p className="text-sm text-gray-400 mt-1">{error.message}</p>
+              <ModernButton onClick={refresh} className="mt-4">
+                Retry
+              </ModernButton>
             </div>
-          ) : !clients || clients.length === 0 ? (
+          </ModernCard>
+        ) : !clients || clients.length === 0 ? (
+          <ModernCard>
             <div className="p-10 text-center">
-              <p className="text-slate-300">{'No clients found.'}</p>
-              <p className="text-sm text-slate-400 mt-1">
-                {'Adjust your filters or create a new client.'}
+              <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <p className="text-white text-lg font-medium">No clients found</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Adjust your filters or create a new client.
               </p>
+              <ModernButton onClick={openCreate} className="mt-4">
+                <Plus className="h-4 w-4 mr-2" />
+                Create First Client
+              </ModernButton>
             </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-[#1C2230]">
-                  <thead className="bg-[#0F141C]">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Name</th>
-                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Company</th>
-                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Platform</th>
-                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Email</th>
-                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Country</th>
-                      <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-300">Status</th>
-                      <th className="px-6 py-3" />
-                    </tr>
-                  </thead>
-                  <tbody className="bg-[#0B0E14] divide-y divide-[#1C2230]">
-                    {clients.map((c) => (
-                      <tr
-                        key={c.id}
-                        className="hover:bg-[#11161F] cursor-pointer"
-                        onClick={() => openView(c.id)}
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-white">{c.name}</div>
-                          {c.created_at && (
-                            <div className="text-xs text-slate-400">
-                              Créé le {new Date(c.created_at).toLocaleDateString()}
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">
-                          {c.company_name || '—'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">
-                          {c.platform}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">
-                          {c.email_primary || '—'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">
-                          {c.country || '—'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${
-                              (c.client_status && {
-                                prospect: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-                                active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-                                inactive: 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-300',
-                                completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-                              } as Record<string, string>)[(c.client_status || '').toLowerCase()] ||
-                              'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-300'
-                            }`}
-                          >
-                            {c.client_status ? c.client_status : '—'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); openEditFromRow(c); }}
-                            className="text-blue-400 hover:text-blue-300 text-sm font-medium"
-                          >
-                            Modifier
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Pagination */}
-              <div className="flex items-center justify-between px-4 py-3 border-t border-[#1C2230]">
-                <p className="text-sm text-slate-300">
-                  {total > 0
-                    ? `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)} of ${total}`
-                    : 'No results'}
-                </p>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page <= 1}
-                    className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-[#1C2230] text-slate-200 hover:bg-[#141922] disabled:opacity-50"
-                  >
-                    <ChevronLeft className="h-4 w-4" /> Précédent
-                  </button>
-                  <span className="text-sm text-slate-300">
-                    Page {page} / {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page >= totalPages}
-                    className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-[#1C2230] text-slate-200 hover:bg-[#141922] disabled:opacity-50"
-                  >
-                    Suivant <ChevronRight className="h-4 w-4" />
-                  </button>
+          </ModernCard>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {clients.map((c) => (
+              <ModernCard key={c.id} className="hover:shadow-lg transition-all duration-200 cursor-pointer group" onClick={() => openView(c.id)}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      {c.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white group-hover:text-[#9c68f2] transition-colors">
+                        {c.name}
+                      </h3>
+                      {c.company_name && (
+                        <div className="flex items-center text-sm text-gray-400 mt-1">
+                          <Building className="h-4 w-4 mr-1" />
+                          {c.company_name}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex space-x-1">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openView(c.id); }}
+                      className="p-2 hover:bg-[#35414e] rounded-lg transition-colors"
+                      title="View details"
+                    >
+                      <Eye className="h-4 w-4 text-gray-400 hover:text-white" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openEditFromRow(c); }}
+                      className="p-2 hover:bg-[#35414e] rounded-lg transition-colors"
+                      title="Edit client"
+                    >
+                      <Edit className="h-4 w-4 text-gray-400 hover:text-[#9c68f2]" />
+                    </button>
+                  </div>
                 </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center text-sm text-gray-400">
+                    <span className="w-20 text-gray-500">Platform:</span>
+                    <span className="text-white">{c.platform}</span>
+                  </div>
+                  
+                  {c.email_primary && (
+                    <div className="flex items-center text-sm text-gray-400">
+                      <Mail className="h-4 w-4 mr-2 text-gray-500" />
+                      <span className="truncate">{c.email_primary}</span>
+                    </div>
+                  )}
+                  
+                  {c.country && (
+                    <div className="flex items-center text-sm text-gray-400">
+                      <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+                      <span>{c.country}</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${
+                        (c.client_status && {
+                          prospect: 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30',
+                          active: 'bg-green-500/20 text-green-300 border border-green-500/30',
+                          inactive: 'bg-gray-500/20 text-gray-300 border border-gray-500/30',
+                          completed: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+                        } as Record<string, string>)[(c.client_status || '').toLowerCase()] ||
+                        'bg-gray-500/20 text-gray-300 border border-gray-500/30'
+                      }`}
+                    >
+                      {c.client_status || 'Unknown'}
+                    </span>
+                    {c.created_at && (
+                      <span className="text-xs text-gray-500">
+                        {new Date(c.created_at).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </ModernCard>
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {clients && clients.length > 0 && (
+          <ModernCard>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-400">
+                {total > 0
+                  ? `Showing ${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)} of ${total}`
+                  : 'No results'}
+              </p>
+              <div className="flex items-center gap-2">
+                <ModernButton
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  variant="outline"
+                  size="sm"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </ModernButton>
+                <span className="px-3 py-1 text-sm text-gray-300 bg-[#35414e] rounded-lg">
+                  Page {page} / {totalPages}
+                </span>
+                <ModernButton
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  variant="outline"
+                  size="sm"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </ModernButton>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </ModernCard>
+        )}
 
         {/* Modal create/edit */}
         <ClientForm
