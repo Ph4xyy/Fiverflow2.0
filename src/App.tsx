@@ -37,22 +37,21 @@ import RootRedirect from './components/RootRedirect';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardExample from './pages/DashboardExample';
-import CalendarPageNew from './pages/CalendarPageNew';
-import PricingPageNew from './pages/PricingPageNew';
+import PageCalendar from './pages/PageCalendar';
+import PagePricing from './pages/PagePricing';
 import WorkboardPage from './pages/TasksPage';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import ProfileRedirect from './pages/ProfileRedirect';
 import ProfileUsername from './pages/ProfileUsername';
 import SettingsPage from './pages/SettingsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
-import ClientsPage from './pages/ClientsPageModern';
-import OrdersPage from './pages/OrdersPageModern';
+import PageClients from './pages/PageClients';
+import PageOrders from './pages/PageOrders';
 import TemplatesPage from './pages/TemplatesPage';
 import StatsPage from './pages/StatsPage';
-import UpgradePageNew from './pages/UpgradePageNew';
+import PageUpgrade from './pages/PageUpgrade';
 import OnboardingPage from './pages/OnboardingPage';
 import NetworkPage from './pages/NetworkPage';
-import AdminDashboard from './pages/AdminDashboard';
 import ReferralsPage from './pages/ReferralsPage';
 import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
@@ -65,7 +64,7 @@ import TermsOfService from "./components/TermsOfService";
 
 // Pages de facturation (lazy loading pour optimiser les performances)
 const InvoicesLayout = lazy(() => import('./pages/InvoicesLayout'));
-const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
+const PageInvoices = lazy(() => import('./pages/PageInvoices'));
 const InvoiceTemplatesPage = lazy(() => import('./pages/InvoiceTemplatesPage'));
 const InvoiceTemplateEditorPage = lazy(() => import('./pages/InvoiceTemplateEditorPage'));
 
@@ -86,7 +85,7 @@ function AppContent() {
           <Route path="/" element={<RootRedirect />} />
           
           {/* Pages publiques */}
-          <Route path="/pricing" element={<PricingPageNew />} />
+          <Route path="/pricing" element={<PagePricing />} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -104,21 +103,21 @@ function AppContent() {
           <Route path="/clients" element={
             <InstantProtectedRoute>
               <SubscriptionGuard requiredPlan="launch" pageName="clients" description="Gestion des clients (max 5 avec Launch)">
-                <ClientsPage />
+                <PageClients />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
           <Route path="/orders" element={
             <InstantProtectedRoute>
               <SubscriptionGuard requiredPlan="launch" pageName="orders" description="Gestion des commandes (max 10 avec Launch)">
-                <OrdersPage />
+                <PageOrders />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
           <Route path="/calendar" element={
             <InstantProtectedRoute>
               <SubscriptionGuard requiredPlan="boost" pageName="calendar" description="Calendrier disponible avec Boost">
-                <CalendarPageNew />
+                <PageCalendar />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
@@ -150,7 +149,7 @@ function AppContent() {
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          <Route path="/upgrade" element={<InstantProtectedRoute><UpgradePageNew /></InstantProtectedRoute>} />
+          <Route path="/upgrade" element={<InstantProtectedRoute><PageUpgrade /></InstantProtectedRoute>} />
           <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
           <Route path="/referrals" element={<InstantProtectedRoute><ReferralsPage /></InstantProtectedRoute>} />
 
@@ -164,7 +163,7 @@ function AppContent() {
           } />
 
           {/* Administration */}
-          <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+          <Route path="/admin/dashboard" element={<AdminRoute><div>Admin Dashboard - Page en cours de développement</div></AdminRoute>} />
 
           {/* Diagnostic Erreur 406 (développement uniquement) */}
           {import.meta.env.DEV && (
@@ -184,9 +183,9 @@ function AppContent() {
               </SubscriptionGuard>
             </InstantProtectedRoute>
           }>
-            <Route index element={<InvoicesPage />} />
-            <Route path="sent" element={<InvoicesPage />} />
-            <Route path="create" element={<InvoicesPage />} />
+            <Route index element={<PageInvoices />} />
+            <Route path="sent" element={<PageInvoices />} />
+            <Route path="create" element={<PageInvoices />} />
             <Route path="templates" element={<InvoiceTemplatesPage />} />
             <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
           </Route>

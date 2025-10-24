@@ -33,7 +33,7 @@ interface Plan {
   buttonVariant: 'primary' | 'secondary' | 'outline';
 }
 
-const PricingPageNew: React.FC = () => {
+const PagePricing: React.FC = () => {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
   const plans: Plan[] = [
@@ -298,4 +298,4 @@ const PricingPageNew: React.FC = () => {
   );
 };
 
-export default PricingPageNew;
+export default PagePricing;

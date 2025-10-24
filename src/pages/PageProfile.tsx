@@ -53,7 +53,7 @@ interface ProfilePageNewProps {
   username?: string;
 }
 
-const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
+const PageProfile: React.FC<ProfilePageNewProps> = ({ username }) => {
   const { user } = useAuth();
   
   // Use the useProfile hook to retrieve data
@@ -1589,8 +1589,8 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
 };
 
 // Gestion des états de chargement et d'erreur
-const ProfilePageNewWithErrorHandling: React.FC<ProfilePageNewProps> = (props) => {
-  return <ProfilePageNew {...props} />;
+const PageProfileWithErrorHandling: React.FC<ProfilePageNewProps> = (props) => {
+  return <PageProfile {...props} />;
 };
 
-export default ProfilePageNewWithErrorHandling;
+export default PageProfileWithErrorHandling;

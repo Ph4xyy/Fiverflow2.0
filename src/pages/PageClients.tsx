@@ -49,7 +49,7 @@ type ClientRow = {
 
 const PAGE_SIZE = 12; // Reduced for card layout
 
-const ClientsPageModern: React.FC = () => {
+const PageClients: React.FC = () => {
   const { user, authReady } = useAuth();
 
   // 🔥 NAVIGATION INSTANTANÉE - Plus d'état de chargement initial
@@ -726,4 +726,4 @@ const ClientsPageModern: React.FC = () => {
   );
 };
 
-export default ClientsPageModern;
+export default PageClients;

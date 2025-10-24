@@ -70,7 +70,7 @@ type OrderRow = {
 
 const PAGE_SIZE = 12; // Reduced for card layout
 
-const OrdersPageModern: React.FC = () => {
+const PageOrders: React.FC = () => {
   const { user } = useAuth();
   const { currency } = useCurrency();
   const { checkOrderLimit } = usePlanLimits();
@@ -705,4 +705,4 @@ const OrdersPageModern: React.FC = () => {
   );
 };
 
-export default OrdersPageModern;
+export default PageOrders;

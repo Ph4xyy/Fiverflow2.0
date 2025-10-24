@@ -17,7 +17,7 @@ import { formatDate, formatMoney } from "@/utils/format";
 
 const STATUSES = ["draft", "sent", "paid", "overdue", "canceled"] as const;
 
-const InvoicesPage: React.FC = () => {
+const PageInvoices: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -450,4 +450,4 @@ const InvoicesPage: React.FC = () => {
   );
 };
 
-export default InvoicesPage;
+export default PageInvoices;

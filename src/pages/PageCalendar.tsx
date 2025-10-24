@@ -38,7 +38,7 @@ interface Event {
   priority: 'low' | 'medium' | 'high';
 }
 
-const CalendarPageNew: React.FC = () => {
+const PageCalendar: React.FC = () => {
   const { user } = useAuth();
   const { tasks, loading: tasksLoading } = useTasks();
   const { orders, loading: ordersLoading } = useOrders();
@@ -816,4 +816,4 @@ const CalendarPageNew: React.FC = () => {
   );
 };
 
-export default CalendarPageNew;
+export default PageCalendar;

@@ -45,7 +45,7 @@ interface Plan {
   current?: boolean;
 }
 
-const UpgradePageNew: React.FC = () => {
+const PageUpgrade: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState<string>('boost');
   const [isYearly, setIsYearly] = useState(false);
 
@@ -482,4 +482,4 @@ const UpgradePageNew: React.FC = () => {
   );
 };
 
-export default UpgradePageNew;
+export default PageUpgrade;
