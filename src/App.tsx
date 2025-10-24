@@ -49,7 +49,7 @@ import PageClients from './pages/PageClients';
 import PageOrders from './pages/PageOrders';
 import TemplatesPage from './pages/TemplatesPage';
 import StatsPage from './pages/StatsPage';
-import PageUpgrade from './pages/PageUpgrade';
+import PagePricing from './pages/PagePricing';
 import OnboardingPage from './pages/OnboardingPage';
 import NetworkPage from './pages/NetworkPage';
 import PageReferrals from './pages/PageReferrals';
@@ -149,7 +149,7 @@ function AppContent() {
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          <Route path="/upgrade" element={<InstantProtectedRoute><PageUpgrade /></InstantProtectedRoute>} />
+          <Route path="/upgrade" element={<InstantProtectedRoute><PagePricing /></InstantProtectedRoute>} />
           <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
           <Route path="/referrals" element={<InstantProtectedRoute><PageReferrals /></InstantProtectedRoute>} />
 

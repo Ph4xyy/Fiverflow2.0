@@ -1,300 +1,388 @@
 import React, { useState } from 'react';
-
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
 import { 
   Check, 
   Star, 
-  Zap, 
-  Rocket, 
+  Zap,
   Crown,
-  Users,
-  Calendar,
-  BarChart3,
+  Sparkles,
+  ArrowRight,
   Shield,
+  Users,
+  BarChart3,
   Headphones,
   FileText,
+  Calendar,
   Network,
-  Clock
+  Clock,
+  Award,
+  Lock,
+  Unlock,
+  Rocket,
+  Target,
+  TrendingUp
 } from 'lucide-react';
+
+interface PlanFeature {
+  text: string;
+  included: boolean;
+}
 
 interface Plan {
   id: string;
   name: string;
   subtitle: string;
-  price: string;
-  period: string;
+  monthlyPrice: number;
+  yearlyPrice: number;
   description: string;
-  features: string[];
-  icon: React.ReactNode;
-  gradient: boolean;
+  features: PlanFeature[];
   popular?: boolean;
+  current?: boolean;
   buttonText: string;
   buttonVariant: 'primary' | 'secondary' | 'outline';
 }
 
 const PagePricing: React.FC = () => {
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const [isYearly, setIsYearly] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string>('boost');
 
   const plans: Plan[] = [
     {
-      id: 'lunch',
-      name: 'Lunch',
-      subtitle: 'Perfect to get started',
-      price: billingPeriod === 'yearly' ? '0' : '0',
-      period: 'free',
-      description: 'All essential features to start your freelance business.',
+      id: 'free',
+      name: 'Free',
+      subtitle: 'Pour commencer',
+      monthlyPrice: 0,
+      yearlyPrice: 0,
+      description: 'Parfait pour découvrir FiverFlow',
       features: [
-        'Up to 5 clients',
-        'Up to 10 orders per month',
-        'Basic calendar',
-        'Simple billing',
-        'Email support',
-        'Basic dashboard'
+        { text: '1 projet actif', included: true },
+        { text: '5 clients maximum', included: true },
+        { text: '1 Go de stockage', included: true },
+        { text: 'Support par email', included: true },
+        { text: 'Templates de base', included: true },
+        { text: 'Rapports basiques', included: false },
+        { text: 'Intégrations limitées', included: false },
+        { text: 'Support prioritaire', included: false }
       ],
-      icon: <Users size={24} />,
-      gradient: false,
-      buttonText: 'Start for free',
+      buttonText: 'Commencer gratuitement',
       buttonVariant: 'outline'
+    },
+    {
+      id: 'launch',
+      name: 'Launch',
+      subtitle: 'Pour les freelancers',
+      monthlyPrice: 29,
+      yearlyPrice: 290, // 20% de réduction
+      description: 'Idéal pour les freelancers indépendants',
+      features: [
+        { text: '5 projets actifs', included: true },
+        { text: '25 clients maximum', included: true },
+        { text: '10 Go de stockage', included: true },
+        { text: 'Support prioritaire', included: true },
+        { text: 'Templates premium', included: true },
+        { text: 'Rapports avancés', included: true },
+        { text: 'Intégrations complètes', included: true },
+        { text: 'API access', included: false }
+      ],
+      popular: true,
+      buttonText: 'Choisir Launch',
+      buttonVariant: 'primary'
     },
     {
       id: 'boost',
       name: 'Boost',
-      subtitle: 'For active freelancers',
-      price: billingPeriod === 'yearly' ? '19' : '22',
-      period: 'month',
-      description: 'Increase your productivity with advanced tools and more capacity.',
+      subtitle: 'Pour les petites équipes',
+      monthlyPrice: 79,
+      yearlyPrice: 790, // 20% de réduction
+      description: 'Parfait pour les équipes en croissance',
       features: [
-        'Unlimited clients',
-        'Unlimited orders',
-        'Advanced calendar',
-        'Professional billing',
-        'Detailed statistics',
-        'Priority support',
-        'Custom templates',
-        'Third-party integrations'
+        { text: '15 projets actifs', included: true },
+        { text: '100 clients maximum', included: true },
+        { text: '50 Go de stockage', included: true },
+        { text: 'Support prioritaire', included: true },
+        { text: 'Templates premium', included: true },
+        { text: 'Rapports avancés', included: true },
+        { text: 'Intégrations complètes', included: true },
+        { text: 'API access', included: true },
+        { text: 'Collaboration équipe', included: true },
+        { text: 'Automatisations', included: true }
       ],
-      icon: <Zap size={24} />,
-      gradient: true,
-      popular: true,
-      buttonText: 'Try Boost',
+      buttonText: 'Choisir Boost',
       buttonVariant: 'primary'
     },
     {
       id: 'scale',
       name: 'Scale',
-      subtitle: 'For businesses',
-      price: billingPeriod === 'yearly' ? '39' : '39',
-      period: 'month',
-      description: 'The complete solution to scale your business to new heights.',
+      subtitle: 'Pour les entreprises',
+      monthlyPrice: 199,
+      yearlyPrice: 1990, // 20% de réduction
+      description: 'Solution complète pour les entreprises',
       features: [
-        'Everything from Boost',
-        'Team management',
-        'Complete API',
-        'Advanced reports',
-        '24/7 support',
-        'Custom training',
-        'Premium integrations',
-        'Automatic backup',
-        'Multi-accounts'
+        { text: 'Projets illimités', included: true },
+        { text: 'Clients illimités', included: true },
+        { text: '200 Go de stockage', included: true },
+        { text: 'Support dédié', included: true },
+        { text: 'Templates premium', included: true },
+        { text: 'Rapports avancés', included: true },
+        { text: 'Intégrations complètes', included: true },
+        { text: 'API access', included: true },
+        { text: 'Collaboration équipe', included: true },
+        { text: 'Automatisations', included: true },
+        { text: 'White label', included: true },
+        { text: 'Analytics avancés', included: true }
       ],
-      icon: <Rocket size={24} />,
-      gradient: true,
-      buttonText: 'Choose Scale',
+      buttonText: 'Choisir Scale',
       buttonVariant: 'primary'
     }
   ];
 
-  const features = [
-    {
-      icon: <Calendar size={20} />,
-      title: 'Calendrier intelligent',
-      description: 'Planifiez vos rendez-vous et gérez votre emploi du temps efficacement.'
-    },
-    {
-      icon: <FileText size={20} />,
-      title: 'Facturation automatisée',
-      description: 'Créez et envoyez vos factures en quelques clics.'
-    },
-    {
-      icon: <BarChart3 size={20} />,
-      title: 'Analytics avancés',
-      description: 'Suivez vos performances et optimisez votre activité.'
-    },
-    {
-      icon: <Network size={20} />,
-      title: 'Réseau de partenaires',
-      description: 'Connectez-vous avec d\'autres professionnels et développez votre réseau.'
-    },
-    {
-      icon: <Shield size={20} />,
-      title: 'Sécurité garantie',
-      description: 'Vos données sont protégées avec un chiffrement de niveau bancaire.'
-    },
-    {
-      icon: <Headphones size={20} />,
-      title: 'Support premium',
-      description: 'Une équipe dédiée pour vous accompagner dans votre réussite.'
-    }
-  ];
+  const formatPrice = (price: number) => {
+    return price === 0 ? 'Gratuit' : `€${price}`;
+  };
+
+  const getYearlyDiscount = (monthlyPrice: number) => {
+    const yearlyPrice = monthlyPrice * 12;
+    const discountedPrice = monthlyPrice * 10; // 20% de réduction
+    const savings = yearlyPrice - discountedPrice;
+    return savings;
+  };
 
   return (
-    <div className="p-6 space-y-12">
+    <div className="min-h-screen bg-gradient-to-br from-[#0f0f23] via-[#1a1a2e] to-[#16213e]">
+      <div className="container mx-auto px-6 py-12">
         {/* Header */}
-        <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-white mb-4">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] text-white px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <Sparkles className="h-4 w-4" />
+            Nouveau: 20% de réduction annuelle
+          </div>
+          
+          <h1 className="text-5xl font-bold text-white mb-6">
             Choisissez votre plan
           </h1>
-          <p className="text-xl text-gray-400 mb-8">
-            Des solutions adaptées à chaque étape de votre parcours freelance
+          <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+            Débloquez tout le potentiel de votre business freelance avec nos plans optimisés pour chaque étape de votre croissance.
           </p>
-          
-          {/* Toggle billing */}
+
+          {/* Toggle Billing */}
           <div className="flex items-center justify-center gap-4 mb-12">
-            <span className={`text-sm ${billingPeriod === 'monthly' ? 'text-white' : 'text-gray-400'}`}>
+            <span className={`text-lg ${!isYearly ? 'text-white' : 'text-gray-400'}`}>
               Mensuel
             </span>
             <button
-              onClick={() => setBillingPeriod(billingPeriod === 'monthly' ? 'yearly' : 'monthly')}
-              className={`relative w-12 h-6 rounded-full transition-colors ${
-                billingPeriod === 'yearly' ? 'bg-[#9c68f2]' : 'bg-[#35414e]'
+              onClick={() => setIsYearly(!isYearly)}
+              className={`relative w-16 h-8 rounded-full transition-colors ${
+                isYearly ? 'bg-[#9c68f2]' : 'bg-gray-600'
               }`}
             >
-              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                billingPeriod === 'yearly' ? 'translate-x-7' : 'translate-x-1'
-              }`} />
+              <div
+                className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-transform ${
+                  isYearly ? 'translate-x-9' : 'translate-x-1'
+                }`}
+              />
             </button>
-            <span className={`text-sm ${billingPeriod === 'yearly' ? 'text-white' : 'text-gray-400'}`}>
+            <span className={`text-lg ${isYearly ? 'text-white' : 'text-gray-400'}`}>
               Annuel
             </span>
-            {billingPeriod === 'yearly' && (
-              <span className="text-sm text-[#9c68f2] font-medium">
-                -20% d'économies
+            {isYearly && (
+              <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                -20%
               </span>
             )}
           </div>
         </div>
 
-        {/* Plans */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {plans.map((plan) => (
-            <div key={plan.id} className="relative">
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] text-white px-4 py-1 rounded-full text-sm font-medium flex items-center gap-1">
-                    <Star size={16} />
-                    Most Popular
-                  </div>
-                </div>
-              )}
-              
-              <ModernCard 
-                className={`h-full flex flex-col ${plan.popular ? 'ring-2 ring-[#9c68f2]' : ''}`}
-                gradient={plan.gradient}
+        {/* Plans Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+          {plans.map((plan) => {
+            const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
+            const period = isYearly ? 'an' : 'mois';
+            const savings = isYearly && plan.monthlyPrice > 0 ? getYearlyDiscount(plan.monthlyPrice) : 0;
+            
+            return (
+              <div
+                key={plan.id}
+                className={`relative bg-[#1e2938] rounded-2xl p-8 transition-all duration-300 hover:scale-105 ${
+                  plan.popular 
+                    ? 'ring-2 ring-[#9c68f2] shadow-2xl shadow-[#9c68f2]/20' 
+                    : 'hover:shadow-xl'
+                }`}
               >
-                <div className="text-center mb-6">
-                  <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#35414e] text-white mx-auto mb-4">
-                    {plan.icon}
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+                      <Star className="h-4 w-4" />
+                      Populaire
+                    </div>
                   </div>
+                )}
+
+                <div className="text-center mb-8">
                   <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
                   <p className="text-gray-400 mb-4">{plan.subtitle}</p>
                   <div className="mb-4">
                     <span className="text-4xl font-bold text-white">
-                      {plan.price === '0' ? 'Free' : `$${plan.price}`}
+                      {formatPrice(price)}
                     </span>
-                    {plan.price !== '0' && (
-                      <span className="text-gray-400 ml-2">/{plan.period}</span>
+                    {price > 0 && (
+                      <span className="text-gray-400">/{period}</span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-400">{plan.description}</p>
+                  {savings > 0 && (
+                    <div className="text-green-400 text-sm font-medium">
+                      Économisez €{savings}/an
+                    </div>
+                  )}
+                  <p className="text-gray-300 text-sm mt-2">{plan.description}</p>
                 </div>
 
-                <div className="flex-1 mb-6">
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-3">
-                        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-green-500 text-white mt-0.5">
-                          <Check size={12} />
-                        </div>
-                        <span className="text-sm text-white">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                <div className="space-y-4 mb-8">
+                  {plan.features.map((feature, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                        feature.included 
+                          ? 'bg-green-500' 
+                          : 'bg-gray-600'
+                      }`}>
+                        {feature.included && (
+                          <Check className="h-3 w-3 text-white" />
+                        )}
+                      </div>
+                      <span className={`text-sm ${
+                        feature.included ? 'text-white' : 'text-gray-500'
+                      }`}>
+                        {feature.text}
+                      </span>
+                    </div>
+                  ))}
                 </div>
 
-                <ModernButton 
-                  variant={plan.buttonVariant}
+                <ModernButton
+                  variant={plan.buttonVariant as any}
                   className="w-full"
-                  size="lg"
+                  onClick={() => setSelectedPlan(plan.id)}
                 >
                   {plan.buttonText}
+                  <ArrowRight className="h-4 w-4 ml-2" />
                 </ModernButton>
-              </ModernCard>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
 
-        {/* Features */}
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Pourquoi choisir FiverFlow ?
-            </h2>
-            <p className="text-gray-400">
-              Des fonctionnalités puissantes conçues pour les freelances modernes
-            </p>
-          </div>
+        {/* Features Comparison */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold text-white text-center mb-12">
+            Comparaison des fonctionnalités
+          </h2>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <ModernCard className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Rocket className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3">Performance</h3>
+              <p className="text-gray-400">
+                Interface ultra-rapide et optimisée pour maximiser votre productivité
+              </p>
+            </ModernCard>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <ModernCard key={index}>
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-[#35414e] text-white">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-lg font-semibold text-white">{feature.title}</h3>
-                </div>
-                <p className="text-gray-400">{feature.description}</p>
-              </ModernCard>
-            ))}
+            <ModernCard className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3">Sécurité</h3>
+              <p className="text-gray-400">
+                Vos données sont protégées avec un chiffrement de niveau bancaire
+              </p>
+            </ModernCard>
+
+            <ModernCard className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Headphones className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3">Support</h3>
+              <p className="text-gray-400">
+                Équipe de support dédiée disponible 24/7 pour vous accompagner
+              </p>
+            </ModernCard>
           </div>
         </div>
 
         {/* FAQ */}
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Questions fréquentes
-            </h2>
-          </div>
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold text-white text-center mb-12">
+            Questions fréquentes
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <ModernCard>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Puis-je changer de plan à tout moment ?
+              </h3>
+              <p className="text-gray-400">
+                Oui, vous pouvez upgrader ou downgrader votre plan à tout moment. 
+                Les changements prennent effet immédiatement.
+              </p>
+            </ModernCard>
 
-          <div className="space-y-6">
-            {[
-              {
-                question: "Can I change my plan at any time?",
-                answer: "Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately."
-              },
-              {
-                question: "Are there any setup fees?",
-                answer: "No, there are no setup fees. You only pay your monthly or annual subscription."
-              },
-              {
-                question: "What happens if I cancel my subscription?",
-                answer: "You keep access to all features until the end of your billing period."
-              },
-              {
-                question: "Do you offer a free trial?",
-                answer: "The Launch plan is completely free. For Boost and Scale, we offer a 14-day trial."
-              }
-            ].map((faq, index) => (
-              <ModernCard key={index}>
-                <h3 className="text-lg font-semibold text-white mb-2">{faq.question}</h3>
-                <p className="text-gray-400">{faq.answer}</p>
-              </ModernCard>
-            ))}
+            <ModernCard>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Y a-t-il un essai gratuit ?
+              </h3>
+              <p className="text-gray-400">
+                Oui, tous nos plans payants incluent un essai gratuit de 14 jours 
+                sans engagement.
+              </p>
+            </ModernCard>
+
+            <ModernCard>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Que se passe-t-il si j'annule ?
+              </h3>
+              <p className="text-gray-400">
+                Vous gardez l'accès à votre compte jusqu'à la fin de votre période 
+                de facturation. Vos données sont conservées pendant 30 jours.
+              </p>
+            </ModernCard>
+
+            <ModernCard>
+              <h3 className="text-lg font-semibold text-white mb-3">
+                Puis-je avoir une facture ?
+              </h3>
+              <p className="text-gray-400">
+                Oui, nous fournissons des factures détaillées pour tous nos plans. 
+                Parfait pour les entreprises et les freelancers.
+              </p>
+            </ModernCard>
           </div>
         </div>
+
+        {/* CTA Final */}
+        <div className="text-center">
+          <ModernCard className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] border-0">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Prêt à transformer votre business ?
+              </h2>
+              <p className="text-purple-100 mb-8 text-lg">
+                Rejoignez des milliers de freelancers qui ont déjà choisi FiverFlow
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <ModernButton size="lg" variant="secondary">
+                  Commencer l'essai gratuit
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </ModernButton>
+                <ModernButton size="lg" variant="outline">
+                  Contacter les ventes
+                </ModernButton>
+              </div>
+            </div>
+          </ModernCard>
+        </div>
       </div>
+    </div>
   );
 };
 
