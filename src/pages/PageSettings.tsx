@@ -46,7 +46,7 @@ interface SettingsCategory {
   description: string;
 }
 
-const SettingsPage: React.FC = () => {
+const PageSettings: React.FC = () => {
   const { user } = useAuth();
   const { getThemeColors } = useTheme();
   const themeColors = getThemeColors();
@@ -1196,4 +1196,4 @@ const SettingsPage: React.FC = () => {
   );
 };
 
-export default SettingsPage;
+export default PageSettings;

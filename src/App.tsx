@@ -40,10 +40,9 @@ import DashboardExample from './pages/DashboardExample';
 import PageCalendar from './pages/PageCalendar';
 import PagePricing from './pages/PagePricing';
 import WorkboardPage from './pages/TasksPage';
-import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import ProfileRedirect from './pages/ProfileRedirect';
 import ProfileUsername from './pages/ProfileUsername';
-import SettingsPage from './pages/SettingsPage';
+import PageSettings from './pages/PageSettings';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import PageClients from './pages/PageClients';
 import PageOrders from './pages/PageOrders';
@@ -140,8 +139,7 @@ function AppContent() {
           {/* Système de profil universel */}
           <Route path="/profile" element={<InstantProtectedRoute><ProfileRedirect /></InstantProtectedRoute>} />
           <Route path="/profile/:username" element={<InstantProtectedRoute><ProfileUsername /></InstantProtectedRoute>} />
-          <Route path="/profile-settings" element={<InstantProtectedRoute><ProfileSettingsPage /></InstantProtectedRoute>} />
-          <Route path="/settings" element={<InstantProtectedRoute><SettingsPage /></InstantProtectedRoute>} />
+          <Route path="/settings" element={<InstantProtectedRoute><PageSettings /></InstantProtectedRoute>} />
           <Route path="/project/:projectId" element={<InstantProtectedRoute><ProjectDetailPage /></InstantProtectedRoute>} />
           <Route path="/network" element={
             <InstantProtectedRoute>
