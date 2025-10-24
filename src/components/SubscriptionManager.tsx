@@ -93,8 +93,8 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#1C2230]">
           <div>
-            <h2 className="text-xl font-bold">
-              {subscription ? 'Modifier l\'abonnement' : 'Nouvel abonnement'}
+            <h2 className="text-xl font-bold text-white">
+              {subscription ? 'Edit Subscription' : 'New Subscription'}
             </h2>
           </div>
           <button
@@ -110,7 +110,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
           {/* Service Name */}
           <div>
             <label className="block text-sm font-semibold mb-2 text-slate-300">
-              Nom du service *
+              Service Name *
             </label>
             <input
               type="text"
@@ -125,7 +125,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
           {/* Provider */}
           <div>
             <label className="block text-sm font-semibold mb-2 text-slate-300">
-              Fournisseur *
+              Provider *
             </label>
             <input
               type="text"
@@ -146,7 +146,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-              placeholder="Description du service..."
+              placeholder="Service description..."
               rows={3}
             />
           </div>
@@ -155,7 +155,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold mb-2 text-slate-300">
-                Montant *
+                Amount *
               </label>
               <input
                 type="number"
@@ -169,7 +169,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
             </div>
             <div>
               <label className="block text-sm font-semibold mb-2 text-slate-300">
-                Devise
+                Currency
               </label>
               <select
                 value={formData.currency}
@@ -188,7 +188,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold mb-2 text-slate-300">
-                Cycle de facturation *
+                Billing Cycle *
               </label>
               <select
                 value={formData.billing_cycle}
@@ -219,7 +219,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold mb-2 text-slate-300">
-                Catégorie
+                Category
               </label>
               <select
                 value={formData.category}
@@ -235,7 +235,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
             </div>
             <div>
               <label className="block text-sm font-semibold mb-2 text-slate-300">
-                Couleur
+                Color
               </label>
               <div className="flex flex-wrap gap-2">
                 {COLORS.map(color => (
@@ -261,7 +261,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
             onClick={onClose}
             variant="outline"
           >
-            Annuler
+            Cancel
           </ModernButton>
 
           <ModernButton
@@ -338,7 +338,7 @@ const SubscriptionPreview: React.FC<{
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${subscription.is_active ? 'bg-green-400' : 'bg-red-400'}`}></div>
             <span className={`text-sm font-medium ${subscription.is_active ? 'text-green-400' : 'text-red-400'}`}>
-              {subscription.is_active ? 'Actif' : 'Inactif'}
+              {subscription.is_active ? 'Active' : 'Inactive'}
             </span>
           </div>
         </div>
@@ -356,22 +356,22 @@ const SubscriptionPreview: React.FC<{
           {/* Main Info */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="text-sm font-semibold text-slate-300 mb-2">Montant</h3>
+              <h3 className="text-sm font-semibold text-slate-300 mb-2">Amount</h3>
               <p className="text-xl font-bold">{formatCurrency(subscription.amount, subscription.currency)}</p>
               <p className="text-xs text-slate-400">{formatBillingCycle(subscription.billing_cycle)}</p>
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-300 mb-2">Prochain renouvellement</h3>
+              <h3 className="text-sm font-semibold text-slate-300 mb-2">Next Renewal</h3>
               <p className="text-lg font-semibold">{formatDateSafe(subscription.next_renewal_date)}</p>
               <p className="text-xs text-slate-400">
-                {daysUntilRenewal > 0 ? `${daysUntilRenewal} jours restants` : 'Expiré'}
+                {daysUntilRenewal > 0 ? `${daysUntilRenewal} days remaining` : 'Expired'}
               </p>
             </div>
           </div>
 
           {/* Category */}
           <div>
-            <h3 className="text-sm font-semibold text-slate-300 mb-2">Catégorie</h3>
+            <h3 className="text-sm font-semibold text-slate-300 mb-2">Category</h3>
             <span className="inline-block px-3 py-1 bg-purple-500/20 text-purple-300 text-sm rounded-full">
               {getCategoryDisplay(subscription.category)}
             </span>
@@ -410,7 +410,7 @@ const SubscriptionPreview: React.FC<{
               size="sm"
             >
               <Edit2 size={16} />
-              Modifier
+              Edit
             </ModernButton>
             <ModernButton
               onClick={onDelete}
@@ -419,7 +419,7 @@ const SubscriptionPreview: React.FC<{
               className="border-[#f43f5e] text-[#f43f5e] hover:bg-[#f43f5e] hover:text-white"
             >
               <Trash2 size={16} />
-              Supprimer
+              Delete
             </ModernButton>
             <ModernButton
               onClick={onClose}

@@ -21,6 +21,7 @@ interface DayEventsModalProps {
   selectedDate: string;
   events: Event[];
   onAddEvent: () => void;
+  onEventClick?: (event: Event) => void;
 }
 
 const DayEventsModal: React.FC<DayEventsModalProps> = ({
@@ -28,7 +29,8 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
   onClose,
   selectedDate,
   events,
-  onAddEvent
+  onAddEvent,
+  onEventClick
 }) => {
   if (!isOpen) return null;
 
@@ -109,6 +111,7 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                   <div
                     key={event.id}
                     className="p-4 border border-[#35414e] rounded-lg hover:bg-[#35414e]/50 transition-colors cursor-pointer"
+                    onClick={() => onEventClick?.(event)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-3">
@@ -150,7 +153,13 @@ const DayEventsModal: React.FC<DayEventsModalProps> = ({
                 ))}
                 
                 <div className="pt-4 border-t border-[#35414e]">
-                  <ModernButton onClick={onAddEvent} className="w-full">
+                  <ModernButton 
+                    onClick={() => {
+                      onClose();
+                      onAddEvent();
+                    }} 
+                    className="w-full"
+                  >
                     <Calendar className="h-4 w-4 mr-2" />
                     Add Another Event
                   </ModernButton>

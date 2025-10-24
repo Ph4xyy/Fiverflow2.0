@@ -84,6 +84,17 @@ const CalendarPageNew: React.FC = () => {
     setIsActionModalOpen(true);
   };
 
+  const handleEventClick = (event: any) => {
+    // Si c'est une commande (order), naviguer vers la page des commandes
+    if (event.type === 'deadline' && event.id.startsWith('task-')) {
+      // C'est une tâche liée à une commande
+      const orderId = event.order_id;
+      if (orderId) {
+        window.location.href = `/orders?order=${orderId}`;
+      }
+    }
+  };
+
   const handleFormSuccess = () => {
     // Recharger les données
     loadCalendarEvents();
@@ -782,6 +793,7 @@ const CalendarPageNew: React.FC = () => {
           selectedDate={selectedDateString}
           events={events.filter(event => event.date === selectedDateString)}
           onAddEvent={handleAddEvent}
+          onEventClick={handleEventClick}
         />
 
         <MeetingForm

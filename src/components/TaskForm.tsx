@@ -126,8 +126,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selecte
         status: formData.status,
         priority: formData.priority,
         due_date: formData.due_date || null,
-        order_id: formData.order_id || null,
-        assigned_to: formData.assigned_to.trim() || null
+        order_id: formData.order_id || null
       };
 
       if (task) {
