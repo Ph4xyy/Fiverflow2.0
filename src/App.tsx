@@ -61,7 +61,6 @@ import AdminAIPage from './pages/admin/AdminAIPage';
 
 // Pages d'abonnement Stripe
 import SubscriptionPage from './pages/SubscriptionPage';
-import SuccessPage from './pages/SuccessPage';
 import CancelPage from './pages/CancelPage';
 
 // Pages légales
