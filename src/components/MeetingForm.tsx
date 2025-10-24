@@ -1,42 +1,45 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { X, CheckSquare, Calendar, Flag, User, FileText } from 'lucide-react';
+import { X, Calendar, Clock, Users, MapPin, Video } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import ModernCard from './ModernCard';
 import ModernButton from './ModernButton';
 
-interface TaskFormProps {
+interface MeetingFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
   selectedDate?: string;
-  task?: {
+  meeting?: {
     id: string;
     title: string;
     description?: string;
-    status: string;
+    start_time: string;
+    end_time: string;
+    date: string;
+    attendees?: string[];
+    location?: string;
+    meeting_type: string;
     priority: string;
-    due_date?: string;
-    order_id?: string;
-    assigned_to?: string;
   } | null;
 }
 
-const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selectedDate, task }) => {
+const MeetingForm: React.FC<MeetingFormProps> = ({ isOpen, onClose, onSuccess, selectedDate, meeting }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [orders, setOrders] = useState<Array<{id: string, title: string}>>([]);
 
   const emptyForm = useMemo(() => ({
     title: '',
     description: '',
-    status: 'todo',
-    priority: 'medium',
-    due_date: selectedDate || '',
-    order_id: '',
-    assigned_to: ''
+    start_time: '',
+    end_time: '',
+    date: selectedDate || '',
+    attendees: [] as string[],
+    location: '',
+    meeting_type: 'in_person',
+    priority: 'medium'
   }), [selectedDate]);
 
   const [formData, setFormData] = useState(emptyForm);
@@ -45,50 +48,28 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selecte
     if (!isOpen) return;
     setCurrentStep(1);
 
-    if (task) {
+    if (meeting) {
       setFormData({
-        title: task.title || '',
-        description: task.description || '',
-        status: task.status || 'todo',
-        priority: task.priority || 'medium',
-        due_date: task.due_date || selectedDate || '',
-        order_id: task.order_id || '',
-        assigned_to: task.assigned_to || ''
+        title: meeting.title || '',
+        description: meeting.description || '',
+        start_time: meeting.start_time || '',
+        end_time: meeting.end_time || '',
+        date: meeting.date || selectedDate || '',
+        attendees: meeting.attendees || [],
+        location: meeting.location || '',
+        meeting_type: meeting.meeting_type || 'in_person',
+        priority: meeting.priority || 'medium'
       });
     } else {
       setFormData(emptyForm);
     }
-  }, [isOpen, task, emptyForm]);
+  }, [isOpen, meeting, emptyForm]);
 
-  // Load orders
-  useEffect(() => {
-    const loadOrders = async () => {
-      if (!user || !isSupabaseConfigured || !supabase) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('orders')
-          .select('id, title')
-          .eq('user_id', user.id)
-          .order('title');
-
-        if (error) throw error;
-        setOrders(data || []);
-      } catch (error) {
-        console.error('Error loading orders:', error);
-      }
-    };
-
-    if (isOpen) {
-      loadOrders();
-    }
-  }, [isOpen, user]);
-
-  const statuses = [
-    { value: 'todo', label: 'To Do' },
-    { value: 'in_progress', label: 'In Progress' },
-    { value: 'completed', label: 'Completed' },
-    { value: 'cancelled', label: 'Cancelled' }
+  const meetingTypes = [
+    { value: 'in_person', label: 'In Person' },
+    { value: 'video_call', label: 'Video Call' },
+    { value: 'phone_call', label: 'Phone Call' },
+    { value: 'hybrid', label: 'Hybrid' }
   ];
 
   const priorities = [
@@ -103,6 +84,27 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selecte
 
   const labelCls = 'block text-sm font-medium text-gray-300 mb-2';
 
+  const handleAttendeesChange = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+      e.preventDefault();
+      const newAttendee = e.currentTarget.value.trim();
+      if (!formData.attendees.includes(newAttendee)) {
+        setFormData({
+          ...formData,
+          attendees: [...formData.attendees, newAttendee]
+        });
+      }
+      e.currentTarget.value = '';
+    }
+  };
+
+  const removeAttendee = (attendeeToRemove: string) => {
+    setFormData({
+      ...formData,
+      attendees: formData.attendees.filter(attendee => attendee !== attendeeToRemove)
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -112,41 +114,48 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selecte
     }
 
     if (!formData.title.trim()) {
-      toast.error('Task title is required');
+      toast.error('Meeting title is required');
+      return;
+    }
+
+    if (!formData.start_time || !formData.end_time) {
+      toast.error('Start and end times are required');
       return;
     }
 
     setLoading(true);
-    const toastId = toast.loading(task ? 'Updating task...' : 'Creating task...');
+    const toastId = toast.loading(meeting ? 'Updating meeting...' : 'Creating meeting...');
 
     try {
-      const taskData = {
+      const meetingData = {
         title: formData.title.trim(),
         description: formData.description.trim() || null,
-        status: formData.status,
-        priority: formData.priority,
-        due_date: formData.due_date || null,
-        order_id: formData.order_id || null,
-        assigned_to: formData.assigned_to.trim() || null
+        start_time: formData.start_time,
+        end_time: formData.end_time,
+        date: formData.date,
+        attendees: formData.attendees.length > 0 ? formData.attendees : null,
+        location: formData.location.trim() || null,
+        meeting_type: formData.meeting_type,
+        priority: formData.priority
       };
 
-      if (task) {
+      if (meeting) {
         const { error } = await supabase
-          .from('tasks')
-          .update(taskData)
-          .eq('id', task.id);
+          .from('meetings')
+          .update(meetingData)
+          .eq('id', meeting.id);
 
         if (error) throw error;
-        toast.success('Task updated successfully!', { id: toastId });
+        toast.success('Meeting updated successfully!', { id: toastId });
       } else {
         const { data, error } = await supabase
-          .from('tasks')
-          .insert([{ ...taskData, user_id: user!.id }])
+          .from('meetings')
+          .insert([{ ...meetingData, user_id: user!.id }])
           .select('id')
           .single();
 
         if (error) throw error;
-        toast.success('Task created successfully!', { id: toastId });
+        toast.success('Meeting created successfully!', { id: toastId });
       }
 
       onSuccess();
@@ -171,8 +180,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selecte
         return (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
-              <CheckSquare className="mr-2 text-[#9c68f2]" size={20} />
-              Task Details
+              <Calendar className="mr-2 text-[#9c68f2]" size={20} />
+              Meeting Details
             </h3>
             <p className="text-sm text-gray-400 mb-4">
               Fields marked with <span className="text-red-400">*</span> are required.
@@ -181,29 +190,42 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selecte
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={labelCls}>
-                  Task Title <span className="text-red-400">*</span>
+                  Meeting Title <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className={baseField}
-                  placeholder="Complete project proposal"
+                  placeholder="Client meeting"
                   required
                 />
               </div>
 
               <div>
-                <label className={labelCls}>Status</label>
+                <label className={labelCls}>Meeting Type</label>
                 <select
-                  value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  value={formData.meeting_type}
+                  onChange={(e) => setFormData({ ...formData, meeting_type: e.target.value })}
                   className={baseField}
                 >
-                  {statuses.map((status) => (
-                    <option key={status.value} value={status.value}>{status.label}</option>
+                  {meetingTypes.map((type) => (
+                    <option key={type.value} value={type.value}>{type.label}</option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label className={labelCls}>
+                  Date <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  className={baseField}
+                  required
+                />
               </div>
 
               <div>
@@ -218,16 +240,6 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selecte
                   ))}
                 </select>
               </div>
-
-              <div>
-                <label className={labelCls}>Due Date</label>
-                <input
-                  type="date"
-                  value={formData.due_date}
-                  onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                  className={baseField}
-                />
-              </div>
             </div>
 
             <div>
@@ -237,7 +249,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selecte
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className={baseField}
                 rows={3}
-                placeholder="Task details, requirements, notes..."
+                placeholder="Meeting agenda, topics to discuss, etc."
               />
             </div>
           </div>
@@ -246,38 +258,79 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selecte
         return (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
-              <User className="mr-2 text-[#9c68f2]" size={20} />
-              Assignment & Project
+              <Clock className="mr-2 text-[#9c68f2]" size={20} />
+              Time & Location
             </h3>
             <p className="text-sm text-gray-400 mb-4">
-              Link this task to a project and assign it to someone.
+              Set the meeting time and location details.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className={labelCls}>Related Order/Project</label>
-                <select
-                  value={formData.order_id}
-                  onChange={(e) => setFormData({ ...formData, order_id: e.target.value })}
+                <label className={labelCls}>
+                  Start Time <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="time"
+                  value={formData.start_time}
+                  onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
                   className={baseField}
-                >
-                  <option value="">Select an order (optional)</option>
-                  {orders.map((order) => (
-                    <option key={order.id} value={order.id}>{order.title}</option>
-                  ))}
-                </select>
+                  required
+                />
               </div>
 
               <div>
-                <label className={labelCls}>Assigned To</label>
+                <label className={labelCls}>
+                  End Time <span className="text-red-400">*</span>
+                </label>
                 <input
-                  type="text"
-                  value={formData.assigned_to}
-                  onChange={(e) => setFormData({ ...formData, assigned_to: e.target.value })}
+                  type="time"
+                  value={formData.end_time}
+                  onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
                   className={baseField}
-                  placeholder="Email or name of assignee"
+                  required
                 />
               </div>
+            </div>
+
+            <div>
+              <label className={labelCls}>Location</label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                className={baseField}
+                placeholder="Office, Zoom link, or physical address"
+              />
+            </div>
+
+            <div>
+              <label className={labelCls}>Attendees</label>
+              <input
+                type="text"
+                onKeyDown={handleAttendeesChange}
+                className={baseField}
+                placeholder="Type attendee email and press Enter"
+              />
+              {formData.attendees.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.attendees.map((attendee, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-gradient-to-r from-[#9c68f2]/20 to-[#422ca5]/20 text-[#9c68f2] ring-1 ring-[#9c68f2]/30"
+                    >
+                      {attendee}
+                      <button
+                        type="button"
+                        onClick={() => removeAttendee(attendee)}
+                        className="ml-1 text-[#9c68f2] hover:text-white"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         );
@@ -295,12 +348,12 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selecte
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-bold text-white">
-                  {task ? 'Edit Task' : 'New Task'}
+                  {meeting ? 'Edit Meeting' : 'New Meeting'}
                 </h2>
                 <div className="flex items-center mt-4 space-x-3">
                   {[
-                    { step: 1, label: 'Details', icon: CheckSquare },
-                    { step: 2, label: 'Assignment', icon: User }
+                    { step: 1, label: 'Details', icon: Calendar },
+                    { step: 2, label: 'Time & Location', icon: Clock }
                   ].map(({ step, label, icon: Icon }) => (
                     <div key={step} className="flex items-center">
                       <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all ${
@@ -393,7 +446,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selecte
                       type="submit"
                       disabled={loading}
                     >
-                      {loading ? 'Processing...' : (task ? 'Update' : 'Create')}
+                      {loading ? 'Processing...' : (meeting ? 'Update' : 'Create')}
                     </ModernButton>
                   )}
                 </div>
@@ -406,4 +459,4 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSuccess, selecte
   );
 };
 
-export default TaskForm;
+export default MeetingForm;
