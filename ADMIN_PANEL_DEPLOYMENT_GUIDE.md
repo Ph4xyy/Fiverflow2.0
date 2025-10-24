@@ -131,7 +131,7 @@ WHERE role IN ('admin', 'moderator');
 
 ```bash
 # Utiliser Stripe CLI pour tester
-stripe listen --forward-to https://your-project.supabase.co/functions/v1/stripe-webhook
+stripe listen --forward-to https://arnuyyyryvbfcvqauqur.supabase.co/functions/v1/stripe-webhook
 ```
 
 ## 📊 6. Configuration Discord (Optionnel)

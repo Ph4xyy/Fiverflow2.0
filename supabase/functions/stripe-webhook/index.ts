@@ -32,8 +32,8 @@ serve(async (req) => {
   try {
     // Create Supabase client
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      'https://your-project.supabase.co', // Remplacez par votre URL Supabase
+      'your_supabase_service_role_key' // Remplacez par votre clé service_role
     )
 
     const body = await req.text()

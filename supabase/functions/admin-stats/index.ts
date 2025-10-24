@@ -82,8 +82,8 @@ serve(async (req) => {
   try {
     // Create Supabase client
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      'https://your-project.supabase.co', // Remplacez par votre URL Supabase
+      'your_supabase_anon_key', // Remplacez par votre clé anon
       {
         global: {
           headers: { Authorization: req.headers.get('Authorization')! },
