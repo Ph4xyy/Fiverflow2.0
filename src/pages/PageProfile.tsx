@@ -1249,7 +1249,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
             <div className="relative">
               <div>
                 <p className="text-2xl font-bold text-white">{statistics.orders}</p>
-                <p className="text-sm text-gray-400">Commandes</p>
+                <p className="text-sm text-gray-400">Orders</p>
               </div>
               <Briefcase size={20} className="absolute top-0 right-0 text-[#9c68f2]" />
             </div>
@@ -1267,7 +1267,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
             <div className="relative">
               <div>
                 <p className="text-2xl font-bold text-white">{statistics.rating}</p>
-                <p className="text-sm text-gray-400">Note</p>
+                <p className="text-sm text-gray-400">Rating</p>
               </div>
               <Star size={20} className="absolute top-0 right-0 text-[#9c68f2]" />
             </div>
@@ -1276,7 +1276,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
             <div className="relative">
               <div>
                 <p className="text-2xl font-bold text-white">{statistics.experience}+</p>
-                <p className="text-sm text-gray-400">Années d'exp.</p>
+                <p className="text-sm text-gray-400">Years exp.</p>
               </div>
               <TrendingUp size={20} className="absolute top-0 right-0 text-[#9c68f2]" />
             </div>
@@ -1442,8 +1442,8 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
                   {activities.length === 0 && (
                     <div className="text-center py-12">
                       <Activity size={48} className="mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-lg font-semibold text-white mb-2">Aucune activité</h3>
-                      <p className="text-gray-400">Votre activité apparaîtra ici</p>
+                      <h3 className="text-lg font-semibold text-white mb-2">No activity</h3>
+                      <p className="text-gray-400">Your activity will appear here</p>
                     </div>
                   )}
                 </div>
@@ -1519,7 +1519,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
             </ModernCard>
 
             {/* Achievements */}
-            <ModernCard title="Récompenses" icon={<Award size={20} className="text-white" />}>
+            <ModernCard title="Awards" icon={<Award size={20} className="text-white" />}>
               <div className="space-y-3">
                 {awards.length > 0 ? (
                   awards.map(award => (

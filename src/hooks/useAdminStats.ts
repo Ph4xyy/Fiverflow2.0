@@ -47,6 +47,28 @@ export interface AdminStats {
     created_at: string;
     client_name: string;
   }>;
+  recentInvoices: Array<{
+    id: string;
+    number: string;
+    total: number;
+    status: string;
+    created_at: string;
+    client_name: string;
+  }>;
+  topReferrers: Array<{
+    id: string;
+    email: string | null;
+    name: string | null;
+    referral_count: number;
+    total_earnings: number;
+  }>;
+  platformStats: {
+    totalClients: number;
+    topPlatforms: Array<{
+      platform: string;
+      count: number;
+    }>;
+  };
 }
 
 export const useAdminStats = (startDate: string, endDate: string) => {
@@ -132,7 +154,35 @@ export const useAdminStats = (startDate: string, endDate: string) => {
               created_at: new Date().toISOString(),
               client_name: 'Client B'
             }
-          ]
+          ],
+          recentInvoices: [
+            {
+              id: '1',
+              number: 'INV-001',
+              total: 1500,
+              status: 'paid',
+              created_at: new Date().toISOString(),
+              client_name: 'Client A'
+            }
+          ],
+          topReferrers: [
+            {
+              id: '1',
+              email: 'referrer1@example.com',
+              name: 'Top Referrer',
+              referral_count: 5,
+              total_earnings: 500
+            }
+          ],
+          platformStats: {
+            totalClients: 120,
+            topPlatforms: [
+              { platform: 'Fiverr', count: 45 },
+              { platform: 'Upwork', count: 30 },
+              { platform: 'Freelancer', count: 25 },
+              { platform: 'Other', count: 20 }
+            ]
+          }
         };
 
         console.log('📊 Mock Admin stats loaded:', mockStats);

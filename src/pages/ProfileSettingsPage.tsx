@@ -161,7 +161,7 @@ const ProfileSettingsPage: React.FC = () => {
         id: Date.now().toString(),
         name: newSkill.name,
         level: newSkill.level,
-        category: newSkill.category || 'Général'
+        category: newSkill.category || 'General'
       };
       setSkills([...skills, skill]);
       setNewSkill({ name: '', level: 'beginner', category: '' });
@@ -330,7 +330,7 @@ const ProfileSettingsPage: React.FC = () => {
 
   const renderSocialTab = () => (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold text-white">Réseaux sociaux</h3>
+      <h3 className="text-lg font-semibold text-white">Social Networks</h3>
       
       <div className="space-y-4">
         {socialNetworkTemplates.map(social => (
@@ -449,8 +449,8 @@ const ProfileSettingsPage: React.FC = () => {
 
   const renderAppearanceTab = () => (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold text-white">Apparence</h3>
-      <p className="text-gray-400">Paramètres d'apparence du profil</p>
+      <h3 className="text-lg font-semibold text-white">Appearance</h3>
+      <p className="text-gray-400">Profile appearance settings</p>
       {/* TODO: Implement theme selector and other appearance settings */}
     </div>
   );
