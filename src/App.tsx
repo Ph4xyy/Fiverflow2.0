@@ -57,6 +57,7 @@ import PageReferrals from './pages/PageReferrals';
 import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
 import AIAssistantPage from './pages/AIAssistantPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 // Pages légales
 import PrivacyPolicy from "./components/PrivacyPolicy";
@@ -164,7 +165,7 @@ function AppContent() {
           } />
 
           {/* Administration */}
-          <Route path="/admin/dashboard" element={<AdminRoute><div>Admin Dashboard - Page en cours de développement</div></AdminRoute>} />
+          <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
 
           {/* Diagnostic Erreur 406 (développement uniquement) */}
           {import.meta.env.DEV && (
