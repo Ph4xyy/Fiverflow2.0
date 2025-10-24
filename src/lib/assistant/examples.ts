@@ -1,5 +1,5 @@
 /**
- * Quick examples for AI Assistant
+ * Exemples rapides pour l'Assistant AI
  */
 
 export interface QuickExample {
@@ -12,42 +12,108 @@ export interface QuickExample {
 }
 
 export const QUICK_EXAMPLES: QuickExample[] = [
-  // English examples
+  // Exemples en français
+  {
+    id: 'fr-create-task',
+    title: 'Créer une tâche',
+    description: 'Ajouter une nouvelle tâche avec échéance',
+    prompt: 'Create a task "Review the design" for tomorrow at 2 PM',
+    category: 'tasks',
+    language: 'fr',
+  },
+  {
+    id: 'fr-list-tasks',
+    title: 'Lister les tâches',
+    description: 'Voir une liste de tâches filtrées',
+    prompt: 'Montrer toutes les tâches en cours de cette semaine',
+    category: 'tasks',
+    language: 'fr',
+  },
+  {
+    id: 'fr-create-client',
+    title: 'Ajouter un client',
+    description: 'Enregistrer un nouveau client',
+    prompt: 'Ajouter un client "Acme Corp" avec l\'email contact@acme.com',
+    category: 'clients',
+    language: 'fr',
+  },
+  {
+    id: 'fr-create-order',
+    title: 'Créer une commande',
+    description: 'Enregistrer une nouvelle commande',
+    prompt: 'Créer une commande "Site web" pour 2500€ due le 15 décembre',
+    category: 'orders',
+    language: 'fr',
+  },
+  {
+    id: 'fr-schedule-event',
+    title: 'Planifier un événement',
+    description: 'Créer un rendez-vous ou réunion',
+    prompt: 'Planifier une réunion "Revue projet" demain à 10h',
+    category: 'events',
+    language: 'fr',
+  },
+  {
+    id: 'fr-update-status',
+    title: 'Mettre à jour le statut',
+    description: 'Changer le statut d\'un élément',
+    prompt: 'Marquer la tâche "Design logo" comme terminée',
+    category: 'tasks',
+    language: 'fr',
+  },
+  {
+    id: 'fr-find-client',
+    title: 'Rechercher un client',
+    description: 'Trouver un client par nom ou email',
+    prompt: 'Trouver le client avec l\'email john@example.com',
+    category: 'clients',
+    language: 'fr',
+  },
+  {
+    id: 'fr-help',
+    title: 'Aide',
+    description: 'Obtenir de l\'aide sur les commandes',
+    prompt: '/help',
+    category: 'general',
+    language: 'fr',
+  },
+
+  // Exemples en anglais
   {
     id: 'en-create-task',
-    title: 'Create a task',
-    description: 'Add a new task with deadline',
-    prompt: 'Create a task "Review the design" for tomorrow at 2 PM',
+    title: 'Create task',
+    description: 'Add a new task with due date',
+    prompt: 'Create task "Review design" for tomorrow at 2pm',
     category: 'tasks',
     language: 'en',
   },
   {
     id: 'en-list-tasks',
     title: 'List tasks',
-    description: 'View a filtered list of tasks',
-    prompt: 'Show all tasks in progress this week',
+    description: 'Show filtered list of tasks',
+    prompt: 'Show all in-progress tasks for this week',
     category: 'tasks',
     language: 'en',
   },
   {
     id: 'en-create-client',
-    title: 'Add a client',
+    title: 'Add client',
     description: 'Register a new client',
-    prompt: 'Add a client "Acme Corp" with email contact@acme.com',
+    prompt: 'Add client "Acme Corp" with email contact@acme.com',
     category: 'clients',
     language: 'en',
   },
   {
     id: 'en-create-order',
-    title: 'Create an order',
+    title: 'Create order',
     description: 'Register a new order',
-    prompt: 'Create an order "Website" for $2500 due December 15th',
+    prompt: 'Create order "Website" for €2500 due December 15th',
     category: 'orders',
     language: 'en',
   },
   {
     id: 'en-schedule-event',
-    title: 'Schedule an event',
+    title: 'Schedule event',
     description: 'Create a meeting or appointment',
     prompt: 'Schedule meeting "Project review" tomorrow at 10am',
     category: 'events',
@@ -80,7 +146,7 @@ export const QUICK_EXAMPLES: QuickExample[] = [
 ];
 
 /**
- * Get examples for a given language
+ * Obtient les exemples pour une langue donnée
  */
 export function getExamplesForLanguage(language: 'fr' | 'en'): QuickExample[] {
   return QUICK_EXAMPLES.filter(example => example.language === language);
