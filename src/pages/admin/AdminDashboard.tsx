@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import Layout, { pageBgClass, cardClass } from '../../components/Layout';
+import AdminNavigation from '../../components/AdminNavigation';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAdminStats } from '../../hooks/useAdminStats';
 import AdminSubscriptionManager from '../../components/AdminSubscriptionManager';
@@ -105,15 +106,18 @@ const AdminDashboard: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-400">
               Vous devez être connecté pour accéder au tableau de bord administrateur.
             </p>
-          </div>
         </div>
-      </Layout>
-    );
+        </div>
+      </div>
+    </Layout>
+  );
   }
 
   return (
     <Layout>
-      <div className={`space-y-4 sm:space-y-6 p-4 sm:p-0 ${pageBgClass}`}>
+      <div className="flex min-h-screen">
+        <AdminNavigation className="w-64 flex-shrink-0" />
+        <div className={`flex-1 space-y-4 sm:space-y-6 p-4 sm:p-6 ${pageBgClass}`}>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
