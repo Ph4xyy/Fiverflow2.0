@@ -144,18 +144,33 @@ const MeetingForm: React.FC<MeetingFormProps> = ({ isOpen, onClose, onSuccess, s
         priority: formData.priority
       };
 
+      // Utiliser la table tasks pour stocker les meetings
+      const taskData = {
+        title: meetingData.title,
+        description: meetingData.description,
+        status: 'todo',
+        priority: meetingData.priority,
+        due_date: meetingData.date,
+        // Ajouter des champs spécifiques aux meetings dans la description
+        meeting_type: meetingData.meeting_type,
+        start_time: meetingData.start_time,
+        end_time: meetingData.end_time,
+        attendees: meetingData.attendees,
+        location: meetingData.location
+      };
+
       if (meeting) {
         const { error } = await supabase
-          .from('meetings')
-          .update(meetingData)
+          .from('tasks')
+          .update(taskData)
           .eq('id', meeting.id);
 
         if (error) throw error;
         toast.success('Meeting updated successfully!', { id: toastId });
       } else {
         const { data, error } = await supabase
-          .from('meetings')
-          .insert([{ ...meetingData, user_id: user!.id }])
+          .from('tasks')
+          .insert([{ ...taskData, user_id: user!.id }])
           .select('id')
           .single();
 

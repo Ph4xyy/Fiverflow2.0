@@ -85,12 +85,14 @@ const CalendarPageNew: React.FC = () => {
   };
 
   const handleEventClick = (event: any) => {
-    // Si c'est une commande (order), naviguer vers la page des commandes
+    // Si c'est une tâche liée à une commande, naviguer vers la page des commandes
     if (event.type === 'deadline' && event.id.startsWith('task-')) {
-      // C'est une tâche liée à une commande
-      const orderId = event.order_id;
-      if (orderId) {
-        window.location.href = `/orders?order=${orderId}`;
+      // Utiliser l'order_id directement depuis l'événement
+      if (event.order_id) {
+        window.location.href = `/orders?order=${event.order_id}`;
+      } else {
+        // Si pas de commande liée, naviguer vers la page des tâches
+        window.location.href = '/tasks';
       }
     }
   };
@@ -172,7 +174,8 @@ const CalendarPageNew: React.FC = () => {
             time: '09:00',
             type: 'deadline' as const,
             priority: task.priority as 'low' | 'medium' | 'high',
-            description: task.description
+            description: task.description,
+            order_id: task.order_id // Ajouter l'order_id pour la navigation
           };
         });
 

@@ -116,7 +116,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-[#9c68f2]"
               placeholder="Netflix, Spotify, Adobe Creative Cloud..."
               required
             />
@@ -131,7 +131,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
               type="text"
               value={formData.provider}
               onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-[#9c68f2]"
               placeholder="Netflix Inc., Spotify AB, Adobe..."
               required
             />
@@ -145,7 +145,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-[#9c68f2]"
               placeholder="Service description..."
               rows={3}
             />
@@ -162,7 +162,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
                 step="0.01"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 placeholder-slate-400 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-[#9c68f2]"
                 placeholder="9.99"
                 required
               />
@@ -174,7 +174,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
               <select
                 value={formData.currency}
                 onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-[#9c68f2]"
               >
                 <option value="USD">USD</option>
                 <option value="EUR">EUR</option>
@@ -193,7 +193,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
               <select
                 value={formData.billing_cycle}
                 onChange={(e) => setFormData({ ...formData, billing_cycle: e.target.value as BillingCycle })}
-                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-[#9c68f2]"
                 required
               >
                 {BILLING_CYCLES.map(cycle => (
@@ -209,7 +209,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
                 type="date"
                 value={formData.next_renewal_date}
                 onChange={(e) => setFormData({ ...formData, next_renewal_date: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-[#9c68f2]"
                 required
               />
             </div>
@@ -224,7 +224,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full px-4 py-2.5 rounded-xl border transition-colors bg-[#11151D] text-slate-100 border-[#1C2230] focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-[#9c68f2]"
               >
                 {CATEGORIES.map(category => (
                   <option key={category} value={category}>
@@ -269,7 +269,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ subscription, onClo
             onClick={handleSubmit}
             disabled={!formData.name || !formData.amount || !formData.next_renewal_date}
           >
-            {subscription ? 'Mettre à jour' : 'Créer'}
+            {subscription ? 'Update' : 'Create'}
           </ModernButton>
         </div>
       </div>
@@ -393,12 +393,12 @@ const SubscriptionPreview: React.FC<{
               {subscription.is_active ? (
                 <>
                   <Pause size={16} />
-                  Désactiver
+                  Disable
                 </>
               ) : (
                 <>
                   <Play size={16} />
-                  Activer
+                  Enable
                 </>
               )}
             </ModernButton>
