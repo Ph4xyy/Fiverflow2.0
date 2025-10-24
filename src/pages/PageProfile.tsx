@@ -49,11 +49,11 @@ import {
 
 // Interface Achievement supprimée - utilise maintenant les vraies données
 
-interface ProfilePageNewProps {
+interface PageProfileProps {
   username?: string;
 }
 
-const PageProfile: React.FC<ProfilePageNewProps> = ({ username }) => {
+const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
   const { user } = useAuth();
   
   // Use the useProfile hook to retrieve data
@@ -1589,7 +1589,7 @@ const PageProfile: React.FC<ProfilePageNewProps> = ({ username }) => {
 };
 
 // Gestion des états de chargement et d'erreur
-const PageProfileWithErrorHandling: React.FC<ProfilePageNewProps> = (props) => {
+const PageProfileWithErrorHandling: React.FC<PageProfileProps> = (props) => {
   return <PageProfile {...props} />;
 };
 
