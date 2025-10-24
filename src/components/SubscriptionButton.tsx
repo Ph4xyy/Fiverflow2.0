@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Button } from './ui/button';
+import { Button } from '../components/ui/button';
 import { CreditCard, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SubscriptionButtonProps {
   priceId: string;
