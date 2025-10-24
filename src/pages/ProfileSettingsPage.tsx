@@ -137,7 +137,7 @@ const ProfileSettingsPage: React.FC = () => {
       // TODO: Implement these services
       
     } catch (error) {
-      console.error('Erreur lors du chargement des données:', error);
+      console.error('Error loading data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -147,9 +147,9 @@ const ProfileSettingsPage: React.FC = () => {
     try {
       setIsSaving(true);
       await ProfileService.updateProfile(profileData);
-      console.log('Profil sauvegardé avec succès');
+      console.log('Profile saved successfully');
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
+      console.error('Error saving:', error);
     } finally {
       setIsSaving(false);
     }
@@ -256,20 +256,20 @@ const ProfileSettingsPage: React.FC = () => {
   const renderSkillsTab = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">Mes compétences</h3>
+        <h3 className="text-lg font-semibold text-white">My Skills</h3>
         <button
           onClick={addSkill}
           className="flex items-center gap-2 px-4 py-2 bg-[#9c68f2] text-white rounded-lg hover:bg-[#8b5cf6] transition-colors"
         >
           <Plus size={16} />
-          Ajouter
+          Add
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <input
           type="text"
-          placeholder="Nom de la compétence"
+          placeholder="Skill name"
           value={newSkill.name}
           onChange={(e) => setNewSkill({...newSkill, name: e.target.value})}
           className="px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
@@ -280,15 +280,15 @@ const ProfileSettingsPage: React.FC = () => {
           onChange={(e) => setNewSkill({...newSkill, level: e.target.value as any})}
           className="px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
         >
-          <option value="beginner">Débutant</option>
-          <option value="intermediate">Intermédiaire</option>
-          <option value="advanced">Avancé</option>
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
           <option value="expert">Expert</option>
         </select>
 
         <input
           type="text"
-          placeholder="Catégorie (optionnel)"
+          placeholder="Category (optional)"
           value={newSkill.category}
           onChange={(e) => setNewSkill({...newSkill, category: e.target.value})}
           className="px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
@@ -308,8 +308,8 @@ const ProfileSettingsPage: React.FC = () => {
                   'bg-gray-500/20 text-gray-400'
                 }`}>
                   {skill.level === 'expert' ? 'Expert' :
-                   skill.level === 'advanced' ? 'Avancé' :
-                   skill.level === 'intermediate' ? 'Intermédiaire' : 'Débutant'}
+                   skill.level === 'advanced' ? 'Advanced' :
+                   skill.level === 'intermediate' ? 'Intermediate' : 'Beginner'}
                 </span>
                 {skill.category && (
                   <span className="text-sm text-gray-400">{skill.category}</span>
@@ -346,7 +346,7 @@ const ProfileSettingsPage: React.FC = () => {
             </div>
             <input
               type="url"
-              placeholder={`Votre ${social.name.toLowerCase()}`}
+              placeholder={`Your ${social.name.toLowerCase()}`}
               value={socialNetworks.find(s => s.id === social.id)?.url || ''}
               onChange={(e) => updateSocialNetwork(social.id, e.target.value)}
               className="flex-1 px-3 py-2 bg-[#1e2938] border border-[#35414e] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
@@ -360,10 +360,10 @@ const ProfileSettingsPage: React.FC = () => {
   const renderProjectsTab = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">Mes projets</h3>
+        <h3 className="text-lg font-semibold text-white">My Projects</h3>
         <button className="flex items-center gap-2 px-4 py-2 bg-[#9c68f2] text-white rounded-lg hover:bg-[#8b5cf6] transition-colors">
           <Plus size={16} />
-          Nouveau projet
+          New Project
         </button>
       </div>
 
@@ -377,7 +377,7 @@ const ProfileSettingsPage: React.FC = () => {
                   <span className={`px-2 py-1 text-xs rounded-full ${
                     project.isPublic ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
                   }`}>
-                    {project.isPublic ? 'Public' : 'Privé'}
+                    {project.isPublic ? 'Public' : 'Private'}
                   </span>
                 </div>
                 <p className="text-gray-400 text-sm mb-3">{project.description}</p>
@@ -409,13 +409,13 @@ const ProfileSettingsPage: React.FC = () => {
 
   const renderPrivacyTab = () => (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold text-white">Paramètres de confidentialité</h3>
+      <h3 className="text-lg font-semibold text-white">Privacy Settings</h3>
       
       <div className="space-y-4">
         <div className="flex items-center justify-between p-4 bg-[#35414e] rounded-lg">
           <div>
-            <h4 className="font-medium text-white">Afficher l'email</h4>
-            <p className="text-sm text-gray-400">Permettre aux autres de voir votre email</p>
+            <h4 className="font-medium text-white">Show email</h4>
+            <p className="text-sm text-gray-400">Allow others to see your email</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
@@ -430,8 +430,8 @@ const ProfileSettingsPage: React.FC = () => {
 
         <div className="flex items-center justify-between p-4 bg-[#35414e] rounded-lg">
           <div>
-            <h4 className="font-medium text-white">Afficher le téléphone</h4>
-            <p className="text-sm text-gray-400">Permettre aux autres de voir votre numéro</p>
+            <h4 className="font-medium text-white">Show phone</h4>
+            <p className="text-sm text-gray-400">Allow others to see your phone number</p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input

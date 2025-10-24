@@ -37,7 +37,7 @@ import { toast } from 'react-hot-toast';
 const PageReferrals: React.FC = () => {
   const { user } = useAuth();
   const { referralCode, referrerInfo, applyReferralCode } = useReferral();
-  // Données mockées pour éviter les erreurs
+  // Mocked data to avoid errors
   const stats = {
     totalReferrals: 0,
     activeReferrals: 0,
@@ -55,7 +55,7 @@ const PageReferrals: React.FC = () => {
   const [showQR, setShowQR] = useState(false);
   const [customMessage, setCustomMessage] = useState('');
 
-  // Rafraîchir les données au montage
+  // Refresh data on mount
   useEffect(() => {
     if (user) {
       // refreshData();
@@ -98,17 +98,17 @@ const PageReferrals: React.FC = () => {
     const body = encodeURIComponent(`
 Bonjour,
 
-Je vous invite à rejoindre FiverFlow, la plateforme qui révolutionne la gestion de projets freelance.
+I invite you to join FiverFlow, the platform that revolutionizes freelance project management.
 
 Utilisez mon code de parrainage: ${referralCode}
 Lien direct: ${referralLink}
 
-Avec ce code, vous bénéficierez de:
-- 50€ de bonus de bienvenue
-- 10% de commission sur vos premiers achats
-- Accès à des fonctionnalités premium
+With this code, you will benefit from:
+- €50 welcome bonus
+- 10% commission on your first purchases
+- Access to premium features
 
-Rejoignez-moi dès maintenant!
+Join me now!
     `);
     
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
@@ -271,7 +271,7 @@ Rejoignez-moi dès maintenant!
             </div>
             <div>
               <h3 className="font-semibold text-white mb-1">{t.referrals.benefits.commission}</h3>
-              <p className="text-sm text-gray-400">Sur tous les achats de vos parrainés</p>
+              <p className="text-sm text-gray-400">On all purchases by your referrals</p>
             </div>
           </div>
           
@@ -291,7 +291,7 @@ Rejoignez-moi dès maintenant!
             </div>
             <div>
               <h3 className="font-semibold text-white mb-1">{t.referrals.benefits.lifetime}</h3>
-              <p className="text-sm text-gray-400">Commissions à vie sur leurs achats</p>
+              <p className="text-sm text-gray-400">Lifetime commissions on their purchases</p>
             </div>
           </div>
           
@@ -397,7 +397,7 @@ Rejoignez-moi dès maintenant!
             <div className="text-center py-12">
               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">{t.referrals.referralList.noReferrals}</h3>
-              <p className="text-gray-400 mb-4">Commencez à partager votre code de parrainage</p>
+              <p className="text-gray-400 mb-4">Start sharing your referral code</p>
               <ModernButton onClick={() => setActiveTab('overview')}>
                 <Share2 className="h-4 w-4 mr-2" />
                 {t.referrals.referralList.inviteMore}
@@ -451,7 +451,7 @@ Rejoignez-moi dès maintenant!
             <div className="text-center py-12">
               <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-white mb-2">{t.referrals.commissionHistory.noCommissions}</h3>
-              <p className="text-gray-400">Les commissions apparaîtront ici une fois que vos parrainés commenceront à acheter</p>
+              <p className="text-gray-400">Commissions will appear here once your referrals start purchasing</p>
             </div>
           )}
         </ModernCard>

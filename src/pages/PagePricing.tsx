@@ -123,7 +123,7 @@ const PagePricing: React.FC = () => {
 
   const getYearlyDiscount = (monthlyPrice: number) => {
     const yearlyPrice = monthlyPrice * 12;
-    const discountedPrice = monthlyPrice * 10; // 20% de réduction
+    const discountedPrice = monthlyPrice * 10; // 20% discount
     const savings = yearlyPrice - discountedPrice;
     return savings;
   };
@@ -241,7 +241,7 @@ const PagePricing: React.FC = () => {
         {/* Features Comparison */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-white text-center mb-12">
-            Comparaison des fonctionnalités
+            Feature Comparison
           </h2>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -251,7 +251,7 @@ const PagePricing: React.FC = () => {
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">Performance</h3>
               <p className="text-gray-400">
-                Interface ultra-rapide et optimisée pour maximiser votre productivité
+                Ultra-fast and optimized interface to maximize your productivity
               </p>
             </ModernCard>
 
@@ -259,9 +259,9 @@ const PagePricing: React.FC = () => {
               <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Sécurité</h3>
+              <h3 className="text-xl font-semibold text-white mb-3">Security</h3>
               <p className="text-gray-400">
-                Vos données sont protégées avec un chiffrement de niveau bancaire
+                Your data is protected with bank-level encryption
               </p>
             </ModernCard>
 
@@ -271,7 +271,7 @@ const PagePricing: React.FC = () => {
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">Support</h3>
               <p className="text-gray-400">
-                Équipe de support dédiée disponible 24/7 pour vous accompagner
+                Dedicated support team available 24/7 to assist you
               </p>
             </ModernCard>
           </div>
@@ -280,17 +280,17 @@ const PagePricing: React.FC = () => {
         {/* FAQ */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-white text-center mb-12">
-            Questions fréquentes
+            Frequently Asked Questions
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <ModernCard>
               <h3 className="text-lg font-semibold text-white mb-3">
-                Puis-je changer de plan à tout moment ?
+                Can I change my plan at any time?
               </h3>
               <p className="text-gray-400">
-                Oui, vous pouvez upgrader ou downgrader votre plan à tout moment. 
-                Les changements prennent effet immédiatement.
+                Yes, you can upgrade or downgrade your plan at any time. 
+                Changes take effect immediately.
               </p>
             </ModernCard>
 
@@ -309,8 +309,8 @@ const PagePricing: React.FC = () => {
                 Que se passe-t-il si j'annule ?
               </h3>
               <p className="text-gray-400">
-                Vous gardez l'accès à votre compte jusqu'à la fin de votre période 
-                de facturation. Vos données sont conservées pendant 30 jours.
+                You keep access to your account until the end of your billing period. 
+                Your data is kept for 30 days.
               </p>
             </ModernCard>
 
@@ -319,8 +319,8 @@ const PagePricing: React.FC = () => {
                 Puis-je avoir une facture ?
               </h3>
               <p className="text-gray-400">
-                Oui, nous fournissons des factures détaillées pour tous nos plans. 
-                Parfait pour les entreprises et les freelancers.
+                Yes, we provide detailed invoices for all our plans. 
+                Perfect for businesses and freelancers.
               </p>
             </ModernCard>
           </div>
@@ -331,18 +331,18 @@ const PagePricing: React.FC = () => {
           <ModernCard className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] border-0">
             <div className="text-center">
               <h2 className="text-3xl font-bold text-white mb-4">
-                Prêt à transformer votre business ?
+                Ready to transform your business?
               </h2>
               <p className="text-purple-100 mb-8 text-lg">
-                Rejoignez des milliers de freelancers qui ont déjà choisi FiverFlow
+                Join thousands of freelancers who have already chosen FiverFlow
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <ModernButton size="lg" variant="secondary">
-                  Commencer l'essai gratuit
+                  Start Free Trial
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </ModernButton>
                 <ModernButton size="lg" variant="outline">
-                  Contacter les ventes
+                  Contact Sales
                 </ModernButton>
               </div>
             </div>

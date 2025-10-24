@@ -95,7 +95,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
         bio: publicData.bio || prev.bio,
         location: publicData.location || prev.location,
         website: publicData.website || prev.website,
-        // Ne pas exposer l'email et le téléphone pour les autres utilisateurs
+        // Don't expose email and phone for other users
         email: isOwnProfile ? (user?.email || prev.email) : '',
         phone: isOwnProfile ? prev.phone : ''
       }));
@@ -118,18 +118,18 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
 
       const targetUserId = profileDataFromHook.user_id;
       
-      console.log('🔄 Chargement des données pour userId:', targetUserId);
+      console.log('🔄 Loading data for userId:', targetUserId);
       
       try {
         // Load statistics
         try {
           const userStats = await StatisticsService.getUserStatistics(targetUserId);
-          // Adapter les données au format attendu
+          // Adapt data to expected format
           setStatistics({
             clients: userStats.totalClients || 0,
             orders: userStats.totalOrders || 0,
             rating: 4.5, // Default value
-            experience: Math.max(1, Math.floor((userStats.totalOrders || 0) / 10)) // Calcul basé sur les commandes
+            experience: Math.max(1, Math.floor((userStats.totalOrders || 0) / 10)) // Calculation based on orders
           });
           console.log('✅ Statistics loaded:', userStats);
         } catch (error) {
@@ -161,7 +161,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
         try {
           const userOrders = await OrdersService.getUserOrders(targetUserId);
           setOrders(userOrders);
-          console.log('✅ Commandes chargées:', userOrders.length);
+          console.log('✅ Orders loaded:', userOrders.length);
         } catch (error) {
           console.warn('⚠️ Orders error:', error);
           setOrders([]);
@@ -189,7 +189,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
 
       } catch (error) {
         console.error('Error loading real data:', error);
-        // En cas d'erreur, réinitialiser les données
+        // In case of error, reset data
         setStatistics({ clients: 0, orders: 0, rating: 0, experience: 0 });
         setSkills([]);
         setAwards([]);
@@ -252,7 +252,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
             show_phone: data.show_phone ?? true
           });
         } else {
-          // Utiliser les données de l'utilisateur auth comme fallback
+          // Use auth user data as fallback
           setProfileData((prev: ProfileData) => ({
             ...prev,
             full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
@@ -312,7 +312,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
         }
       } catch (error) {
         console.error('Error loading profile:', error);
-        // Fallback vers les données auth
+        // Fallback to auth data
         setProfileData((prev: ProfileData) => ({
           ...prev,
           full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
@@ -323,7 +323,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
       }
     };
 
-  // Ne charger les données que si c'est le profil de l'utilisateur connecté (pas de username fourni)
+  // Only load data if it's the connected user's profile (no username provided)
   useEffect(() => {
     if (!username && user) {
       loadProfileData();
@@ -333,12 +333,12 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
         try {
           // Load statistics
           const userStats = await StatisticsService.getUserStatistics(user.id);
-          // Adapter les données au format attendu
+          // Adapt data to expected format
           setStatistics({
             clients: userStats.totalClients || 0,
             orders: userStats.totalOrders || 0,
             rating: 4.5, // Default value
-            experience: Math.max(1, Math.floor((userStats.totalOrders || 0) / 10)) // Calcul basé sur les commandes
+            experience: Math.max(1, Math.floor((userStats.totalOrders || 0) / 10)) // Calculation based on orders
           });
 
           // Load skills
@@ -374,7 +374,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
     }
   }, [user, username]);
 
-  // Recharger les données quand l'utilisateur revient de la page settings (seulement pour le profil propre)
+  // Reload data when user returns from settings page (only for own profile)
   useEffect(() => {
     if (!username) {
       const handleFocus = () => {
@@ -393,7 +393,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
     }
   }, [user, username]);
 
-  // Vérifier le statut admin
+  // Check admin status
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user) return;
@@ -445,7 +445,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
 
     setIsSaving(true);
     try {
-      // Préparer les données à sauvegarder incluant les réseaux sociaux
+      // Prepare data to save including social networks
       const dataToSave = {
         ...profileData,
         github_url: socialNetworks.github,
@@ -458,11 +458,11 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
       const success = await ProfileService.updateProfile(user.id, dataToSave);
       if (success) {
         setIsEditMenuOpen(false);
-        // Recharger les données
+        // Reload data
         const updatedData = await ProfileService.getProfile(user.id);
         if (updatedData) {
           setProfileData((prev: ProfileData) => ({ ...prev, ...updatedData }));
-          // Mettre à jour les réseaux sociaux
+          // Update social networks
           setSocialNetworks({
             github: updatedData.github_url || '',
             linkedin: updatedData.linkedin_url || '',
@@ -504,7 +504,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
 
     setIsSaving(true);
     try {
-      // Préparer les données à sauvegarder incluant les réseaux sociaux
+      // Prepare data to save including social networks
       const dataToSave = {
         ...profileData,
         github_url: socialNetworks.github,
@@ -519,7 +519,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
       
       if (success && privacySuccess) {
         setIsSettingsMenuOpen(false);
-        // Recharger les données
+        // Reload data
         const updatedData = await ProfileService.getProfile(user.id);
         if (updatedData) {
           setProfileData((prev: ProfileData) => ({ ...prev, ...updatedData }));
@@ -527,7 +527,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
             show_email: updatedData.show_email ?? true,
             show_phone: updatedData.show_phone ?? true
           });
-          // Mettre à jour les réseaux sociaux
+          // Update social networks
           setSocialNetworks({
             github: updatedData.github_url || '',
             linkedin: updatedData.linkedin_url || '',
@@ -689,7 +689,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
                             </div>
                           </div>
                         </div>
-                        {/* Username affiché en dessous du nom avec bouton de copie */}
+                        {/* Username displayed below name with copy button */}
                         {(profileDataFromHook?.public_data?.username || profileData.username) && (
                           <div className="flex items-center gap-2 mt-1 group">
                             <p className="text-sm text-gray-400">@{profileDataFromHook?.public_data?.username || profileData.username}</p>
@@ -859,7 +859,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Téléphone
+                    Phone
                   </label>
                   <input
                     type="tel"
@@ -942,12 +942,12 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
                         size="sm"
                         onClick={() => {
                           setIsSettingsMenuOpen(false);
-                          // Navigation vers la page des paramètres
+                          // Navigation to settings page
                           window.location.href = '/settings';
                         }}
                       >
                         <Settings size={16} className="mr-2" />
-                        Paramètres avancés
+                        Advanced Settings
                       </ModernButton>
                       <button 
                         onClick={() => setIsSettingsMenuOpen(false)}
@@ -1011,9 +1011,9 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
                         />
                       </div>
 
-                      {/* Paramètres de confidentialité */}
+                      {/* Privacy Settings */}
                       <div className="pt-4 border-t border-[#35414e]">
-                        <h5 className="text-md font-semibold text-white mb-3">Confidentialité</h5>
+                        <h5 className="text-md font-semibold text-white mb-3">Privacy</h5>
                         
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
@@ -1039,10 +1039,10 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
                           <div className="flex items-center justify-between">
                             <div>
                               <label className="text-sm font-medium text-gray-300">
-                                Afficher le téléphone
+                                Show phone
                               </label>
                               <p className="text-xs text-gray-400">
-                                Permet aux autres utilisateurs de voir votre téléphone
+                                Allow other users to see your phone
                               </p>
                             </div>
                             <label className="relative inline-flex items-center cursor-pointer">
@@ -1084,7 +1084,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
 
                           <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                              Téléphone de contact
+                              Phone de contact
                             </label>
                             <input
                               type="tel"
@@ -1094,7 +1094,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
                               placeholder="+33 6 12 34 56 78"
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                              Numéro professionnel pour les clients
+                              Professional number for clients
                             </p>
                           </div>
                         </div>
@@ -1334,13 +1334,13 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
                               'text-green-400'
                             }`}>
                               {skill.level === 'expert' ? 'Expert' :
-                               skill.level === 'advanced' ? 'Avancé' :
-                               skill.level === 'intermediate' ? 'Intermédiaire' : 'Débutant'}
+                               skill.level === 'advanced' ? 'Advanced' :
+                               skill.level === 'intermediate' ? 'Intermediate' : 'Beginner'}
                             </span>
                           </div>
                         ))
                       ) : (
-                        <span className="text-gray-400 text-sm">Aucune compétence ajoutée</span>
+                        <span className="text-gray-400 text-sm">No skills added</span>
                       )}
                     </div>
                   </div>
@@ -1382,7 +1382,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
                                 )}
                                 {order.due_date && (
                                   <span>
-                                    Échéance: {new Date(order.due_date).toLocaleDateString('fr-FR')}
+                                    Due: {new Date(order.due_date).toLocaleDateString('en-US')}
                                   </span>
                                 )}
                               </div>
@@ -1391,7 +1391,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
                               <p className="text-xs text-gray-500">
                                 {new Date(order.created_at).toLocaleDateString('fr-FR')}
                               </p>
-                              {/* Likes et vues simulés */}
+                              {/* Simulated likes and views */}
                               <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
                                 <span className="flex items-center gap-1">
                                   <Heart size={12} className="text-red-400" />
@@ -1410,8 +1410,8 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
                   ) : (
                     <div className="text-center py-12">
                       <Briefcase size={48} className="mx-auto text-gray-400 mb-4" />
-                      <h3 className="text-lg font-semibold text-white mb-2">Aucun projet</h3>
-                      <p className="text-gray-400">Vos projets apparaîtront ici une fois que vous en aurez créé</p>
+                      <h3 className="text-lg font-semibold text-white mb-2">No projects</h3>
+                      <p className="text-gray-400">Your projects will appear here once you create them</p>
                     </div>
                   )}
                 </div>
@@ -1512,7 +1512,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
                 )}
                 {!socialNetworks.github && !socialNetworks.linkedin && !socialNetworks.twitter && !socialNetworks.discord && !socialNetworks.website && (
                   <div className="text-sm text-gray-500 text-center py-4">
-                    Aucun réseau social configuré
+                    No social networks configured
                   </div>
                 )}
               </div>
@@ -1540,8 +1540,8 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
                 ) : (
                   <div className="text-center py-8">
                     <Award size={48} className="mx-auto text-gray-400 mb-4" />
-                    <h3 className="text-lg font-semibold text-white mb-2">Aucune récompense</h3>
-                    <p className="text-gray-400">Vos récompenses apparaîtront ici</p>
+                    <h3 className="text-lg font-semibold text-white mb-2">No awards</h3>
+                    <p className="text-gray-400">Your awards will appear here</p>
                   </div>
                 )}
               </div>
@@ -1588,7 +1588,7 @@ const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
   );
 };
 
-// Gestion des états de chargement et d'erreur
+// Loading and error state management
 const PageProfileWithErrorHandling: React.FC<PageProfileProps> = (props) => {
   return <PageProfile {...props} />;
 };
