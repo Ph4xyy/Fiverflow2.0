@@ -51,74 +51,74 @@ const PagePricing: React.FC = () => {
     {
       id: 'lunch',
       name: 'Lunch',
-      subtitle: 'Plan gratuit',
+      subtitle: 'Free plan',
       monthlyPrice: 0,
       yearlyPrice: 0,
-      description: 'Parfait pour commencer',
+      description: 'Perfect to get started',
       features: [
-        { text: '1 projet actif', included: true },
+        { text: '1 active project', included: true },
         { text: '5 clients maximum', included: true },
-        { text: '1 Go de stockage', included: true },
-        { text: 'Support par email', included: true },
-        { text: 'Templates de base', included: true },
-        { text: 'Rapports basiques', included: false },
-        { text: 'Intégrations limitées', included: false },
-        { text: 'Support prioritaire', included: false }
+        { text: '1 GB storage', included: true },
+        { text: 'Email support', included: true },
+        { text: 'Basic templates', included: true },
+        { text: 'Basic reports', included: false },
+        { text: 'Limited integrations', included: false },
+        { text: 'Priority support', included: false }
       ],
-      buttonText: 'Commencer gratuitement',
+      buttonText: 'Current Plan',
       buttonVariant: 'outline'
     },
     {
       id: 'boost',
       name: 'Boost',
-      subtitle: 'Pour les freelancers',
+      subtitle: 'For freelancers',
       monthlyPrice: 22,
-      yearlyPrice: 220, // 20% de réduction
-      description: 'Idéal pour les freelancers actifs',
+      yearlyPrice: 220, // 20% discount
+      description: 'Perfect for active freelancers',
       features: [
-        { text: 'Projets illimités', included: true },
-        { text: 'Clients illimités', included: true },
-        { text: 'Stockage illimité', included: true },
-        { text: 'Support prioritaire', included: true },
-        { text: 'Templates premium', included: true },
-        { text: 'Rapports avancés', included: true },
-        { text: 'Intégrations complètes', included: true },
+        { text: 'Unlimited projects', included: true },
+        { text: 'Unlimited clients', included: true },
+        { text: 'Unlimited storage', included: true },
+        { text: 'Priority support', included: true },
+        { text: 'Premium templates', included: true },
+        { text: 'Advanced reports', included: true },
+        { text: 'Full integrations', included: true },
         { text: 'API access', included: true },
-        { text: 'Automatisations', included: true },
-        { text: 'Analytics avancés', included: true }
+        { text: 'Automations', included: true },
+        { text: 'Advanced analytics', included: true }
       ],
       popular: true,
-      buttonText: 'Choisir Boost',
+      buttonText: 'Choose Boost',
       buttonVariant: 'primary'
     },
     {
       id: 'scale',
       name: 'Scale',
-      subtitle: 'Pour les entreprises',
+      subtitle: 'For businesses',
       monthlyPrice: 39,
-      yearlyPrice: 390, // 20% de réduction
-      description: 'Solution complète pour les entreprises',
+      yearlyPrice: 390, // 20% discount
+      description: 'Complete solution for businesses',
       features: [
-        { text: 'Projets illimités', included: true },
-        { text: 'Clients illimités', included: true },
-        { text: 'Stockage illimité', included: true },
-        { text: 'Support dédié', included: true },
-        { text: 'Templates premium', included: true },
-        { text: 'Rapports avancés', included: true },
-        { text: 'Intégrations complètes', included: true },
+        { text: 'Unlimited projects', included: true },
+        { text: 'Unlimited clients', included: true },
+        { text: 'Unlimited storage', included: true },
+        { text: 'Dedicated support', included: true },
+        { text: 'Premium templates', included: true },
+        { text: 'Advanced reports', included: true },
+        { text: 'Full integrations', included: true },
         { text: 'API access', included: true },
-        { text: 'Collaboration équipe', included: true },
-        { text: 'Automatisations', included: true },
+        { text: 'Team collaboration', included: true },
+        { text: 'Automations', included: true },
         { text: 'White label', included: true },
-        { text: 'Analytics avancés', included: true }
+        { text: 'Advanced analytics', included: true }
       ],
-      buttonText: 'Choisir Scale',
+      buttonText: 'Choose Scale',
       buttonVariant: 'primary'
     }
   ];
 
   const formatPrice = (price: number) => {
-    return price === 0 ? 'Gratuit' : `$${price}`;
+    return price === 0 ? '$0' : `$${price}`;
   };
 
   const getYearlyDiscount = (monthlyPrice: number) => {
@@ -133,22 +133,18 @@ const PagePricing: React.FC = () => {
       <div className="container mx-auto px-6 py-12">
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] text-white px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <Sparkles className="h-4 w-4" />
-            Nouveau: 20% de réduction annuelle
-          </div>
           
           <h1 className="text-5xl font-bold text-white mb-6">
-            Choisissez votre plan
+            Choose Your Plan
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-            Débloquez tout le potentiel de votre business freelance avec nos plans optimisés pour chaque étape de votre croissance.
+            Unlock the full potential of your freelance business with our plans optimized for every stage of your growth.
           </p>
 
           {/* Toggle Billing */}
           <div className="flex items-center justify-center gap-4 mb-12">
             <span className={`text-lg ${!isYearly ? 'text-white' : 'text-gray-400'}`}>
-              Mensuel
+              Monthly
             </span>
             <button
               onClick={() => setIsYearly(!isYearly)}
@@ -163,9 +159,9 @@ const PagePricing: React.FC = () => {
               />
             </button>
             <span className={`text-lg ${isYearly ? 'text-white' : 'text-gray-400'}`}>
-              Annuel
+              Yearly
             </span>
-            {isYearly && (
+            {!isYearly && (
               <div className="text-green-400 text-sm font-medium">
                 Save 20% on yearly subscription
               </div>
@@ -177,7 +173,7 @@ const PagePricing: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
           {plans.map((plan) => {
             const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
-            const period = isYearly ? 'an' : 'mois';
+            const period = isYearly ? 'year' : 'month';
             const savings = isYearly && plan.monthlyPrice > 0 ? getYearlyDiscount(plan.monthlyPrice) : 0;
             
             return (
@@ -193,7 +189,7 @@ const PagePricing: React.FC = () => {
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <div className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
                       <Star className="h-4 w-4" />
-                      Populaire
+                      Popular
                     </div>
                   </div>
                 )}
@@ -209,11 +205,6 @@ const PagePricing: React.FC = () => {
                       <span className="text-gray-400">/{period}</span>
                     )}
                   </div>
-                  {savings > 0 && (
-                    <div className="text-green-400 text-sm font-medium">
-                      Économisez ${savings}/an
-                    </div>
-                  )}
                   <p className="text-gray-300 text-sm mt-2">{plan.description}</p>
                 </div>
 

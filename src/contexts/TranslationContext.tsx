@@ -21,9 +21,17 @@ export const TranslationProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setTranslations(translationModule.default);
       } catch (error) {
         console.error('Error loading translations:', error);
-        // Fallback vers les traductions françaises
-        const fallbackModule = await import('../locales/fr.json');
-        setTranslations(fallbackModule.default);
+        // Fallback vers les traductions par défaut
+        setTranslations({
+          profile: {
+            editProfile: 'Edit Profile'
+          },
+          common: {
+            save: 'Save',
+            cancel: 'Cancel',
+            loading: 'Loading...'
+          }
+        });
       }
     };
 
