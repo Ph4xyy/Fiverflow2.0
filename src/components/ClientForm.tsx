@@ -730,7 +730,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={onClose}>
       <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-        <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
           <ModernCard>
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
@@ -738,14 +738,39 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                 <h2 className="text-xl font-bold text-white">
                   {client ? 'Edit Client' : 'New Client'}
                 </h2>
-                <div className="flex items-center mt-3 space-x-2">
-                  {[1, 2, 3, 4].map((step) => (
-                    <div
-                      key={step}
-                      className={`h-2 w-10 rounded-full transition-all ${
-                        step <= currentStep ? 'bg-gradient-to-r from-[#9c68f2] to-[#422ca5]' : 'bg-gray-600'
-                      }`}
-                    />
+                <div className="flex items-center mt-4 space-x-3">
+                  {[
+                    { step: 1, label: 'Basic Info', icon: User },
+                    { step: 2, label: 'Contact', icon: Mail },
+                    { step: 3, label: 'Business', icon: Briefcase },
+                    { step: 4, label: 'Management', icon: MessageSquare }
+                  ].map(({ step, label, icon: Icon }) => (
+                    <div key={step} className="flex items-center">
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all ${
+                        step <= currentStep 
+                          ? 'bg-gradient-to-r from-[#9c68f2] to-[#422ca5] border-[#9c68f2] text-white' 
+                          : 'bg-[#35414e] border-gray-600 text-gray-400'
+                      }`}>
+                        <Icon size={16} />
+                      </div>
+                      <div className="ml-2 hidden sm:block">
+                        <div className={`text-xs font-medium ${
+                          step <= currentStep ? 'text-white' : 'text-gray-400'
+                        }`}>
+                          {label}
+                        </div>
+                        <div className={`text-xs ${
+                          step <= currentStep ? 'text-[#9c68f2]' : 'text-gray-500'
+                        }`}>
+                          Step {step}
+                        </div>
+                      </div>
+                      {step < 4 && (
+                        <div className={`ml-3 w-8 h-0.5 transition-all ${
+                          step < currentStep ? 'bg-gradient-to-r from-[#9c68f2] to-[#422ca5]' : 'bg-gray-600'
+                        }`} />
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -755,6 +780,20 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
               >
                 <X size={20} className="text-gray-400" />
               </button>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mb-6">
+              <div className="flex justify-between text-xs text-gray-400 mb-2">
+                <span>Progress</span>
+                <span>{currentStep}/4</span>
+              </div>
+              <div className="w-full bg-gray-600 rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(currentStep / 4) * 100}%` }}
+                />
+              </div>
             </div>
 
             {/* Form */}
