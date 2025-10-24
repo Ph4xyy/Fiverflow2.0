@@ -161,7 +161,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
         try {
           const userOrders = await OrdersService.getUserOrders(targetUserId);
           setOrders(userOrders);
-          console.log('✅ Commandes chargées:', userOrders.length);
+          console.log('✅ Orders loaded:', userOrders.length);
         } catch (error) {
           console.warn('⚠️ Orders error:', error);
           setOrders([]);
@@ -795,7 +795,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Nom complet
+                    Full name
                   </label>
                   <input
                     type="text"
@@ -965,7 +965,7 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                       
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Nom complet
+                          Full name
                         </label>
                         <input
                           type="text"

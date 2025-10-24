@@ -1,18 +1,18 @@
 /**
- * Page Assistant AI - Interface style ChatGPT
+ * AI Assistant Page - ChatGPT-style Interface
  * 
- * CHECKLIST D'ACCEPTATION:
- * - [x] UI style ChatGPT, cohérente avec le thème global
- * - [x] Lien "AI ▸ Assistant" dans le layout
- * - [x] Slash-commands & langage naturel FR/EN
+ * ACCEPTANCE CHECKLIST:
+ * - [x] ChatGPT-style UI, consistent with global theme
+ * - [x] "AI ▸ Assistant" link in layout
+ * - [x] Slash-commands & natural language EN
  * - [x] CRUD tasks/orders/clients/events
- * - [x] Confirmations delete/bulk
- * - [x] Rôles/ownership OK (RLS-friendly)
- * - [x] Quotas par plan OK + messages
- * - [x] Logs assistant_actions + ai_usage
- * - [x] Webhooks n8n signés (si ENV fournis)
- * - [x] Tests unitaires passent
- * - [x] Aucun flash blanc en dark-mode
+ * - [x] Delete/bulk confirmations
+ * - [x] Roles/ownership OK (RLS-friendly)
+ * - [x] Plan quotas OK + messages
+ * - [x] assistant_actions + ai_usage logs
+ * - [x] Signed n8n webhooks (if ENV provided)
+ * - [x] Unit tests pass
+ * - [x] No white flash in dark-mode
  */
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -116,7 +116,7 @@ const AIAssistantPage: React.FC = () => {
       const errorMessage: AssistantMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: '❌ Une erreur est survenue. Veuillez réessayer.',
+        content: '❌ An error occurred. Please try again.',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -149,7 +149,7 @@ const AIAssistantPage: React.FC = () => {
           const errorMessage: AssistantMessage = {
             id: Date.now().toString(),
             type: 'assistant',
-            content: '❌ Erreur lors de la confirmation.',
+            content: '❌ Error during confirmation.',
             timestamp: new Date(),
           };
           setMessages(prev => [...prev, errorMessage]);
@@ -190,7 +190,7 @@ const AIAssistantPage: React.FC = () => {
     inputRef.current?.focus();
   };
 
-  // Rendu d'un message
+  // Render a message
   const renderMessage = (message: AssistantMessage) => {
     const isUser = message.type === 'user';
     const isAssistant = message.type === 'assistant';
@@ -245,13 +245,10 @@ const AIAssistantPage: React.FC = () => {
             </div>
             <div>
               <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Assistant AI
+                AI Assistant
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {userLanguage === 'fr' 
-                  ? 'Gérez vos tâches, clients, commandes et événements'
-                  : 'Manage your tasks, clients, orders, and events'
-                }
+                Manage your tasks, clients, orders, and events
               </p>
             </div>
           </div>
