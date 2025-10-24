@@ -64,7 +64,7 @@ const AIAssistantPage: React.FC = () => {
         id: 'welcome',
         type: 'assistant',
         content: userLanguage === 'fr' 
-          ? '👋 Bonjour ! Je suis votre assistant AI. Je peux vous aider à gérer vos tâches, clients, commandes et événements. Essayez un exemple ci-dessous ou tapez votre demande !'
+          ? '👋 Hello! I\'m your AI assistant. I can help you manage your tasks, clients, orders, and events. Try an example below or type your request!'
           : '👋 Hello! I\'m your AI assistant. I can help you manage your tasks, clients, orders, and events. Try an example below or type your request!',
         timestamp: new Date(),
       };

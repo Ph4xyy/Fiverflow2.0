@@ -111,39 +111,39 @@ const SettingsPage: React.FC = () => {
   const categories: SettingsCategory[] = [
     {
       id: 'profile',
-      name: 'Profil',
+      name: 'Profile',
       icon: <User size={20} />,
-      description: 'Informations personnelles et professionnelles'
+      description: 'Personal and professional information'
     },
     {
       id: 'privacy',
-      name: 'Confidentialité',
+      name: 'Privacy',
       icon: <Shield size={20} />,
-      description: 'Paramètres de confidentialité et visibilité'
+      description: 'Privacy and visibility settings'
     },
     {
       id: 'notifications',
       name: 'Notifications',
       icon: <Bell size={20} />,
-      description: 'Préférences de notifications'
+      description: 'Notification preferences'
     },
     {
       id: 'appearance',
-      name: 'Apparence',
+      name: 'Appearance',
       icon: <Palette size={20} />,
-      description: 'Thème et préférences visuelles'
+      description: 'Theme and visual preferences'
     },
     {
       id: 'social',
-      name: 'Réseaux sociaux',
+      name: 'Social Networks',
       icon: <Globe size={20} />,
-      description: 'Liens vers vos réseaux sociaux'
+      description: 'Links to your social networks'
     },
     {
       id: 'skills',
-      name: 'Compétences & Récompenses',
+      name: 'Skills & Awards',
       icon: <Award size={20} />,
-      description: 'Gérer vos compétences et récompenses'
+      description: 'Manage your skills and awards'
     },
     {
       id: 'subscription',
@@ -1023,13 +1023,15 @@ const SettingsPage: React.FC = () => {
                 </div>
                 <h3 className="text-2xl font-semibold text-white mb-2">Want to upgrade or change your plan?</h3>
                 <p className="text-gray-400 mb-6">Discover our premium plans and unlock new features for your freelance business</p>
-                <ModernButton 
-                  onClick={() => navigate('/upgrade')}
-                  className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5ae8] hover:to-[#3a2580]"
-                >
-                  <Crown size={16} className="mr-2" />
-                  View Plans & Upgrade
-                </ModernButton>
+                <div className="flex justify-center">
+                  <ModernButton 
+                    onClick={() => navigate('/upgrade')}
+                    className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5ae8] hover:to-[#3a2580]"
+                  >
+                    <Crown size={16} className="mr-2" />
+                    View Plans & Upgrade
+                  </ModernButton>
+                </div>
               </div>
             </ModernCard>
 

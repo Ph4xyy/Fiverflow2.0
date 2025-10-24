@@ -708,23 +708,23 @@ const ProfilePageNew: React.FC<ProfilePageNewProps> = ({ username }) => {
                         )}
                       </div>
                     </div>
-                    <p className="text-lg text-gray-400 mb-2">{profileData.professional_title || 'Professionnel'}</p>
+                    <p className="text-lg text-gray-400 mb-2">{profileData.professional_title || 'Professional'}</p>
                     <div className="flex items-center gap-4 text-sm text-gray-400">
                       <div className="flex items-center gap-1">
                         <MapPin size={16} />
-                        {profileData.location || 'Non spécifié'}
+                        {profileData.location || 'Not specified'}
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar size={16} />
-                        Membre depuis {new Date().getFullYear()}
+                        Member since {new Date().getFullYear()}
                       </div>
                       <div className="flex items-center gap-1">
                         <Coffee size={16} />
-                        {profileData.status === 'available' && 'Disponible'}
-                        {profileData.status === 'busy' && 'Occupé'}
-                        {profileData.status === 'away' && 'Absent'}
-                        {profileData.status === 'do_not_disturb' && 'Ne pas déranger'}
-                        {!profileData.status && 'Disponible'}
+                        {profileData.status === 'available' && 'Available'}
+                        {profileData.status === 'busy' && 'Busy'}
+                        {profileData.status === 'away' && 'Away'}
+                        {profileData.status === 'do_not_disturb' && 'Do not disturb'}
+                        {!profileData.status && 'Available'}
                       </div>
                     </div>
                   </div>
