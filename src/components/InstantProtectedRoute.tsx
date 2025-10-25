@@ -13,8 +13,11 @@ interface InstantProtectedRouteProps {
 const InstantProtectedRoute: React.FC<InstantProtectedRouteProps> = ({ children }) => {
   const { user, authReady } = useAuth();
   
+  console.log('🔍 InstantProtectedRoute - authReady:', authReady, 'user:', user ? 'exists' : 'null');
+  
   // Show loading while auth is initializing
   if (!authReady) {
+    console.log('⏳ Auth not ready, showing loading screen...');
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div className="text-center">
@@ -27,10 +30,12 @@ const InstantProtectedRoute: React.FC<InstantProtectedRouteProps> = ({ children 
   
   // Redirect to login if not authenticated
   if (!user) {
+    console.log('❌ No user, redirecting to login...');
     window.location.href = '/login';
     return null;
   }
   
+  console.log('✅ User authenticated, showing protected content');
   return <>{children}</>;
 };
 

@@ -46,34 +46,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
+    // Vérifier si Supabase est configuré
+    if (!supabase) {
+      console.error('❌ Supabase client is not initialized - check environment variables');
+      setLoading(false);
+      setAuthReady(true);
+      return;
+    }
+
     // Récupérer la session actuelle
-           const getInitialSession = async () => {
-             try {
-               // Récupération de la session initiale - logs supprimés pour la propreté
-               const { data: { session }, error } = await supabase.auth.getSession();
+    const getInitialSession = async () => {
+      try {
+        console.log('🔄 Getting initial session...');
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-               if (error) {
-                 // Erreur de session - gérée silencieusement
-               }
-
-               if (error) {
-                 // Erreur lors de la récupération de la session - gérée silencieusement
-               } else {
-                 // Session récupérée - logs supprimés pour la propreté
-                 if (mounted) {
-                   setSession(session);
-                   setUser(session?.user ?? null);
-                   setAuthReady(true);
-                 }
-               }
-             } catch (error) {
-               // Erreur lors de l'initialisation de l'auth - gérée silencieusement
-             } finally {
-               if (mounted) {
-                 setLoading(false);
-               }
-             }
-           };
+        if (error) {
+          console.error('❌ Error getting session:', error);
+        } else {
+          console.log('✅ Session retrieved:', session ? 'User logged in' : 'No user');
+          if (mounted) {
+            setSession(session);
+            setUser(session?.user ?? null);
+            setAuthReady(true);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Exception during auth init:', error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
 
     getInitialSession();
 
