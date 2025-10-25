@@ -92,7 +92,7 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
 
             <div className="flex flex-col space-y-3">
               <Button
-                onClick={() => navigate('/subscription')}
+                onClick={() => navigate('/upgrade')}
                 className="w-full"
               >
                 <Crown className="w-4 h-4 mr-2" />
