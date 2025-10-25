@@ -204,22 +204,33 @@ export class StripeWebhookHandler {
    */
   private static async getUserIdFromCustomerId(customerId: string): Promise<string | null> {
     try {
-      // Cette fonction devrait interroger votre base de données
-      // pour trouver l'utilisateur correspondant au customer_id Stripe
-      // Pour l'instant, on retourne null - à implémenter selon votre structure
       console.log('🔍 Looking up user for customer:', customerId);
       
-      // TODO: Implémenter la logique de récupération de l'utilisateur
-      // Exemple:
-      // const { data } = await supabase
-      //   .from('user_profiles')
-      //   .select('user_id')
-      //   .eq('stripe_customer_id', customerId)
-      //   .single();
-      // 
-      // return data?.user_id || null;
+      // Implémentation de la récupération de l'utilisateur
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
       
-      return null;
+      if (!supabaseUrl || !supabaseKey) {
+        console.error('❌ Supabase configuration missing');
+        return null;
+      }
+      
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      
+      const { data, error } = await supabase
+        .from('stripe_customers')
+        .select('user_id')
+        .eq('customer_id', customerId)
+        .is('deleted_at', null)
+        .single();
+      
+      if (error) {
+        console.error('❌ Error fetching user from customer ID:', error);
+        return null;
+      }
+      
+      return data?.user_id || null;
 
     } catch (error) {
       console.error('❌ Error getting user ID from customer ID:', error);
@@ -227,6 +238,7 @@ export class StripeWebhookHandler {
     }
   }
 }
+
 
 
 
