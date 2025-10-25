@@ -40,14 +40,24 @@ export const useSubscription = () => {
           throw new Error('Erreur lors de la récupération du profil');
         }
 
-        // Récupérer les détails de l'abonnement
-        const { data: subscriptionData, error: subscriptionError } = await supabase
-          .from('user_subscriptions')
-          .select('status, current_period_end')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+        // Récupérer les détails de l'abonnement (optionnel)
+        let subscriptionData = null;
+        try {
+          const { data, error: subscriptionError } = await supabase
+            .from('user_subscriptions')
+            .select('status, current_period_end')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+          
+          if (!subscriptionError) {
+            subscriptionData = data;
+          }
+        } catch (e) {
+          // Table user_subscriptions n'existe pas ou erreur - on continue sans
+          console.log('Table user_subscriptions non disponible, utilisation des données de profil uniquement');
+        }
 
         setSubscription({
           plan: profile?.subscription_plan || 'Lunch',
