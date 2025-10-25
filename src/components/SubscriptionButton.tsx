@@ -3,6 +3,7 @@ import { Button } from './ui/Button';
 import { CreditCard, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
 interface SubscriptionButtonProps {
   priceId: string;
@@ -20,7 +21,7 @@ export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
   className
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { user, supabase } = useAuth();
+  const { user } = useAuth();
 
   const handleSubscribe = async () => {
     if (!user) {

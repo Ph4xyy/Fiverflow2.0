@@ -39,7 +39,7 @@ export const usePreloadData = () => {
         // Précharger les commandes récentes
         const ordersPromise = supabase
           .from('orders')
-          .select('id, title, amount, status, deadline, created_at, client_name, platform')
+          .select('id, title, budget, status, due_date, created_at, client_name, platform')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(20);
