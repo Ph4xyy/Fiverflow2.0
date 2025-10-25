@@ -111,14 +111,14 @@ function AppContent() {
           {/* Pages internes du dashboard avec protection par abonnement */}
           <Route path="/clients" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="launch" pageName="clients" description="Gestion des clients (max 5 avec Launch)">
+              <SubscriptionGuard requiredPlan="Lunch" pageName="clients" description="Gestion des clients (max 5 avec Lunch)">
                 <PageClients />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
           <Route path="/orders" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="launch" pageName="orders" description="Gestion des commandes (max 10 avec Launch)">
+              <SubscriptionGuard requiredPlan="Lunch" pageName="orders" description="Gestion des commandes (max 10 avec Lunch)">
                 <PageOrders />
               </SubscriptionGuard>
             </InstantProtectedRoute>
@@ -164,7 +164,7 @@ function AppContent() {
           {/* Assistant AI */}
           <Route path="/assistant" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="launch" pageName="assistant" description="Assistant AI disponible avec Launch">
+              <SubscriptionGuard requiredPlan="Lunch" pageName="assistant" description="Assistant AI disponible avec Lunch">
                 <AIAssistantPage />
               </SubscriptionGuard>
             </InstantProtectedRoute>

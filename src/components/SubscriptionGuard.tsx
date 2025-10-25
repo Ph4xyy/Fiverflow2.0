@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface SubscriptionGuardProps {
   children: React.ReactNode;
-  requiredPlan: 'Launch' | 'Boost' | 'Scale';
+  requiredPlan: 'Lunch' | 'Boost' | 'Scale';
   pageType?: 'admin' | 'pro' | 'premium';
   fallback?: React.ReactNode;
 }
@@ -28,7 +28,7 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
     );
   }
 
-  const hasAccess = pageType ? canAccess(pageType) : plan === requiredPlan || (requiredPlan === 'Launch' && plan === 'Launch');
+  const hasAccess = pageType ? canAccess(pageType) : plan === requiredPlan || (requiredPlan === 'Lunch' && plan === 'Lunch');
 
   if (!hasAccess) {
     if (fallback) {

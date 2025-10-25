@@ -12,7 +12,7 @@ interface SubscriptionData {
 export const useSubscription = () => {
   const { user, supabase } = useAuth();
   const [subscription, setSubscription] = useState<SubscriptionData>({
-    plan: 'Launch',
+    plan: 'Lunch',
     status: 'active',
     currentPeriodEnd: null,
     isLoading: true,
@@ -50,7 +50,7 @@ export const useSubscription = () => {
           .single();
 
         setSubscription({
-          plan: profile?.subscription_plan || 'Launch',
+          plan: profile?.subscription_plan || 'Lunch',
           status: subscriptionData?.status || 'active',
           currentPeriodEnd: subscriptionData?.current_period_end || null,
           isLoading: false,
@@ -71,7 +71,7 @@ export const useSubscription = () => {
 
   const hasAccess = (requiredPlan: string): boolean => {
     const planHierarchy = {
-      'Launch': 0,
+      'Lunch': 0,
       'Boost': 1,
       'Scale': 2,
     };
@@ -83,7 +83,7 @@ export const useSubscription = () => {
   };
 
   const isActive = (): boolean => {
-    return subscription.status === 'active' && subscription.plan !== 'Launch';
+    return subscription.status === 'active' && subscription.plan !== 'Lunch';
   };
 
   const canAccess = (pageType: 'admin' | 'pro' | 'premium'): boolean => {
