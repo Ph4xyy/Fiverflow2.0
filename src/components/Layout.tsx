@@ -50,62 +50,43 @@ export const buttonClass = 'bg-[#35414e] hover:bg-[#3d4a57] text-white';
 export const gradientClass = 'bg-gradient-to-r from-[#9c68f2] to-[#422ca5]';
 
 /* ---------- Helper: détecte admin ---------- */
-const useIsAdminFromEverywhere = (user: any) => {
+const useIsAdminFromRole = (user: any) => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [, setAdminCheckLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAdminStatus = async () => {
+    const checkAdminRole = async () => {
       if (!user) {
-        // Pas d'utilisateur connecté - log supprimé pour la propreté
         setIsAdmin(false);
-        setAdminCheckLoading(false);
+        setLoading(false);
         return;
       }
 
-      // Vérification admin pour user - log supprimé pour la propreté
-
       try {
-        if (!supabase) {
-          console.error('❌ Supabase client non initialisé');
-          setIsAdmin(false);
-          return;
-        }
+        const { data: profile, error } = await supabase
+          .from('user_profiles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
 
-        // Utiliser la nouvelle classe utilitaire sans RPC
-        const isAdmin = await UserProfileManager.checkAdminStatus(user);
-        setIsAdmin(isAdmin);
-      } catch (error: any) {
-        console.error('Erreur lors de la vérification admin:', error);
-        
-        // Si c'est une erreur 406, essayer le contournement
-        if (error?.code === 'PGRST301' || error?.message?.includes('406')) {
-          // Erreur 406 détectée, tentative de contournement - log supprimé pour la propreté
-          try {
-            const fallbackData = await handleError406(user.id);
-            if (fallbackData) {
-              setIsAdmin(fallbackData.is_admin || false);
-              // Contournement réussi pour la vérification admin - log supprimé pour la propreté
-            } else {
-              setIsAdmin(false);
-              console.warn('⚠️ Layout: Contournement échoué, utilisateur non-admin par défaut');
-            }
-          } catch (fallbackError) {
-            console.error('❌ Layout: Erreur lors du contournement:', fallbackError);
-            setIsAdmin(false);
-          }
-        } else {
+        if (error) {
+          console.error('Erreur lors de la récupération du rôle:', error);
           setIsAdmin(false);
+        } else {
+          setIsAdmin(profile?.role === 'Admin' || profile?.role === 'Moderator');
         }
+      } catch (error) {
+        console.error('Erreur lors de la vérification du rôle admin:', error);
+        setIsAdmin(false);
       } finally {
-        setAdminCheckLoading(false);
+        setLoading(false);
       }
     };
 
-    checkAdminStatus();
+    checkAdminRole();
   }, [user]);
 
-  return isAdmin;
+  return { isAdmin, loading };
 };
 
 class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error?: any }> {
@@ -155,7 +136,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     }
   }, [user]);
 
-  const isAdmin = useIsAdminFromEverywhere(user, userRole);
+  const { isAdmin, loading: adminLoading } = useIsAdminFromRole(user);
 
   /* ---------- NAV STRUCTURE EN 3 SECTIONS + MICRO SECTION BAS ---------- */
   // Section 1: Overview (principales)
