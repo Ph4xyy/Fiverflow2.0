@@ -100,7 +100,7 @@ function AppContent() {
           {/* Dashboard principal - Accessible à tous les abonnements */}
           <Route path="/dashboard" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="launch" pageName="dashboard">
+              <SubscriptionGuard requiredPlan="Lunch" pageName="dashboard">
                 <DashboardExample />
               </SubscriptionGuard>
             </InstantProtectedRoute>

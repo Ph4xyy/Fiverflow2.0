@@ -28,7 +28,25 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
     );
   }
 
-  const hasAccess = pageType ? canAccess(pageType) : plan === requiredPlan || (requiredPlan === 'Lunch' && plan === 'Lunch');
+  const hasAccess = pageType ? canAccess(pageType) : (() => {
+    // Debug: afficher les informations
+    console.log('SubscriptionGuard Debug:', {
+      userPlan: plan,
+      requiredPlan,
+      pageType,
+      canAccess: canAccess
+    });
+    
+    // Si le plan requis est Lunch, autoriser l'accès
+    if (requiredPlan === 'Lunch') {
+      return true;
+    }
+    // Pour les autres plans, vérifier la hiérarchie
+    const planHierarchy = { 'Lunch': 0, 'Boost': 1, 'Scale': 2 };
+    const userPlanLevel = planHierarchy[plan as keyof typeof planHierarchy] || 0;
+    const requiredPlanLevel = planHierarchy[requiredPlan as keyof typeof planHierarchy] || 0;
+    return userPlanLevel >= requiredPlanLevel;
+  })();
 
   if (!hasAccess) {
     if (fallback) {
