@@ -26,6 +26,7 @@ import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
 import LoadingDiagnostic from './components/LoadingDiagnostic';
 import SubscriptionGuard from './components/SubscriptionGuard';
+import TempSubscriptionGuard from './components/TempSubscriptionGuard';
 import Layout from './components/Layout';
 import Error406Diagnostic from './components/Error406Diagnostic';
 
@@ -123,24 +124,24 @@ function AppContent() {
           } />
           <Route path="/calendar" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Boost" pageName="calendar" description="Calendrier disponible avec Boost">
+              <TempSubscriptionGuard requiredPlan="Boost" pageName="calendar" description="Calendrier disponible avec Boost">
                 <PageCalendar />
-              </SubscriptionGuard>
+              </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
           <Route path="/tasks" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Boost" pageName="workboard" description="Tableau de travail disponible avec Boost">
+              <TempSubscriptionGuard requiredPlan="Boost" pageName="workboard" description="Tableau de travail disponible avec Boost">
                 <WorkboardPage />
-              </SubscriptionGuard>
+              </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
           <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
           <Route path="/stats" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Scale" pageName="stats" description="Statistiques avancées disponibles avec Scale">
+              <TempSubscriptionGuard requiredPlan="Scale" pageName="stats" description="Statistiques avancées disponibles avec Scale">
                 <StatsPage />
-              </SubscriptionGuard>
+              </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
           {/* Système de profil universel */}
@@ -150,9 +151,9 @@ function AppContent() {
           <Route path="/project/:projectId" element={<InstantProtectedRoute><ProjectDetailPage /></InstantProtectedRoute>} />
           <Route path="/network" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Boost" pageName="referrals" description="Système de parrainage disponible avec Boost">
+              <TempSubscriptionGuard requiredPlan="Boost" pageName="referrals" description="Système de parrainage disponible avec Boost">
                 <NetworkPage />
-              </SubscriptionGuard>
+              </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
           <Route path="/upgrade" element={<InstantProtectedRoute><PagePricing /></InstantProtectedRoute>} />
