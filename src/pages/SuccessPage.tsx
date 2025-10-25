@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Button } from '../components/ui/button';
+import { Button } from '../components/ui/Button';
 import { CheckCircle, ArrowRight, Download } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 

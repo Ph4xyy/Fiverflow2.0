@@ -1,7 +1,7 @@
 import React from 'react';
 import { StripeProvider } from '../components/StripeProvider';
 import { SubscriptionButton } from '../components/SubscriptionButton';
-import { Button } from '../components/ui/button';
+import { Button } from '../components/ui/Button';
 import { Check, Star, Crown, Zap } from 'lucide-react';
 import { stripeProducts } from '../stripe-config';
 
