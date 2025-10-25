@@ -60,7 +60,6 @@ import AdminStatsPage from './pages/admin/AdminStatsPage';
 import AdminAIPage from './pages/admin/AdminAIPage';
 
 // Pages d'abonnement Stripe
-import SubscriptionPage from './pages/SubscriptionPage';
 import CancelPage from './pages/CancelPage';
 
 // Pages légales
@@ -92,7 +91,6 @@ function AppContent() {
           
           {/* Pages publiques */}
           <Route path="/pricing" element={<PagePricing />} />
-          <Route path="/subscription" element={<SubscriptionPage />} />
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/cancel" element={<CancelPage />} />
           <Route path="/support" element={<SupportPage />} />
@@ -125,14 +123,14 @@ function AppContent() {
           } />
           <Route path="/calendar" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="boost" pageName="calendar" description="Calendrier disponible avec Boost">
+              <SubscriptionGuard requiredPlan="Boost" pageName="calendar" description="Calendrier disponible avec Boost">
                 <PageCalendar />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
           <Route path="/tasks" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="boost" pageName="workboard" description="Tableau de travail disponible avec Boost">
+              <SubscriptionGuard requiredPlan="Boost" pageName="workboard" description="Tableau de travail disponible avec Boost">
                 <WorkboardPage />
               </SubscriptionGuard>
             </InstantProtectedRoute>
@@ -140,7 +138,7 @@ function AppContent() {
           <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
           <Route path="/stats" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="scale" pageName="stats" description="Statistiques avancées disponibles avec Scale">
+              <SubscriptionGuard requiredPlan="Scale" pageName="stats" description="Statistiques avancées disponibles avec Scale">
                 <StatsPage />
               </SubscriptionGuard>
             </InstantProtectedRoute>
@@ -152,7 +150,7 @@ function AppContent() {
           <Route path="/project/:projectId" element={<InstantProtectedRoute><ProjectDetailPage /></InstantProtectedRoute>} />
           <Route path="/network" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="boost" pageName="referrals" description="Système de parrainage disponible avec Boost">
+              <SubscriptionGuard requiredPlan="Boost" pageName="referrals" description="Système de parrainage disponible avec Boost">
                 <NetworkPage />
               </SubscriptionGuard>
             </InstantProtectedRoute>
@@ -170,33 +168,25 @@ function AppContent() {
             </InstantProtectedRoute>
           } />
 
-          {/* Administration - Protection par abonnement Scale */}
+          {/* Administration - Accès libre pour les admins */}
           <Route path="/admin/dashboard" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Scale" pageType="admin">
-                <AdminRoute><AdminDashboard /></AdminRoute>
-              </SubscriptionGuard>
+              <AdminRoute><AdminDashboard /></AdminRoute>
             </InstantProtectedRoute>
           } />
           <Route path="/admin/users" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Scale" pageType="admin">
-                <AdminRoute><AdminUsersPage /></AdminRoute>
-              </SubscriptionGuard>
+              <AdminRoute><AdminUsersPage /></AdminRoute>
             </InstantProtectedRoute>
           } />
           <Route path="/admin/stats" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Scale" pageType="admin">
-                <AdminRoute><AdminStatsPage /></AdminRoute>
-              </SubscriptionGuard>
+              <AdminRoute><AdminStatsPage /></AdminRoute>
             </InstantProtectedRoute>
           } />
           <Route path="/admin/ai" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Scale" pageType="admin">
-                <AdminRoute><AdminAIPage /></AdminRoute>
-              </SubscriptionGuard>
+              <AdminRoute><AdminAIPage /></AdminRoute>
             </InstantProtectedRoute>
           } />
 
@@ -213,7 +203,7 @@ function AppContent() {
           {/* Système de facturation (lazy loaded) - Scale uniquement */}
           <Route path="/invoices" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="scale" pageName="invoices" description="Système de facturation disponible avec Scale">
+              <SubscriptionGuard requiredPlan="Scale" pageName="invoices" description="Système de facturation disponible avec Scale">
                 <InvoicesLayout />
               </SubscriptionGuard>
             </InstantProtectedRoute>
