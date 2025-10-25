@@ -39,8 +39,8 @@ export const usePreloadData = () => {
         // Précharger les commandes récentes
         const ordersPromise = supabase
           .from('orders')
-          .select('id, title, amount, status, deadline, created_at, clients!inner(name, platform, user_id)')
-          .eq('clients.user_id', user.id)
+          .select('id, title, amount, status, deadline, created_at, client_name, platform')
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(20);
 
@@ -54,9 +54,9 @@ export const usePreloadData = () => {
 
         // Précharger le profil utilisateur
         const profilePromise = supabase
-          .from('users')
-          .select('name, role, created_at')
-          .eq('id', user.id)
+          .from('user_profiles')
+          .select('username, is_admin, created_at')
+          .eq('user_id', user.id)
           .single();
 
         // Exécuter toutes les requêtes en parallèle

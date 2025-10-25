@@ -20,7 +20,7 @@ export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
   className
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
+  const { user, supabase } = useAuth();
 
   const handleSubscribe = async () => {
     if (!user) {
@@ -31,12 +31,9 @@ export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
     setIsLoading(true);
 
     try {
-      // Obtenir le token d'authentification
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(
-        import.meta.env.VITE_SUPABASE_URL,
-        import.meta.env.VITE_SUPABASE_ANON_KEY
-      );
+      if (!supabase) {
+        throw new Error('Supabase non configuré');
+      }
       
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
