@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ModernCard from '../components/ModernCard';
 import ModernButton from '../components/ModernButton';
+import SubscriptionButton from '../components/SubscriptionButton';
 import { 
   Check, 
   Star, 
@@ -72,13 +73,13 @@ const PagePricing: React.FC = () => {
       id: 'boost',
       name: 'Boost',
       subtitle: 'For freelancers',
-      monthlyPrice: 22,
-      yearlyPrice: 220, // 20% discount
+      monthlyPrice: 24,
+      yearlyPrice: 240, // 20% discount
       description: 'Perfect for active freelancers',
       features: [
-        { text: 'Unlimited projects', included: true },
-        { text: 'Unlimited clients', included: true },
-        { text: 'Unlimited storage', included: true },
+        { text: '5 projects', included: true },
+        { text: '25 clients', included: true },
+        { text: '10 GB storage', included: true },
         { text: 'Priority support', included: true },
         { text: 'Premium templates', included: true },
         { text: 'Advanced reports', included: true },
@@ -95,13 +96,13 @@ const PagePricing: React.FC = () => {
       id: 'scale',
       name: 'Scale',
       subtitle: 'For businesses',
-      monthlyPrice: 39,
-      yearlyPrice: 390, // 20% discount
+      monthlyPrice: 59,
+      yearlyPrice: 590, // 20% discount
       description: 'Complete solution for businesses',
       features: [
-        { text: 'Unlimited projects', included: true },
-        { text: 'Unlimited clients', included: true },
-        { text: 'Unlimited storage', included: true },
+        { text: '15 projects', included: true },
+        { text: '100 clients', included: true },
+        { text: '50 GB storage', included: true },
         { text: 'Dedicated support', included: true },
         { text: 'Premium templates', included: true },
         { text: 'Advanced reports', included: true },
@@ -225,14 +226,27 @@ const PagePricing: React.FC = () => {
                   ))}
                 </div>
 
-                <ModernButton
-                  variant={plan.buttonVariant as any}
-                  className="w-full"
-                  onClick={() => setSelectedPlan(plan.id)}
-                >
-                  {plan.buttonText}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </ModernButton>
+                {plan.id === 'lunch' ? (
+                  <ModernButton
+                    variant={plan.buttonVariant as any}
+                    className="w-full"
+                    onClick={() => setSelectedPlan(plan.id)}
+                  >
+                    {plan.buttonText}
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </ModernButton>
+                ) : (
+                  <SubscriptionButton
+                    priceId={isYearly ? `price_${plan.id}_yearly` : `price_${plan.id}_monthly`}
+                    planName={plan.name}
+                    amount={`$${isYearly ? plan.yearlyPrice : plan.monthlyPrice}/${isYearly ? 'year' : 'month'}`}
+                    className="w-full"
+                    onSuccess={() => {
+                      console.log(`Successfully subscribed to ${plan.name}`);
+                      setSelectedPlan(plan.id);
+                    }}
+                  />
+                )}
               </div>
             );
           })}

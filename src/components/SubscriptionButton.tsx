@@ -31,15 +31,32 @@ export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
     setIsLoading(true);
 
     try {
-      // Appeler l'API de checkout
-      const response = await fetch('/api/stripe/checkout', {
+      // Obtenir le token d'authentification
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        import.meta.env.VITE_SUPABASE_URL,
+        import.meta.env.VITE_SUPABASE_ANON_KEY
+      );
+      
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.access_token) {
+        throw new Error('Erreur d\'authentification');
+      }
+
+      // Appeler l'Edge Function Supabase
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`;
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          priceId,
-          userId: user.id,
+          price_id: priceId,
+          success_url: `${window.location.origin}/dashboard?success=true`,
+          cancel_url: `${window.location.origin}/upgrade?canceled=true`,
+          mode: 'subscription',
         }),
       });
 
@@ -48,24 +65,15 @@ export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
         throw new Error(errorData.error || 'Erreur lors de la création de la session de paiement');
       }
 
-      const { sessionId } = await response.json();
+      const { url } = await response.json();
 
-      // Rediriger vers Stripe Checkout
-      const stripe = await import('@stripe/stripe-js').then(m => m.loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY));
-      
-      if (!stripe) {
-        throw new Error('Impossible de charger Stripe');
+      if (url) {
+        // Rediriger vers Stripe Checkout
+        window.location.href = url;
+      } else {
+        throw new Error('URL de redirection manquante');
       }
 
-      const { error } = await stripe.redirectToCheckout({
-        sessionId: sessionId
-      });
-
-      if (error) {
-        toast.error(error.message || 'Une erreur est survenue lors du paiement');
-      } else if (onSuccess) {
-        onSuccess();
-      }
     } catch (error) {
       console.error('Erreur de souscription:', error);
       toast.error(error instanceof Error ? error.message : 'Échec du processus de souscription');

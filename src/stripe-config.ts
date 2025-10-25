@@ -12,23 +12,43 @@ export interface StripeProduct {
 export const stripeProducts: StripeProduct[] = [
   {
     id: 'boost_monthly',
-    priceId: 'price_1SLqlIKF06h9za4ci2OnSIW0',
+    priceId: 'price_boost_monthly',
     name: 'Boost',
     description: 'Accès aux fonctionnalités Boost avec facturation mensuelle',
     mode: 'subscription',
-    price: '$20.00',
+    price: '$24.00',
     currency: 'USD',
     interval: 'month'
   },
   {
+    id: 'boost_yearly',
+    priceId: 'price_boost_yearly',
+    name: 'Boost',
+    description: 'Accès aux fonctionnalités Boost avec facturation annuelle',
+    mode: 'subscription',
+    price: '$240.00',
+    currency: 'USD',
+    interval: 'year'
+  },
+  {
     id: 'scale_monthly',
-    priceId: 'price_1SLqlhKF06h9za4cQ3qEQdO5',
+    priceId: 'price_scale_monthly',
     name: 'Scale',
     description: 'Accès aux fonctionnalités Scale avec facturation mensuelle',
     mode: 'subscription',
-    price: '$35.00',
+    price: '$59.00',
     currency: 'USD',
     interval: 'month'
+  },
+  {
+    id: 'scale_yearly',
+    priceId: 'price_scale_yearly',
+    name: 'Scale',
+    description: 'Accès aux fonctionnalités Scale avec facturation annuelle',
+    mode: 'subscription',
+    price: '$590.00',
+    currency: 'USD',
+    interval: 'year'
   }
 ];
 
