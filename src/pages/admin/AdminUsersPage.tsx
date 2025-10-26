@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Layout, { pageBgClass, cardClass } from '../../components/Layout'
+import AdminLayout from '../../components/AdminLayout'
 import AdminNavigation from '../../components/AdminNavigation'
 import { useAdminUsers } from '../../hooks/useAdminUsers'
 import { AdminUser } from '../../services/adminService'
@@ -189,10 +189,8 @@ const AdminUsersPage: React.FC = () => {
   }
 
   return (
-    <Layout>
-      <div className="flex min-h-screen">
-        <AdminNavigation className="w-64 flex-shrink-0" />
-        <div className={`flex-1 space-y-6 p-4 sm:p-6 ${pageBgClass}`}>
+    <AdminLayout>
+      <div className="space-y-6 p-4 sm:p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center space-x-3">
@@ -443,9 +441,8 @@ const AdminUsersPage: React.FC = () => {
             </div>
           </>
         )}
-        </div>
       </div>
-    </Layout>
+    </AdminLayout>
   )
 }
 
