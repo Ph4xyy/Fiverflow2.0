@@ -53,10 +53,10 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const handleSave = async () => {
     try {
       if (editedUser.role !== user.role) {
-        await onUpdate(user.id, 'role', { role: editedUser.role })
+        await onUpdate(user.user_id, 'role', { role: editedUser.role })
       }
       if (editedUser.subscription_plan !== user.subscription_plan) {
-        await onUpdate(user.id, 'subscription', { plan: editedUser.subscription_plan })
+        await onUpdate(user.user_id, 'subscription', { plan: editedUser.subscription_plan })
       }
       setIsEditing(false)
       toast.success('Utilisateur mis à jour avec succès')
