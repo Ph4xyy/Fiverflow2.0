@@ -29,10 +29,15 @@ const InvoiceTemplatesPage: React.FC = () => {
           />
           <button
             onClick={async () => {
-              const n = (name || "").trim() || 'New template';
-              const created = await create(n);
-              setName("");
-              navigate(`/invoices/templates/${created.id}`);
+              try {
+                const n = (name || "").trim() || 'New template';
+                const created = await create(n);
+                setName("");
+                navigate(`/invoices/templates/${created.id}`);
+              } catch (error: any) {
+                console.error('Error creating template:', error);
+                alert(`Erreur lors de la création du template: ${error.message || error}`);
+              }
             }}
             className="px-4 py-2 rounded-lg text-white"
             style={{ backgroundColor: '#111827' }}

@@ -57,6 +57,8 @@ export function useInvoiceTemplates(userId?: string | null) {
         throw new Error('Database not configured');
       }
 
+      console.log('Creating template:', { name, userId, schema });
+
       const { data, error } = await supabase
         .from("invoice_templates")
         .insert([
@@ -71,11 +73,16 @@ export function useInvoiceTemplates(userId?: string | null) {
         .select("id")
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating template:', error);
+        throw error;
+      }
+
+      console.log('Template created successfully:', data);
       await fetchAll();
       return data as { id: string };
     },
-    [userId, items.length]
+    [userId, items.length, fetchAll]
   );
 
   const update = useCallback(
