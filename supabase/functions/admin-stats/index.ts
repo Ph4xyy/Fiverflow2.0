@@ -159,7 +159,7 @@ serve(async (req) => {
         // Recent invoices
         supabaseClient
           .from('invoices')
-          .select('id, number, client_name, total, status, created_at')
+          .select('id, number, total, status, created_at, clients(name)')
           .order('created_at', { ascending: false })
           .limit(10),
         
@@ -198,6 +198,14 @@ serve(async (req) => {
         .sort((a, b) => b.count - a.count)
         .slice(0, 5)
 
+      // Transform recentInvoices to include client_name from joined clients
+      const transformedInvoices = (recentInvoices || []).map((invoice: any) => ({
+        ...invoice,
+        client_name: typeof invoice.clients === 'object' && invoice.clients !== null 
+          ? invoice.clients.name 
+          : 'No Client'
+      }))
+
       const result: StatsOverview = {
         ...stats,
         platformStats: {
@@ -206,7 +214,7 @@ serve(async (req) => {
         },
         recentUsers: recentUsers || [],
         recentOrders: recentOrders || [],
-        recentInvoices: recentInvoices || [],
+        recentInvoices: transformedInvoices,
         topReferrers: topReferrers || []
       }
 

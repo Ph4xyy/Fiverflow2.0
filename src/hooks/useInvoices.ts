@@ -99,8 +99,7 @@ export function useInvoices() {
           template_id,
           created_at,
           updated_at,
-          client_name,
-          platform
+          clients!inner(id, name, platform)
         `)
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
