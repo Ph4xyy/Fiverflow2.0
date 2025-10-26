@@ -128,7 +128,7 @@ const AdminAIPage: React.FC = () => {
 
         {/* Error State */}
         {error && (
-          <div className={`${cardClass} border border-red-200 dark:border-red-800 p-4`}>
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-red-200 dark:border-red-800 p-4">
             <div className="flex items-center gap-3">
               <AlertCircle className="text-red-500" size={20} />
               <div>
@@ -144,7 +144,7 @@ const AdminAIPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Input Section */}
           <div className="xl:col-span-1">
-            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-6`}>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Poser une question
               </h3>
@@ -224,7 +224,7 @@ const AdminAIPage: React.FC = () => {
 
           {/* Results Section */}
           <div className="xl:col-span-2">
-            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-6`}>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Réponses de l'IA
               </h3>
