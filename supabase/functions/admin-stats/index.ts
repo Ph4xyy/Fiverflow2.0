@@ -7,9 +7,39 @@ const corsHeaders = {
 }
 
 interface StatsOverview {
-  totalUsers: number
-  totalInvoices: number
-  totalRevenue: number
+  totals: {
+    allTimeUsers: number
+    newUsersInRange: number
+    totalRevenue: number
+    revenueInRange: number
+    totalClients: number
+    totalOrders: number
+    totalInvoices: number
+    totalTasks: number
+    totalTimeEntries: number
+    adminsAllTime: number
+  }
+  plans: {
+    free: number
+    pro: number
+  }
+  revenue: {
+    fromInvoices: number
+    fromOrders: number
+  }
+  subscriptions: {
+    total: number
+    active: number
+    monthlyRevenue: number
+    yearlyRevenue: number
+  }
+  platformStats: {
+    totalClients: number
+    topPlatforms: Array<{
+      platform: string
+      count: number
+    }>
+  }
   recentUsers: Array<{
     id: string
     full_name: string
@@ -120,9 +150,36 @@ serve(async (req) => {
         }))
 
         const result: StatsOverview = {
-          totalUsers: totalUsers?.length || 0,
-          totalInvoices: totalInvoices?.length || 0,
-          totalRevenue: revenue,
+          totals: {
+            allTimeUsers: totalUsers?.length || 0,
+            newUsersInRange: 0, // TODO: Calculate based on date range
+            totalRevenue: revenue,
+            revenueInRange: revenue, // TODO: Calculate based on date range
+            totalClients: 0, // TODO: Get from clients table
+            totalOrders: recentOrders?.length || 0,
+            totalInvoices: totalInvoices?.length || 0,
+            totalTasks: 0, // TODO: Get from tasks table
+            totalTimeEntries: 0, // TODO: Get from time entries table
+            adminsAllTime: recentUsers?.filter(user => user.role === 'Admin').length || 0
+          },
+          plans: {
+            free: recentUsers?.filter(user => user.role === 'Member').length || 0,
+            pro: recentUsers?.filter(user => user.role === 'Admin').length || 0
+          },
+          revenue: {
+            fromInvoices: revenue,
+            fromOrders: 0 // TODO: Calculate from orders
+          },
+          subscriptions: {
+            total: recentUsers?.length || 0,
+            active: recentUsers?.length || 0,
+            monthlyRevenue: revenue,
+            yearlyRevenue: revenue
+          },
+          platformStats: {
+            totalClients: 0, // TODO: Get from clients table
+            topPlatforms: []
+          },
           recentUsers: recentUsers || [],
           recentOrders: recentOrders || [],
           recentInvoices: transformedInvoices,
