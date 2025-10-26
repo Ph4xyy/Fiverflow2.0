@@ -119,3 +119,4 @@ Le problème du fichier `.env.local` corrompu a été résolu avec succès ! L'a
 1. 🔑 Configurer les clés Stripe de test
 2. 🧪 Tester le flux de paiement
 3. 🚀 Déployer en production avec les vraies clés
+

@@ -114,68 +114,71 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <Layout>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
         <AdminNavigation className="w-64 flex-shrink-0" />
-        <div className={`flex-1 space-y-4 sm:space-y-6 p-4 sm:p-6 ${pageBgClass}`}>
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-600 rounded-lg flex items-center justify-center">
-              <Shield className="text-white" size={20} />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                Administration
-              </h1>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                Tableau de bord global — Données synchronisées en temps réel
-              </p>
-            </div>
-          </div>
+        <div className="flex-1 overflow-auto">
+          <div className={`space-y-4 sm:space-y-6 p-4 sm:p-6 ${pageBgClass}`}>
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-600 rounded-lg flex items-center justify-center">
+                  <Shield className="text-white" size={20} />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                    Administration
+                  </h1>
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    Tableau de bord global — Données synchronisées en temps réel
+                  </p>
+                </div>
+              </div>
 
-          {/* Date filters */}
-          <div className={`${cardClass} px-3 py-2 border border-gray-200 dark:border-slate-700 flex items-center gap-2`}>
-            <CalendarIcon className="text-gray-600 dark:text-gray-300" size={16} />
-            <input
-              type="date"
-              className="bg-transparent text-sm text-gray-900 dark:text-white outline-none"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              max={endDate}
-            />
-            <span className="text-gray-500 dark:text-gray-400 text-sm">→</span>
-            <input
-              type="date"
-              className="bg-transparent text-sm text-gray-900 dark:text-white outline-none"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              min={startDate}
-              max={new Date().toISOString().slice(0, 10)}
-            />
-            <div className="h-5 w-px bg-gray-200 dark:bg-slate-700 mx-1" />
-            <button
-              onClick={() => preset(7)}
-              className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600"
-              title="7 derniers jours"
-            >
-              7d
-            </button>
-            <button
-              onClick={() => preset(30)}
-              className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600"
-              title="30 derniers jours"
-            >
-              30d
-            </button>
-            <button
-              onClick={() => preset(90)}
-              className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600"
-              title="90 derniers jours"
-            >
-              90d
-            </button>
-          </div>
-        </div>
+              {/* Date filters */}
+              <div className={`${cardClass} px-3 py-2 border border-gray-200 dark:border-slate-700 flex items-center gap-2 w-full sm:w-auto`}>
+                <CalendarIcon className="text-gray-600 dark:text-gray-300" size={16} />
+                <input
+                  type="date"
+                  className="bg-transparent text-sm text-gray-900 dark:text-white outline-none flex-1 sm:flex-none"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  max={endDate}
+                />
+                <span className="text-gray-500 dark:text-gray-400 text-sm">→</span>
+                <input
+                  type="date"
+                  className="bg-transparent text-sm text-gray-900 dark:text-white outline-none flex-1 sm:flex-none"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  min={startDate}
+                  max={new Date().toISOString().slice(0, 10)}
+                />
+                <div className="h-5 w-px bg-gray-200 dark:bg-slate-700 mx-1" />
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => preset(7)}
+                    className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600"
+                    title="7 derniers jours"
+                  >
+                    7d
+                  </button>
+                  <button
+                    onClick={() => preset(30)}
+                    className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600"
+                    title="30 derniers jours"
+                  >
+                    30d
+                  </button>
+                  <button
+                    onClick={() => preset(90)}
+                    className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600"
+                    title="90 derniers jours"
+                  >
+                    90d
+                  </button>
+                </div>
+              </div>
+            </div>
 
         {/* Error State */}
         {error && (
@@ -672,14 +675,15 @@ const AdminDashboard: React.FC = () => {
           </>
         )}
 
-        {/* Modal de Statistiques Détaillées */}
-        {selectedUserForStats && (
-          <UserDetailedStats
-            userId={selectedUserForStats}
-            isOpen={showUserStats}
-            onClose={handleCloseUserStats}
-          />
-        )}
+            {/* Modal de Statistiques Détaillées */}
+            {selectedUserForStats && (
+              <UserDetailedStats
+                userId={selectedUserForStats}
+                isOpen={showUserStats}
+                onClose={handleCloseUserStats}
+              />
+            )}
+          </div>
         </div>
       </div>
     </Layout>

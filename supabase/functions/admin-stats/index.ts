@@ -104,11 +104,11 @@ serve(async (req) => {
     // Check if user is admin or moderator
     const { data: profile, error: profileError } = await supabaseClient
       .from('user_profiles')
-      .select('role')
+      .select('role, is_admin')
       .eq('user_id', user.id)
       .single()
 
-    if (profileError || !profile || !['admin', 'moderator'].includes(profile.role)) {
+    if (profileError || !profile || (!profile.is_admin && !['admin', 'moderator'].includes(profile.role))) {
       return new Response(
         JSON.stringify({ error: 'Forbidden: Admin or moderator role required' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
