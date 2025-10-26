@@ -41,6 +41,9 @@ export interface AdvancedStats {
   averageSessionDuration: number
   activeUsersLast7Days: number
   churnRate: number
+  
+  // Revenus admin (pour export séparé)
+  adminRevenue: number
 }
 
 class AdvancedStatsService {
@@ -90,19 +93,28 @@ class AdvancedStatsService {
         `)
         .eq('status', 'active')
 
-      const premiumUsers = subscriptions?.length || 0
+      // Utilisateurs avec abonnement payant (Boost/Scale uniquement)
+  const premiumUsers = subscriptions?.filter(sub => {
+    const planName = sub.subscription_plans?.name
+    return planName === 'boost' || planName === 'scale'
+  }).length || 0
 
-      // Calcul des revenus
-      const totalRevenue = subscriptions?.reduce((sum, sub) => {
+      // Calcul des revenus (exclure Launch gratuit et Admin)
+      const totalRevenue = subscriptions?.filter(sub => {
+        const planName = sub.subscription_plans?.name
+        return planName === 'boost' || planName === 'scale'
+      }).reduce((sum, sub) => {
         const amount = sub.amount || 0
         const monthlyAmount = sub.billing_cycle === 'yearly' ? amount / 12 : amount
         return sum + monthlyAmount
       }, 0) || 0
 
-      // Revenus du mois en cours
+      // Revenus du mois en cours (exclure Launch gratuit et Admin)
       const monthlyRevenue = subscriptions?.filter(sub => {
+        const planName = sub.subscription_plans?.name
         const subDate = new Date(sub.created_at)
-        return subDate.getMonth() === currentMonth.getMonth() && 
+        return (planName === 'boost' || planName === 'scale') &&
+               subDate.getMonth() === currentMonth.getMonth() && 
                subDate.getFullYear() === currentMonth.getFullYear()
       }).reduce((sum, sub) => {
         const amount = sub.amount || 0
@@ -110,18 +122,23 @@ class AdvancedStatsService {
         return sum + monthlyAmount
       }, 0) || 0
 
-      // Revenus de la semaine
+      // Revenus de la semaine (exclure Launch gratuit et Admin)
       const weeklyRevenue = subscriptions?.filter(sub => {
+        const planName = sub.subscription_plans?.name
         const subDate = new Date(sub.created_at)
-        return subDate >= startOfWeek
+        return (planName === 'boost' || planName === 'scale') &&
+               subDate >= startOfWeek
       }).reduce((sum, sub) => {
         const amount = sub.amount || 0
         const monthlyAmount = sub.billing_cycle === 'yearly' ? amount / 12 : amount
         return sum + monthlyAmount
       }, 0) || 0
 
-      // Statistiques par plan
-      const planBreakdown = subscriptions?.reduce((acc, sub) => {
+      // Statistiques par plan (exclure Launch gratuit et Admin)
+      const planBreakdown = subscriptions?.filter(sub => {
+        const planName = sub.subscription_plans?.name
+        return planName === 'boost' || planName === 'scale'
+      }).reduce((acc, sub) => {
         const planName = sub.subscription_plans?.name || 'unknown'
         if (!acc[planName]) {
           acc[planName] = {
@@ -142,6 +159,16 @@ class AdvancedStatsService {
       Object.values(planBreakdown).forEach(plan => {
         plan.percentage = totalUsers > 0 ? (plan.count / totalUsers) * 100 : 0
       })
+
+      // Calculer les revenus admin séparément (pour l'export)
+      const adminRevenue = subscriptions?.filter(sub => {
+        const planName = sub.subscription_plans?.name
+        return planName === 'boost' || planName === 'scale'
+      }).reduce((sum, sub) => {
+        const amount = sub.amount || 0
+        const monthlyAmount = sub.billing_cycle === 'yearly' ? amount / 12 : amount
+        return sum + monthlyAmount
+      }, 0) || 0
 
       // Statistiques temporelles (derniers 12 mois)
       const revenueByMonth = []
@@ -222,7 +249,8 @@ class AdvancedStatsService {
         revenueGrowthRate,
         averageSessionDuration,
         activeUsersLast7Days,
-        churnRate
+        churnRate,
+        adminRevenue
       }
     } catch (error) {
       console.error('Error fetching advanced stats:', error)

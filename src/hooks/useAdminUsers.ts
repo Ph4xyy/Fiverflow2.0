@@ -73,8 +73,10 @@ export const useAdminUsers = (params: UseAdminUsersParams = {}): UseAdminUsersRe
   const updateUserRole = async (userId: string, role: string) => {
     try {
       await adminUserService.updateUserRole(userId, role)
-      await refetch() // Recharger les données
+      toast.success('Rôle utilisateur mis à jour avec succès !')
+      await refetch() // Forcer le rechargement complet
     } catch (err) {
+      toast.error('Erreur lors de la mise à jour du rôle')
       throw err
     }
   }
@@ -82,8 +84,10 @@ export const useAdminUsers = (params: UseAdminUsersParams = {}): UseAdminUsersRe
   const updateUserSubscription = async (userId: string, plan: string) => {
     try {
       await adminUserService.updateUserSubscription(userId, plan)
-      await refetch() // Recharger les données
+      toast.success('Abonnement utilisateur mis à jour avec succès !')
+      await refetch() // Forcer le rechargement complet
     } catch (err) {
+      toast.error('Erreur lors de la mise à jour de l\'abonnement')
       throw err
     }
   }

@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import AdminLayout from '../../components/AdminLayout'
 import { useAdvancedStats } from '../../hooks/useAdvancedStats'
+import { ExportService } from '../../services/exportService'
+import { adminUserService } from '../../services/adminUserService'
 import {
   BarChart,
   Bar,
@@ -51,6 +53,31 @@ const AdminStatsPage: React.FC = () => {
   const formatPercentage = (num: number) => `${num.toFixed(1)}%`
 
   const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
+
+  const handleExport = async () => {
+    try {
+      // Récupérer tous les utilisateurs
+      const { users } = await adminUserService.getUsers({ limit: 1000 })
+      
+      // Préparer les données d'export
+      const exportData = {
+        users,
+        adminRevenue: stats?.adminRevenue || 0,
+        totalRevenue: stats?.totalRevenue || 0,
+        stats: {
+          totalUsers: stats?.totalUsers || 0,
+          premiumUsers: stats?.premiumUsers || 0,
+          conversionRate: stats?.conversionRate || 0
+        }
+      }
+      
+      // Exporter
+      ExportService.exportToExcel(exportData)
+      toast.success('Export Excel généré avec succès !')
+    } catch (error) {
+      toast.error('Erreur lors de l\'export')
+    }
+  }
 
   const preset = (days: number) => {
     const today = new Date()
@@ -117,7 +144,10 @@ const AdminStatsPage: React.FC = () => {
               <RefreshCw className="w-4 h-4 mr-2" />
               Actualiser
             </button>
-            <button className="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors">
+            <button
+              onClick={handleExport}
+              className="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors"
+            >
               <Download className="w-4 h-4 mr-2" />
               Exporter
             </button>
@@ -150,11 +180,11 @@ const AdminStatsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Utilisateurs Premium */}
+          {/* Utilisateurs Payants */}
           <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Utilisateurs Premium</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Utilisateurs Payants</p>
                 <p className="text-3xl font-bold text-gray-900 dark:text-white">{formatNumber(stats.premiumUsers)}</p>
                 <div className="flex items-center mt-2">
                   <Percent className="w-4 h-4 text-indigo-500 mr-1" />
@@ -318,7 +348,7 @@ const AdminStatsPage: React.FC = () => {
 
         {/* Revenus par Plan Détaillés */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Revenus par Plan d'Abonnement</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Revenus par Plan Payant (Boost/Scale)</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {Object.entries(stats.planBreakdown).map(([planKey, planData], index) => (
               <div key={planKey} className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">

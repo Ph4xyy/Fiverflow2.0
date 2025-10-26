@@ -76,11 +76,11 @@ const AdminUsersPage: React.FC = () => {
   const userStats: UserStats = {
     totalUsers: users.length,
     activeUsers: users.filter(u => u.is_active).length,
-    premiumUsers: users.filter(u => u.subscription_plan && u.subscription_plan !== 'free').length,
+    premiumUsers: users.filter(u => u.subscription_plan && (u.subscription_plan === 'boost' || u.subscription_plan === 'scale')).length,
     totalRevenue: users.reduce((sum, u) => sum + (u.total_spent || 0), 0),
     monthlyRevenue: users.reduce((sum, u) => sum + (u.monthly_spent || 0), 0),
     avgRevenuePerUser: users.length > 0 ? users.reduce((sum, u) => sum + (u.total_spent || 0), 0) / users.length : 0,
-    conversionRate: users.length > 0 ? (users.filter(u => u.subscription_plan && u.subscription_plan !== 'free').length / users.length) * 100 : 0,
+    conversionRate: users.length > 0 ? (users.filter(u => u.subscription_plan && (u.subscription_plan === 'boost' || u.subscription_plan === 'scale')).length / users.length) * 100 : 0,
     planBreakdown: {}
   }
 
@@ -173,7 +173,7 @@ const AdminUsersPage: React.FC = () => {
     const plans = {
       free: { label: 'Gratuit', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
       basic: { label: 'Basique', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-      premium: { label: 'Premium', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
+      premium: { label: 'Payants', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
       enterprise: { label: 'Entreprise', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }
     }
     const planInfo = plans[plan as keyof typeof plans] || plans.free
