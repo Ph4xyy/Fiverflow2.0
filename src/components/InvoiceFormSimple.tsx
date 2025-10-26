@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { X, Plus, Trash2, ShoppingCart } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
+import { useInvoiceTemplates } from "../hooks/useInvoiceTemplates";
 import toast from "react-hot-toast";
 
 interface ClientOpt {
@@ -29,6 +30,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
   onSuccess,
 }) => {
   const { user } = useAuth();
+  const { items: templates } = useInvoiceTemplates(user?.id);
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<ClientOpt[]>([]);
   const [orders, setOrders] = useState<{id: string, title: string, budget: number}[]>([]);
@@ -45,6 +47,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
     tax_rate: 0,
     discount: 0,
     notes: "",
+    template_id: "",
   });
 
   useEffect(() => {
@@ -196,6 +199,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
           discount: totals.discountAmount,
           total: totals.total,
           notes: form.notes || null,
+          template_id: form.template_id || null,
         })
         .select("id")
         .single();
@@ -262,7 +266,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
         {/* Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Informations Client */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Client *
@@ -282,6 +286,26 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
               </select>
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Modèle de facture
+              </label>
+              <select
+                value={form.template_id}
+                onChange={(e) => setForm({ ...form, template_id: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D]"
+              >
+                <option value="">Par défaut</option>
+                {templates.map(template => (
+                  <option key={template.id} value={template.id}>
+                    {template.name} {template.is_default ? "(défaut)" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Date d'émission *
