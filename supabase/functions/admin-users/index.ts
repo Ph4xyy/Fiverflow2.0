@@ -69,11 +69,7 @@ serve(async (req) => {
 
       let query = supabaseClient
         .from('user_profiles')
-        .select(`
-          *,
-          transactions:transactions(count),
-          last_transaction:transactions(created_at)
-        `)
+        .select('*')
         .order(sort_by, { ascending: sort_order === 'asc' })
         .range((page - 1) * limit, page * limit - 1)
 
