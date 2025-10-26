@@ -161,7 +161,6 @@ export const useSubscriptionPermissions = () => {
       setPermissions(newPermissions);
 
       // Mettre en cache
-      const isUserAdmin = adminData?.is_admin === true || adminData?.role === 'Admin';
       permissionCache.set(cacheKey, {
         data: {
           subscription: currentSubscription,
