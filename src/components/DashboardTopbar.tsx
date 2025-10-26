@@ -98,7 +98,7 @@ const DashboardTopBar: React.FC = () => {
       <div className="flex items-center justify-between px-4 py-3">
         {/* Left side: Logo + texte */}
         <div className="flex items-center space-x-3">
-          <img src={LogoImage} alt="Logo" className="h-8 w-auto" />
+          <img src={LogoImage} alt="FiverFlow Logo" className="h-8 w-auto" />
           <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-accent-blue dark:to-accent-purple bg-clip-text text-transparent">
             FiverFlow
           </span>
