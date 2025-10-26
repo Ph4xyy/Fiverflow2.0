@@ -217,12 +217,22 @@ class AdminUserService {
       if (error) throw error
       
       // Réorganiser les plans dans l'ordre logique : launch, boost, scale, admin (sans free)
+      console.log('📋 Raw plans from DB:', data?.map(p => ({ name: p.name, display_name: p.display_name, id: p.id })))
+      
       const orderedPlans = (data || []).sort((a, b) => {
         const order = ['launch', 'boost', 'scale', 'admin']
-        return order.indexOf(a.name) - order.indexOf(b.name)
+        const indexA = order.indexOf(a.name)
+        const indexB = order.indexOf(b.name)
+        console.log(`🔄 Sorting: ${a.name} (index: ${indexA}) vs ${b.name} (index: ${indexB})`)
+        return indexA - indexB
       })
       
-      console.log('📋 Subscription plans retrieved (without free):', orderedPlans.map(p => ({ name: p.name, display_name: p.display_name })))
+      console.log('📋 Subscription plans retrieved (without free):', orderedPlans.map((p, index) => ({ 
+        index, 
+        name: p.name, 
+        display_name: p.display_name,
+        id: p.id 
+      })))
       
       return orderedPlans
     } catch (error) {

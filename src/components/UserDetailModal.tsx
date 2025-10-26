@@ -55,14 +55,20 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
       console.log('🔍 UserDetailModal - handleSave:', {
         originalPlan: user.subscription_plan,
         newPlan: editedUser.subscription_plan,
-        availablePlans: subscriptionPlans.map(p => ({ name: p.name, display_name: p.display_name }))
+        availablePlans: subscriptionPlans.map(p => ({ name: p.name, display_name: p.display_name })),
+        editedUser: editedUser,
+        user: user
       })
       
       if (editedUser.role !== user.role) {
         await onUpdate(user.user_id, 'role', { role: editedUser.role })
       }
       if (editedUser.subscription_plan !== user.subscription_plan) {
-        console.log('📝 Updating subscription plan:', editedUser.subscription_plan)
+        console.log('📝 Updating subscription plan:', {
+          userId: user.user_id,
+          planName: editedUser.subscription_plan,
+          originalPlan: user.subscription_plan
+        })
         await onUpdate(user.user_id, 'subscription', { plan: editedUser.subscription_plan })
       }
       setIsEditing(false)
@@ -230,14 +236,28 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   {isEditing ? (
                     <select
                       value={editedUser.subscription_plan || user.subscription_plan}
-                      onChange={(e) => setEditedUser({ ...editedUser, subscription_plan: e.target.value })}
+                      onChange={(e) => {
+                        console.log('🔍 Select onChange:', {
+                          selectedValue: e.target.value,
+                          selectedIndex: e.target.selectedIndex,
+                          allOptions: Array.from(e.target.options).map((opt, idx) => ({
+                            index: idx,
+                            value: opt.value,
+                            text: opt.text
+                          }))
+                        })
+                        setEditedUser({ ...editedUser, subscription_plan: e.target.value })
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                     >
-                      {subscriptionPlans.map((plan) => (
-                        <option key={plan.id} value={plan.name}>
-                          {plan.display_name}
-                        </option>
-                      ))}
+                      {subscriptionPlans.map((plan, index) => {
+                        console.log(`📋 Option ${index}:`, { name: plan.name, display_name: plan.display_name })
+                        return (
+                          <option key={plan.id} value={plan.name}>
+                            {plan.display_name}
+                          </option>
+                        )
+                      })}
                     </select>
                   ) : (
                     getPlanBadge(user.subscription_plan || 'launch')
