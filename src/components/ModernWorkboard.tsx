@@ -76,12 +76,12 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const [showDropdown, setShowDropdown] = useState(false);
 
   const statusOptions = [
-    { value: 'pending', label: 'Pending', color: 'text-gray-400', bgColor: 'bg-gray-100' },
-    { value: 'in_progress', label: 'In Progress', color: 'text-blue-400', bgColor: 'bg-blue-100' },
-    { value: 'on_hold', label: 'On Hold', color: 'text-yellow-400', bgColor: 'bg-yellow-100' },
-    { value: 'completed', label: 'Completed', color: 'text-green-400', bgColor: 'bg-green-100' },
-    { value: 'cancelled', label: 'Cancelled', color: 'text-red-400', bgColor: 'bg-red-100' },
-    { value: 'archived', label: 'Archived', color: 'text-gray-500', bgColor: 'bg-gray-100' }
+    { value: 'pending', label: 'Pending', color: 'text-gray-400', bgColor: 'bg-gray-500', icon: Clock },
+    { value: 'in_progress', label: 'In Progress', color: 'text-blue-400', bgColor: 'bg-blue-500', icon: Activity },
+    { value: 'on_hold', label: 'On Hold', color: 'text-yellow-400', bgColor: 'bg-yellow-500', icon: AlertCircle },
+    { value: 'completed', label: 'Completed', color: 'text-green-400', bgColor: 'bg-green-500', icon: CheckCircle2 },
+    { value: 'cancelled', label: 'Cancelled', color: 'text-red-400', bgColor: 'bg-red-500', icon: X },
+    { value: 'archived', label: 'Archived', color: 'text-gray-500', bgColor: 'bg-gray-500', icon: Archive }
   ];
 
   const getStatusLabel = (status: string) => {
@@ -93,105 +93,148 @@ const TaskCard: React.FC<TaskCardProps> = ({
   };
 
   const getStatusBgColor = (status: string) => {
-    return statusOptions.find(option => option.value === status)?.bgColor || 'bg-gray-100';
+    return statusOptions.find(option => option.value === status)?.bgColor || 'bg-gray-500';
+  };
+
+  const getStatusIcon = (status: string) => {
+    const StatusIcon = statusOptions.find(option => option.value === status)?.icon || Clock;
+    return <StatusIcon className="w-3.5 h-3.5" />;
   };
 
   return (
-    <div className={`group p-3 rounded-lg bg-gradient-to-br from-[#35414e] to-[#2a3441] hover:from-[#3d4a57] hover:to-[#35414e] transition-all duration-300 border border-[#4a5568] hover:border-[#9c68f2]/30 cursor-pointer ${completed ? 'opacity-60' : ''}`}>
-      {/* Header avec titre et actions */}
-      <div className="flex items-start justify-between mb-2">
-        <div className="flex-1 pr-2">
-          <h4 className={`font-semibold text-white text-sm ${completed ? 'line-through' : ''}`}>
-            {task.title}
-          </h4>
-          {task.description && (
-            <p className={`text-xs text-gray-300 mt-1 line-clamp-1 ${completed ? 'line-through' : ''}`}>
-              {task.description}
-            </p>
-          )}
-        </div>
-        
-        <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(task);
-            }}
-            className="p-1.5 rounded-lg bg-[#4a5568]/50 hover:bg-blue-500/20 text-gray-400 hover:text-blue-400 transition-all"
-            title="Edit task"
-          >
-            <Edit className="w-3.5 h-3.5" />
-          </button>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(task.id);
-            }}
-            className="p-1.5 rounded-lg bg-[#4a5568]/50 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all"
-            title="Delete task"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
+    <div className={`group relative overflow-hidden rounded-xl bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] hover:border-white/[0.12] transition-all duration-300 shadow-lg hover:shadow-2xl ${completed ? 'opacity-50' : ''}`}>
+      {/* Accent bar with gradient based on priority */}
+      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${
+        task.priority === 'high' ? 'from-red-500 via-pink-500 to-red-600' :
+        task.priority === 'medium' ? 'from-yellow-500 via-amber-500 to-yellow-600' :
+        'from-green-500 via-emerald-500 to-green-600'
+      }`} />
       
-      {/* Footer avec badges et actions */}
-      <div className="flex items-center justify-between mt-2">
-        <div className="flex items-center space-x-1.5">
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-            <Flag className="w-2.5 h-2.5 mr-0.5" />
-            {task.priority}
-          </span>
+      <div className="p-4">
+        {/* Header avec titre et actions */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex-1 pr-3 min-w-0">
+            <h4 className={`font-semibold text-white text-[15px] leading-tight mb-1.5 ${completed ? 'line-through' : ''}`}>
+              {task.title}
+            </h4>
+            {task.description && (
+              <p className={`text-[13px] text-gray-400 leading-relaxed line-clamp-2 ${completed ? 'line-through' : ''}`}>
+                {task.description}
+              </p>
+            )}
+          </div>
+          
+          <div className="flex items-center space-x-1.5 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(task);
+              }}
+              className="p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 transition-all"
+              title="Edit task"
+            >
+              <Edit className="w-3.5 h-3.5" />
+            </button>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(task.id);
+              }}
+              className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-all"
+              title="Delete task"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
         
-        <div className="flex items-center space-x-1">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onStartTimer(task.id);
-            }}
-            className="p-1.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-400 hover:text-green-300 transition-all"
-            title="Start timer"
-          >
-            <Play className="w-3.5 h-3.5" />
-          </button>
+        {/* Metadata with icons */}
+        <div className="flex flex-wrap items-center gap-3 mb-3 text-xs text-gray-400">
+          {task.due_date && (
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/[0.05] hover:bg-white/[0.08] transition-colors">
+              <Calendar className="w-3 h-3" />
+              <span>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/[0.05] hover:bg-white/[0.08] transition-colors">
+            <Clock className="w-3 h-3" />
+            <span>{task.estimated_hours || 0}h</span>
+          </div>
+        </div>
+        
+        {/* Footer avec badges et actions */}
+        <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
+          <div className="flex items-center gap-2">
+            {/* Status badge */}
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold ${getStatusColor(task.status)} ${getStatusBgColor(task.status)}/10 border ${getStatusBgColor(task.status)}/20`}>
+              {getStatusIcon(task.status)}
+              {getStatusLabel(task.status)}
+            </span>
+            
+            {/* Priority badge */}
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold border ${getPriorityColor(task.priority)}`}>
+              <Flag className="w-3 h-3" />
+              <span className="capitalize">{task.priority}</span>
+            </span>
+          </div>
           
-          {/* Dropdown pour changer le statut */}
-          <div className="relative">
+          <div className="flex items-center gap-1">
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setShowDropdown(!showDropdown);
+                onStartTimer(task.id);
               }}
-              className="p-1.5 rounded-lg bg-[#4a5568]/50 hover:bg-[#9c68f2]/20 text-gray-400 hover:text-white transition-all"
-              title="Change status"
+              className="p-2 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 text-green-400 hover:text-green-300 transition-all border border-green-500/20"
+              title="Start timer"
             >
-              <ChevronDown className="w-3.5 h-3.5" />
+              <Play className="w-4 h-4" />
             </button>
             
-            {showDropdown && (
-              <div className="absolute right-0 top-full mt-2 w-52 bg-[#1e2938] border border-[#35414e] rounded-xl shadow-2xl z-50">
-                <div className="py-2">
-                  {statusOptions.map(option => (
-                    <button
-                      key={option.value}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onStatusChange(task.id, option.value);
-                        setShowDropdown(false);
-                      }}
-                      className={`w-full text-left px-4 py-3 text-sm hover:bg-[#35414e] flex items-center gap-3 transition-colors ${option.color}`}
-                    >
-                      <div className={`w-2 h-2 rounded-full ${option.bgColor}`}></div>
-                      {option.label}
-                    </button>
-                  ))}
+            {/* Dropdown pour changer le statut */}
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDropdown(!showDropdown);
+                }}
+                className="p-2 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] text-gray-400 hover:text-white transition-all"
+                title="Change status"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              
+              {showDropdown && (
+                <div className="absolute right-0 bottom-full mb-2 w-56 bg-[#1a1f2e] border border-white/[0.08] rounded-xl shadow-2xl z-50 backdrop-blur-md">
+                  <div className="py-2">
+                    {statusOptions.map(option => {
+                      const OptionIcon = option.icon || Clock;
+                      return (
+                        <button
+                          key={option.value}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onStatusChange(task.id, option.value);
+                            setShowDropdown(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-white/[0.08] flex items-center gap-3 transition-colors ${
+                            task.status === option.value ? option.color : 'text-gray-400'
+                          }`}
+                        >
+                          <OptionIcon className="w-4 h-4" />
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
+      
+      {/* Subtle hover glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#9c68f2]/0 via-transparent to-[#9c68f2]/0 group-hover:from-[#9c68f2]/5 group-hover:via-transparent group-hover:to-[#9c68f2]/5 transition-all duration-300 pointer-events-none" />
     </div>
   );
 };
@@ -221,6 +264,16 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
     order_id: ''
   });
 
+  // Status options for list view
+  const statusOptions = [
+    { value: 'pending', label: 'Pending', color: 'text-gray-400', bgColor: 'bg-gray-500', icon: Clock },
+    { value: 'in_progress', label: 'In Progress', color: 'text-blue-400', bgColor: 'bg-blue-500', icon: Activity },
+    { value: 'on_hold', label: 'On Hold', color: 'text-yellow-400', bgColor: 'bg-yellow-500', icon: AlertCircle },
+    { value: 'completed', label: 'Completed', color: 'text-green-400', bgColor: 'bg-green-500', icon: CheckCircle2 },
+    { value: 'cancelled', label: 'Cancelled', color: 'text-red-400', bgColor: 'bg-red-500', icon: X },
+    { value: 'archived', label: 'Archived', color: 'text-gray-500', bgColor: 'bg-gray-500', icon: Archive }
+  ];
+
   // Statistiques calculées
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(t => t.status === 'completed').length;
@@ -243,15 +296,13 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
   });
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'in_progress': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'completed': return 'bg-green-100 text-green-800 border-green-200';
-      case 'on_hold': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
-      case 'archived': return 'bg-gray-100 text-gray-600 border-gray-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
+    const info = statusOptions.find(option => option.value === status);
+    return info?.color || 'text-gray-400';
+  };
+
+  const getStatusBgColor = (status: string) => {
+    const info = statusOptions.find(option => option.value === status);
+    return info?.bgColor || 'bg-gray-500';
   };
 
   const getPriorityColor = (priority: string) => {
@@ -774,69 +825,108 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
 
         {viewMode === 'list' && (
           <ModernCard title="All Tasks">
-            <div className="space-y-3">
-              {filteredTasks.map(task => (
-                <div key={task.id} className="flex items-center justify-between p-4 rounded-lg bg-[#35414e] hover:bg-[#3d4a57] transition-colors">
-                  <div className="flex items-center space-x-4 flex-1">
-                    <div className="flex items-center space-x-3">
-                      <button
-                        onClick={() => handleStatusChange(task.id, task.status === 'completed' ? 'todo' : 'completed')}
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          task.status === 'completed' 
-                            ? 'bg-green-500 border-green-500 text-white' 
-                            : 'border-gray-400 hover:border-green-400'
-                        }`}
-                      >
-                        {task.status === 'completed' && <CheckCircle2 className="w-3 h-3" />}
-                      </button>
+            <div className="space-y-2">
+              {filteredTasks.map(task => {
+                const getStatusInfo = (status: string) => {
+                  const info = statusOptions.find(option => option.value === status);
+                  return info || statusOptions[0];
+                };
+                const statusInfo = getStatusInfo(task.status);
+                const StatusIcon = statusInfo.icon || Clock;
+                
+                return (
+                  <div key={task.id} className="group relative overflow-hidden rounded-lg bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] hover:border-white/[0.12] hover:bg-white/[0.04] transition-all duration-200">
+                    {/* Accent bar */}
+                    <div className={`absolute top-0 left-0 right-0 h-0.5 ${
+                      task.priority === 'high' ? 'bg-gradient-to-r from-red-500 to-pink-500' :
+                      task.priority === 'medium' ? 'bg-gradient-to-r from-yellow-500 to-amber-500' :
+                      'bg-gradient-to-r from-green-500 to-emerald-500'
+                    }`} />
+                    
+                    <div className="flex items-center justify-between p-4">
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        {/* Checkbox */}
+                        <button
+                          onClick={() => handleStatusChange(task.id, task.status === 'completed' ? 'pending' : 'completed')}
+                          className={`flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+                            task.status === 'completed' 
+                              ? 'bg-green-500 border-green-500 text-white' 
+                              : 'border-gray-500 hover:border-green-400 bg-transparent'
+                          }`}
+                        >
+                          {task.status === 'completed' && <CheckCircle2 className="w-3 h-3" />}
+                        </button>
+                        
+                        {/* Task info */}
+                        <div className="flex-1 min-w-0 pr-4">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className={`font-semibold text-white text-[15px] ${task.status === 'completed' ? 'line-through opacity-60' : ''}`}>
+                              {task.title}
+                            </h4>
+                          </div>
+                          {task.description && (
+                            <p className={`text-sm text-gray-400 truncate ${task.status === 'completed' ? 'line-through opacity-60' : ''}`}>
+                              {task.description}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
+                            {task.due_date && (
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                <span>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              <span>{task.estimated_hours || 0}h</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Badges */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {/* Status badge */}
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold ${getStatusColor(task.status)} ${getStatusBgColor(task.status)}/10 border ${getStatusBgColor(task.status)}/20`}>
+                            <StatusIcon className="w-3.5 h-3.5" />
+                            {statusInfo.label}
+                          </span>
+                          
+                          {/* Priority badge */}
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold border ${getPriorityColor(task.priority)}`}>
+                            <Flag className="w-3 h-3" />
+                            <span className="capitalize">{task.priority}</span>
+                          </span>
+                        </div>
+                      </div>
                       
-                      <div className="flex-1">
-                        <h4 className={`font-medium text-white ${task.status === 'completed' ? 'line-through opacity-60' : ''}`}>
-                          {task.title}
-                        </h4>
-                        {task.description && (
-                          <p className={`text-sm text-gray-400 ${task.status === 'completed' ? 'line-through opacity-60' : ''}`}>
-                            {task.description}
-                          </p>
-                        )}
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-4">
+                        <button
+                          onClick={() => handleStartTimer(task.id)}
+                          className="p-2 rounded-lg bg-green-500/10 hover:bg-green-500/20 text-green-400 hover:text-green-300 transition-all"
+                          title="Start timer"
+                        >
+                          <Play className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleEditTask(task)}
+                          className="p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 transition-all"
+                          title="Edit task"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => setShowDeleteConfirm(task.id)}
+                          className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-all"
+                          title="Delete task"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
-                    
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-                      <Flag className="w-3 h-3 mr-1" />
-                      {task.priority}
-                    </span>
-                    
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(task.status)}`}>
-                      {task.status.replace('_', ' ')}
-                    </span>
                   </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => handleStartTimer(task.id)}
-                      className="text-green-400 hover:text-green-300 p-1"
-                      title="Start timer"
-                    >
-                      <Play className="w-4 h-4" />
-                    </button>
-                    <button 
-                      onClick={() => handleEditTask(task)}
-                      className="text-gray-400 hover:text-white p-1"
-                      title="Edit task"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button 
-                      onClick={() => setShowDeleteConfirm(task.id)}
-                      className="text-gray-400 hover:text-red-400 p-1"
-                      title="Delete task"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </ModernCard>
         )}

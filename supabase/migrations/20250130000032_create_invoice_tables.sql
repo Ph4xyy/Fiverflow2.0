@@ -356,3 +356,4 @@ BEGIN
   RETURN v_invoice_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
