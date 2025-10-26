@@ -112,16 +112,19 @@ const CentralizedSearchBar: React.FC = () => {
       if (category === 'all' || category === 'invoices') {
         const { data: invoices, error: invoicesError } = await supabase
           .from('invoices')
-          .select('id, invoice_number, client_name, total_amount, status')
+          .select('id, number, total, status, clients(name)')
           .eq('user_id', user.id)
-          .or(`invoice_number.ilike.%${searchTerm}%,client_name.ilike.%${searchTerm}%`);
+          .or(`number.ilike.%${searchTerm}%,clients.name.ilike.%${searchTerm}%`);
 
         if (!invoicesError && invoices) {
           invoices.forEach(invoice => {
+            const clientName = typeof invoice.clients === 'object' && invoice.clients !== null 
+              ? (invoice.clients as any).name 
+              : 'No Client';
             results.push({
               id: invoice.id,
-              title: invoice.invoice_number || 'No Invoice Number',
-              subtitle: `${invoice.client_name || 'No Client'} • $${invoice.total_amount || '0'}`,
+              title: invoice.number || 'No Invoice Number',
+              subtitle: `${clientName} • $${invoice.total || '0'}`,
               category: 'invoices',
               url: '/invoices'
             });
