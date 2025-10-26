@@ -349,35 +349,56 @@ const AdminStatsPage: React.FC = () => {
         {/* Revenus par Plan Détaillés */}
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Revenus par Plan Payant (Boost/Scale)</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Object.entries(stats.planBreakdown).map(([planKey, planData], index) => (
-              <div key={planKey} className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                    ></div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white">{planData.name}</h4>
-                  </div>
-                  <Crown className="w-4 h-4 text-gray-400" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+            {/* Plan Boost - Toujours affiché */}
+            <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                  <h4 className="font-semibold text-gray-900 dark:text-white">Boost</h4>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Utilisateurs:</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{formatNumber(planData.count)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Revenus:</span>
-                    <span className="font-medium text-green-600 dark:text-green-400">{formatCurrency(planData.revenue)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Part:</span>
-                    <span className="font-medium text-indigo-600 dark:text-indigo-400">{formatPercentage(planData.percentage)}</span>
-                  </div>
+                <Crown className="w-4 h-4 text-gray-400" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Utilisateurs:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{formatNumber(stats?.planBreakdown?.boost?.count || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Revenus:</span>
+                  <span className="font-medium text-green-600 dark:text-green-400">{formatCurrency(stats?.planBreakdown?.boost?.revenue || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Prix mensuel:</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">$29.99</span>
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Plan Scale - Toujours affiché */}
+            <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <h4 className="font-semibold text-gray-900 dark:text-white">Scale</h4>
+                </div>
+                <Crown className="w-4 h-4 text-gray-400" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Utilisateurs:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{formatNumber(stats?.planBreakdown?.scale?.count || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Revenus:</span>
+                  <span className="font-medium text-green-600 dark:text-green-400">{formatCurrency(stats?.planBreakdown?.scale?.revenue || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Prix mensuel:</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">$99.99</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

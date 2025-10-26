@@ -85,17 +85,17 @@ class AdminUserService {
 
     try {
       // Récupérer les utilisateurs avec leurs profils
-      let query = this.supabase
-        .from('user_profiles')
-        .select(`
-          id,
-          user_id,
-          email,
-          full_name,
-          created_at,
-          is_active,
-          is_admin
-        `)
+        let query = this.supabaseAdmin
+          .from('user_profiles')
+          .select(`
+            id,
+            user_id,
+            email,
+            full_name,
+            created_at,
+            is_active,
+            is_admin
+          `)
 
       // Appliquer les filtres
       if (search) {
@@ -354,21 +354,24 @@ class AdminUserService {
         console.log('No active subscription to deactivate')
       }
 
-      // Créer le nouvel abonnement
-      const { error: insertError } = await this.supabaseAdmin
+      // Créer ou mettre à jour l'abonnement (upsert)
+      const { error: upsertError } = await this.supabaseAdmin
         .from('user_subscriptions')
-        .insert({
+        .upsert({
           user_id: userId,
           plan_id: planData.id,
           status: 'active',
           billing_cycle: 'monthly',
           amount: planData.price_monthly,
           currency: 'USD'
+        }, {
+          onConflict: 'user_id',
+          ignoreDuplicates: false
         })
 
-      if (insertError) {
-        console.error('Error inserting new subscription:', insertError)
-        throw new Error(`Erreur lors de l'ajout du nouvel abonnement: ${insertError.message}`)
+      if (upsertError) {
+        console.error('Error upserting subscription:', upsertError)
+        throw new Error(`Erreur lors de la mise à jour de l'abonnement: ${upsertError.message}`)
       }
 
       console.log('Subscription updated successfully')
@@ -382,16 +385,16 @@ class AdminUserService {
   // Obtenir les statistiques des utilisateurs
   async getUserStats() {
     try {
-      // Total utilisateurs
-      const { count: totalUsers } = await this.supabase
-        .from('user_profiles')
-        .select('*', { count: 'exact', head: true })
+        // Total utilisateurs
+        const { count: totalUsers } = await this.supabaseAdmin
+          .from('user_profiles')
+          .select('*', { count: 'exact', head: true })
 
-      // Utilisateurs actifs
-      const { count: activeUsers } = await this.supabase
-        .from('user_profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true)
+        // Utilisateurs actifs
+        const { count: activeUsers } = await this.supabaseAdmin
+          .from('user_profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true)
 
       // Utilisateurs avec abonnement payant
       const { count: premiumUsers } = await this.supabaseAdmin

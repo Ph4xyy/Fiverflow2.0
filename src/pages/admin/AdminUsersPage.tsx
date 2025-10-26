@@ -32,6 +32,7 @@ import {
 } from 'lucide-react'
 import { ExportService } from '../../services/exportService'
 import { advancedStatsService } from '../../services/advancedStatsService'
+import toast from 'react-hot-toast'
 
 interface UserStats {
   totalUsers: number
