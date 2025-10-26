@@ -317,8 +317,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             </button>
             <Link to="/dashboard" className="text-2xl font-extrabold leading-none">
               <div className="flex items-center space-x-3">
-                <img src={LogoImage} alt="FiverFlow" className="h-6 w-auto" />
-                <span className="text-white font-bold">FiverFlow</span>
+                <img src={LogoImage} alt="Logo" className="h-6 w-auto" />
               </div>
             </Link>
           </div>
