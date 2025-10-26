@@ -382,9 +382,10 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                       value={item.quantity || ''}
                       onChange={(e) => {
                         const val = e.target.value;
-                        // Permettre les nombres et décimales
-                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
-                          updateItem(index, 'quantity', val === '' ? 0 : parseFloat(val) || 0);
+                        // Permettre les nombres avec . ou ,
+                        if (val === '' || /^\d*[.,]?\d*$/.test(val)) {
+                          const normalizedVal = val.replace(',', '.');
+                          updateItem(index, 'quantity', normalizedVal === '' ? 0 : parseFloat(normalizedVal) || 0);
                         }
                       }}
                       className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D] placeholder-slate-500"
@@ -397,9 +398,10 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                       value={item.unit_price || ''}
                       onChange={(e) => {
                         const val = e.target.value;
-                        // Permettre les nombres et décimales
-                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
-                          updateItem(index, 'unit_price', val === '' ? 0 : parseFloat(val) || 0);
+                        // Permettre les nombres avec . ou ,
+                        if (val === '' || /^\d*[.,]?\d*$/.test(val)) {
+                          const normalizedVal = val.replace(',', '.');
+                          updateItem(index, 'unit_price', normalizedVal === '' ? 0 : parseFloat(normalizedVal) || 0);
                         }
                       }}
                       className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D] placeholder-slate-500"
@@ -437,8 +439,9 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                 value={form.tax_rate}
                 onChange={(e) => {
                   const val = e.target.value;
-                  if (val === '' || /^\d*\.?\d*$/.test(val)) {
-                    setForm({ ...form, tax_rate: val === '' ? 0 : parseFloat(val) || 0 });
+                  if (val === '' || /^\d*[.,]?\d*$/.test(val)) {
+                    const normalizedVal = val.replace(',', '.');
+                    setForm({ ...form, tax_rate: normalizedVal === '' ? 0 : parseFloat(normalizedVal) || 0 });
                   }
                 }}
                 className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D]"
@@ -453,8 +456,9 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                 value={form.discount}
                 onChange={(e) => {
                   const val = e.target.value;
-                  if (val === '' || /^\d*\.?\d*$/.test(val)) {
-                    setForm({ ...form, discount: val === '' ? 0 : parseFloat(val) || 0 });
+                  if (val === '' || /^\d*[.,]?\d*$/.test(val)) {
+                    const normalizedVal = val.replace(',', '.');
+                    setForm({ ...form, discount: normalizedVal === '' ? 0 : parseFloat(normalizedVal) || 0 });
                   }
                 }}
                 className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D]"
