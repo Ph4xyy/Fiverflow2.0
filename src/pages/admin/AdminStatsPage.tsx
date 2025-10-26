@@ -72,7 +72,7 @@ const AdminStatsPage: React.FC = () => {
       }
       
       // Exporter
-      ExportService.exportToExcel(exportData)
+      ExportService.exportToExcel(exportData, 'stats')
       toast.success('Export Excel généré avec succès !')
     } catch (error) {
       toast.error('Erreur lors de l\'export')

@@ -12,7 +12,7 @@ export interface ExportData {
 }
 
 export class ExportService {
-  static exportToExcel(data: ExportData): void {
+  static exportToExcel(data: ExportData, exportType: 'global' | 'stats' | 'user' = 'global', username?: string): void {
     // Créer le contenu CSV
     const csvContent = this.generateCSV(data)
     
@@ -22,7 +22,26 @@ export class ExportService {
     const url = URL.createObjectURL(blob)
     
     link.setAttribute('href', url)
-    link.setAttribute('download', `fiverflow-users-export-${new Date().toISOString().split('T')[0]}.csv`)
+    
+    // Nom du fichier selon le type d'export
+    let filename = ''
+    const date = new Date().toISOString().split('T')[0]
+    
+    switch (exportType) {
+      case 'global':
+        filename = `admin-globaluser-export-${date}.csv`
+        break
+      case 'stats':
+        filename = `admin-stats-export-${date}.csv`
+        break
+      case 'user':
+        filename = `admin-user-${username || 'unknown'}-export-${date}.csv`
+        break
+      default:
+        filename = `admin-export-${date}.csv`
+    }
+    
+    link.setAttribute('download', filename)
     link.style.visibility = 'hidden'
     
     document.body.appendChild(link)

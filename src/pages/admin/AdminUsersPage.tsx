@@ -30,7 +30,8 @@ import {
   Target,
   Crown
 } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { ExportService } from '../../services/exportService'
+import { advancedStatsService } from '../../services/advancedStatsService'
 
 interface UserStats {
   totalUsers: number
@@ -172,9 +173,10 @@ const AdminUsersPage: React.FC = () => {
   const getPlanBadge = (plan: string) => {
     const plans = {
       free: { label: 'Gratuit', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
-      basic: { label: 'Basique', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
-      premium: { label: 'Payants', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
-      enterprise: { label: 'Entreprise', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }
+      launch: { label: 'Launch', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
+      boost: { label: 'Boost', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
+      scale: { label: 'Scale', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
+      admin: { label: 'Admin', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }
     }
     const planInfo = plans[plan as keyof typeof plans] || plans.free
     return (
@@ -189,6 +191,57 @@ const AdminUsersPage: React.FC = () => {
       style: 'currency',
       currency: 'EUR'
     }).format(amount)
+  }
+
+  const handleExportGlobal = async () => {
+    try {
+      // Récupérer les statistiques avancées
+      const stats = await advancedStatsService.getAdvancedStats()
+      
+      // Préparer les données d'export
+      const exportData = {
+        users: filteredUsers,
+        adminRevenue: stats.adminRevenue,
+        totalRevenue: stats.totalRevenue,
+        stats: {
+          totalUsers: stats.totalUsers,
+          premiumUsers: stats.premiumUsers,
+          conversionRate: stats.conversionRate
+        }
+      }
+      
+      // Exporter
+      ExportService.exportToExcel(exportData, 'global')
+      toast.success('Export global généré avec succès !')
+    } catch (error) {
+      toast.error('Erreur lors de l\'export global')
+    }
+  }
+
+  const handleExportUser = async (user: AdminUser) => {
+    try {
+      // Récupérer les statistiques avancées
+      const stats = await advancedStatsService.getAdvancedStats()
+      
+      // Préparer les données d'export pour un utilisateur spécifique
+      const exportData = {
+        users: [user], // Seulement cet utilisateur
+        adminRevenue: stats.adminRevenue,
+        totalRevenue: stats.totalRevenue,
+        stats: {
+          totalUsers: stats.totalUsers,
+          premiumUsers: stats.premiumUsers,
+          conversionRate: stats.conversionRate
+        }
+      }
+      
+      // Exporter avec le nom d'utilisateur
+      const username = user.full_name || user.email.split('@')[0]
+      ExportService.exportToExcel(exportData, 'user', username)
+      toast.success(`Export pour ${username} généré avec succès !`)
+    } catch (error) {
+      toast.error('Erreur lors de l\'export utilisateur')
+    }
   }
 
   const formatDate = (date: string) => {
@@ -226,11 +279,11 @@ const AdminUsersPage: React.FC = () => {
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
             <button
-              onClick={exportUsers}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md flex items-center gap-2"
+              onClick={handleExportGlobal}
+              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
-              Exporter
+              Exporter Global
             </button>
           </div>
         </div>
@@ -536,6 +589,13 @@ const AdminUsersPage: React.FC = () => {
                                   className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
                                 >
                                   <Settings className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleExportUser(user)}
+                                  className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                                  title="Exporter cet utilisateur"
+                                >
+                                  <Download className="w-4 h-4" />
                                 </button>
                               </div>
                             </td>

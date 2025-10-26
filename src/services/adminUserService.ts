@@ -247,6 +247,20 @@ class AdminUserService {
 
       console.log('Role data found:', roleData)
 
+      // Vérifier si l'utilisateur a déjà ce rôle
+      const { data: existingRole } = await this.supabaseAdmin
+        .from('user_roles')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('role_id', roleData.id)
+        .eq('is_active', true)
+        .single()
+
+      if (existingRole) {
+        console.log('User already has this role')
+        return { success: true }
+      }
+
       // Désactiver tous les rôles actuels de l'utilisateur
       const { error: deactivateError } = await this.supabaseAdmin
         .from('user_roles')
@@ -312,6 +326,20 @@ class AdminUserService {
       }
 
       console.log('Plan data found:', planData)
+
+      // Vérifier si l'utilisateur a déjà ce plan actif
+      const { data: existingSubscription } = await this.supabaseAdmin
+        .from('user_subscriptions')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('plan_id', planData.id)
+        .eq('status', 'active')
+        .single()
+
+      if (existingSubscription) {
+        console.log('User already has this subscription plan')
+        return { success: true }
+      }
 
       // Désactiver l'abonnement actuel
       const { error: deactivateError } = await this.supabaseAdmin
