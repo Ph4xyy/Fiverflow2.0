@@ -680,8 +680,7 @@ const AdminDashboard: React.FC = () => {
                 onClose={handleCloseUserStats}
               />
             )}
-          </div>
-        </div>
+      </div>
       </AdminLayout>
     );
   };
