@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cardClass } from "@/components/Layout";
 import ModernButton from "@/components/ModernButton";
-import InvoiceForm from "@/components/InvoiceForm";
+import InvoiceFormSimple from "@/components/InvoiceFormSimple";
 import InvoiceViewModal from "@/components/InvoiceViewModal";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -422,7 +422,7 @@ const PageInvoices: React.FC = () => {
 
       {/* Forms and Modals */}
       {formOpen && (
-        <InvoiceForm
+        <InvoiceFormSimple
           isOpen={formOpen}
           onClose={() => {
             setFormOpen(false);
@@ -432,7 +432,6 @@ const PageInvoices: React.FC = () => {
             setFormOpen(false);
             setEditingInvoice(null);
           }}
-          invoice={editingInvoice}
         />
       )}
 
