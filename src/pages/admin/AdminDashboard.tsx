@@ -20,7 +20,7 @@ import {
   CheckCircle,
   AlertCircle,
   Eye,
-  Activity,
+  Activity
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -179,7 +179,7 @@ const AdminDashboard: React.FC = () => {
 
         {/* Error State */}
         {error && (
-          <div className={`${cardClass} border border-red-200 dark:border-red-800 p-4`}>
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-red-200 dark:border-red-800 p-4">
             <div className="flex items-center gap-3">
               <AlertCircle className="text-red-500" size={20} />
               <div>
@@ -366,7 +366,7 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Répartition des Plans Globale */}
-            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                   Répartition des Plans (GLOBALE)
@@ -414,7 +414,7 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Statistiques Abonnements */}
-            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                   Statistiques Abonnements
@@ -459,7 +459,7 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Top Plateformes */}
-            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                   Top Plateformes Clients
@@ -491,7 +491,7 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Utilisateurs Récents */}
-            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                   Utilisateurs Récents
