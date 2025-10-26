@@ -13,8 +13,8 @@ interface ClientOpt {
 
 interface InvoiceLine {
   description: string;
-  quantity: number;
-  unit_price: number;
+  quantity: number | string;
+  unit_price: number | string;
 }
 
 interface InvoiceFormSimpleProps {
@@ -34,7 +34,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
   const [orders, setOrders] = useState<{id: string, title: string, budget: number}[]>([]);
   const [showImportOrders, setShowImportOrders] = useState(false);
   const [items, setItems] = useState<InvoiceLine[]>([
-    { description: "", quantity: 1, unit_price: 0 }
+    { description: "", quantity: "1", unit_price: "0" }
   ]);
 
   const [form, setForm] = useState({
@@ -84,7 +84,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
   }, [isOpen, user]);
 
   const addItem = () => {
-    setItems([...items, { description: "", quantity: 1, unit_price: 0 }]);
+    setItems([...items, { description: "", quantity: "1", unit_price: "0" }]);
   };
 
   const importFromOrder = (order: {id: string, title: string, budget: number}) => {
@@ -93,8 +93,8 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
         ...items,
         { 
           description: order.title, 
-          quantity: 1, 
-          unit_price: order.budget 
+          quantity: "1", 
+          unit_price: order.budget.toString()
         }
       ]);
       toast.success("Commande importée");
@@ -113,21 +113,16 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
   const updateItem = (index: number, field: keyof InvoiceLine, value: any) => {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
-    
-    // Calculer automatiquement le total si on change quantity ou unit_price
-    if (field === 'quantity' || field === 'unit_price') {
-      newItems[index].quantity = field === 'quantity' ? value : newItems[index].quantity;
-      newItems[index].unit_price = field === 'unit_price' ? value : newItems[index].unit_price;
-    }
-    
     setItems(newItems);
   };
 
   // Calculer les totaux
   const calculateTotals = () => {
-    const subtotal = items.reduce((sum, item) => 
-      sum + (item.quantity * item.unit_price), 0
-    );
+    const subtotal = items.reduce((sum, item) => {
+      const qty = typeof item.quantity === 'string' ? parseFloat(item.quantity.replace(',', '.')) || 0 : item.quantity;
+      const price = typeof item.unit_price === 'string' ? parseFloat(item.unit_price.replace(',', '.')) || 0 : item.unit_price;
+      return sum + (qty * price);
+    }, 0);
     const discountAmount = subtotal * (form.discount / 100);
     const subtotalAfterDiscount = subtotal - discountAmount;
     const taxAmount = subtotalAfterDiscount * (form.tax_rate / 100);
@@ -147,7 +142,11 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
       return;
     }
 
-    if (items.every(item => !item.description || item.quantity === 0 || item.unit_price === 0)) {
+    if (items.every(item => {
+      const qty = typeof item.quantity === 'string' ? parseFloat(item.quantity.replace(',', '.')) || 0 : item.quantity;
+      const price = typeof item.unit_price === 'string' ? parseFloat(item.unit_price.replace(',', '.')) || 0 : item.unit_price;
+      return !item.description || qty === 0 || price === 0;
+    })) {
       toast.error("Ajoutez au moins un article valide");
       return;
     }
@@ -206,15 +205,23 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
       // Ajouter les articles
       if (items.length > 0) {
         const itemsPayload = items
-          .filter(item => item.description && item.quantity > 0 && item.unit_price > 0)
-          .map((item, index) => ({
-            invoice_id: newInvoice.id,
-            description: item.description,
-            quantity: item.quantity,
-            unit_price: item.unit_price,
-            line_total: item.quantity * item.unit_price,
-            position: index + 1,
-          }));
+          .filter(item => {
+            const qty = typeof item.quantity === 'string' ? parseFloat(item.quantity.replace(',', '.')) || 0 : item.quantity;
+            const price = typeof item.unit_price === 'string' ? parseFloat(item.unit_price.replace(',', '.')) || 0 : item.unit_price;
+            return item.description && qty > 0 && price > 0;
+          })
+          .map((item, index) => {
+            const qty = typeof item.quantity === 'string' ? parseFloat(item.quantity.replace(',', '.')) || 0 : item.quantity;
+            const price = typeof item.unit_price === 'string' ? parseFloat(item.unit_price.replace(',', '.')) || 0 : item.unit_price;
+            return {
+              invoice_id: newInvoice.id,
+              description: item.description,
+              quantity: qty,
+              unit_price: price,
+              line_total: qty * price,
+              position: index + 1,
+            };
+          });
 
         if (itemsPayload.length > 0) {
           const { error: itemsError } = await supabase
@@ -384,8 +391,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                         const val = e.target.value;
                         // Permettre les nombres avec . ou ,
                         if (val === '' || /^\d*[.,]?\d*$/.test(val)) {
-                          const normalizedVal = val.replace(',', '.');
-                          updateItem(index, 'quantity', normalizedVal === '' ? 0 : parseFloat(normalizedVal) || 0);
+                          updateItem(index, 'quantity', val);
                         }
                       }}
                       className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D] placeholder-slate-500"
@@ -400,8 +406,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                         const val = e.target.value;
                         // Permettre les nombres avec . ou ,
                         if (val === '' || /^\d*[.,]?\d*$/.test(val)) {
-                          const normalizedVal = val.replace(',', '.');
-                          updateItem(index, 'unit_price', normalizedVal === '' ? 0 : parseFloat(normalizedVal) || 0);
+                          updateItem(index, 'unit_price', val);
                         }
                       }}
                       className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D] placeholder-slate-500"
@@ -409,7 +414,11 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                   </div>
                   <div className="col-span-2">
                     <div className="px-3 py-2 bg-slate-800 rounded-lg text-white text-right">
-                      ${(item.quantity * item.unit_price).toFixed(2)}
+                      ${(() => {
+                        const qty = typeof item.quantity === 'string' ? parseFloat(item.quantity.replace(',', '.')) || 0 : item.quantity;
+                        const price = typeof item.unit_price === 'string' ? parseFloat(item.unit_price.replace(',', '.')) || 0 : item.unit_price;
+                        return (qty * price).toFixed(2);
+                      })()}
                     </div>
                   </div>
                   <div className="col-span-1">
