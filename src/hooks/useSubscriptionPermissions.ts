@@ -110,15 +110,22 @@ export const useSubscriptionPermissions = () => {
     try {
       console.log('🔄 useSubscriptionPermissions: Chargement des permissions pour', user.id);
       
-      // Vérifier le statut admin en premier
+      // Vérifier le statut admin en premier (is_admin ou role)
       const { data: adminData, error: adminError } = await supabase
         .from('user_profiles')
-        .select('is_admin')
+        .select('is_admin, role')
         .eq('user_id', user.id)
         .single();
 
       if (!adminError && adminData) {
-        setIsAdmin(adminData.is_admin);
+        // Considérer admin si is_admin est true OU role est Admin
+        const isUserAdmin = adminData.is_admin === true || adminData.role === 'Admin';
+        setIsAdmin(isUserAdmin);
+        console.log('🔍 Statut admin vérifié:', {
+          is_admin: adminData.is_admin,
+          role: adminData.role,
+          finalIsAdmin: isUserAdmin
+        });
       }
 
       // Récupérer l'abonnement actuel
@@ -139,7 +146,8 @@ export const useSubscriptionPermissions = () => {
       // Définir les limites selon le plan (illimitées pour les admins)
       const planName = currentSubscription?.plan_name || 'launch';
       const newLimits = getLimitsForPlan(planName);
-      const finalLimits = adminData?.is_admin ? {
+      const isUserAdmin = adminData?.is_admin === true || adminData?.role === 'Admin';
+      const finalLimits = isUserAdmin ? {
         maxClients: -1,
         maxOrders: -1,
         maxProjects: -1,
@@ -149,14 +157,15 @@ export const useSubscriptionPermissions = () => {
       setLimits(finalLimits);
       
       // Définir les permissions selon le plan et le statut admin
-      const newPermissions = getPermissionsForPlan(planName, adminData?.is_admin);
+      const newPermissions = getPermissionsForPlan(planName, isUserAdmin);
       setPermissions(newPermissions);
 
       // Mettre en cache
+      const isUserAdmin = adminData?.is_admin === true || adminData?.role === 'Admin';
       permissionCache.set(cacheKey, {
         data: {
           subscription: currentSubscription,
-          isAdmin: adminData?.is_admin || false,
+          isAdmin: isUserAdmin || false,
           limits: finalLimits,
           permissions: newPermissions
         },

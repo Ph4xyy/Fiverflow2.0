@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSubscription } from '../hooks/useSubscription';
+import { useSubscriptionPermissions } from '../hooks/useSubscriptionPermissions';
 import { Button } from './ui/Button';
 import { Lock, Crown, Star, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +9,8 @@ interface SubscriptionGuardProps {
   children: React.ReactNode;
   requiredPlan: 'Lunch' | 'Boost' | 'Scale';
   pageType?: 'admin' | 'pro' | 'premium';
+  pageName?: string;
+  description?: string;
   fallback?: React.ReactNode;
 }
 
@@ -15,17 +18,26 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
   children,
   requiredPlan,
   pageType,
+  pageName,
+  description,
   fallback
 }) => {
   const { plan, isLoading, canAccess } = useSubscription();
+  const { isAdmin, loading: permissionsLoading } = useSubscriptionPermissions();
   const navigate = useNavigate();
 
-  if (isLoading) {
+  if (isLoading || permissionsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     );
+  }
+
+  // Les admins ont toujours accès à toutes les pages
+  if (isAdmin) {
+    console.log('✅ SubscriptionGuard: Admin bypass - accès autorisé');
+    return <>{children}</>;
   }
 
   const hasAccess = pageType ? canAccess(pageType) : (() => {
