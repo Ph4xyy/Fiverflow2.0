@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -7,45 +7,14 @@ const corsHeaders = {
 }
 
 interface StatsOverview {
-  totals: {
-    allTimeUsers: number
-    newUsersInRange: number
-    totalRevenue: number
-    revenueInRange: number
-    totalClients: number
-    totalOrders: number
-    totalInvoices: number
-    totalTasks: number
-    totalTimeEntries: number
-    adminsAllTime: number
-  }
-  plans: {
-    free: number
-    pro: number
-  }
-  revenue: {
-    fromInvoices: number
-    fromOrders: number
-  }
-  subscriptions: {
-    total: number
-    active: number
-    monthlyRevenue: number
-    yearlyRevenue: number
-  }
-  platformStats: {
-    totalClients: number
-    topPlatforms: Array<{
-      platform: string
-      count: number
-    }>
-  }
+  totalUsers: number
+  totalInvoices: number
+  totalRevenue: number
   recentUsers: Array<{
     id: string
-    name: string
+    full_name: string
     email: string
     role: string
-    current_plan: string
     created_at: string
   }>
   recentOrders: Array<{
@@ -65,9 +34,8 @@ interface StatsOverview {
     created_at: string
   }>
   topReferrers: Array<{
-    id: string
-    name: string
-    email: string
+    user_id: string
+    full_name: string
     referral_count: number
     total_earnings: number
   }>
@@ -88,125 +56,100 @@ serve(async (req) => {
 
     // For admin operations, we'll use service role key directly
     // No need to verify user session as this is an admin-only function
+    // Service role key bypasses all RLS policies
 
     const url = new URL(req.url)
     const method = req.method
 
     // GET /admin-stats - Get overview statistics
     if (method === 'GET') {
-      const startDate = url.searchParams.get('start_date')
-      const endDate = url.searchParams.get('end_date')
+      try {
+        // Get basic stats using simple queries
+        const [
+          { data: totalUsers, error: usersError },
+          { data: totalInvoices, error: invoicesError },
+          { data: totalRevenue, error: revenueError },
+          { data: recentUsers, error: recentUsersError },
+          { data: recentOrders, error: recentOrdersError },
+          { data: recentInvoices, error: recentInvoicesError }
+        ] = await Promise.all([
+          supabaseClient
+            .from('user_profiles')
+            .select('id', { count: 'exact', head: true }),
+          supabaseClient
+            .from('invoices')
+            .select('id', { count: 'exact', head: true }),
+          supabaseClient
+            .from('invoices')
+            .select('total')
+            .eq('status', 'paid'),
+          supabaseClient
+            .from('user_profiles')
+            .select('id, full_name, email, role, created_at')
+            .order('created_at', { ascending: false })
+            .limit(5),
+          supabaseClient
+            .from('orders')
+            .select('id, title, client_name, amount, status, created_at')
+            .order('created_at', { ascending: false })
+            .limit(5),
+          supabaseClient
+            .from('invoices')
+            .select('id, number, total, status, created_at, clients(name)')
+            .order('created_at', { ascending: false })
+            .limit(10)
+        ])
 
-      // Use the database function to get stats
-      const { data: stats, error: statsError } = await supabaseClient
-        .rpc('get_admin_stats', {
-          p_start_date: startDate,
-          p_end_date: endDate
-        })
+        // Check for errors
+        if (usersError) throw new Error(`Users error: ${usersError.message}`)
+        if (invoicesError) throw new Error(`Invoices error: ${invoicesError.message}`)
+        if (revenueError) throw new Error(`Revenue error: ${revenueError.message}`)
+        if (recentUsersError) throw new Error(`Recent users error: ${recentUsersError.message}`)
+        if (recentOrdersError) throw new Error(`Recent orders error: ${recentOrdersError.message}`)
+        if (recentInvoicesError) throw new Error(`Recent invoices error: ${recentInvoicesError.message}`)
 
-      if (statsError) {
-        throw new Error(`Failed to fetch stats: ${statsError.message}`)
+        // Calculate total revenue
+        const revenue = totalRevenue?.reduce((sum: number, invoice: any) => sum + (invoice.total || 0), 0) || 0
+
+        // Transform recentInvoices to include client_name from joined clients
+        const transformedInvoices = (recentInvoices || []).map((invoice: any) => ({
+          ...invoice,
+          client_name: typeof invoice.clients === 'object' && invoice.clients !== null 
+            ? invoice.clients.name 
+            : 'No Client'
+        }))
+
+        const result: StatsOverview = {
+          totalUsers: totalUsers?.length || 0,
+          totalInvoices: totalInvoices?.length || 0,
+          totalRevenue: revenue,
+          recentUsers: recentUsers || [],
+          recentOrders: recentOrders || [],
+          recentInvoices: transformedInvoices,
+          topReferrers: [] // Empty for now
+        }
+
+        return new Response(
+          JSON.stringify(result),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      } catch (error) {
+        console.error('Error fetching stats:', error)
+        return new Response(
+          JSON.stringify({ error: 'Failed to fetch stats: ' + error.message }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
       }
-
-      // Get additional data for the overview
-      const [
-        { data: recentUsers },
-        { data: recentOrders },
-        { data: recentInvoices },
-        { data: platformStats },
-        { data: topReferrers }
-      ] = await Promise.all([
-        // Recent users
-        supabaseClient
-          .from('user_profiles')
-          .select('id, display_name as name, email, role, subscription_plan as current_plan, created_at')
-          .order('created_at', { ascending: false })
-          .limit(10),
-        
-        // Recent orders
-        supabaseClient
-          .from('orders')
-          .select('id, title, client_name, amount, status, created_at')
-          .order('created_at', { ascending: false })
-          .limit(10),
-        
-        // Recent invoices
-        supabaseClient
-          .from('invoices')
-          .select('id, number, total, status, created_at, clients(name)')
-          .order('created_at', { ascending: false })
-          .limit(10),
-        
-        // Platform statistics
-        supabaseClient
-          .from('clients')
-          .select('platform')
-          .not('platform', 'is', null),
-        
-        // Top referrers
-        supabaseClient
-          .from('user_profiles')
-          .select(`
-            id, display_name as name, email,
-            referral_count,
-            total_earnings
-          `)
-          .not('referral_count', 'is', null)
-          .gt('referral_count', 0)
-          .order('referral_count', { ascending: false })
-          .limit(10)
-      ])
-
-      // Process platform stats
-      const platformCounts: { [key: string]: number } = {}
-      if (platformStats) {
-        platformStats.forEach((client: any) => {
-          if (client.platform) {
-            platformCounts[client.platform] = (platformCounts[client.platform] || 0) + 1
-          }
-        })
-      }
-
-      const topPlatforms = Object.entries(platformCounts)
-        .map(([platform, count]) => ({ platform, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5)
-
-      // Transform recentInvoices to include client_name from joined clients
-      const transformedInvoices = (recentInvoices || []).map((invoice: any) => ({
-        ...invoice,
-        client_name: typeof invoice.clients === 'object' && invoice.clients !== null 
-          ? invoice.clients.name 
-          : 'No Client'
-      }))
-
-      const result: StatsOverview = {
-        ...stats,
-        platformStats: {
-          totalClients: platformStats?.length || 0,
-          topPlatforms
-        },
-        recentUsers: recentUsers || [],
-        recentOrders: recentOrders || [],
-        recentInvoices: transformedInvoices,
-        topReferrers: topReferrers || []
-      }
-
-      return new Response(
-        JSON.stringify(result),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
     }
 
     return new Response(
       JSON.stringify({ error: 'Method not allowed' }),
       { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
-
   } catch (error) {
-    console.error('Error in admin-stats function:', error)
+    console.error('Unexpected error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error: ' + error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
