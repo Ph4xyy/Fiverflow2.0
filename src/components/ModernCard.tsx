@@ -3,7 +3,7 @@ import React from 'react';
 interface ModernCardProps {
   children: React.ReactNode;
   className?: string;
-  title?: string;
+  title?: React.ReactNode;
   icon?: React.ReactNode;
   gradient?: boolean;
 }
@@ -25,14 +25,11 @@ const ModernCard: React.FC<ModernCardProps> = ({
       ${className}
     `}>
       {(title || icon) && (
-        <div className="flex items-center gap-3 mb-4">
-          {icon && (
-            <div className="flex items-center justify-center">
-              {icon}
-            </div>
-          )}
-          {title && (
+        <div className="mb-4">
+          {title && typeof title === 'string' ? (
             <h3 className="text-lg font-semibold text-white">{title}</h3>
+          ) : (
+            title
           )}
         </div>
       )}

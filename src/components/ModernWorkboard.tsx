@@ -74,7 +74,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
   completed = false
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
 
   const statusOptions = [
     { value: 'pending', label: 'Pending', color: 'text-gray-400', bgColor: 'bg-gray-100' },
@@ -98,15 +97,15 @@ const TaskCard: React.FC<TaskCardProps> = ({
   };
 
   return (
-    <div className={`group p-4 rounded-xl bg-gradient-to-br from-[#35414e] to-[#2a3441] hover:from-[#3d4a57] hover:to-[#35414e] transition-all duration-300 border border-[#4a5568] hover:border-[#9c68f2]/30 ${completed ? 'opacity-60' : ''}`}>
+    <div className={`group p-3 rounded-lg bg-gradient-to-br from-[#35414e] to-[#2a3441] hover:from-[#3d4a57] hover:to-[#35414e] transition-all duration-300 border border-[#4a5568] hover:border-[#9c68f2]/30 cursor-pointer ${completed ? 'opacity-60' : ''}`}>
       {/* Header avec titre et actions */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1 pr-3">
-          <h4 className={`font-semibold text-white text-lg ${completed ? 'line-through' : ''}`}>
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex-1 pr-2">
+          <h4 className={`font-semibold text-white text-sm ${completed ? 'line-through' : ''}`}>
             {task.title}
           </h4>
           {task.description && (
-            <p className={`text-sm text-gray-300 mt-1 line-clamp-2 ${completed ? 'line-through' : ''}`}>
+            <p className={`text-xs text-gray-300 mt-1 line-clamp-1 ${completed ? 'line-through' : ''}`}>
               {task.description}
             </p>
           )}
@@ -114,127 +113,60 @@ const TaskCard: React.FC<TaskCardProps> = ({
         
         <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button 
-            onClick={() => setShowPreview(!showPreview)}
-            className="p-2 rounded-lg bg-[#4a5568]/50 hover:bg-[#9c68f2]/20 text-gray-400 hover:text-white transition-all"
-            title="Preview task"
-          >
-            <Eye className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={() => onEdit(task)}
-            className="p-2 rounded-lg bg-[#4a5568]/50 hover:bg-blue-500/20 text-gray-400 hover:text-blue-400 transition-all"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(task);
+            }}
+            className="p-1.5 rounded-lg bg-[#4a5568]/50 hover:bg-blue-500/20 text-gray-400 hover:text-blue-400 transition-all"
             title="Edit task"
           >
-            <Edit className="w-4 h-4" />
+            <Edit className="w-3.5 h-3.5" />
           </button>
           <button 
-            onClick={() => onDelete(task.id)}
-            className="p-2 rounded-lg bg-[#4a5568]/50 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(task.id);
+            }}
+            className="p-1.5 rounded-lg bg-[#4a5568]/50 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-all"
             title="Delete task"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
       
-      {/* Preview Modal */}
-      {showPreview && (
-        <div className="mb-4 p-4 bg-[#1e2938] rounded-xl border border-[#9c68f2]/20 shadow-xl">
-          <div className="flex items-center justify-between mb-4">
-            <h5 className="text-lg font-semibold text-white">Task Details</h5>
-            <button
-              onClick={() => setShowPreview(false)}
-              className="p-1 rounded-lg hover:bg-[#4a5568] text-gray-400 hover:text-white transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-400">Priority:</span>
-                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-                    <Flag className="w-3 h-3 mr-1" />
-                    {task.priority}
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-400">Status:</span>
-                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(task.status)} ${getStatusBgColor(task.status)}`}>
-                    {getStatusLabel(task.status)}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Estimated:</span>
-                  <span className="text-white font-medium">{task.estimated_hours || 0}h</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Actual:</span>
-                  <span className="text-white font-medium">{task.actual_hours || 0}h</span>
-                </div>
-              </div>
-            </div>
-            
-            {task.due_date && (
-              <div className="flex items-center justify-between p-3 bg-[#2a3441] rounded-lg">
-                <span className="text-sm text-gray-400">Due Date:</span>
-                <span className="text-white font-medium">{new Date(task.due_date).toLocaleDateString()}</span>
-              </div>
-            )}
-            
-            {task.order_id && (
-              <div className="flex items-center justify-between p-3 bg-[#2a3441] rounded-lg">
-                <span className="text-sm text-gray-400">Order:</span>
-                <span className="text-white font-medium">{task.order?.title || 'Unknown Order'}</span>
-              </div>
-            )}
-            
-            {task.description && (
-              <div className="p-3 bg-[#2a3441] rounded-lg">
-                <span className="text-sm text-gray-400 block mb-2">Description:</span>
-                <p className="text-white text-sm leading-relaxed">{task.description}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-      
       {/* Footer avec badges et actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-            <Flag className="w-3 h-3 mr-1" />
+      <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center space-x-1.5">
+          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+            <Flag className="w-2.5 h-2.5 mr-0.5" />
             {task.priority}
-          </span>
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(task.status)} ${getStatusBgColor(task.status)}`}>
-            {getStatusLabel(task.status)}
           </span>
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1">
           <button
-            onClick={() => onStartTimer(task.id)}
-            className="p-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-400 hover:text-green-300 transition-all"
+            onClick={(e) => {
+              e.stopPropagation();
+              onStartTimer(task.id);
+            }}
+            className="p-1.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-400 hover:text-green-300 transition-all"
             title="Start timer"
           >
-            <Play className="w-4 h-4" />
+            <Play className="w-3.5 h-3.5" />
           </button>
           
           {/* Dropdown pour changer le statut */}
           <div className="relative">
             <button
-              onClick={() => setShowDropdown(!showDropdown)}
-              className="p-2 rounded-lg bg-[#4a5568]/50 hover:bg-[#9c68f2]/20 text-gray-400 hover:text-white transition-all"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDropdown(!showDropdown);
+              }}
+              className="p-1.5 rounded-lg bg-[#4a5568]/50 hover:bg-[#9c68f2]/20 text-gray-400 hover:text-white transition-all"
               title="Change status"
             >
-              <ChevronDown className="w-4 h-4" />
+              <ChevronDown className="w-3.5 h-3.5" />
             </button>
             
             {showDropdown && (
@@ -243,7 +175,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
                   {statusOptions.map(option => (
                     <button
                       key={option.value}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         onStatusChange(task.id, option.value);
                         setShowDropdown(false);
                       }}
@@ -655,111 +588,187 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
 
         {/* Contenu selon le mode de vue */}
         {viewMode === 'kanban' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Pending */}
-            <ModernCard title="Pending">
-              <div className="space-y-4">
-                {filteredTasks.filter(t => t.status === 'pending').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    onEdit={handleEditTask}
-                    onDelete={setShowDeleteConfirm}
-                    onStartTimer={handleStartTimer}
-                    onStatusChange={handleStatusChange}
-                    getPriorityColor={getPriorityColor}
-                  />
-                ))}
+            <ModernCard title={
+              <div className="flex items-center justify-between w-full">
+                <span>Pending</span>
+                <span className="text-xs font-medium text-gray-400 bg-gray-700 px-2 py-1 rounded-full">
+                  {filteredTasks.filter(t => t.status === 'pending').length}
+                </span>
+              </div>
+            }>
+              <div className="space-y-3 min-h-[400px]">
+                {filteredTasks.filter(t => t.status === 'pending').length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Clock size={32} className="mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No pending tasks</p>
+                  </div>
+                ) : (
+                  filteredTasks.filter(t => t.status === 'pending').map(task => (
+                    <TaskCard 
+                      key={task.id} 
+                      task={task} 
+                      onEdit={handleEditTask}
+                      onDelete={setShowDeleteConfirm}
+                      onStartTimer={handleStartTimer}
+                      onStatusChange={handleStatusChange}
+                      getPriorityColor={getPriorityColor}
+                    />
+                  ))
+                )}
               </div>
             </ModernCard>
 
             {/* In Progress */}
-            <ModernCard title="In Progress">
-              <div className="space-y-4">
-                {filteredTasks.filter(t => t.status === 'in_progress').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    onEdit={handleEditTask}
-                    onDelete={setShowDeleteConfirm}
-                    onStartTimer={handleStartTimer}
-                    onStatusChange={handleStatusChange}
-                    getPriorityColor={getPriorityColor}
-                  />
-                ))}
+            <ModernCard title={
+              <div className="flex items-center justify-between w-full">
+                <span>In Progress</span>
+                <span className="text-xs font-medium text-blue-400 bg-blue-900/30 px-2 py-1 rounded-full">
+                  {filteredTasks.filter(t => t.status === 'in_progress').length}
+                </span>
               </div>
-            </ModernCard>
-
-            {/* On Hold */}
-            <ModernCard title="On Hold">
-              <div className="space-y-4">
-                {filteredTasks.filter(t => t.status === 'on_hold').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    onEdit={handleEditTask}
-                    onDelete={setShowDeleteConfirm}
-                    onStartTimer={handleStartTimer}
-                    onStatusChange={handleStatusChange}
-                    getPriorityColor={getPriorityColor}
-                  />
-                ))}
+            }>
+              <div className="space-y-3 min-h-[400px]">
+                {filteredTasks.filter(t => t.status === 'in_progress').length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Activity size={32} className="mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No active tasks</p>
+                  </div>
+                ) : (
+                  filteredTasks.filter(t => t.status === 'in_progress').map(task => (
+                    <TaskCard 
+                      key={task.id} 
+                      task={task} 
+                      onEdit={handleEditTask}
+                      onDelete={setShowDeleteConfirm}
+                      onStartTimer={handleStartTimer}
+                      onStatusChange={handleStatusChange}
+                      getPriorityColor={getPriorityColor}
+                    />
+                  ))
+                )}
               </div>
             </ModernCard>
 
             {/* Completed */}
-            <ModernCard title="Completed">
-              <div className="space-y-4">
-                {filteredTasks.filter(t => t.status === 'completed').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    onEdit={handleEditTask}
-                    onDelete={setShowDeleteConfirm}
-                    onStartTimer={handleStartTimer}
-                    onStatusChange={handleStatusChange}
-                    getPriorityColor={getPriorityColor}
-                    completed={true}
-                  />
-                ))}
+            <ModernCard title={
+              <div className="flex items-center justify-between w-full">
+                <span>Completed</span>
+                <span className="text-xs font-medium text-green-400 bg-green-900/30 px-2 py-1 rounded-full">
+                  {filteredTasks.filter(t => t.status === 'completed').length}
+                </span>
+              </div>
+            }>
+              <div className="space-y-3 min-h-[400px]">
+                {filteredTasks.filter(t => t.status === 'completed').length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <CheckCircle2 size={32} className="mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No completed tasks</p>
+                  </div>
+                ) : (
+                  filteredTasks.filter(t => t.status === 'completed').map(task => (
+                    <TaskCard 
+                      key={task.id} 
+                      task={task} 
+                      onEdit={handleEditTask}
+                      onDelete={setShowDeleteConfirm}
+                      onStartTimer={handleStartTimer}
+                      onStatusChange={handleStatusChange}
+                      getPriorityColor={getPriorityColor}
+                      completed={true}
+                    />
+                  ))
+                )}
               </div>
             </ModernCard>
 
-            {/* Cancelled */}
-            <ModernCard title="Cancelled">
-              <div className="space-y-4">
-                {filteredTasks.filter(t => t.status === 'cancelled').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    onEdit={handleEditTask}
-                    onDelete={setShowDeleteConfirm}
-                    onStartTimer={handleStartTimer}
-                    onStatusChange={handleStatusChange}
-                    getPriorityColor={getPriorityColor}
-                    completed={true}
-                  />
-                ))}
-              </div>
-            </ModernCard>
+            {/* Colonnes supplémentaires pour On Hold, Cancelled, Archived si elles contiennent des tâches */}
+            {(filteredTasks.filter(t => t.status === 'on_hold').length > 0 ||
+              filteredTasks.filter(t => t.status === 'cancelled').length > 0 ||
+              filteredTasks.filter(t => t.status === 'archived').length > 0) && (
+              <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                {/* On Hold */}
+                {filteredTasks.filter(t => t.status === 'on_hold').length > 0 && (
+                  <ModernCard title={
+                    <div className="flex items-center justify-between w-full">
+                      <span>On Hold</span>
+                      <span className="text-xs font-medium text-yellow-400 bg-yellow-900/30 px-2 py-1 rounded-full">
+                        {filteredTasks.filter(t => t.status === 'on_hold').length}
+                      </span>
+                    </div>
+                  }>
+                    <div className="space-y-3 min-h-[200px]">
+                      {filteredTasks.filter(t => t.status === 'on_hold').map(task => (
+                        <TaskCard 
+                          key={task.id} 
+                          task={task} 
+                          onEdit={handleEditTask}
+                          onDelete={setShowDeleteConfirm}
+                          onStartTimer={handleStartTimer}
+                          onStatusChange={handleStatusChange}
+                          getPriorityColor={getPriorityColor}
+                        />
+                      ))}
+                    </div>
+                  </ModernCard>
+                )}
 
-            {/* Archived */}
-            <ModernCard title="Archived">
-              <div className="space-y-4">
-                {filteredTasks.filter(t => t.status === 'archived').map(task => (
-                  <TaskCard 
-                    key={task.id} 
-                    task={task} 
-                    onEdit={handleEditTask}
-                    onDelete={setShowDeleteConfirm}
-                    onStartTimer={handleStartTimer}
-                    onStatusChange={handleStatusChange}
-                    getPriorityColor={getPriorityColor}
-                    completed={true}
-                  />
-                ))}
+                {/* Cancelled */}
+                {filteredTasks.filter(t => t.status === 'cancelled').length > 0 && (
+                  <ModernCard title={
+                    <div className="flex items-center justify-between w-full">
+                      <span>Cancelled</span>
+                      <span className="text-xs font-medium text-red-400 bg-red-900/30 px-2 py-1 rounded-full">
+                        {filteredTasks.filter(t => t.status === 'cancelled').length}
+                      </span>
+                    </div>
+                  }>
+                    <div className="space-y-3 min-h-[200px]">
+                      {filteredTasks.filter(t => t.status === 'cancelled').map(task => (
+                        <TaskCard 
+                          key={task.id} 
+                          task={task} 
+                          onEdit={handleEditTask}
+                          onDelete={setShowDeleteConfirm}
+                          onStartTimer={handleStartTimer}
+                          onStatusChange={handleStatusChange}
+                          getPriorityColor={getPriorityColor}
+                          completed={true}
+                        />
+                      ))}
+                    </div>
+                  </ModernCard>
+                )}
+
+                {/* Archived */}
+                {filteredTasks.filter(t => t.status === 'archived').length > 0 && (
+                  <ModernCard title={
+                    <div className="flex items-center justify-between w-full">
+                      <span>Archived</span>
+                      <span className="text-xs font-medium text-gray-400 bg-gray-700 px-2 py-1 rounded-full">
+                        {filteredTasks.filter(t => t.status === 'archived').length}
+                      </span>
+                    </div>
+                  }>
+                    <div className="space-y-3 min-h-[200px]">
+                      {filteredTasks.filter(t => t.status === 'archived').map(task => (
+                        <TaskCard 
+                          key={task.id} 
+                          task={task} 
+                          onEdit={handleEditTask}
+                          onDelete={setShowDeleteConfirm}
+                          onStartTimer={handleStartTimer}
+                          onStatusChange={handleStatusChange}
+                          getPriorityColor={getPriorityColor}
+                          completed={true}
+                        />
+                      ))}
+                    </div>
+                  </ModernCard>
+                )}
               </div>
-            </ModernCard>
+            )}
           </div>
         )}
 
