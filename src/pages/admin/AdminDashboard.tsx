@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import Layout, { pageBgClass, cardClass } from '../../components/Layout';
+import AdminLayout from '../../components/AdminLayout';
 import AdminNavigation from '../../components/AdminNavigation';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAdminStats } from '../../hooks/useAdminStats';
@@ -96,9 +96,9 @@ const AdminDashboard: React.FC = () => {
 
   if (!user) {
     return (
-      <Layout>
-        <div className={`space-y-4 p-4 ${pageBgClass}`}>
-          <div className={`${cardClass} p-6 text-center`}>
+      <AdminLayout>
+        <div className="space-y-4 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 text-center">
             <AlertCircle className="mx-auto mb-4 text-red-500" size={48} />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               Accès non autorisé
@@ -106,18 +106,15 @@ const AdminDashboard: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-400">
               Vous devez être connecté pour accéder au tableau de bord administrateur.
             </p>
+          </div>
         </div>
-        </div>
-      </Layout>
+      </AdminLayout>
     );
   }
 
   return (
-    <Layout>
-      <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
-        <AdminNavigation className="w-64 flex-shrink-0" />
-        <div className="flex-1 overflow-auto">
-          <div className={`space-y-4 sm:space-y-6 p-4 sm:p-6 ${pageBgClass}`}>
+    <AdminLayout>
+      <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center space-x-3">
@@ -135,7 +132,7 @@ const AdminDashboard: React.FC = () => {
               </div>
 
               {/* Date filters */}
-              <div className={`${cardClass} px-3 py-2 border border-gray-200 dark:border-slate-700 flex items-center gap-2 w-full sm:w-auto`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 px-3 py-2 flex items-center gap-2 w-full sm:w-auto">
                 <CalendarIcon className="text-gray-600 dark:text-gray-300" size={16} />
                 <input
                   type="date"
@@ -685,9 +682,8 @@ const AdminDashboard: React.FC = () => {
             )}
           </div>
         </div>
-      </div>
-    </Layout>
-  );
-};
+      </AdminLayout>
+    );
+  };
 
 export default AdminDashboard;
