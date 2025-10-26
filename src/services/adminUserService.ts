@@ -102,15 +102,6 @@ class AdminUserService {
         query = query.or(`email.ilike.%${search}%,full_name.ilike.%${search}%`)
       }
 
-      if (role) {
-        query = query.eq('role', role)
-      }
-
-      // Pagination
-      const from = (page - 1) * limit
-      const to = from + limit - 1
-      query = query.range(from, to)
-
       // Tri
       query = query.order(sort_by, { ascending: sort_order === 'asc' })
 
@@ -346,46 +337,63 @@ class AdminUserService {
       // Vérifier si l'utilisateur a déjà ce plan actif
       const { data: existingSubscription } = await this.supabaseAdmin
         .from('user_subscriptions')
-        .select('id')
+        .select(`
+          id,
+          subscription_plans (
+            name
+          )
+        `)
         .eq('user_id', userId)
         .eq('plan_id', planData.id)
         .eq('status', 'active')
         .single()
 
+      console.log('🔍 Existing subscription check:', { 
+        userId, 
+        planId: planData.id, 
+        planName: planData.name,
+        existingSubscription 
+      })
+
       if (existingSubscription) {
-        console.log('User already has this subscription plan')
+        console.log('✅ User already has this subscription plan - no update needed')
         return { success: true }
       }
 
       // Supprimer tous les abonnements actuels de l'utilisateur
+      console.log('🗑️ Deleting existing subscriptions for user:', userId)
       const { error: deleteError } = await this.supabaseAdmin
         .from('user_subscriptions')
         .delete()
         .eq('user_id', userId)
 
       if (deleteError) {
-        console.error('Error deleting subscriptions:', deleteError)
+        console.error('❌ Error deleting subscriptions:', deleteError)
         throw new Error(`Erreur lors de la suppression des abonnements: ${deleteError.message}`)
       }
+      console.log('✅ Existing subscriptions deleted successfully')
 
       // Insérer le nouvel abonnement
+      const newSubscriptionData = {
+        user_id: userId,
+        plan_id: planData.id,
+        status: 'active',
+        billing_cycle: 'monthly',
+        amount: planData.price_monthly,
+        currency: 'USD'
+      }
+      
+      console.log('➕ Inserting new subscription:', newSubscriptionData)
       const { error: insertError } = await this.supabaseAdmin
         .from('user_subscriptions')
-        .insert({
-          user_id: userId,
-          plan_id: planData.id,
-          status: 'active',
-          billing_cycle: 'monthly',
-          amount: planData.price_monthly,
-          currency: 'USD'
-        })
+        .insert(newSubscriptionData)
 
       if (insertError) {
-        console.error('Error inserting new subscription:', insertError)
+        console.error('❌ Error inserting new subscription:', insertError)
         throw new Error(`Erreur lors de l'ajout du nouvel abonnement: ${insertError.message}`)
       }
 
-      console.log('Subscription updated successfully')
+      console.log('✅ Subscription updated successfully')
       return { success: true }
     } catch (error) {
       console.error('Error updating user subscription:', error)

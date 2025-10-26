@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { adminUserService, AdminUser, UserRole, SubscriptionPlan } from '../services/adminUserService'
+import toast from 'react-hot-toast'
 
 interface UseAdminUsersParams {
   page?: number
@@ -72,10 +73,13 @@ export const useAdminUsers = (params: UseAdminUsersParams = {}): UseAdminUsersRe
 
   const updateUserRole = async (userId: string, role: string) => {
     try {
+      console.log('🔄 useAdminUsers - updateUserRole:', { userId, role })
       await adminUserService.updateUserRole(userId, role)
+      console.log('✅ useAdminUsers - Role updated successfully')
       toast.success('Rôle utilisateur mis à jour avec succès !')
       await refetch() // Forcer le rechargement complet
     } catch (err) {
+      console.error('❌ useAdminUsers - Error updating role:', err)
       toast.error('Erreur lors de la mise à jour du rôle')
       throw err
     }
@@ -83,10 +87,13 @@ export const useAdminUsers = (params: UseAdminUsersParams = {}): UseAdminUsersRe
 
   const updateUserSubscription = async (userId: string, plan: string) => {
     try {
+      console.log('🔄 useAdminUsers - updateUserSubscription:', { userId, plan })
       await adminUserService.updateUserSubscription(userId, plan)
+      console.log('✅ useAdminUsers - Subscription updated successfully')
       toast.success('Abonnement utilisateur mis à jour avec succès !')
       await refetch() // Forcer le rechargement complet
     } catch (err) {
+      console.error('❌ useAdminUsers - Error updating subscription:', err)
       toast.error('Erreur lors de la mise à jour de l\'abonnement')
       throw err
     }
