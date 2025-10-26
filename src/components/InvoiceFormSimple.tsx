@@ -1,6 +1,6 @@
 // src/components/InvoiceFormSimple.tsx - Formulaire de facture simplifié sur une seule page
 import React, { useEffect, useState } from "react";
-import { X, Plus, Trash2 } from "lucide-react";
+import { X, Plus, Trash2, ShoppingCart } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import toast from "react-hot-toast";
@@ -31,6 +31,8 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<ClientOpt[]>([]);
+  const [orders, setOrders] = useState<{id: string, title: string, budget: number}[]>([]);
+  const [showImportOrders, setShowImportOrders] = useState(false);
   const [items, setItems] = useState<InvoiceLine[]>([
     { description: "", quantity: 1, unit_price: 0 }
   ]);
@@ -60,6 +62,15 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
           .eq("user_id", user.id)
           .order("name");
         if (cData) setClients(cData as ClientOpt[]);
+
+        // Charger les commandes
+        const { data: ordersData } = await supabase
+          .from("orders")
+          .select("id, title, budget")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(50);
+        if (ordersData) setOrders(ordersData as {id: string, title: string, budget: number}[]);
       }
 
       // Définir les dates par défaut
@@ -74,6 +85,23 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
 
   const addItem = () => {
     setItems([...items, { description: "", quantity: 1, unit_price: 0 }]);
+  };
+
+  const importFromOrder = (order: {id: string, title: string, budget: number}) => {
+    if (order.budget && order.budget > 0) {
+      setItems([
+        ...items,
+        { 
+          description: order.title, 
+          quantity: 1, 
+          unit_price: order.budget 
+        }
+      ]);
+      toast.success("Commande importée");
+      setShowImportOrders(false);
+    } else {
+      toast.error("Cette commande n'a pas de montant défini");
+    }
   };
 
   const removeItem = (index: number) => {
@@ -278,15 +306,62 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium text-white">Articles</h3>
-              <button
-                type="button"
-                onClick={addItem}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
-              >
-                <Plus size={18} />
-                Ajouter
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowImportOrders(!showImportOrders)}
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                >
+                  <ShoppingCart size={18} />
+                  Importer commandes
+                </button>
+                <button
+                  type="button"
+                  onClick={addItem}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                >
+                  <Plus size={18} />
+                  Ajouter
+                </button>
+              </div>
             </div>
+
+            {/* Modal d'import des commandes */}
+            {showImportOrders && (
+              <div className="mb-4 p-4 bg-slate-800 rounded-lg border border-slate-700">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium text-white">Sélectionnez une commande à importer</h4>
+                  <button
+                    type="button"
+                    onClick={() => setShowImportOrders(false)}
+                    className="text-slate-400 hover:text-white"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                <div className="max-h-48 overflow-y-auto space-y-2">
+                  {orders.length === 0 ? (
+                    <p className="text-sm text-slate-400">Aucune commande disponible</p>
+                  ) : (
+                    orders.map(order => (
+                      <button
+                        key={order.id}
+                        type="button"
+                        onClick={() => importFromOrder(order)}
+                        className="w-full text-left px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-white">{order.title}</span>
+                          <span className="text-sm font-medium text-green-400">
+                            ${order.budget?.toFixed(2) || '0.00'}
+                          </span>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-3">
               {items.map((item, index) => (
@@ -302,23 +377,31 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                   </div>
                   <div className="col-span-2">
                     <input
-                      type="number"
+                      type="text"
                       placeholder="Qté"
                       value={item.quantity || ''}
-                      onChange={(e) => updateItem(index, 'quantity', parseFloat(e.target.value) || 0)}
-                      min="0"
-                      step="0.01"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        // Permettre les nombres et décimales
+                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                          updateItem(index, 'quantity', val === '' ? 0 : parseFloat(val) || 0);
+                        }
+                      }}
                       className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D] placeholder-slate-500"
                     />
                   </div>
                   <div className="col-span-2">
                     <input
-                      type="number"
+                      type="text"
                       placeholder="Prix unit."
                       value={item.unit_price || ''}
-                      onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
-                      min="0"
-                      step="0.01"
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        // Permettre les nombres et décimales
+                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                          updateItem(index, 'unit_price', val === '' ? 0 : parseFloat(val) || 0);
+                        }
+                      }}
                       className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D] placeholder-slate-500"
                     />
                   </div>
@@ -350,11 +433,14 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                 Taxe (%)
               </label>
               <input
-                type="number"
+                type="text"
                 value={form.tax_rate}
-                onChange={(e) => setForm({ ...form, tax_rate: parseFloat(e.target.value) || 0 })}
-                min="0"
-                step="0.01"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                    setForm({ ...form, tax_rate: val === '' ? 0 : parseFloat(val) || 0 });
+                  }
+                }}
                 className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D]"
               />
             </div>
@@ -363,11 +449,14 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                 Remise (%)
               </label>
               <input
-                type="number"
+                type="text"
                 value={form.discount}
-                onChange={(e) => setForm({ ...form, discount: parseFloat(e.target.value) || 0 })}
-                min="0"
-                step="0.01"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                    setForm({ ...form, discount: val === '' ? 0 : parseFloat(val) || 0 });
+                  }
+                }}
                 className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D]"
               />
             </div>
