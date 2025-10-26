@@ -209,7 +209,7 @@ const AdminDashboard: React.FC = () => {
           <>
             {/* KPIs Principaux */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -228,7 +228,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -247,7 +247,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -266,7 +266,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -288,7 +288,7 @@ const AdminDashboard: React.FC = () => {
 
             {/* KPIs Secondaires */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -307,7 +307,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -326,7 +326,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -345,7 +345,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -535,7 +535,7 @@ const AdminDashboard: React.FC = () => {
 
             {/* Commandes et Factures Récentes */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                     Commandes Récentes
@@ -579,7 +579,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                     Factures Récentes
@@ -626,7 +626,7 @@ const AdminDashboard: React.FC = () => {
 
             {/* Top Referrers */}
             {stats.topReferrers.length > 0 && (
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                     Top Parrains (période)
