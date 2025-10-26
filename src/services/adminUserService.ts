@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY
 
 export interface AdminUser {
   id: string
@@ -60,6 +61,7 @@ export interface UserSubscription {
 
 class AdminUserService {
   private supabase = createClient(supabaseUrl, supabaseKey)
+  private supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
   // Récupérer tous les utilisateurs avec leurs rôles et abonnements
   async getUsers(params: {
@@ -120,7 +122,7 @@ class AdminUserService {
       const usersWithDetails = await Promise.all(
         users.map(async (user) => {
           // Récupérer le rôle
-          const { data: userRole } = await this.supabase
+          const { data: userRole } = await this.supabaseAdmin
             .from('user_roles')
             .select(`
               system_roles (
@@ -133,7 +135,7 @@ class AdminUserService {
             .single()
 
           // Récupérer l'abonnement actuel
-          const { data: subscription } = await this.supabase
+          const { data: subscription } = await this.supabaseAdmin
             .from('user_subscriptions')
             .select(`
               status,
@@ -192,7 +194,7 @@ class AdminUserService {
   // Récupérer tous les rôles disponibles
   async getRoles(): Promise<UserRole[]> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.supabaseAdmin
         .from('system_roles')
         .select('*')
         .eq('is_active', true)
@@ -209,7 +211,7 @@ class AdminUserService {
   // Récupérer tous les plans d'abonnement disponibles
   async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.supabaseAdmin
         .from('subscription_plans')
         .select('*')
         .eq('is_active', true)
@@ -229,7 +231,7 @@ class AdminUserService {
       console.log('Updating user role:', { userId, newRole })
       
       // Récupérer l'ID du rôle
-      const { data: roleData, error: roleError } = await this.supabase
+      const { data: roleData, error: roleError } = await this.supabaseAdmin
         .from('system_roles')
         .select('id')
         .eq('name', newRole)
@@ -246,7 +248,7 @@ class AdminUserService {
       console.log('Role data found:', roleData)
 
       // Désactiver tous les rôles actuels de l'utilisateur
-      const { error: deactivateError } = await this.supabase
+      const { error: deactivateError } = await this.supabaseAdmin
         .from('user_roles')
         .update({ is_active: false })
         .eq('user_id', userId)
@@ -257,7 +259,7 @@ class AdminUserService {
       }
 
       // Ajouter le nouveau rôle
-      const { error: insertError } = await this.supabase
+      const { error: insertError } = await this.supabaseAdmin
         .from('user_roles')
         .insert({
           user_id: userId,
@@ -271,7 +273,7 @@ class AdminUserService {
       }
 
       // Mettre à jour le profil utilisateur
-      const { error: profileError } = await this.supabase
+      const { error: profileError } = await this.supabaseAdmin
         .from('user_profiles')
         .update({ is_admin: newRole === 'admin' })
         .eq('user_id', userId)
@@ -295,7 +297,7 @@ class AdminUserService {
       console.log('Updating user subscription:', { userId, planName })
       
       // Récupérer l'ID du plan
-      const { data: planData, error: planError } = await this.supabase
+      const { data: planData, error: planError } = await this.supabaseAdmin
         .from('subscription_plans')
         .select('id, price_monthly')
         .eq('name', planName)
@@ -312,7 +314,7 @@ class AdminUserService {
       console.log('Plan data found:', planData)
 
       // Désactiver l'abonnement actuel
-      const { error: deactivateError } = await this.supabase
+      const { error: deactivateError } = await this.supabaseAdmin
         .from('user_subscriptions')
         .update({ status: 'cancelled' })
         .eq('user_id', userId)
@@ -325,7 +327,7 @@ class AdminUserService {
       }
 
       // Créer le nouvel abonnement
-      const { error: insertError } = await this.supabase
+      const { error: insertError } = await this.supabaseAdmin
         .from('user_subscriptions')
         .insert({
           user_id: userId,
@@ -364,14 +366,14 @@ class AdminUserService {
         .eq('is_active', true)
 
       // Utilisateurs avec abonnement payant
-      const { count: premiumUsers } = await this.supabase
+      const { count: premiumUsers } = await this.supabaseAdmin
         .from('user_subscriptions')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'active')
         .not('subscription_plans.name', 'eq', 'free')
 
       // Revenus totaux depuis les abonnements
-      const { data: revenueData } = await this.supabase
+      const { data: revenueData } = await this.supabaseAdmin
         .from('user_subscriptions')
         .select('amount, billing_cycle, created_at')
         .eq('status', 'active')
@@ -388,7 +390,7 @@ class AdminUserService {
       const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1)
       const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0)
 
-      const { data: monthlyRevenueData } = await this.supabase
+      const { data: monthlyRevenueData } = await this.supabaseAdmin
         .from('user_subscriptions')
         .select('amount, billing_cycle')
         .eq('status', 'active')
@@ -402,7 +404,7 @@ class AdminUserService {
       }, 0) || 0
 
       // Statistiques par plan
-      const { data: planStats } = await this.supabase
+      const { data: planStats } = await this.supabaseAdmin
         .from('user_subscriptions')
         .select(`
           subscription_plans (
