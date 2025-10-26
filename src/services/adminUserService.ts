@@ -396,45 +396,72 @@ class AdminUserService {
           .select('*', { count: 'exact', head: true })
           .eq('is_active', true)
 
-      // Utilisateurs avec abonnement payant
-      const { count: premiumUsers } = await this.supabaseAdmin
+      // Utilisateurs avec abonnement payant (Boost/Scale uniquement)
+      const { data: premiumSubscriptions } = await this.supabaseAdmin
         .from('user_subscriptions')
-        .select('*', { count: 'exact', head: true })
+        .select(`
+          subscription_plans (
+            name
+          )
+        `)
         .eq('status', 'active')
-        .not('subscription_plans.name', 'eq', 'free')
 
-      // Revenus totaux depuis les abonnements
+      const premiumUsers = premiumSubscriptions?.filter(sub => {
+        const planName = sub.subscription_plans?.name
+        return planName === 'boost' || planName === 'scale'
+      }).length || 0
+
+      // Revenus totaux depuis les abonnements (Boost/Scale uniquement)
       const { data: revenueData } = await this.supabaseAdmin
         .from('user_subscriptions')
-        .select('amount, billing_cycle, created_at')
+        .select(`
+          amount, 
+          billing_cycle, 
+          created_at,
+          subscription_plans (
+            name
+          )
+        `)
         .eq('status', 'active')
 
-      const totalRevenue = revenueData?.reduce((sum, sub) => {
+      const totalRevenue = revenueData?.filter(sub => {
+        const planName = sub.subscription_plans?.name
+        return planName === 'boost' || planName === 'scale'
+      }).reduce((sum, sub) => {
         const amount = sub.amount || 0
         // Si c'est un abonnement annuel, diviser par 12 pour avoir le montant mensuel
         const monthlyAmount = sub.billing_cycle === 'yearly' ? amount / 12 : amount
         return sum + monthlyAmount
       }, 0) || 0
 
-      // Revenus du mois en cours
+      // Revenus du mois en cours (Boost/Scale uniquement)
       const currentMonth = new Date()
       const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1)
       const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0)
 
       const { data: monthlyRevenueData } = await this.supabaseAdmin
         .from('user_subscriptions')
-        .select('amount, billing_cycle')
+        .select(`
+          amount, 
+          billing_cycle,
+          subscription_plans (
+            name
+          )
+        `)
         .eq('status', 'active')
         .gte('created_at', startOfMonth.toISOString())
         .lte('created_at', endOfMonth.toISOString())
 
-      const monthlyRevenue = monthlyRevenueData?.reduce((sum, sub) => {
+      const monthlyRevenue = monthlyRevenueData?.filter(sub => {
+        const planName = sub.subscription_plans?.name
+        return planName === 'boost' || planName === 'scale'
+      }).reduce((sum, sub) => {
         const amount = sub.amount || 0
         const monthlyAmount = sub.billing_cycle === 'yearly' ? amount / 12 : amount
         return sum + monthlyAmount
       }, 0) || 0
 
-      // Statistiques par plan
+      // Statistiques par plan (Boost/Scale uniquement)
       const { data: planStats } = await this.supabaseAdmin
         .from('user_subscriptions')
         .select(`
@@ -448,7 +475,10 @@ class AdminUserService {
         `)
         .eq('status', 'active')
 
-      const planBreakdown = planStats?.reduce((acc, sub) => {
+      const planBreakdown = planStats?.filter(sub => {
+        const planName = sub.subscription_plans?.name
+        return planName === 'boost' || planName === 'scale'
+      }).reduce((acc, sub) => {
         const planName = sub.subscription_plans?.name || 'unknown'
         if (!acc[planName]) {
           acc[planName] = {
