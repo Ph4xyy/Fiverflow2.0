@@ -118,9 +118,14 @@ class AdminUserService {
 
       if (usersError) throw usersError
 
-      // Pour chaque utilisateur, récupérer son rôle et abonnement
+      // Appliquer la pagination après avoir récupéré tous les utilisateurs
+      const startIndex = (page - 1) * limit
+      const endIndex = startIndex + limit
+      const paginatedUsers = users.slice(startIndex, endIndex)
+
+      // Pour chaque utilisateur paginé, récupérer son rôle et abonnement
       const usersWithDetails = await Promise.all(
-        users.map(async (user) => {
+        paginatedUsers.map(async (user) => {
           // Récupérer le rôle
           const { data: userRole } = await this.supabaseAdmin
             .from('user_roles')
@@ -172,7 +177,7 @@ class AdminUserService {
       )
 
       // Compter le total pour la pagination
-      const { count } = await this.supabase
+      const { count } = await this.supabaseAdmin
         .from('user_profiles')
         .select('*', { count: 'exact', head: true })
 
@@ -272,18 +277,21 @@ class AdminUserService {
         throw new Error(`Erreur lors de la désactivation des rôles: ${deactivateError.message}`)
       }
 
-      // Ajouter le nouveau rôle
-      const { error: insertError } = await this.supabaseAdmin
+      // Créer ou mettre à jour le rôle (upsert)
+      const { error: upsertError } = await this.supabaseAdmin
         .from('user_roles')
-        .insert({
+        .upsert({
           user_id: userId,
           role_id: roleData.id,
           is_active: true
+        }, {
+          onConflict: 'user_id',
+          ignoreDuplicates: false
         })
 
-      if (insertError) {
-        console.error('Error inserting new role:', insertError)
-        throw new Error(`Erreur lors de l'ajout du nouveau rôle: ${insertError.message}`)
+      if (upsertError) {
+        console.error('Error upserting role:', upsertError)
+        throw new Error(`Erreur lors de la mise à jour du rôle: ${upsertError.message}`)
       }
 
       // Mettre à jour le profil utilisateur
