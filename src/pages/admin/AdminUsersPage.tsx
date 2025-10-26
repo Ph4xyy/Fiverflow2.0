@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import AdminLayout from '../../components/AdminLayout'
-import AdminNavigation from '../../components/AdminNavigation'
 import UserDetailModal from '../../components/UserDetailModal'
 import { useAdminUsers } from '../../hooks/useAdminUsers'
-import { AdminUser } from '../../services/adminService'
+import { AdminUser } from '../../services/adminUserService'
 import {
   Users,
   Search,
@@ -55,6 +54,8 @@ const AdminUsersPage: React.FC = () => {
 
   const {
     users,
+    roles,
+    subscriptionPlans,
     loading,
     error,
     pagination,
@@ -388,9 +389,11 @@ const AdminUsersPage: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                   >
                     <option value="">Tous les rôles</option>
-                    <option value="admin">Admin</option>
-                    <option value="moderator">Modérateur</option>
-                    <option value="user">Utilisateur</option>
+                    {roles.map((role) => (
+                      <option key={role.id} value={role.name}>
+                        {role.display_name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -404,10 +407,11 @@ const AdminUsersPage: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                   >
                     <option value="">Tous les plans</option>
-                    <option value="free">Gratuit</option>
-                    <option value="basic">Basique</option>
-                    <option value="premium">Premium</option>
-                    <option value="enterprise">Entreprise</option>
+                    {subscriptionPlans.map((plan) => (
+                      <option key={plan.id} value={plan.name}>
+                        {plan.display_name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -607,6 +611,8 @@ const AdminUsersPage: React.FC = () => {
           setSelectedUser(null)
         }}
         onUpdate={handleUserAction}
+        roles={roles}
+        subscriptionPlans={subscriptionPlans}
       />
     </AdminLayout>
   )

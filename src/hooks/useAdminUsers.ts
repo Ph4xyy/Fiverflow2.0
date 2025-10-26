@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
-import { AdminService, AdminUser, UsersListResponse } from '../services/adminService'
+import { useState, useEffect } from 'react'
+import { adminUserService, AdminUser, UserRole, SubscriptionPlan } from '../services/adminUserService'
 
-export interface UseAdminUsersOptions {
+interface UseAdminUsersParams {
   page?: number
   limit?: number
   search?: string
@@ -11,8 +11,10 @@ export interface UseAdminUsersOptions {
   sort_order?: 'asc' | 'desc'
 }
 
-export interface UseAdminUsersReturn {
+interface UseAdminUsersReturn {
   users: AdminUser[]
+  roles: UserRole[]
+  subscriptionPlans: SubscriptionPlan[]
   loading: boolean
   error: string | null
   pagination: {
@@ -20,136 +22,90 @@ export interface UseAdminUsersReturn {
     limit: number
     total: number
     pages: number
-  }
+  } | null
   refetch: () => Promise<void>
   updateUserRole: (userId: string, role: string) => Promise<void>
-  updateUserSubscription: (
-    userId: string, 
-    subscription_plan: string,
-    subscription_started_at?: string,
-    subscription_expires_at?: string
-  ) => Promise<void>
-  setFilters: (filters: Partial<UseAdminUsersOptions>) => void
+  updateUserSubscription: (userId: string, plan: string) => Promise<void>
+  setFilters: (filters: Partial<UseAdminUsersParams>) => void
 }
 
-export function useAdminUsers(initialOptions: UseAdminUsersOptions = {}): UseAdminUsersReturn {
+export const useAdminUsers = (params: UseAdminUsersParams = {}): UseAdminUsersReturn => {
   const [users, setUsers] = useState<AdminUser[]>([])
+  const [roles, setRoles] = useState<UserRole[]>([])
+  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 20,
-    total: 0,
-    pages: 0
-  })
-  const [options, setOptions] = useState<UseAdminUsersOptions>({
-    page: 1,
-    limit: 20,
-    sort_by: 'created_at',
-    sort_order: 'desc',
-    ...initialOptions
-  })
+  const [pagination, setPagination] = useState<{
+    page: number
+    limit: number
+    total: number
+    pages: number
+  } | null>(null)
+  const [filters, setFilters] = useState<UseAdminUsersParams>(params)
 
-  const fetchUsers = useCallback(async () => {
+  const fetchData = async () => {
     try {
       setLoading(true)
       setError(null)
-      
-      const response: UsersListResponse = await AdminService.getUsers(options)
-      
-      setUsers(response.users)
-      setPagination(response.pagination)
+
+      // Récupérer les utilisateurs, rôles et plans en parallèle
+      const [usersResult, rolesResult, plansResult] = await Promise.all([
+        adminUserService.getUsers(filters),
+        adminUserService.getRoles(),
+        adminUserService.getSubscriptionPlans()
+      ])
+
+      setUsers(usersResult.users)
+      setPagination(usersResult.pagination)
+      setRoles(rolesResult)
+      setSubscriptionPlans(plansResult)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch users')
-      console.error('Error fetching users:', err)
+      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des données')
     } finally {
       setLoading(false)
     }
-  }, [options])
+  }
 
-  const refetch = useCallback(async () => {
-    await fetchUsers()
-  }, [fetchUsers])
+  const refetch = async () => {
+    await fetchData()
+  }
 
-  const updateUserRole = useCallback(async (userId: string, role: string) => {
+  const updateUserRole = async (userId: string, role: string) => {
     try {
-      setError(null)
-      await AdminService.updateUserRole(userId, role)
-      
-      // Update the user in the local state
-      setUsers(prevUsers => 
-        prevUsers.map(user => 
-          user.user_id === userId 
-            ? { ...user, role }
-            : user
-        )
-      )
-      
-      // Refetch to ensure data consistency
-      await refetch()
+      await adminUserService.updateUserRole(userId, role)
+      await refetch() // Recharger les données
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update user role')
       throw err
     }
-  }, [refetch])
+  }
 
-  const updateUserSubscription = useCallback(async (
-    userId: string, 
-    subscription_plan: string,
-    subscription_started_at?: string,
-    subscription_expires_at?: string
-  ) => {
+  const updateUserSubscription = async (userId: string, plan: string) => {
     try {
-      setError(null)
-      await AdminService.updateUserSubscription(
-        userId, 
-        subscription_plan,
-        subscription_started_at,
-        subscription_expires_at
-      )
-      
-      // Update the user in the local state
-      setUsers(prevUsers => 
-        prevUsers.map(user => 
-          user.user_id === userId 
-            ? { 
-                ...user, 
-                subscription_plan,
-                subscription_started_at: subscription_started_at || user.subscription_started_at,
-                subscription_expires_at: subscription_expires_at || user.subscription_expires_at
-              }
-            : user
-        )
-      )
-      
-      // Refetch to ensure data consistency
-      await refetch()
+      await adminUserService.updateUserSubscription(userId, plan)
+      await refetch() // Recharger les données
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update user subscription')
       throw err
     }
-  }, [refetch])
+  }
 
-  const setFilters = useCallback((filters: Partial<UseAdminUsersOptions>) => {
-    setOptions(prevOptions => ({
-      ...prevOptions,
-      ...filters,
-      page: 1 // Reset to first page when filters change
-    }))
-  }, [])
+  const handleSetFilters = (newFilters: Partial<UseAdminUsersParams>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }))
+  }
 
   useEffect(() => {
-    fetchUsers()
-  }, [fetchUsers])
+    fetchData()
+  }, [filters])
 
   return {
     users,
+    roles,
+    subscriptionPlans,
     loading,
     error,
     pagination,
     refetch,
     updateUserRole,
     updateUserSubscription,
-    setFilters
+    setFilters: handleSetFilters
   }
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { AdminUser } from '../../services/adminService'
+import { AdminUser } from '../services/adminUserService'
+import { UserRole, SubscriptionPlan } from '../services/adminUserService'
 import {
   X,
   Mail,
@@ -23,9 +24,18 @@ interface UserDetailModalProps {
   isOpen: boolean
   onClose: () => void
   onUpdate: (userId: string, action: string, data: any) => Promise<void>
+  roles?: UserRole[]
+  subscriptionPlans?: SubscriptionPlan[]
 }
 
-const UserDetailModal: React.FC<UserDetailModalProps> = ({ user, isOpen, onClose, onUpdate }) => {
+const UserDetailModal: React.FC<UserDetailModalProps> = ({ 
+  user, 
+  isOpen, 
+  onClose, 
+  onUpdate, 
+  roles = [], 
+  subscriptionPlans = [] 
+}) => {
   const [isEditing, setIsEditing] = useState(false)
   const [editedUser, setEditedUser] = useState<Partial<AdminUser>>({})
 
@@ -190,9 +200,11 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ user, isOpen, onClose
                       onChange={(e) => setEditedUser({ ...editedUser, role: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                     >
-                      <option value="user">Utilisateur</option>
-                      <option value="moderator">Modérateur</option>
-                      <option value="admin">Administrateur</option>
+                      {roles.map((role) => (
+                        <option key={role.id} value={role.name}>
+                          {role.display_name}
+                        </option>
+                      ))}
                     </select>
                   ) : (
                     <div className="flex items-center gap-2">
@@ -213,10 +225,11 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ user, isOpen, onClose
                       onChange={(e) => setEditedUser({ ...editedUser, subscription_plan: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                     >
-                      <option value="free">Gratuit</option>
-                      <option value="basic">Basique</option>
-                      <option value="premium">Premium</option>
-                      <option value="enterprise">Entreprise</option>
+                      {subscriptionPlans.map((plan) => (
+                        <option key={plan.id} value={plan.name}>
+                          {plan.display_name}
+                        </option>
+                      ))}
                     </select>
                   ) : (
                     getPlanBadge(user.subscription_plan || 'free')
