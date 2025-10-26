@@ -226,7 +226,7 @@ const AdminUsersPage: React.FC = () => {
         </div>
 
         {/* Filters */}
-        <div className={`${cardClass} p-4 border border-gray-200 dark:border-slate-700`}>
+        <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-gray-200 dark:border-slate-700">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -304,7 +304,7 @@ const AdminUsersPage: React.FC = () => {
 
         {/* Error State */}
         {error && (
-          <div className={`${cardClass} border border-red-200 dark:border-red-800 p-4`}>
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-red-200 dark:border-red-800 p-4">
             <div className="flex items-center gap-3">
               <AlertCircle className="text-red-500" size={20} />
               <div>
@@ -332,7 +332,7 @@ const AdminUsersPage: React.FC = () => {
         {/* Users Table */}
         {!loading && !error && (
           <>
-            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 overflow-hidden`}>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
                   <thead className="bg-gray-50 dark:bg-slate-800">

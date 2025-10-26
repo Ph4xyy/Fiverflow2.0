@@ -135,8 +135,8 @@ const AdminStatsPage: React.FC = () => {
   if (!stats && !loading) {
     return (
       <AdminLayout>
-        <div className={`space-y-4 p-4 ${pageBgClass}`}>
-          <div className={`${cardClass} p-6 text-center`}>
+        <div className="space-y-4 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 text-center">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               Aucune donnée disponible
             </h2>
@@ -187,7 +187,7 @@ const AdminStatsPage: React.FC = () => {
         </div>
 
         {/* Date Filters */}
-        <div className={`${cardClass} p-4 border border-gray-200 dark:border-slate-700`}>
+        <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-gray-200 dark:border-slate-700">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex items-center gap-2">
               <Calendar className="text-gray-600 dark:text-gray-300" size={16} />
@@ -236,7 +236,7 @@ const AdminStatsPage: React.FC = () => {
 
         {/* Error State */}
         {error && (
-          <div className={`${cardClass} border border-red-200 dark:border-red-800 p-4`}>
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-red-200 dark:border-red-800 p-4">
             <div className="flex items-center gap-3">
               <div className="text-red-500" size={20} />
               <div>
@@ -266,7 +266,7 @@ const AdminStatsPage: React.FC = () => {
           <>
             {/* KPIs Principaux */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -285,7 +285,7 @@ const AdminStatsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -304,7 +304,7 @@ const AdminStatsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -323,7 +323,7 @@ const AdminStatsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -346,7 +346,7 @@ const AdminStatsPage: React.FC = () => {
             {/* Charts */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               {/* Revenue Distribution */}
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   Répartition des Revenus
                 </h3>
@@ -373,7 +373,7 @@ const AdminStatsPage: React.FC = () => {
               </div>
 
               {/* Plan Distribution */}
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   Répartition des Plans
                 </h3>
@@ -393,7 +393,7 @@ const AdminStatsPage: React.FC = () => {
 
             {/* Platform Stats */}
             {platformData.length > 0 && (
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   Top Plateformes Clients
                 </h3>
@@ -414,7 +414,7 @@ const AdminStatsPage: React.FC = () => {
             {/* Recent Activity */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               {/* Recent Users */}
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   Utilisateurs Récents
                 </h3>
@@ -443,7 +443,7 @@ const AdminStatsPage: React.FC = () => {
               </div>
 
               {/* Recent Orders */}
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                   Commandes Récentes
                 </h3>
