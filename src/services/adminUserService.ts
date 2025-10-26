@@ -223,7 +223,16 @@ class AdminUserService {
         .order('price_monthly')
 
       if (error) throw error
-      return data || []
+      
+      // Réorganiser les plans dans l'ordre logique : free, launch, boost, scale, admin
+      const orderedPlans = (data || []).sort((a, b) => {
+        const order = ['free', 'launch', 'boost', 'scale', 'admin']
+        return order.indexOf(a.name) - order.indexOf(b.name)
+      })
+      
+      console.log('📋 Subscription plans retrieved:', orderedPlans.map(p => ({ name: p.name, display_name: p.display_name })))
+      
+      return orderedPlans
     } catch (error) {
       console.error('Error fetching subscription plans:', error)
       throw error
@@ -313,14 +322,16 @@ class AdminUserService {
   // Mettre à jour l'abonnement d'un utilisateur
   async updateUserSubscription(userId: string, planName: string) {
     try {
-      console.log('Updating user subscription:', { userId, planName })
+      console.log('🔄 AdminUserService - updateUserSubscription:', { userId, planName })
       
       // Récupérer l'ID du plan
       const { data: planData, error: planError } = await this.supabaseAdmin
         .from('subscription_plans')
-        .select('id, price_monthly')
+        .select('id, price_monthly, name, display_name')
         .eq('name', planName)
         .single()
+
+      console.log('📋 Plan data retrieved:', planData)
 
       if (planError) {
         console.error('Error fetching plan:', planError)

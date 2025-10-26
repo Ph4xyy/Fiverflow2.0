@@ -52,15 +52,23 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
   const handleSave = async () => {
     try {
+      console.log('🔍 UserDetailModal - handleSave:', {
+        originalPlan: user.subscription_plan,
+        newPlan: editedUser.subscription_plan,
+        availablePlans: subscriptionPlans.map(p => ({ name: p.name, display_name: p.display_name }))
+      })
+      
       if (editedUser.role !== user.role) {
         await onUpdate(user.user_id, 'role', { role: editedUser.role })
       }
       if (editedUser.subscription_plan !== user.subscription_plan) {
+        console.log('📝 Updating subscription plan:', editedUser.subscription_plan)
         await onUpdate(user.user_id, 'subscription', { plan: editedUser.subscription_plan })
       }
       setIsEditing(false)
       toast.success('Utilisateur mis à jour avec succès')
     } catch (error) {
+      console.error('❌ Error in handleSave:', error)
       toast.error('Erreur lors de la mise à jour')
     }
   }
