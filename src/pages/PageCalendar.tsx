@@ -12,6 +12,7 @@ import { useSubscriptions } from '../hooks/useSubscriptions';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useOrders } from '../hooks/useOrders';
+import { useInvoices } from '../hooks/useInvoices';
 import { 
   Calendar as CalendarIcon, 
   Plus, 
@@ -43,6 +44,7 @@ const PageCalendar: React.FC = () => {
   const { tasks, loading: tasksLoading } = useTasks();
   const { orders, loading: ordersLoading } = useOrders();
   const { subscriptions, loading: subscriptionsLoading } = useSubscriptions();
+  const { invoices, loading: invoicesLoading } = useInvoices();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -143,6 +145,28 @@ const PageCalendar: React.FC = () => {
 
         setCalendarEvents(calendarData || []);
 
+        // Convertir les factures avec due_date en événements
+        const invoiceEvents: Event[] = invoices
+          .filter(invoice => invoice.due_date)
+          .map(invoice => {
+            console.log('🧾 Invoice with due_date:', {
+              id: invoice.id,
+              number: invoice.number,
+              due_date: invoice.due_date,
+              total: invoice.total,
+              status: invoice.status
+            });
+            return {
+              id: `invoice-${invoice.id}`,
+              title: `🧾 ${invoice.number} - ${invoice.clients.name}`,
+              date: invoice.due_date,
+              time: '17:00',
+              type: 'deadline' as const,
+              priority: invoice.status === 'overdue' ? 'high' as const : 'medium' as const,
+              description: `Facture de ${invoice.total.toFixed(2)} ${invoice.currency} - ${invoice.status}`
+            };
+          });
+
         // Convertir les tâches avec due_date en événements
         const taskEvents: Event[] = tasks
           .filter(task => task.due_date)
@@ -234,7 +258,7 @@ const PageCalendar: React.FC = () => {
           });
 
         // Combiner tous les événements
-        const allEvents = [...allTaskEvents, ...orderEvents, ...calendarEventObjects, ...subscriptionEvents];
+        const allEvents = [...allTaskEvents, ...orderEvents, ...calendarEventObjects, ...subscriptionEvents, ...invoiceEvents];
         setEvents(allEvents);
         
         console.log('✅ Calendar events loaded:', {
@@ -242,6 +266,7 @@ const PageCalendar: React.FC = () => {
           orders: orderEvents.length,
           calendar: calendarEventObjects.length,
           subscriptions: subscriptionEvents.length,
+          invoices: invoiceEvents.length,
           total: allEvents.length
         });
         
@@ -270,10 +295,10 @@ const PageCalendar: React.FC = () => {
     };
 
     // Charger seulement si les données sont prêtes
-    if (!tasksLoading && !ordersLoading && !subscriptionsLoading) {
+    if (!tasksLoading && !ordersLoading && !subscriptionsLoading && !invoicesLoading) {
       loadCalendarEvents();
     }
-  }, [user, tasks, orders, subscriptions, tasksLoading, ordersLoading, subscriptionsLoading]);
+  }, [user, tasks, orders, subscriptions, invoices, tasksLoading, ordersLoading, subscriptionsLoading, invoicesLoading]);
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -392,7 +417,7 @@ const PageCalendar: React.FC = () => {
   const days = getDaysInMonth(currentDate);
 
   // Afficher un indicateur de chargement
-  if (loading || tasksLoading || ordersLoading || subscriptionsLoading) {
+  if (loading || tasksLoading || ordersLoading || subscriptionsLoading || invoicesLoading) {
     return (
       <div className="p-6 space-y-6">
           <div className="flex items-center justify-center h-64">
@@ -731,6 +756,15 @@ const PageCalendar: React.FC = () => {
                   </div>
                   <span className="text-lg font-bold text-white">
                     {orders.filter(order => order.due_date).length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-[#ec4899] to-[#db2777]"></div>
+                    <span className="text-sm text-[#94a3b8]">Invoice due dates</span>
+                  </div>
+                  <span className="text-lg font-bold text-white">
+                    {invoices.filter(invoice => invoice.due_date).length}
                   </span>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-[#35414e] rounded-lg border border-[#1C2230] hover:border-[#35414e] transition-colors">
