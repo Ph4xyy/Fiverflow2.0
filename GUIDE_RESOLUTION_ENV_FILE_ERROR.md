@@ -163,3 +163,4 @@ Le problème était un fichier `.env.local` corrompu avec des caractères invali
 2. Créer un nouveau fichier propre
 3. Configurer les clés Stripe de test
 4. Tester l'application
+

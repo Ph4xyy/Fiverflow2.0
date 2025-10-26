@@ -36,3 +36,4 @@ Write-Host "2. Vérifiez que le plan s'est mis à jour" -ForegroundColor Cyan
 Write-Host "3. Testez l'accès aux différentes pages" -ForegroundColor Cyan
 Write-Host "4. Les pages Boost/Scale devraient maintenant être accessibles" -ForegroundColor Cyan
 
+

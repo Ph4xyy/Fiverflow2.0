@@ -144,3 +144,4 @@ Le problème était une tentative de créer un abonnement dans la base de donné
 2. Tester le flux de paiement
 3. Configurer les webhooks Stripe
 4. Tester les paiements avec des cartes de test
+
