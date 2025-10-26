@@ -266,32 +266,29 @@ class AdminUserService {
         return { success: true }
       }
 
-      // Désactiver tous les rôles actuels de l'utilisateur
-      const { error: deactivateError } = await this.supabaseAdmin
+      // Supprimer tous les rôles actuels de l'utilisateur
+      const { error: deleteError } = await this.supabaseAdmin
         .from('user_roles')
-        .update({ is_active: false })
+        .delete()
         .eq('user_id', userId)
 
-      if (deactivateError) {
-        console.error('Error deactivating roles:', deactivateError)
-        throw new Error(`Erreur lors de la désactivation des rôles: ${deactivateError.message}`)
+      if (deleteError) {
+        console.error('Error deleting roles:', deleteError)
+        throw new Error(`Erreur lors de la suppression des rôles: ${deleteError.message}`)
       }
 
-      // Créer ou mettre à jour le rôle (upsert)
-      const { error: upsertError } = await this.supabaseAdmin
+      // Insérer le nouveau rôle
+      const { error: insertError } = await this.supabaseAdmin
         .from('user_roles')
-        .upsert({
+        .insert({
           user_id: userId,
           role_id: roleData.id,
           is_active: true
-        }, {
-          onConflict: 'user_id',
-          ignoreDuplicates: false
         })
 
-      if (upsertError) {
-        console.error('Error upserting role:', upsertError)
-        throw new Error(`Erreur lors de la mise à jour du rôle: ${upsertError.message}`)
+      if (insertError) {
+        console.error('Error inserting new role:', insertError)
+        throw new Error(`Erreur lors de l'ajout du nouveau rôle: ${insertError.message}`)
       }
 
       // Mettre à jour le profil utilisateur
@@ -349,37 +346,32 @@ class AdminUserService {
         return { success: true }
       }
 
-      // Désactiver l'abonnement actuel
-      const { error: deactivateError } = await this.supabaseAdmin
+      // Supprimer tous les abonnements actuels de l'utilisateur
+      const { error: deleteError } = await this.supabaseAdmin
         .from('user_subscriptions')
-        .update({ status: 'cancelled' })
+        .delete()
         .eq('user_id', userId)
-        .eq('status', 'active')
 
-      if (deactivateError) {
-        console.error('Error deactivating subscription:', deactivateError)
-        // Ne pas faire échouer si aucun abonnement actuel
-        console.log('No active subscription to deactivate')
+      if (deleteError) {
+        console.error('Error deleting subscriptions:', deleteError)
+        throw new Error(`Erreur lors de la suppression des abonnements: ${deleteError.message}`)
       }
 
-      // Créer ou mettre à jour l'abonnement (upsert)
-      const { error: upsertError } = await this.supabaseAdmin
+      // Insérer le nouvel abonnement
+      const { error: insertError } = await this.supabaseAdmin
         .from('user_subscriptions')
-        .upsert({
+        .insert({
           user_id: userId,
           plan_id: planData.id,
           status: 'active',
           billing_cycle: 'monthly',
           amount: planData.price_monthly,
           currency: 'USD'
-        }, {
-          onConflict: 'user_id',
-          ignoreDuplicates: false
         })
 
-      if (upsertError) {
-        console.error('Error upserting subscription:', upsertError)
-        throw new Error(`Erreur lors de la mise à jour de l'abonnement: ${upsertError.message}`)
+      if (insertError) {
+        console.error('Error inserting new subscription:', insertError)
+        throw new Error(`Erreur lors de l'ajout du nouvel abonnement: ${insertError.message}`)
       }
 
       console.log('Subscription updated successfully')
