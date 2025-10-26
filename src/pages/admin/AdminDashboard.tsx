@@ -3,7 +3,6 @@ import AdminLayout from '../../components/AdminLayout';
 import AdminNavigation from '../../components/AdminNavigation';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAdminStats } from '../../hooks/useAdminStats';
-import AdminSubscriptionManager from '../../components/AdminSubscriptionManager';
 import UserDetailedStats from '../../components/UserDetailedStats';
 import {
   Users,
@@ -658,8 +657,6 @@ const AdminDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* Gestion des Abonnements */}
-            <AdminSubscriptionManager startDate={startDate} endDate={endDate} />
 
             {/* Footer Info */}
             <div className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">

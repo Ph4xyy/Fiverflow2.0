@@ -5,19 +5,19 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 export interface AdminUser {
   id: string
+  user_id: string
   email: string
   full_name?: string
-  username?: string
   role?: string
   subscription_plan?: string
   subscription_status?: string
   is_active?: boolean
+  is_admin?: boolean
   created_at: string
   last_activity?: string
   total_spent?: number
   monthly_spent?: number
   total_orders?: number
-  referral_code?: string
 }
 
 export interface UserRole {
@@ -87,16 +87,12 @@ class AdminUserService {
         .from('user_profiles')
         .select(`
           id,
+          user_id,
           email,
           full_name,
-          username,
           created_at,
-          last_activity,
-          total_spent,
-          monthly_spent,
-          total_orders,
-          referral_code,
-          is_active
+          is_active,
+          is_admin
         `)
 
       // Appliquer les filtres
@@ -132,7 +128,7 @@ class AdminUserService {
                 display_name
               )
             `)
-            .eq('user_id', user.id)
+            .eq('user_id', user.user_id)
             .eq('is_active', true)
             .single()
 
@@ -149,15 +145,26 @@ class AdminUserService {
                 display_name
               )
             `)
-            .eq('user_id', user.id)
+            .eq('user_id', user.user_id)
             .eq('status', 'active')
             .single()
 
+          // Calculer les valeurs par défaut
+          const role = userRole?.system_roles?.name || (user.is_admin ? 'admin' : 'user')
+          const subscription_plan = subscription?.subscription_plans?.name || 'free'
+          const subscription_status = subscription?.status || 'inactive'
+          const total_spent = subscription?.amount || 0
+          const monthly_spent = subscription?.amount || 0
+
           return {
             ...user,
-            role: userRole?.system_roles?.name || 'user',
-            subscription_plan: subscription?.subscription_plans?.name || 'free',
-            subscription_status: subscription?.status || 'inactive'
+            role,
+            subscription_plan,
+            subscription_status,
+            total_spent,
+            monthly_spent,
+            total_orders: 0, // Valeur par défaut
+            last_activity: user.created_at // Utiliser created_at comme fallback
           }
         })
       )
@@ -249,8 +256,8 @@ class AdminUserService {
       // Mettre à jour le profil utilisateur
       const { error: profileError } = await this.supabase
         .from('user_profiles')
-        .update({ role: newRole })
-        .eq('id', userId)
+        .update({ is_admin: newRole === 'admin' })
+        .eq('user_id', userId)
 
       if (profileError) throw profileError
 
@@ -321,7 +328,7 @@ class AdminUserService {
         .from('user_subscriptions')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'active')
-        .neq('subscription_plans.name', 'free')
+        .not('subscription_plans.name', 'eq', 'free')
 
       // Revenus totaux
       const { data: revenueData } = await this.supabase
