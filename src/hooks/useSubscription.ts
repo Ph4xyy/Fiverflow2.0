@@ -60,7 +60,7 @@ export const useSubscription = () => {
         }
 
         setSubscription({
-          plan: profile?.subscription_plan || 'Launch',
+          plan: profile?.subscription_plan || 'launch',
           status: subscriptionData?.status || 'active',
           currentPeriodEnd: subscriptionData?.current_period_end || null,
           isLoading: false,

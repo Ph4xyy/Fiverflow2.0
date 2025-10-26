@@ -149,7 +149,7 @@ class AdminUserService {
 
           // Calculer les valeurs par défaut
           const role = userRole?.system_roles?.name || (user.is_admin ? 'admin' : 'user')
-          const subscription_plan = subscription?.subscription_plans?.name || 'free'
+          const subscription_plan = subscription?.subscription_plans?.name || 'launch'
           const subscription_status = subscription?.status || 'inactive'
           const total_spent = subscription?.amount || 0
           const monthly_spent = subscription?.amount || 0
@@ -211,17 +211,18 @@ class AdminUserService {
         .from('subscription_plans')
         .select('*')
         .eq('is_active', true)
+        .neq('name', 'free') // Exclure le plan gratuit
         .order('price_monthly')
 
       if (error) throw error
       
-      // Réorganiser les plans dans l'ordre logique : free, launch, boost, scale, admin
+      // Réorganiser les plans dans l'ordre logique : launch, boost, scale, admin (sans free)
       const orderedPlans = (data || []).sort((a, b) => {
-        const order = ['free', 'launch', 'boost', 'scale', 'admin']
+        const order = ['launch', 'boost', 'scale', 'admin']
         return order.indexOf(a.name) - order.indexOf(b.name)
       })
       
-      console.log('📋 Subscription plans retrieved:', orderedPlans.map(p => ({ name: p.name, display_name: p.display_name })))
+      console.log('📋 Subscription plans retrieved (without free):', orderedPlans.map(p => ({ name: p.name, display_name: p.display_name })))
       
       return orderedPlans
     } catch (error) {

@@ -108,13 +108,12 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
   const getPlanBadge = (plan: string) => {
     const plans = {
-      free: { label: 'Gratuit', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
       launch: { label: 'Launch', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
       boost: { label: 'Boost', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' },
       scale: { label: 'Scale', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' },
       admin: { label: 'Admin', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' }
     }
-    const planInfo = plans[plan as keyof typeof plans] || plans.free
+    const planInfo = plans[plan as keyof typeof plans] || { label: 'Aucun Plan', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' }
     return (
       <span className={`px-3 py-1 text-sm font-medium rounded-full ${planInfo.color}`}>
         {planInfo.label}
@@ -241,7 +240,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       ))}
                     </select>
                   ) : (
-                    getPlanBadge(user.subscription_plan || 'free')
+                    getPlanBadge(user.subscription_plan || 'launch')
                   )}
                 </div>
               </div>
