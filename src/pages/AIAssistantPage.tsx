@@ -194,24 +194,24 @@ const AIAssistantPage: React.FC = () => {
     return (
       <div
         key={message.id}
-        className={`flex gap-3 p-4 ${isUser ? 'justify-end' : 'justify-start'}`}
+        className={`flex gap-2 sm:gap-3 p-3 sm:p-4 ${isUser ? 'justify-end' : 'justify-start'}`}
       >
         {!isUser && (
           <div className="flex-shrink-0">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-              <Bot size={16} className="text-white" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+              <Bot size={14} className="sm:w-4 sm:h-4 text-white" />
             </div>
           </div>
         )}
         
         <div
-          className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+          className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 py-2 sm:px-4 sm:py-3 ${
             isUser
               ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
               : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
           }`}
         >
-          <div className="whitespace-pre-wrap">{message.content}</div>
+          <div className="text-sm sm:text-base whitespace-pre-wrap break-words">{message.content}</div>
           <div className="text-xs opacity-70 mt-1">
             {message.timestamp.toLocaleTimeString()}
           </div>
@@ -219,8 +219,8 @@ const AIAssistantPage: React.FC = () => {
 
         {isUser && (
           <div className="flex-shrink-0">
-            <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-              <User size={16} className="text-gray-600 dark:text-gray-300" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+              <User size={14} className="sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
             </div>
           </div>
         )}
@@ -229,19 +229,19 @@ const AIAssistantPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+    <div className="h-screen bg-gray-50 dark:bg-gray-900 flex flex-col overflow-hidden">
+      {/* Header - fixed */}
+      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-              <SparklesIcon size={20} className="text-white" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+              <SparklesIcon size={18} className="sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                 Assistant AI
               </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
                 {userLanguage === 'fr' 
                   ? 'Gérez vos tâches, clients, commandes et événements'
                   : 'Manage your tasks, clients, orders, and events'
@@ -269,26 +269,26 @@ const AIAssistantPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Messages - scrollable */}
+      <div className="flex-1 overflow-y-auto min-h-0">
         {messages.length === 1 && (
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="max-w-4xl mx-auto">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-3 sm:mb-4">
                 {userLanguage === 'fr' ? 'Exemples rapides' : 'Quick examples'}
               </h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {examples.slice(0, 6).map((example) => (
                   <button
                     key={example.id}
                     onClick={() => useExample(example.prompt)}
-                    className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
+                    className="p-3 sm:p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
                   >
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-1">
+                    <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-1">
                       {example.title}
                     </h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">
                       {example.description}
                     </p>
                     <code className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-gray-700 dark:text-gray-300">
@@ -305,16 +305,16 @@ const AIAssistantPage: React.FC = () => {
           {messages.map(renderMessage)}
           
           {isLoading && (
-            <div className="flex gap-3 p-4 justify-start">
+            <div className="flex gap-2 sm:gap-3 p-3 sm:p-4 justify-start">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-                  <Bot size={16} className="text-white" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                  <Bot size={14} className="sm:w-4 sm:h-4 text-white" />
                 </div>
               </div>
-              <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl px-4 py-3">
+              <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl px-3 py-2 sm:px-4 sm:py-3">
                 <div className="flex items-center gap-2">
-                  <Loader2 size={16} className="animate-spin text-gray-500" />
-                  <span className="text-gray-500 dark:text-gray-400">
+                  <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin text-gray-500" />
+                  <span className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
                     {userLanguage === 'fr' ? 'Réflexion...' : 'Thinking...'}
                   </span>
                 </div>
@@ -354,10 +354,10 @@ const AIAssistantPage: React.FC = () => {
         </div>
       )}
 
-      {/* Input */}
-      <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
+      {/* Input - fixed at bottom */}
+      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-3 sm:p-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <div className="flex-1 relative">
               <textarea
                 ref={inputRef}
@@ -366,14 +366,14 @@ const AIAssistantPage: React.FC = () => {
                 onKeyPress={handleKeyPress}
                 placeholder={
                   userLanguage === 'fr' 
-                    ? 'Tapez votre message... (Shift+Entrée pour une nouvelle ligne)'
-                    : 'Type your message... (Shift+Enter for new line)'
+                    ? 'Tapez votre message...'
+                    : 'Type your message...'
                 }
-                className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 pr-10 sm:pr-12 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-sm sm:text-base"
                 rows={1}
                 style={{
-                  minHeight: '48px',
-                  maxHeight: '120px',
+                  minHeight: '40px',
+                  maxHeight: '100px',
                 }}
               />
             </div>
@@ -381,17 +381,17 @@ const AIAssistantPage: React.FC = () => {
             <button
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isLoading || !user}
-              className="px-4 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+              className="px-3 py-2 sm:px-4 sm:py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center flex-shrink-0"
             >
               {isLoading ? (
-                <Loader2 size={18} className="animate-spin" />
+                <Loader2 size={16} className="sm:w-5 sm:h-5 animate-spin" />
               ) : (
-                <Send size={18} />
+                <Send size={16} className="sm:w-5 sm:h-5" />
               )}
             </button>
           </div>
           
-          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+          <div className="hidden sm:block mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
             {userLanguage === 'fr' 
               ? 'Appuyez sur Entrée pour envoyer, Shift+Entrée pour une nouvelle ligne'
               : 'Press Enter to send, Shift+Enter for new line'
