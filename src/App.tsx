@@ -85,16 +85,15 @@ function AppContent() {
   usePreloadData();
 
   return (
-    <Suspense fallback={null}>
-      <Routes>
-        {/* Redirection racine intelligente */}
-        <Route path="/" element={<RootRedirect />} />
-        
-        {/* Landing page - standalone, NO Layout (has its own Navbar) */}
-        <Route path="/landing" element={<LandingPage />} />
-        
-        {/* All other pages WITH Layout wrapper */}
-        <Route element={<Layout />}>
+    <Layout>
+      <Suspense fallback={null}>
+        <Routes>
+          {/* Redirection racine intelligente */}
+          <Route path="/" element={<RootRedirect />} />
+          
+          {/* Landing page - has its own Navbar */}
+          <Route path="/landing" element={<LandingPage />} />
+          
           {/* Pages publiques */}
           <Route path="/pricing" element={<PagePricing />} />
           <Route path="/success" element={<SuccessPage />} />
@@ -223,9 +222,9 @@ function AppContent() {
 
           {/* Onboarding pour nouveaux utilisateurs */}
           <Route path="/onboarding" element={<InstantProtectedRoute><OnboardingPage /></InstantProtectedRoute>} />
-        </Route>
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+    </Layout>
   );
 }
 

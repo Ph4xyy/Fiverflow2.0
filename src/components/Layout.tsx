@@ -596,6 +596,13 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 };
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const location = useLocation();
+  
+  // Skip Layout for landing page
+  if (location.pathname === '/landing') {
+    return <>{children}</>;
+  }
+  
   return (
     <LocalErrorBoundary>
       <LayoutInner>{children}</LayoutInner>
