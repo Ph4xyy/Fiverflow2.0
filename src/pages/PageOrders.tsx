@@ -231,7 +231,26 @@ const PageOrders: React.FC = () => {
 
       if (error) throw error;
 
-      setOrders(data || []);
+      // Convertir les statuts de la DB vers l'affichage utilisateur
+      const getStatusForDisplay = (status: string) => {
+        switch (status) {
+          case 'pending': return 'Pending';
+          case 'in_progress': return 'In Progress';
+          case 'completed': return 'Completed';
+          case 'cancelled': return 'Cancelled';
+          case 'on_hold': return 'On Hold';
+          case 'awaiting_payment': return 'Awaiting Payment';
+          case 'in_review': return 'In Review';
+          default: return status;
+        }
+      };
+
+      const transformed = (data || []).map((o: any) => ({
+        ...o,
+        status: getStatusForDisplay(o.status)
+      }));
+
+      setOrders(transformed);
       setTotal(count || 0);
     } catch (err: any) {
       console.error('Error loading orders:', err);
@@ -385,7 +404,9 @@ const PageOrders: React.FC = () => {
         case 'Completed': return 'completed';
         case 'Cancelled': return 'cancelled';
         case 'On Hold': return 'on_hold';
-        default: return status.toLowerCase().replace(' ', '_');
+        case 'Awaiting Payment': return 'awaiting_payment';
+        case 'In Review': return 'in_review';
+        default: return status.toLowerCase().replace(/ /g, '_');
       }
     };
 
@@ -395,20 +416,27 @@ const PageOrders: React.FC = () => {
         return;
       }
 
-      const { error } = await supabase
+      console.log('🔄 Updating order status:', { orderId, newStatus, dbStatus: getStatusForDB(newStatus) });
+
+      const { error, data } = await supabase
         .from('orders')
         .update({ status: getStatusForDB(newStatus) })
-        .eq('id', orderId);
+        .eq('id', orderId)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Supabase error:', error);
+        throw error;
+      }
 
+      console.log('✅ Status updated successfully:', data);
       toast.success(`Status updated to ${newStatus}`);
       
       // Recharger toutes les données pour mettre à jour preview, edit, etc.
       await fetchOrders();
     } catch (e: any) {
-      console.error('Failed to update status', e);
-      toast.error('Failed to update status');
+      console.error('❌ Failed to update status:', e);
+      toast.error(`Failed to update status: ${e.message || e}`);
     }
   };
 

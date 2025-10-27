@@ -175,6 +175,8 @@ const OrdersPage: React.FC = () => {
           case 'completed': return 'Completed';
           case 'cancelled': return 'Cancelled';
           case 'on_hold': return 'On Hold';
+          case 'awaiting_payment': return 'Awaiting Payment';
+          case 'in_review': return 'In Review';
           default: return status;
         }
       };
@@ -337,7 +339,9 @@ const OrdersPage: React.FC = () => {
         case 'Completed': return 'completed';
         case 'Cancelled': return 'cancelled';
         case 'On Hold': return 'on_hold';
-        default: return 'pending';
+        case 'Awaiting Payment': return 'awaiting_payment';
+        case 'In Review': return 'in_review';
+        default: return status.toLowerCase().replace(/ /g, '_');
       }
     };
 
@@ -347,17 +351,26 @@ const OrdersPage: React.FC = () => {
       return;
     }
     try {
-      const { error } = await supabase
+      console.log('🔄 Updating order status:', { orderId, newStatus, dbStatus: getStatusForDB(newStatus) });
+
+      const { error, data } = await supabase
         .from('orders')
         .update({ status: getStatusForDB(newStatus) })
-        .eq('id', orderId);
-      if (error) throw error;
+        .eq('id', orderId)
+        .select();
+
+      if (error) {
+        console.error('❌ Supabase error:', error);
+        throw error;
+      }
+
+      console.log('✅ Status updated successfully:', data);
       toast.success(`Status updated to ${newStatus}`);
       // Recharger toutes les données pour mettre à jour preview, edit, etc.
       fetchOrders();
     } catch (e: any) {
-      console.error('Failed to update status', e);
-      toast.error('Failed to update status');
+      console.error('❌ Failed to update status:', e);
+      toast.error(`Failed to update status: ${e.message || e}`);
       // force refresh to revert optimistic update
       fetchOrders();
     }
