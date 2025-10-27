@@ -40,21 +40,33 @@ const AIAssistantPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Extract permission values
-  const subscription = permissions?.subscription || null;
-  const isUserAdmin = permissions?.isAdmin || false;
-  const permissionsLoading = permissions?.loading || false;
+  // Extract permission values - with safe fallbacks
+  const subscription = (permissions && 'subscription' in permissions) ? permissions.subscription : null;
+  const isUserAdmin = (permissions && 'isAdmin' in permissions) ? permissions.isAdmin : false;
+  const permissionsLoading = (permissions && 'loading' in permissions) ? permissions.loading : false;
 
   // Detect user language
   const userLanguage = navigator.language.startsWith('fr') ? 'fr' : 'en';
   const examples = getExamplesForLanguage(userLanguage);
 
   // Check if user has scale plan access OR is admin
+  const planName = subscription && 'plan_name' in subscription ? subscription.plan_name : '';
   const hasScaleAccess = isUserAdmin || 
-                        subscription?.plan_name?.toLowerCase() === 'scale' || 
-                        subscription?.plan_name?.toLowerCase() === 'teams';
+                        planName?.toLowerCase() === 'scale' || 
+                        planName?.toLowerCase() === 'teams';
 
-  // Loading state
+  // Loading state - only show if user exists and still loading
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-500 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Connexion en cours...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (permissionsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">

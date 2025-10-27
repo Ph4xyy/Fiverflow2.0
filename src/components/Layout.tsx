@@ -128,7 +128,12 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { restrictions, checkAccess } = usePlanRestrictions();
-  const { subscription, isAdmin: isUserAdmin } = useSubscriptionPermissions();
+  
+  // Get subscription permissions
+  const perms = useSubscriptionPermissions();
+  const subscription = perms?.subscription || null;
+  const isUserAdmin = perms?.isAdmin || false;
+  
   useEffect(() => {
     // Définir le rôle utilisateur basé sur l'authentification
     if (user) {
