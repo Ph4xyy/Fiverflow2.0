@@ -34,6 +34,81 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
+// Translations
+const t = {
+  referrals: {
+    title: 'Programme de Parrainage',
+    subtitle: 'Invitez vos amis et gagnez ensemble',
+    copied: 'Copié !',
+    copyCode: 'Copier le code',
+    yourCode: 'Votre code de parrainage',
+    howItWorks: {
+      title: 'Comment ça marche',
+      step1: 'Partagez votre lien',
+      step2: 'Vos amis s\'inscrivent',
+      step3: 'Ils effectuent un paiement',
+      step4: 'Vous gagnez une commission'
+    },
+    benefits: {
+      title: 'Avantages du Programme',
+      commission: 'Commission de 20%',
+      bonus: 'Bonus de bienvenue',
+      lifetime: 'Commission à vie',
+      noLimit: 'Illimité'
+    },
+    stats: {
+      totalReferrals: 'Total parrainages',
+      activeReferrals: 'Parrainages actifs',
+      totalCommissions: 'Total commissions',
+      pendingCommissions: 'Commissions en attente',
+      thisMonth: 'Ce mois-ci'
+    },
+    tabs: {
+      overview: 'Vue d\'ensemble',
+      referrals: 'Parrainages',
+      commissions: 'Commissions'
+    },
+    referralList: {
+      title: 'Mes filleuls',
+      name: 'Nom',
+      email: 'Email',
+      joinedDate: 'Date d\'inscription',
+      status: 'Statut',
+      commission: 'Commission',
+      noReferrals: 'Aucun filleul pour le moment',
+      inviteMore: 'Inviter plus de personnes'
+    },
+    commissionHistory: {
+      title: 'Historique des commissions',
+      date: 'Date',
+      referral: 'Filleul',
+      amount: 'Montant',
+      status: 'Statut',
+      description: 'Description',
+      paid: 'Payée',
+      pending: 'En attente',
+      cancelled: 'Annulée',
+      noCommissions: 'Aucune commission'
+    },
+    share: {
+      title: 'Partager votre lien',
+      customMessage: 'Message personnalisé',
+      generateQR: 'Générer QR Code'
+    },
+    terms: {
+      title: 'Conditions du Programme',
+      content: 'Les commissions sont payées uniquement après confirmation de paiement par le filleul. Le programme de parrainage est soumis aux conditions générales d\'utilisation.'
+    }
+  },
+  common: {
+    loading: 'Chargement...',
+    error: 'Erreur',
+    refresh: 'Actualiser',
+    active: 'Actif',
+    inactive: 'Inactif'
+  }
+};
+
 const PageReferrals: React.FC = () => {
   const { user } = useAuth();
   const { referralCode, referrerInfo, applyReferralCode } = useReferral();
@@ -55,10 +130,16 @@ const PageReferrals: React.FC = () => {
   const [showQR, setShowQR] = useState(false);
   const [customMessage, setCustomMessage] = useState('');
 
+  // Refresh data function
+  const refreshData = () => {
+    // This is a placeholder - implement actual data fetching if needed
+    console.log('Refreshing referral data...');
+  };
+
   // Refresh data on mount
   useEffect(() => {
     if (user) {
-      // refreshData();
+      refreshData();
     }
   }, [user]);
 
