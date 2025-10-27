@@ -17,28 +17,15 @@ interface ClientFormProps {
     name: string;
     platform: string;
     company_name?: string;
-    client_type?: string;
     email_primary?: string;
-    email_secondary?: string;
     phone_primary?: string;
     phone_whatsapp?: string;
-    timezone?: string;
-    preferred_language?: string;
-    country?: string;
-    city?: string;
     industry?: string;
     services_needed?: string[];
-    budget_range?: string;
-    collaboration_frequency?: string;
-    acquisition_source?: string;
     client_status?: string;
     priority_level?: string;
     payment_terms?: string;
-    preferred_contact_method?: string;
-    availability_notes?: string;
     important_notes?: string;
-    next_action?: string;
-    next_action_date?: string;
     tags?: string[];
   } | null;
 }
@@ -52,29 +39,16 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
   const emptyForm = useMemo(() => ({
     name: '',
     company_name: '',
-    client_type: 'individual',
     platform: '',
     email_primary: '',
-    email_secondary: '',
     phone_primary: '',
     phone_whatsapp: '',
-    timezone: '',
-    preferred_language: 'English',
-    country: '',
-    city: '',
     industry: '',
     services_needed: [] as string[],
-    budget_range: '',
-    collaboration_frequency: '',
-    acquisition_source: '',
     client_status: 'prospect',
     priority_level: 'medium',
     payment_terms: '',
-    preferred_contact_method: 'email',
-    availability_notes: '',
     important_notes: '',
-    next_action: '',
-    next_action_date: '',
     tags: [] as string[]
   }), []);
 
@@ -88,29 +62,16 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
       setFormData({
         name: client.name || '',
         company_name: client.company_name || '',
-        client_type: client.client_type || 'individual',
         platform: client.platform || '',
         email_primary: client.email_primary || '',
-        email_secondary: client.email_secondary || '',
         phone_primary: client.phone_primary || '',
         phone_whatsapp: client.phone_whatsapp || '',
-        timezone: client.timezone || '',
-        preferred_language: client.preferred_language || 'English',
-        country: client.country || '',
-        city: client.city || '',
         industry: client.industry || '',
         services_needed: client.services_needed || [],
-        budget_range: client.budget_range || '',
-        collaboration_frequency: client.collaboration_frequency || '',
-        acquisition_source: client.acquisition_source || '',
         client_status: client.client_status || 'prospect',
         priority_level: client.priority_level || 'medium',
         payment_terms: client.payment_terms || '',
-        preferred_contact_method: client.preferred_contact_method || 'email',
-        availability_notes: client.availability_notes || '',
         important_notes: client.important_notes || '',
-        next_action: client.next_action || '',
-        next_action_date: client.next_action_date || '',
         tags: client.tags || []
       });
     } else {
@@ -122,25 +83,6 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
     'Fiverr', 'Upwork', 'Freelancer', 'Direct', 'LinkedIn', 'Malt', 'Toptal', '99designs', 'PeoplePerHour', 'Other'
   ];
 
-  const clientTypes = [
-    { value: 'individual', label: 'Individual' },
-    { value: 'company', label: 'Company' },
-    { value: 'freelance', label: 'Freelance' }
-  ];
-
-  const languages = [
-    'English', 'Français', 'Español', 'Deutsch', 'Italiano', 'Português', 'Nederlands', 'العربية', '中文', '日本語'
-  ];
-
-  const timezones = [
-    'UTC-12', 'UTC-11', 'UTC-10', 'UTC-9', 'UTC-8', 'UTC-7', 'UTC-6', 'UTC-5', 'UTC-4', 'UTC-3', 'UTC-2', 'UTC-1',
-    'UTC+0', 'UTC+1', 'UTC+2', 'UTC+3', 'UTC+4', 'UTC+5', 'UTC+6', 'UTC+7', 'UTC+8', 'UTC+9', 'UTC+10', 'UTC+11', 'UTC+12'
-  ];
-
-  const countries = [
-    'France', 'United States', 'Canada', 'United Kingdom', 'Germany', 'Spain', 'Italy', 'Netherlands', 'Belgium',
-    'Switzerland', 'Australia', 'Brazil', 'India', 'Japan', 'China', 'Mexico', 'Argentina', 'Other'
-  ];
 
   const industries = [
     'Technology', 'Healthcare', 'Finance', 'Education', 'Retail', 'Manufacturing', 'Real Estate', 'Marketing',
@@ -153,20 +95,6 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
     'Virtual Assistant', 'Consulting', 'Other'
   ];
 
-  const budgetRanges = [
-    'Under $500', '$500 - $1,000', '$1,000 - $2,500', '$2,500 - $5,000', '$5,000 - $10,000', 'Over $10,000'
-  ];
-
-  const collaborationFrequencies = [
-    { value: 'one-time', label: 'One-time' },
-    { value: 'occasional', label: 'Occasional' },
-    { value: 'regular', label: 'Regular' },
-    { value: 'ongoing', label: 'Ongoing' }
-  ];
-
-  const acquisitionSources = [
-    'Referral', 'Social Media', 'Search Engine', 'Advertisement', 'Cold Outreach', 'Networking Event', 'Website', 'Other'
-  ];
 
   const clientStatuses = [
     { value: 'prospect', label: 'Prospect' },
@@ -183,13 +111,6 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
 
   const paymentTermsOptions = [
     '50% upfront, 50% on completion', '100% upfront', 'Net 15', 'Net 30', 'Weekly payments', 'Monthly payments', 'Other'
-  ];
-
-  const contactMethods = [
-    { value: 'email', label: 'Email' },
-    { value: 'phone', label: 'Phone' },
-    { value: 'whatsapp', label: 'WhatsApp' },
-    { value: 'platform', label: 'Platform' }
   ];
 
   // === Style matching ProfilePageNew ===
@@ -264,29 +185,16 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
       const clientData = {
         name: formData.name.trim(),
         company_name: formData.company_name.trim() || null,
-        client_type: formData.client_type,
         platform: formData.platform,
         email_primary: formData.email_primary.trim() || null,
-        email_secondary: formData.email_secondary.trim() || null,
         phone_primary: formData.phone_primary.trim() || null,
         phone_whatsapp: formData.phone_whatsapp.trim() || null,
-        timezone: formData.timezone || null,
-        preferred_language: formData.preferred_language,
-        country: formData.country || null,
-        city: formData.city.trim() || null,
         industry: formData.industry || null,
         services_needed: formData.services_needed.length > 0 ? formData.services_needed : null,
-        budget_range: formData.budget_range || null,
-        collaboration_frequency: formData.collaboration_frequency || null,
-        acquisition_source: formData.acquisition_source || null,
         client_status: formData.client_status,
         priority_level: formData.priority_level,
         payment_terms: formData.payment_terms || null,
-        preferred_contact_method: formData.preferred_contact_method,
-        availability_notes: formData.availability_notes.trim() || null,
         important_notes: formData.important_notes.trim() || null,
-        next_action: formData.next_action.trim() || null,
-        next_action_date: formData.next_action_date || null,
         tags: formData.tags.length > 0 ? formData.tags : null
       };
 
@@ -338,14 +246,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
         return;
       }
     }
-    if (currentStep === 2) {
-      // Validation pour l'étape 2
-      if (!formData.email_primary.trim()) {
-        toast.error('Primary email is required');
-        return;
-      }
-    }
-    if (currentStep < 4) {
+    if (currentStep < 3) {
       setCurrentStep(s => s + 1);
     }
   };
@@ -395,21 +296,6 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
 
               <div>
                 <label className={labelCls}>
-                  Client Type <span className="text-red-400">*</span>
-                </label>
-                <select
-                  value={formData.client_type}
-                  onChange={(e) => setFormData({ ...formData, client_type: e.target.value })}
-                  className={baseField}
-                >
-                  {clientTypes.map((type) => (
-                    <option key={type.value} value={type.value}>{type.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className={labelCls}>
                   Platform <span className="text-red-400">*</span>
                 </label>
                 <select
@@ -432,15 +318,15 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
           <div className="space-y-4">
             <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
               <Mail className="mr-2 text-[#9c68f2]" size={20} />
-              Contact & Location
+              Contact Information
             </h3>
             <p className="text-sm text-gray-400 mb-4">
-              All contact information is optional. You can fill in as much or as little as needed.
+              Add contact details for this client.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className={labelCls}>Primary Email</label>
+                <label className={labelCls}>Email</label>
                 <input
                   type="email"
                   value={formData.email_primary}
@@ -451,18 +337,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
               </div>
 
               <div>
-                <label className={labelCls}>Secondary Email</label>
-                <input
-                  type="email"
-                  value={formData.email_secondary}
-                  onChange={(e) => setFormData({ ...formData, email_secondary: e.target.value })}
-                  className={baseField}
-                  placeholder="email2@example.com"
-                />
-              </div>
-
-              <div>
-                <label className={labelCls}>Primary Phone</label>
+                <label className={labelCls}>Phone</label>
                 <input
                   type="tel"
                   value={formData.phone_primary}
@@ -473,65 +348,13 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
               </div>
 
               <div>
-                <label className={labelCls}>WhatsApp</label>
+                <label className={labelCls}>WhatsApp (optional)</label>
                 <input
                   type="tel"
                   value={formData.phone_whatsapp}
                   onChange={(e) => setFormData({ ...formData, phone_whatsapp: e.target.value })}
                   className={baseField}
                   placeholder="+1 234 567 8900"
-                />
-              </div>
-
-              <div>
-                <label className={labelCls}>Timezone</label>
-                <select
-                  value={formData.timezone}
-                  onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-                  className={baseField}
-                >
-                  <option value="">Select a timezone</option>
-                  {timezones.map((tz) => (
-                    <option key={tz} value={tz}>{tz}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className={labelCls}>Preferred Language</label>
-                <select
-                  value={formData.preferred_language}
-                  onChange={(e) => setFormData({ ...formData, preferred_language: e.target.value })}
-                  className={baseField}
-                >
-                  {languages.map((lang) => (
-                    <option key={lang} value={lang}>{lang}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className={labelCls}>Country</label>
-                <select
-                  value={formData.country}
-                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                  className={baseField}
-                >
-                  <option value="">Select a country</option>
-                  {countries.map((country) => (
-                    <option key={country} value={country}>{country}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className={labelCls}>City</label>
-                <input
-                  type="text"
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  className={baseField}
-                  placeholder="New York"
                 />
               </div>
             </div>
@@ -542,10 +365,10 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
           <div className="space-y-4">
             <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
               <Briefcase className="mr-2 text-[#9c68f2]" size={20} />
-              Business & Projects
+              Additional Details
             </h3>
             <p className="text-sm text-gray-400 mb-4">
-              Help us understand your client's business needs and project requirements.
+              Add any additional information about this client.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -564,79 +387,6 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
               </div>
 
               <div>
-                <label className={labelCls}>Average Project Budget</label>
-                <select
-                  value={formData.budget_range}
-                  onChange={(e) => setFormData({ ...formData, budget_range: e.target.value })}
-                  className={baseField}
-                >
-                  <option value="">Select a range</option>
-                  {budgetRanges.map((range) => (
-                    <option key={range} value={range}>{range}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className={labelCls}>Collaboration Frequency</label>
-                <select
-                  value={formData.collaboration_frequency}
-                  onChange={(e) => setFormData({ ...formData, collaboration_frequency: e.target.value })}
-                  className={baseField}
-                >
-                  <option value="">Select a frequency</option>
-                  {collaborationFrequencies.map((freq) => (
-                    <option key={freq.value} value={freq.value}>{freq.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className={labelCls}>Acquisition Source</label>
-                <select
-                  value={formData.acquisition_source}
-                  onChange={(e) => setFormData({ ...formData, acquisition_source: e.target.value })}
-                  className={baseField}
-                >
-                  <option value="">Select a source</option>
-                  {acquisitionSources.map((source) => (
-                    <option key={source} value={source}>{source}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className={labelCls}>Required Services</label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded-xl p-3 border-[#1e2938] bg-[#35414e]">
-                {servicesOptions.map((service) => (
-                  <label key={service} className="flex items-center text-sm text-gray-300">
-                    <input
-                      type="checkbox"
-                      checked={formData.services_needed.includes(service)}
-                      onChange={() => handleServicesChange(service)}
-                      className="mr-2 rounded accent-[#9c68f2]"
-                    />
-                    {service}
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      case 4:
-        return (
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
-              <MessageSquare className="mr-2 text-[#9c68f2]" size={20} />
-              Management & Communication
-            </h3>
-            <p className="text-sm text-gray-400 mb-4">
-              Set up how you'll manage and communicate with this client.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
                 <label className={labelCls}>Client Status</label>
                 <select
                   value={formData.client_status}
@@ -650,7 +400,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
               </div>
 
               <div>
-                <label className={labelCls}>Priority</label>
+                <label className={labelCls}>Priority Level</label>
                 <select
                   value={formData.priority_level}
                   onChange={(e) => setFormData({ ...formData, priority_level: e.target.value })}
@@ -675,51 +425,23 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   ))}
                 </select>
               </div>
-
-              <div>
-                <label className={labelCls}>Preferred Contact Method</label>
-                <select
-                  value={formData.preferred_contact_method}
-                  onChange={(e) => setFormData({ ...formData, preferred_contact_method: e.target.value })}
-                  className={baseField}
-                >
-                  {contactMethods.map((method) => (
-                    <option key={method.value} value={method.value}>{method.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className={labelCls}>Next Action</label>
-                <input
-                  type="text"
-                  value={formData.next_action}
-                  onChange={(e) => setFormData({ ...formData, next_action: e.target.value })}
-                  className={baseField}
-                  placeholder="Call to discuss the project"
-                />
-              </div>
-
-              <div>
-                <label className={labelCls}>Next Action Date</label>
-                <input
-                  type="date"
-                  value={formData.next_action_date}
-                  onChange={(e) => setFormData({ ...formData, next_action_date: e.target.value })}
-                  className={baseField}
-                />
-              </div>
             </div>
 
             <div>
-              <label className={labelCls}>Availability Notes</label>
-              <textarea
-                value={formData.availability_notes}
-                onChange={(e) => setFormData({ ...formData, availability_notes: e.target.value })}
-                className={baseField}
-                rows={2}
-                placeholder="Available weekdays from 9am to 5pm"
-              />
+              <label className={labelCls}>Services Needed</label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-40 overflow-y-auto border rounded-xl p-3 border-[#1e2938] bg-[#35414e]">
+                {servicesOptions.map((service) => (
+                  <label key={service} className="flex items-center text-sm text-gray-300">
+                    <input
+                      type="checkbox"
+                      checked={formData.services_needed.includes(service)}
+                      onChange={() => handleServicesChange(service)}
+                      className="mr-2 rounded accent-[#9c68f2]"
+                    />
+                    {service}
+                  </label>
+                ))}
+              </div>
             </div>
 
             <div>
@@ -783,8 +505,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                   {[
                     { step: 1, label: 'Basic Info', icon: User },
                     { step: 2, label: 'Contact', icon: Mail },
-                    { step: 3, label: 'Business', icon: Briefcase },
-                    { step: 4, label: 'Management', icon: MessageSquare }
+                    { step: 3, label: 'Details', icon: Briefcase }
                   ].map(({ step, label, icon: Icon }) => (
                     <div key={step} className="flex items-center">
                       <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all ${
@@ -806,7 +527,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                           Step {step}
                         </div>
                       </div>
-                      {step < 4 && (
+                      {step < 3 && (
                         <div className={`ml-3 w-8 h-0.5 transition-all ${
                           step < currentStep ? 'bg-gradient-to-r from-[#9c68f2] to-[#422ca5]' : 'bg-gray-600'
                         }`} />
@@ -827,12 +548,12 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
             <div className="mb-6">
               <div className="flex justify-between text-xs text-gray-400 mb-2">
                 <span>Progress</span>
-                <span>{currentStep}/4</span>
+                <span>{currentStep}/3</span>
               </div>
               <div className="w-full bg-gray-600 rounded-full h-2">
                 <div 
                   className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${(currentStep / 4) * 100}%` }}
+                  style={{ width: `${(currentStep / 3) * 100}%` }}
                 />
               </div>
             </div>
@@ -862,7 +583,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ isOpen, onClose, onSuccess, cli
                     Cancel
                   </ModernButton>
 
-                  {currentStep < 4 ? (
+                  {currentStep < 3 ? (
                     <ModernButton
                       type="button"
                       onClick={(e) => {
