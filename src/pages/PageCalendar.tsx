@@ -34,9 +34,12 @@ interface Event {
   date: string;
   time: string;
   type: 'meeting' | 'deadline' | 'reminder';
+  category: 'task' | 'order' | 'invoice' | 'subscription' | 'calendar' | 'meeting';
   attendees?: string[];
   location?: string;
   priority: 'low' | 'medium' | 'high';
+  description?: string;
+  order_id?: string;
 }
 
 const PageCalendar: React.FC = () => {
@@ -54,6 +57,16 @@ const PageCalendar: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // États pour les filtres par catégorie (checkboxes)
+  const [filterCategories, setFilterCategories] = useState({
+    task: true,
+    order: true,
+    invoice: true,
+    subscription: true,
+    calendar: true,
+    meeting: true,
+  });
   
   // États pour les modals
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
@@ -162,6 +175,7 @@ const PageCalendar: React.FC = () => {
               date: invoice.due_date,
               time: '17:00',
               type: 'deadline' as const,
+              category: 'invoice' as const,
               priority: invoice.status === 'overdue' ? 'high' as const : 'medium' as const,
               description: `Facture de ${invoice.total.toFixed(2)} ${invoice.currency} - ${invoice.status}`
             };
@@ -183,6 +197,7 @@ const PageCalendar: React.FC = () => {
               date: task.due_date!,
               time: '09:00',
               type: 'deadline' as const,
+              category: 'task' as const,
               priority: task.priority as 'low' | 'medium' | 'high',
               description: task.description
             };
@@ -197,6 +212,7 @@ const PageCalendar: React.FC = () => {
             date: eventDate,
             time: '09:00',
             type: 'deadline' as const,
+            category: 'task' as const,
             priority: task.priority as 'low' | 'medium' | 'high',
             description: task.description,
             order_id: task.order_id // Ajouter l'order_id pour la navigation
@@ -219,6 +235,7 @@ const PageCalendar: React.FC = () => {
               date: order.due_date!,
               time: '17:00', // Heure par défaut pour les deadlines
               type: 'deadline' as const,
+              category: 'order' as const,
               priority: 'high' as const, // Les deadlines de commandes sont importantes
               description: `Commande pour ${order.client?.name || 'Client'}`
             };
@@ -231,6 +248,7 @@ const PageCalendar: React.FC = () => {
           date: event.start_time.split('T')[0],
           time: event.start_time.split('T')[1]?.substring(0, 5) || '09:00',
           type: event.type || 'meeting' as const,
+          category: (event.type || 'meeting') === 'meeting' ? 'meeting' as const : 'calendar' as const,
           priority: event.priority || 'medium' as const,
           attendees: event.attendees || [],
           location: event.location
@@ -252,6 +270,7 @@ const PageCalendar: React.FC = () => {
               date: sub.next_renewal_date!,
               time: '09:00',
               type: 'reminder' as const,
+              category: 'subscription' as const,
               priority: 'medium' as const,
               description: `Renouvellement ${sub.billing_cycle} - ${sub.provider}`
             };
@@ -347,7 +366,12 @@ const PageCalendar: React.FC = () => {
       return event.date === dateStr;
     });
     
-    // Apply filters
+    // Apply category filters
+    filteredEvents = filteredEvents.filter(event => {
+      return filterCategories[event.category as keyof typeof filterCategories];
+    });
+    
+    // Apply type filters
     if (filterType) {
       filteredEvents = filteredEvents.filter(event => event.type === filterType);
     }
@@ -510,31 +534,6 @@ const PageCalendar: React.FC = () => {
               <Plus size={16} className="mr-2" />
               New Event
             </ModernButton>
-            <ModernButton 
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                // Créer une tâche de test avec due_date
-                const today = new Date();
-                const tomorrow = new Date(today);
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                
-                const testEvent: Event = {
-                  id: `test-task-${Date.now()}`,
-                  title: '📋 Test Task with Due Date',
-                  date: tomorrow.toISOString().split('T')[0],
-                  time: '14:00',
-                  type: 'deadline',
-                  priority: 'high',
-                  description: 'This is a test task created from calendar'
-                };
-                
-                setEvents(prev => [...prev, testEvent]);
-                console.log('✅ Test task created:', testEvent);
-              }}
-            >
-              Add Test Task
-            </ModernButton>
           </div>
         </div>
 
@@ -550,6 +549,40 @@ const PageCalendar: React.FC = () => {
                 <X size={16} className="text-gray-400" />
               </button>
             </div>
+            
+            {/* Category Filters with Checkboxes */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-300 mb-3">Show Events</label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {[
+                  { key: 'task', label: '📋 Tasks', icon: '📋' },
+                  { key: 'order', label: '📦 Orders', icon: '📦' },
+                  { key: 'invoice', label: '🧾 Invoices', icon: '🧾' },
+                  { key: 'subscription', label: '💳 Subscriptions', icon: '💳' },
+                  { key: 'calendar', label: '📅 Calendar Events', icon: '📅' },
+                  { key: 'meeting', label: '👥 Meetings', icon: '👥' },
+                ].map(({ key, label, icon }) => (
+                  <label
+                    key={key}
+                    className="flex items-center gap-2 p-3 bg-[#35414e] border border-[#1e2938] rounded-lg cursor-pointer hover:bg-[#1e2938] hover:border-[#9c68f2] transition-all"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={filterCategories[key as keyof typeof filterCategories]}
+                      onChange={(e) => {
+                        setFilterCategories(prev => ({
+                          ...prev,
+                          [key]: e.target.checked
+                        }));
+                      }}
+                      className="w-4 h-4 rounded border-gray-500 bg-[#1e2938] text-[#9c68f2] focus:ring-[#9c68f2] focus:ring-offset-[#1e2938] focus:ring-offset-2"
+                    />
+                    <span className="text-sm text-white">{icon} {label.split(' ').slice(1).join(' ')}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Event Type</label>
@@ -585,9 +618,17 @@ const PageCalendar: React.FC = () => {
                 onClick={() => {
                   setFilterType('');
                   setFilterPriority('');
+                  setFilterCategories({
+                    task: true,
+                    order: true,
+                    invoice: true,
+                    subscription: true,
+                    calendar: true,
+                    meeting: true,
+                  });
                 }}
               >
-                Clear Filters
+                Clear All Filters
               </ModernButton>
               <ModernButton 
                 size="sm"
