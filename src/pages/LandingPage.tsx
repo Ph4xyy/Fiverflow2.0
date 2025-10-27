@@ -12,20 +12,22 @@ import { Footer } from '../components/landing/Footer';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-slate-950 to-black text-white">
+    <div className="min-h-screen text-white relative overflow-hidden">
       <GlowBackground />
-      <Navbar />
-      <main>
-        <HeroSection />
-        <TrustedBy />
-        <VideoShowcase />
-        <FeaturesTabs />
-        <BenefitsGrid />
-        <TestimonialsCarousel />
-        <CTASection />
-        <FAQSection />
-      </main>
-      <Footer />
+      <div className="relative z-10">
+        <Navbar />
+        <main>
+          <HeroSection />
+          <TrustedBy />
+          <VideoShowcase />
+          <FeaturesTabs />
+          <BenefitsGrid />
+          <TestimonialsCarousel />
+          <CTASection />
+          <FAQSection />
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }
