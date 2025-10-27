@@ -39,8 +39,8 @@ export async function assistantExecute(
   requiresConfirmation?: boolean;
 }> {
   try {
-    // Vérifier l'accès au plan Scale
-    assertAssistantEntitlement(user);
+    // Vérifier l'accès au plan Scale (ou admin)
+    await assertAssistantEntitlement(user);
     
     // Vérifier les limites de plan
     const planCheck = await enforcePlanLimits(user);

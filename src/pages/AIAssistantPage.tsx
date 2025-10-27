@@ -55,8 +55,10 @@ const AIAssistantPage: React.FC = () => {
   const userLanguage = navigator.language.startsWith('fr') ? 'fr' : 'en';
   const examples = getExamplesForLanguage(userLanguage);
 
-  // Check if user has scale plan access
-  const hasScaleAccess = subscription?.plan_name?.toLowerCase() === 'scale' || 
+  // Check if user has scale plan access OR is admin
+  const isUserAdmin = useSubscriptionPermissions().isAdmin;
+  const hasScaleAccess = isUserAdmin || 
+                        subscription?.plan_name?.toLowerCase() === 'scale' || 
                         subscription?.plan_name?.toLowerCase() === 'teams';
 
   // Loading state

@@ -9,13 +9,28 @@ import { checkUsageLimit, incrementUsage } from './usage';
 
 /**
  * Vérifie que l'utilisateur a accès au plan Scale
+ * Les admins ont toujours accès
  */
-export function assertAssistantEntitlement(user?: User | { plan?: string }): void {
+export async function assertAssistantEntitlement(user?: User | { plan?: string }): Promise<void> {
+  if (!user) {
+    const err: any = new Error('entitlement_denied');
+    err.code = 'entitlement_denied';
+    err.explanation = 'Assistant AI réservé au plan Scale.';
+    throw err;
+  }
+
+  // Vérifier si l'utilisateur est admin
+  const isUserAdmin = await isAdmin(user);
+  if (isUserAdmin) {
+    return; // Les admins ont toujours accès
+  }
+
+  // Vérifier le plan
   const userPlan = user && 'plan' in user ? user.plan : 
                    user && 'user_metadata' in user ? user.user_metadata?.subscription_plan : 
                    undefined;
   
-  if (!user || userPlan !== 'scale') {
+  if (userPlan !== 'scale' && userPlan !== 'teams') {
     const err: any = new Error('entitlement_denied');
     err.code = 'entitlement_denied';
     err.explanation = 'Assistant AI réservé au plan Scale.';
