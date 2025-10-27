@@ -211,10 +211,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
               
               {showDropdown && (
                 <div 
-                  className="absolute right-0 bottom-full mb-2 w-56 bg-[#1a1f2e] border border-white/[0.08] rounded-xl shadow-2xl z-50 backdrop-blur-md"
+                  className="absolute right-0 bottom-full mb-1 bg-[#1a1f2e] border border-white/[0.08] rounded-lg shadow-2xl z-50 overflow-hidden backdrop-blur-md min-w-[180px]"
                   onClick={(e) => e.stopPropagation()}
+                  style={{ width: 'auto' }}
                 >
-                  <div className="py-2">
+                  <div className="py-1">
                     {statusOptions.map(option => {
                       const OptionIcon = option.icon || Clock;
                       return (
@@ -225,11 +226,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
                             onStatusChange(task.id, option.value);
                             setShowDropdown(false);
                           }}
-                          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-white/[0.08] flex items-center gap-3 transition-colors ${
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-white/[0.08] flex items-center gap-2 transition-colors ${
                             task.status === option.value ? option.color : 'text-gray-400'
                           }`}
                         >
-                          <OptionIcon className="w-4 h-4" />
+                          <OptionIcon className="w-3.5 h-3.5" />
                           {option.label}
                         </button>
                       );
