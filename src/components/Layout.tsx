@@ -122,13 +122,13 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const themeColors = getThemeColors();
 
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const [requiredPlan, setRequiredPlan] = useState<'Pro' | 'Excellence'>('Pro');
+  const [requiredPlan, setRequiredPlan] = useState<'Pro' | 'Excellence' | 'Scale'>('Pro');
 
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { restrictions, checkAccess } = usePlanRestrictions();
-  const { subscription } = useSubscriptionPermissions();
+  const { subscription, isAdmin: isUserAdmin } = useSubscriptionPermissions();
   useEffect(() => {
     // Définir le rôle utilisateur basé sur l'authentification
     if (user) {
@@ -170,18 +170,18 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     },
   ];
 
-  // Section 2: AI - Only show for Scale plan
-  const hasScalePlan = subscription?.plan_name?.toLowerCase() === 'scale' || 
-                       subscription?.plan_name?.toLowerCase() === 'teams';
+  // Section 2: AI - Restricted to Scale plan
+  const hasAssistantAccess = isUserAdmin || subscription?.plan_name?.toLowerCase() === 'scale' || subscription?.plan_name?.toLowerCase() === 'teams';
   
-  const aiItems = hasScalePlan ? [
+  const aiItems = [
     { 
       path: '/assistant', 
       label: 'Assistant', 
       icon: Bot,
-      restricted: false
+      restricted: !hasAssistantAccess,
+      requiredPlan: 'Scale' as const
     },
-  ] : [];
+  ];
 
   // Section 3: Workspace
   const workspaceItems = [
