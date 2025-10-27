@@ -5,9 +5,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { parseIntent } from '../lib/assistant/intent';
-import { assistantExecute } from '../lib/assistant/actions';
+import { useNavigate } from 'react-router-dom';
 import { getExamplesForLanguage } from '../lib/assistant/examples';
+import { handleAssistantMessage } from '../lib/assistant/apiRoute';
 import { AssistantMessage } from '../types/assistant';
 import { 
   Send, 
@@ -15,15 +15,17 @@ import {
   User, 
   Trash2, 
   Sparkles as SparklesIcon,
-  Loader2
+  Loader2,
+  Zap
 } from 'lucide-react';
 
 const AIAssistantPage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [pendingConfirmation, setPendingConfirmation] = useState<AssistantMessage | null>(null);
+  const [pendingConfirmation, setPendingConfirmation] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -60,22 +62,53 @@ const AIAssistantPage: React.FC = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentMessage = inputValue.trim();
     setInputValue('');
     setIsLoading(true);
 
     try {
-      const intent = parseIntent(inputValue.trim());
-      const result = await assistantExecute(user, intent);
+      // Construire l'historique de conversation
+      const conversationHistory = messages
+        .filter(m => m.type !== 'assistant' || !m.content.includes('👋'))
+        .map(m => ({
+          role: m.type === 'user' ? 'user' : 'assistant',
+          content: m.content
+        }));
 
+      // Appeler la route API
+      const result = await handleAssistantMessage(user, {
+        message: currentMessage,
+        conversationHistory,
+        pendingConfirmation: pendingConfirmation?.confirmationData
+      });
+
+      // Gérer les erreurs d'entitlement
+      if (result.error === 'entitlement_denied') {
+        setMessages(prev => [...prev, {
+          id: (Date.now() + 1).toString(),
+          type: 'assistant',
+          content: result.text,
+          timestamp: new Date(),
+          metadata: {
+            error: 'entitlement_denied'
+          }
+        }]);
+        return;
+      }
+
+      // Afficher la réponse
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: result.message,
+        content: result.text,
         timestamp: new Date(),
       }]);
 
+      // Gérer la confirmation si nécessaire
       if (result.requiresConfirmation) {
-        setPendingConfirmation({ ...userMessage, metadata: { intent, result: result.data } });
+        setPendingConfirmation({ confirmationData: pendingConfirmation?.confirmationData });
+      } else {
+        setPendingConfirmation(null);
       }
     } catch (error: any) {
       setMessages(prev => [...prev, {
@@ -238,30 +271,25 @@ const AIAssistantPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
-      {pendingConfirmation && (
+      {/* Entitlement denied modal with upgrade button */}
+      {messages.some(m => m.metadata?.error === 'entitlement_denied') && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {userLanguage === 'fr' ? 'Confirmation' : 'Confirmation'}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md mx-4 text-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center mx-auto mb-4">
+              <Zap className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              Plan Scale requis
             </h3>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
-              {pendingConfirmation.content}
+              L'Assistant AI est réservé au plan Scale. Passe à Scale pour débloquer cette fonctionnalité.
             </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setPendingConfirmation(null)}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 dark:text-gray-300"
-              >
-                {userLanguage === 'fr' ? 'Annuler' : 'Cancel'}
-              </button>
-              <button
-                onClick={() => setPendingConfirmation(null)}
-                className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white"
-              >
-                {userLanguage === 'fr' ? 'Confirmer' : 'Confirm'}
-              </button>
-            </div>
+            <button
+              onClick={() => navigate('/billing')}
+              className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold hover:from-purple-600 hover:to-blue-600 transition-colors"
+            >
+              Voir les plans
+            </button>
           </div>
         </div>
       )}
