@@ -50,7 +50,6 @@ const PageCalendar: React.FC = () => {
   const { invoices, loading: invoicesLoading } = useInvoices();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
   const [filterType, setFilterType] = useState<string>('');
   const [filterPriority, setFilterPriority] = useState<string>('');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -113,8 +112,8 @@ const PageCalendar: React.FC = () => {
   };
 
   const handleFormSuccess = () => {
-    // Recharger les données
-    loadCalendarEvents();
+    // Recharger les données - les useEffect vont recharger automatiquement
+    window.location.reload();
   };
 
   // Fermer le dropdown de filtre quand on clique ailleurs
@@ -476,49 +475,119 @@ const PageCalendar: React.FC = () => {
               
               {/* Dropdown Menu */}
               {showFilterDropdown && (
-                <div className="filter-dropdown absolute top-full right-0 mt-2 w-48 bg-[#1e2938] border border-[#35414e] rounded-lg shadow-lg z-50">
-                  <div className="py-2">
-                    <button 
+                <div className="filter-dropdown absolute top-full right-0 mt-2 w-64 bg-[#1e2938] border border-[#35414e] rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+                  {/* Header */}
+                  <div className="px-4 py-3 border-b border-[#35414e] flex items-center justify-between sticky top-0 bg-[#1e2938]">
+                    <h3 className="text-sm font-semibold text-white">Show Events</h3>
+                    <button
                       onClick={() => {
-                        setShowFilters(true);
-                        setShowFilterDropdown(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2"
-                    >
-                      <Filter size={16} />
-                      Advanced Filters
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setFilterType('meeting');
-                        setShowFilterDropdown(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2"
-                    >
-                      <Clock size={16} />
-                      Meetings Only
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setFilterType('deadline');
-                        setShowFilterDropdown(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2"
-                    >
-                      <AlertTriangle size={16} />
-                      Deadlines Only
-                    </button>
-                    <button 
-                      onClick={() => {
+                        setFilterCategories({
+                          task: true,
+                          order: true,
+                          invoice: true,
+                          subscription: true,
+                          calendar: true,
+                          meeting: true,
+                        });
                         setFilterType('');
                         setFilterPriority('');
-                        setShowFilterDropdown(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-[#35414e] flex items-center gap-2"
+                      className="text-xs text-gray-400 hover:text-white transition-colors"
                     >
-                      <X size={16} />
-                      Clear All
+                      Reset
                     </button>
+                  </div>
+
+                  {/* Category Filters */}
+                  <div className="py-2">
+                    {[
+                      { key: 'task', label: 'Tasks', icon: '📋' },
+                      { key: 'order', label: 'Orders', icon: '📦' },
+                      { key: 'invoice', label: 'Invoices', icon: '🧾' },
+                      { key: 'subscription', label: 'Subscriptions', icon: '💳' },
+                      { key: 'calendar', label: 'Calendar Events', icon: '📅' },
+                      { key: 'meeting', label: 'Meetings', icon: '👥' },
+                    ].map(({ key, label, icon }) => (
+                      <label
+                        key={key}
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#35414e] cursor-pointer transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={filterCategories[key as keyof typeof filterCategories]}
+                          onChange={(e) => {
+                            setFilterCategories(prev => ({
+                              ...prev,
+                              [key]: e.target.checked
+                            }));
+                          }}
+                          className="w-4 h-4 rounded border-gray-500 bg-[#1e2938] text-[#9c68f2] focus:ring-[#9c68f2] focus:ring-offset-[#1e2938] focus:ring-offset-2"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <span className="flex-1 text-sm text-white">{icon} {label}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {/* Divider */}
+                  <div className="border-t border-[#35414e]"></div>
+
+                  {/* Event Type Filters */}
+                  <div className="py-2">
+                    <div className="px-4 py-2">
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Event Type</span>
+                    </div>
+                    {[
+                      { value: '', label: 'All Types' },
+                      { value: 'meeting', label: 'Meetings', icon: '👥' },
+                      { value: 'deadline', label: 'Deadlines', icon: '⚡' },
+                      { value: 'reminder', label: 'Reminders', icon: '🔔' },
+                    ].map(({ value, label, icon }) => (
+                      <button
+                        key={value}
+                        onClick={() => {
+                          setFilterType(value);
+                          setShowFilterDropdown(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 transition-colors ${
+                          filterType === value 
+                            ? 'text-white bg-[#9c68f2]/20' 
+                            : 'text-gray-300 hover:bg-[#35414e] hover:text-white'
+                        }`}
+                      >
+                        {icon && <span>{icon}</span>}
+                        <span>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Priority Filters */}
+                  <div className="py-2 pb-2">
+                    <div className="px-4 py-2">
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Priority</span>
+                    </div>
+                    {[
+                      { value: '', label: 'All Priorities' },
+                      { value: 'high', label: 'High', icon: '🔴' },
+                      { value: 'medium', label: 'Medium', icon: '🟡' },
+                      { value: 'low', label: 'Low', icon: '🟢' },
+                    ].map(({ value, label, icon }) => (
+                      <button
+                        key={value}
+                        onClick={() => {
+                          setFilterPriority(value);
+                          setShowFilterDropdown(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 transition-colors ${
+                          filterPriority === value 
+                            ? 'text-white bg-[#9c68f2]/20' 
+                            : 'text-gray-300 hover:bg-[#35414e] hover:text-white'
+                        }`}
+                      >
+                        {icon && <span>{icon}</span>}
+                        <span>{label}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
@@ -537,108 +606,6 @@ const PageCalendar: React.FC = () => {
           </div>
         </div>
 
-        {/* Filters Panel */}
-        {showFilters && (
-          <ModernCard>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white">Event Filters</h3>
-              <button 
-                onClick={() => setShowFilters(false)}
-                className="p-1 hover:bg-[#35414e] rounded"
-              >
-                <X size={16} className="text-gray-400" />
-              </button>
-            </div>
-            
-            {/* Category Filters with Checkboxes */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-300 mb-3">Show Events</label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {[
-                  { key: 'task', label: '📋 Tasks', icon: '📋' },
-                  { key: 'order', label: '📦 Orders', icon: '📦' },
-                  { key: 'invoice', label: '🧾 Invoices', icon: '🧾' },
-                  { key: 'subscription', label: '💳 Subscriptions', icon: '💳' },
-                  { key: 'calendar', label: '📅 Calendar Events', icon: '📅' },
-                  { key: 'meeting', label: '👥 Meetings', icon: '👥' },
-                ].map(({ key, label, icon }) => (
-                  <label
-                    key={key}
-                    className="flex items-center gap-2 p-3 bg-[#35414e] border border-[#1e2938] rounded-lg cursor-pointer hover:bg-[#1e2938] hover:border-[#9c68f2] transition-all"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={filterCategories[key as keyof typeof filterCategories]}
-                      onChange={(e) => {
-                        setFilterCategories(prev => ({
-                          ...prev,
-                          [key]: e.target.checked
-                        }));
-                      }}
-                      className="w-4 h-4 rounded border-gray-500 bg-[#1e2938] text-[#9c68f2] focus:ring-[#9c68f2] focus:ring-offset-[#1e2938] focus:ring-offset-2"
-                    />
-                    <span className="text-sm text-white">{icon} {label.split(' ').slice(1).join(' ')}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Event Type</label>
-                <select
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                >
-                  <option value="">All Types</option>
-                  <option value="meeting">Meeting</option>
-                  <option value="deadline">Deadline</option>
-                  <option value="reminder">Reminder</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Priority</label>
-                <select
-                  value={filterPriority}
-                  onChange={(e) => setFilterPriority(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
-                >
-                  <option value="">All Priorities</option>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 mt-4">
-              <ModernButton 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  setFilterType('');
-                  setFilterPriority('');
-                  setFilterCategories({
-                    task: true,
-                    order: true,
-                    invoice: true,
-                    subscription: true,
-                    calendar: true,
-                    meeting: true,
-                  });
-                }}
-              >
-                Clear All Filters
-              </ModernButton>
-              <ModernButton 
-                size="sm"
-                onClick={() => setShowFilters(false)}
-              >
-                Apply Filters
-              </ModernButton>
-            </div>
-          </ModernCard>
-        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Calendrier principal */}
