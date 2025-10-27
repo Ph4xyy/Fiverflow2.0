@@ -85,15 +85,16 @@ function AppContent() {
   usePreloadData();
 
   return (
-    <Layout>
-      <Suspense fallback={null}>
-        <Routes>
-          {/* Redirection racine intelligente */}
-          <Route path="/" element={<RootRedirect />} />
-          
-          {/* Landing page - standalone, no Layout */}
-          <Route path="/landing" element={<LandingPage />} />
-          
+    <Suspense fallback={null}>
+      <Routes>
+        {/* Redirection racine intelligente */}
+        <Route path="/" element={<RootRedirect />} />
+        
+        {/* Landing page - standalone, NO Layout (has its own Navbar) */}
+        <Route path="/landing" element={<LandingPage />} />
+        
+        {/* All other pages WITH Layout wrapper */}
+        <Route element={<Layout />}>
           {/* Pages publiques */}
           <Route path="/pricing" element={<PagePricing />} />
           <Route path="/success" element={<SuccessPage />} />
@@ -222,19 +223,9 @@ function AppContent() {
 
           {/* Onboarding pour nouveaux utilisateurs */}
           <Route path="/onboarding" element={<InstantProtectedRoute><OnboardingPage /></InstantProtectedRoute>} />
-        </Routes>
-      </Suspense>
-      
-      {/* Composants de debug - seulement en développement */}
-      {import.meta.env.DEV && (
-        <>
-          {/* Debug components removed for cleaner code */}
-        </>
-      )}
-      
-      {/* Diagnostic de chargement - visible avec Ctrl+Shift+L */}
-      <LoadingDiagnostic />
-    </Layout>
+        </Route>
+      </Routes>
+    </Suspense>
   );
 }
 

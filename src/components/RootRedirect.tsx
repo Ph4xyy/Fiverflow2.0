@@ -34,6 +34,7 @@ const RootRedirect: React.FC = () => {
   if (user) {
     return <Navigate to="/dashboard" replace />;
   } else {
+    // Pour les non-connectés, afficher directement la landing sans Layout
     return <Navigate to="/landing" replace />;
   }
 };

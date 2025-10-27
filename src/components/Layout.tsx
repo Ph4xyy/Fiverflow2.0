@@ -128,11 +128,6 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const [requiredPlan, setRequiredPlan] = useState<'Pro' | 'Excellence' | 'Scale'>('Pro');
 
   const location = useLocation();
-  
-  // Skip Layout for landing page
-  if (location.pathname === '/landing') {
-    return <>{children}</>;
-  }
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { restrictions, checkAccess } = usePlanRestrictions();
