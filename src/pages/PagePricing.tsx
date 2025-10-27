@@ -96,8 +96,8 @@ const PagePricing: React.FC = () => {
       id: 'scale',
       name: 'Scale',
       subtitle: 'For businesses',
-      monthlyPrice: 59,
-      yearlyPrice: 590, // 20% discount
+      monthlyPrice: 39,
+      yearlyPrice: 390, // 20% discount
       description: 'Complete solution for businesses',
       features: [
         { text: '15 projects', included: true },

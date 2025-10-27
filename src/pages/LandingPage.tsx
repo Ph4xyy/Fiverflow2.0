@@ -7,6 +7,7 @@ import { FeaturesTabs } from '../components/landing/FeaturesTabs';
 import { BenefitsGrid } from '../components/landing/BenefitsGrid';
 import { TestimonialsCarousel } from '../components/landing/TestimonialsCarousel';
 import { CTASection } from '../components/landing/CTASection';
+import PricingSection from '../components/landing/PricingSection';
 import { FAQSection } from '../components/landing/FAQSection';
 import { Footer } from '../components/landing/Footer';
 
@@ -23,7 +24,7 @@ export default function LandingPage() {
           <FeaturesTabs />
           <BenefitsGrid />
           <TestimonialsCarousel />
-          <CTASection />
+          <PricingSection />
           <FAQSection />
         </main>
         <Footer />
