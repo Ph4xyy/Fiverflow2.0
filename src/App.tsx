@@ -37,6 +37,7 @@ import { usePreloadData } from './hooks/usePreloadData';
 import RootRedirect from './components/RootRedirect';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import LandingPage from './pages/LandingPage';
 import DashboardExample from './pages/DashboardExample';
 import PageCalendar from './pages/PageCalendar';
 import PagePricing from './pages/PagePricing';
@@ -89,6 +90,9 @@ function AppContent() {
         <Routes>
           {/* Redirection racine intelligente */}
           <Route path="/" element={<RootRedirect />} />
+          
+          {/* Landing page - standalone, no Layout */}
+          <Route path="/landing" element={<LandingPage />} />
           
           {/* Pages publiques */}
           <Route path="/pricing" element={<PagePricing />} />

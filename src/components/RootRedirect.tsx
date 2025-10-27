@@ -3,7 +3,7 @@
  * 
  * Fonctionnalités :
  * - Redirection automatique vers /dashboard si connecté
- * - Redirection vers /login si non connecté
+ * - Affiche la landing page si non connecté
  * - Gestion des états de chargement
  * - Interface de chargement élégante
  */
@@ -34,7 +34,7 @@ const RootRedirect: React.FC = () => {
   if (user) {
     return <Navigate to="/dashboard" replace />;
   } else {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/landing" replace />;
   }
 };
 
