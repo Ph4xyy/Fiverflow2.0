@@ -1,18 +1,6 @@
 /**
  * Page Assistant AI - Interface style ChatGPT
- * 
- * CHECKLIST D'ACCEPTATION:
- * - [x] UI style ChatGPT, cohérente avec le thème global
- * - [x] Lien "AI ▸ Assistant" dans le layout
- * - [x] Slash-commands & langage naturel FR/EN
- * - [x] CRUD tasks/orders/clients/events
- * - [x] Confirmations delete/bulk
- * - [x] Rôles/ownership OK (RLS-friendly)
- * - [x] Quotas par plan OK + messages
- * - [x] Logs assistant_actions + ai_usage
- * - [x] Webhooks n8n signés (si ENV fournis)
- * - [x] Tests unitaires passent
- * - [x] Aucun flash blanc en dark-mode
+ * Accès réservé au plan Scale ou aux admins
  */
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -41,12 +29,9 @@ import { useNavigate } from 'react-router-dom';
 
 const AIAssistantPage: React.FC = () => {
   const { user } = useAuth();
+  const { currentTheme } = useTheme();
   const navigate = useNavigate();
-  // Safely call useSubscriptionPermissions
   const permissions = useSubscriptionPermissions();
-  const subscription = permissions?.subscription || null;
-  const isUserAdmin = permissions?.isAdmin || false;
-  const permissionsLoading = permissions?.loading || false;
   
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -54,6 +39,11 @@ const AIAssistantPage: React.FC = () => {
   const [pendingConfirmation, setPendingConfirmation] = useState<AssistantMessage | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Extract permission values
+  const subscription = permissions?.subscription || null;
+  const isUserAdmin = permissions?.isAdmin || false;
+  const permissionsLoading = permissions?.loading || false;
 
   // Detect user language
   const userLanguage = navigator.language.startsWith('fr') ? 'fr' : 'en';
@@ -79,24 +69,20 @@ const AIAssistantPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
         <div className="max-w-2xl w-full">
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 shadow-lg">
-            {/* Icon */}
             <div className="flex justify-center mb-6">
               <div className="w-20 h-20 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
                 <SparklesIcon className="w-10 h-10 text-white" />
               </div>
             </div>
 
-            {/* Title */}
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-4">
               Assistant AI (réservé au plan Scale)
             </h1>
 
-            {/* Description */}
             <p className="text-lg text-gray-600 dark:text-gray-300 text-center mb-8">
               Passez à Scale pour débloquer l'assistant intelligent, capable de créer vos clients, tâches et événements automatiquement.
             </p>
 
-            {/* Features */}
             <div className="space-y-4 mb-8">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
@@ -129,7 +115,6 @@ const AIAssistantPage: React.FC = () => {
               </div>
             </div>
 
-            {/* CTA Button */}
             <button
               onClick={() => navigate('/billing')}
               className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-blue-600 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg"
@@ -149,33 +134,29 @@ const AIAssistantPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (hasScaleAccess) {
+    if (hasScaleAccess && messages.length > 0) {
       scrollToBottom();
     }
   }, [messages, hasScaleAccess]);
 
-  // Initial welcome message - only if has access
+  // Initial welcome message
   useEffect(() => {
-    if (hasScaleAccess && messages.length === 0) {
-      try {
-        const welcomeMessage: AssistantMessage = {
-          id: 'welcome',
-          type: 'assistant',
-          content: userLanguage === 'fr' 
-            ? '👋 Hello! I\'m your AI assistant. I can help you manage your tasks, clients, orders, and events. Try an example below or type your request!'
-            : '👋 Hello! I\'m your AI assistant. I can help you manage your tasks, clients, orders, and events. Try an example below or type your request!',
-          timestamp: new Date(),
-        };
-        setMessages([welcomeMessage]);
-      } catch (error) {
-        console.error('Error setting welcome message:', error);
-      }
-    }
+    if (!hasScaleAccess || messages.length !== 0) return;
+    
+    const welcomeMessage: AssistantMessage = {
+      id: 'welcome',
+      type: 'assistant',
+      content: userLanguage === 'fr' 
+        ? '👋 Hello! I\'m your AI assistant. I can help you manage your tasks, clients, orders, and events. Try an example below or type your request!'
+        : '👋 Hello! I\'m your AI assistant. I can help you manage your tasks, clients, orders, and events. Try an example below or type your request!',
+      timestamp: new Date(),
+    };
+    setMessages([welcomeMessage]);
   }, [userLanguage, hasScaleAccess]);
 
   // Handle sending a message
   const handleSendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return;
+    if (!inputValue.trim() || isLoading || !user) return;
 
     const userMessage: AssistantMessage = {
       id: Date.now().toString(),
@@ -189,11 +170,8 @@ const AIAssistantPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Parse intent
       const intent = parseIntent(inputValue.trim());
-      
-      // Execute action
-      const result = await assistantExecute(user!, intent);
+      const result = await assistantExecute(user, intent);
 
       const assistantMessage: AssistantMessage = {
         id: (Date.now() + 1).toString(),
@@ -209,7 +187,6 @@ const AIAssistantPage: React.FC = () => {
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      // Si une confirmation est requise, la stocker
       if (result.requiresConfirmation) {
         setPendingConfirmation(assistantMessage);
       }
@@ -228,15 +205,14 @@ const AIAssistantPage: React.FC = () => {
 
   // Handle confirmation
   const handleConfirmation = async (confirmed: boolean) => {
-    if (!pendingConfirmation) return;
+    if (!pendingConfirmation || !user) return;
 
     if (confirmed) {
-      // Restart action with confirmation
       const intent = pendingConfirmation.metadata?.intent;
       if (intent) {
         setIsLoading(true);
         try {
-          const result = await assistantExecute(user!, intent);
+          const result = await assistantExecute(user, intent);
           
           const confirmationMessage: AssistantMessage = {
             id: Date.now().toString(),
@@ -279,19 +255,19 @@ const AIAssistantPage: React.FC = () => {
     }
   };
 
-  // Effacer la conversation
+  // Clear conversation
   const clearConversation = () => {
     setMessages([]);
     setPendingConfirmation(null);
   };
 
-  // Utiliser un exemple
+  // Use example
   const useExample = (example: string) => {
     setInputValue(example);
     inputRef.current?.focus();
   };
 
-  // Rendu d'un message
+  // Render message
   const renderMessage = (message: AssistantMessage) => {
     const isUser = message.type === 'user';
     const isAssistant = message.type === 'assistant';
@@ -490,7 +466,7 @@ const AIAssistantPage: React.FC = () => {
             
             <button
               onClick={handleSendMessage}
-              disabled={!inputValue.trim() || isLoading}
+              disabled={!inputValue.trim() || isLoading || !user}
               className="px-4 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
             >
               {isLoading ? (
