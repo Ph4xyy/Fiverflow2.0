@@ -74,12 +74,31 @@ const PageCalendar: React.FC = () => {
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [selectedDateString, setSelectedDateString] = useState<string>('');
 
+  // Helper function to apply all filters
+  const applyFilters = (eventsToFilter: Event[]) => {
+    // Apply category filters
+    let filtered = eventsToFilter.filter(event => {
+      return filterCategories[event.category as keyof typeof filterCategories];
+    });
+    
+    // Apply type filters
+    if (filterType) {
+      filtered = filtered.filter(event => event.type === filterType);
+    }
+    if (filterPriority) {
+      filtered = filtered.filter(event => event.priority === filterPriority);
+    }
+    
+    return filtered;
+  };
+
   // Fonctions de gestion des modals
   const handleDateClick = (dateString: string) => {
     setSelectedDateString(dateString);
-    // Vérifier s'il y a des événements pour cette date
+    // Vérifier s'il y a des événements pour cette date (avec filtres appliqués)
     const dayEvents = events.filter(event => event.date === dateString);
-    if (dayEvents.length > 0) {
+    const filteredDayEvents = applyFilters(dayEvents);
+    if (filteredDayEvents.length > 0) {
       setIsDayEventsModalOpen(true);
     } else {
       setIsActionModalOpen(true);
@@ -365,18 +384,8 @@ const PageCalendar: React.FC = () => {
       return event.date === dateStr;
     });
     
-    // Apply category filters
-    filteredEvents = filteredEvents.filter(event => {
-      return filterCategories[event.category as keyof typeof filterCategories];
-    });
-    
-    // Apply type filters
-    if (filterType) {
-      filteredEvents = filteredEvents.filter(event => event.type === filterType);
-    }
-    if (filterPriority) {
-      filteredEvents = filteredEvents.filter(event => event.priority === filterPriority);
-    }
+    // Apply all filters
+    filteredEvents = applyFilters(filteredEvents);
     
     console.log('✅ Found events for', dateStr, ':', filteredEvents.length);
     return filteredEvents;
@@ -836,7 +845,7 @@ const PageCalendar: React.FC = () => {
           isOpen={isDayEventsModalOpen}
           onClose={() => setIsDayEventsModalOpen(false)}
           selectedDate={selectedDateString}
-          events={events.filter(event => event.date === selectedDateString)}
+          events={applyFilters(events.filter(event => event.date === selectedDateString))}
           onAddEvent={handleAddEvent}
           onEventClick={handleEventClick}
         />
