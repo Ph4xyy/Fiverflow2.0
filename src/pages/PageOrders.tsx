@@ -43,7 +43,7 @@ type OrderRow = {
   id: string;
   title: string;
   budget: number | null;
-  status: 'Pending' | 'In Progress' | 'Completed' | string;
+  status: 'Pending' | 'In Progress' | 'Completed' | 'On Hold' | 'Cancelled' | 'Awaiting Payment' | 'In Review' | string;
   due_date: string | null;
   created_at: string | null;
   clients: {
@@ -69,6 +69,17 @@ type OrderRow = {
 };
 
 const PAGE_SIZE = 12; // Reduced for card layout
+
+// Status options for dropdown
+const ALL_STATUSES: Array<OrderRow['status']> = [
+  'Pending',
+  'In Progress',
+  'Completed',
+  'On Hold',
+  'Cancelled',
+  'Awaiting Payment',
+  'In Review'
+];
 
 const PageOrders: React.FC = () => {
   const { user } = useAuth();
@@ -104,6 +115,10 @@ const PageOrders: React.FC = () => {
   // Detail modal
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
+
+  // Status dropdown state
+  const [openStatusFor, setOpenStatusFor] = useState<string | null>(null);
+  const statusMenuRef = useRef<HTMLDivElement | null>(null);
 
   // 🔥 NAVIGATION INSTANTANÉE - Plus de debounce, recherche immédiate
   useEffect(() => {
@@ -277,6 +292,26 @@ const PageOrders: React.FC = () => {
           color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
           icon: <Clock className="w-4 h-4" />
         };
+      case 'on hold':
+        return { 
+          color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+          icon: <AlertCircle className="w-4 h-4" />
+        };
+      case 'cancelled':
+        return { 
+          color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+          icon: <X className="w-4 h-4" />
+        };
+      case 'awaiting payment':
+        return { 
+          color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+          icon: <DollarSign className="w-4 h-4" />
+        };
+      case 'in review':
+        return { 
+          color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+          icon: <Eye className="w-4 h-4" />
+        };
       default:
         return { 
           color: 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-300',
@@ -323,6 +358,76 @@ const PageOrders: React.FC = () => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
+
+  // Status dropdown handlers
+  const toggleStatusMenu = (e: React.MouseEvent, orderId: string) => {
+    e.stopPropagation();
+    setOpenStatusFor(prev => (prev === orderId ? null : orderId));
+  };
+
+  const updateOrderStatus = async (orderId: string, newStatus: OrderRow['status']) => {
+    // Convertir le statut pour la base de données
+    const getStatusForDB = (status: string) => {
+      switch (status) {
+        case 'Pending': return 'pending';
+        case 'In Progress': return 'in_progress';
+        case 'Completed': return 'completed';
+        case 'Cancelled': return 'cancelled';
+        case 'On Hold': return 'on_hold';
+        default: return status.toLowerCase().replace(' ', '_');
+      }
+    };
+
+    try {
+      if (!isSupabaseConfigured || !supabase) {
+        toast.error('Database not configured');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: getStatusForDB(newStatus) })
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      toast.success(`Status updated to ${newStatus}`);
+    } catch (e: any) {
+      console.error('Failed to update status', e);
+      toast.error('Failed to update status');
+    }
+  };
+
+  const selectStatus = (e: React.MouseEvent, order: OrderRow, newStatus: OrderRow['status']) => {
+    e.stopPropagation();
+    setOpenStatusFor(null);
+    if (order.status === newStatus) return;
+    
+    // Optimistic update
+    setOrders(prev => prev.map(o => (o.id === order.id ? { ...o, status: newStatus } : o)));
+    updateOrderStatus(order.id, newStatus);
+  };
+
+  // Close dropdown on outside click or Esc
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (statusMenuRef.current && statusMenuRef.current.contains(e.target as Node)) {
+        return;
+      }
+      setOpenStatusFor(null);
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenStatusFor(null);
+    };
+    if (openStatusFor) {
+      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('keydown', handleKey);
+    }
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [openStatusFor]);
 
   if (loading && !orders.length) {
     return (
@@ -524,10 +629,47 @@ const PageOrders: React.FC = () => {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-white">{formatCurrency(order.budget)}</span>
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${statusInfo.color}`}>
-                      {statusInfo.icon}
-                      {order.status}
-                    </span>
+                    <div className="relative" ref={openStatusFor === order.id ? statusMenuRef : undefined}>
+                      <button
+                        onClick={(e) => toggleStatusMenu(e, order.id)}
+                        className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${statusInfo.color} hover:opacity-90 transition cursor-pointer`}
+                        title="Change status"
+                      >
+                        {statusInfo.icon}
+                        {order.status}
+                      </button>
+                      {openStatusFor === order.id && (
+                        <div className="absolute z-20 right-0 mt-2 w-44 rounded-xl border border-[#1C2230] bg-[#0E121A] shadow-lg">
+                          <ul className="py-1 max-h-64 overflow-auto">
+                            {ALL_STATUSES.map((st) => {
+                              const statusInfo = getStatusInfo(st);
+                              return (
+                                <li key={st}>
+                                  <button
+                                    className={`w-full text-left px-3 py-2 text-sm hover:bg-[#141922] ${
+                                      st === order.status ? 'text-white' : 'text-slate-300'
+                                    }`}
+                                    onClick={(e) => selectStatus(e, order, st)}
+                                  >
+                                    <span className={`inline-block w-2 h-2 rounded-full mr-2 align-middle ${
+                                      statusInfo.color.includes('green') ? 'bg-green-500' : 
+                                      statusInfo.color.includes('blue') ? 'bg-blue-500' : 
+                                      statusInfo.color.includes('yellow') ? 'bg-yellow-500' : 
+                                      statusInfo.color.includes('red') ? 'bg-red-500' : 
+                                      statusInfo.color.includes('orange') ? 'bg-orange-500' : 
+                                      statusInfo.color.includes('indigo') ? 'bg-indigo-500' : 
+                                      statusInfo.color.includes('amber') ? 'bg-amber-500' : 
+                                      'bg-slate-500'
+                                    }`}></span>
+                                    {st}
+                                  </button>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   
                   {order.due_date && (
@@ -613,11 +755,47 @@ const PageOrders: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-white">{formatCurrency(order.budget)}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${statusInfo.color}`}>
+                      <td className="px-6 py-4 whitespace-nowrap relative" ref={openStatusFor === order.id ? statusMenuRef : undefined}>
+                        <button
+                          type="button"
+                          onClick={(e) => toggleStatusMenu(e, order.id)}
+                          className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${statusInfo.color} hover:opacity-90 transition cursor-pointer`}
+                          title="Change status"
+                        >
                           {statusInfo.icon}
                           {order.status}
-                        </span>
+                        </button>
+                        {openStatusFor === order.id && (
+                          <div className="absolute z-20 mt-2 w-44 rounded-xl border border-[#1C2230] bg-[#0E121A] shadow-lg">
+                            <ul className="py-1 max-h-64 overflow-auto">
+                              {ALL_STATUSES.map((st) => {
+                                const statusInfo = getStatusInfo(st);
+                                return (
+                                  <li key={st}>
+                                    <button
+                                      className={`w-full text-left px-3 py-2 text-sm hover:bg-[#141922] ${
+                                        st === order.status ? 'text-white' : 'text-slate-300'
+                                      }`}
+                                      onClick={(e) => selectStatus(e, order, st)}
+                                    >
+                                      <span className={`inline-block w-2 h-2 rounded-full mr-2 align-middle ${
+                                        statusInfo.color.includes('green') ? 'bg-green-500' : 
+                                        statusInfo.color.includes('blue') ? 'bg-blue-500' : 
+                                        statusInfo.color.includes('yellow') ? 'bg-yellow-500' : 
+                                        statusInfo.color.includes('red') ? 'bg-red-500' : 
+                                        statusInfo.color.includes('orange') ? 'bg-orange-500' : 
+                                        statusInfo.color.includes('indigo') ? 'bg-indigo-500' : 
+                                        statusInfo.color.includes('amber') ? 'bg-amber-500' : 
+                                        'bg-slate-500'
+                                      }`}></span>
+                                      {st}
+                                    </button>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className={`text-sm ${
