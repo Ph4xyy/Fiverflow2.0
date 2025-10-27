@@ -218,6 +218,16 @@ const OrdersPage: React.FC = () => {
     return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
   }, []); // 🔥 FIXED: Empty dependencies to prevent infinite loops
 
+  // Update selectedOrder when orders change (after status update, etc.)
+  useEffect(() => {
+    if (selectedOrder && orders.length > 0) {
+      const updatedOrder = orders.find(o => o.id === selectedOrder.id);
+      if (updatedOrder) {
+        setSelectedOrder(updatedOrder);
+      }
+    }
+  }, [orders, selectedOrder]);
+
   const handleAddOrder = async () => {
     const canAdd = await checkOrderLimit();
     if (canAdd) {
@@ -343,6 +353,8 @@ const OrdersPage: React.FC = () => {
         .eq('id', orderId);
       if (error) throw error;
       toast.success(`Status updated to ${newStatus}`);
+      // Recharger toutes les données pour mettre à jour preview, edit, etc.
+      fetchOrders();
     } catch (e: any) {
       console.error('Failed to update status', e);
       toast.error('Failed to update status');
@@ -362,7 +374,6 @@ const OrdersPage: React.FC = () => {
     e.stopPropagation();
     setOpenStatusFor(null);
     if (order.status === newStatus) return;
-    setOrders(prev => prev.map(o => (o.id === order.id ? { ...o, status: newStatus } : o)));
     updateOrderStatus(order.id, newStatus);
   };
 

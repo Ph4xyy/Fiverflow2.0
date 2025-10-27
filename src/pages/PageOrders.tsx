@@ -1,5 +1,5 @@
 // src/pages/OrdersPageModern.tsx - NOUVELLE INTERFACE MODERNE
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import Layout, { cardClass } from '../components/Layout';
 import ModernButton from '../components/ModernButton';
 import OrderForm from '../components/OrderForm';
@@ -157,93 +157,104 @@ const PageOrders: React.FC = () => {
     loadPlatforms();
   }, [user]);
 
-  // Load orders
-  useEffect(() => {
-    const loadOrders = async () => {
-      if (!user) {
-        setLoading(false);
+  // Load orders - extracted function to be called from anywhere
+  const fetchOrders = useCallback(async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (!isSupabaseConfigured || !supabase) {
+        // Mock data for development
+        const mockOrders: OrderRow[] = [
+          {
+            id: '1',
+            title: 'Website Design',
+            budget: 500,
+            status: 'In Progress',
+            due_date: '2024-02-15',
+            created_at: '2024-01-15',
+            clients: { name: 'John Doe', platform: 'Fiverr' },
+            description: 'Modern website design',
+            client_name: 'John Doe',
+            platform: 'Fiverr'
+          },
+          {
+            id: '2',
+            title: 'Logo Creation',
+            budget: 150,
+            status: 'Completed',
+            due_date: '2024-01-30',
+            created_at: '2024-01-10',
+            clients: { name: 'Jane Smith', platform: 'Upwork' },
+            description: 'Professional logo design',
+            client_name: 'Jane Smith',
+            platform: 'Upwork'
+          }
+        ];
+        setOrders(mockOrders);
+        setTotal(mockOrders.length);
         return;
       }
 
-      setLoading(true);
-      setError(null);
+      let query = supabase
+        .from('orders')
+        .select(`
+          id, title, budget, status, due_date, created_at, description,
+          client_id, start_date, completed_date, platform,
+          clients!inner(name, platform)
+        `, { count: 'exact' })
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-      try {
-        if (!isSupabaseConfigured || !supabase) {
-          // Mock data for development
-          const mockOrders: OrderRow[] = [
-            {
-              id: '1',
-              title: 'Website Design',
-              budget: 500,
-              status: 'In Progress',
-              due_date: '2024-02-15',
-              created_at: '2024-01-15',
-              clients: { name: 'John Doe', platform: 'Fiverr' },
-              description: 'Modern website design',
-              client_name: 'John Doe',
-              platform: 'Fiverr'
-            },
-            {
-              id: '2',
-              title: 'Logo Creation',
-              budget: 150,
-              status: 'Completed',
-              due_date: '2024-01-30',
-              created_at: '2024-01-10',
-              clients: { name: 'Jane Smith', platform: 'Upwork' },
-              description: 'Professional logo design',
-              client_name: 'Jane Smith',
-              platform: 'Upwork'
-            }
-          ];
-          setOrders(mockOrders);
-          setTotal(mockOrders.length);
-          return;
-        }
-
-        let query = supabase
-          .from('orders')
-          .select(`
-            id, title, budget, status, due_date, created_at, description,
-            client_id, start_date, completed_date, platform,
-            clients!inner(name, platform)
-          `, { count: 'exact' })
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        // Apply filters
-        if (debouncedSearch) {
-          query = query.or(`title.ilike.%${debouncedSearch}%,description.ilike.%${debouncedSearch}%`);
-        }
-        if (status) {
-          query = query.eq('status', status);
-        }
-        if (platform) {
-          query = query.eq('platform', platform);
-        }
-
-        // Apply pagination
-        const from = (page - 1) * PAGE_SIZE;
-        const to = from + PAGE_SIZE - 1;
-        query = query.range(from, to);
-
-        const { data, error, count } = await query;
-
-        if (error) throw error;
-
-        setOrders(data || []);
-        setTotal(count || 0);
-      } catch (err: any) {
-        console.error('Error loading orders:', err);
-        setError(err.message || 'Failed to load orders');
-      } finally {
-        setLoading(false);
+      // Apply filters
+      if (debouncedSearch) {
+        query = query.or(`title.ilike.%${debouncedSearch}%,description.ilike.%${debouncedSearch}%`);
       }
-    };
+      if (status) {
+        query = query.eq('status', status);
+      }
+      if (platform) {
+        query = query.eq('platform', platform);
+      }
 
-    loadOrders();
+      // Apply pagination
+      const from = (page - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
+
+      if (error) throw error;
+
+      setOrders(data || []);
+      setTotal(count || 0);
+    } catch (err: any) {
+      console.error('Error loading orders:', err);
+      setError(err.message || 'Failed to load orders');
+    } finally {
+      setLoading(false);
+    }
   }, [user, debouncedSearch, status, platform, page]);
+
+  // Load orders effect
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  // Update selectedOrder when orders change (after status update, etc.)
+  useEffect(() => {
+    if (selectedOrder && orders.length > 0) {
+      const updatedOrder = orders.find(o => o.id === selectedOrder.id);
+      if (updatedOrder) {
+        setSelectedOrder(updatedOrder);
+      }
+    }
+  }, [orders, selectedOrder]);
 
   // Open create form
   const openCreate = async () => {
@@ -392,6 +403,9 @@ const PageOrders: React.FC = () => {
       if (error) throw error;
 
       toast.success(`Status updated to ${newStatus}`);
+      
+      // Recharger toutes les données pour mettre à jour preview, edit, etc.
+      await fetchOrders();
     } catch (e: any) {
       console.error('Failed to update status', e);
       toast.error('Failed to update status');
@@ -403,8 +417,6 @@ const PageOrders: React.FC = () => {
     setOpenStatusFor(null);
     if (order.status === newStatus) return;
     
-    // Optimistic update
-    setOrders(prev => prev.map(o => (o.id === order.id ? { ...o, status: newStatus } : o)));
     updateOrderStatus(order.id, newStatus);
   };
 
