@@ -41,7 +41,7 @@ import { useNavigate } from 'react-router-dom';
 
 const AIAssistantPage: React.FC = () => {
   const { user } = useAuth();
-  const { subscription, isAdmin: isUserAdmin, loading: permissionsLoading } = useSubscriptionPermissions();
+  const subscriptionPermissions = useSubscriptionPermissions();
   const { currentTheme } = useTheme();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
@@ -50,6 +50,9 @@ const AIAssistantPage: React.FC = () => {
   const [pendingConfirmation, setPendingConfirmation] = useState<AssistantMessage | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Safely extract values
+  const { subscription, isAdmin: isUserAdmin = false, loading: permissionsLoading = false } = subscriptionPermissions || {};
 
   // Detect user language
   const userLanguage = navigator.language.startsWith('fr') ? 'fr' : 'en';
@@ -145,23 +148,29 @@ const AIAssistantPage: React.FC = () => {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  // Initial welcome message
-  useEffect(() => {
-    if (messages.length === 0) {
-      const welcomeMessage: AssistantMessage = {
-        id: 'welcome',
-        type: 'assistant',
-        content: userLanguage === 'fr' 
-          ? '👋 Hello! I\'m your AI assistant. I can help you manage your tasks, clients, orders, and events. Try an example below or type your request!'
-          : '👋 Hello! I\'m your AI assistant. I can help you manage your tasks, clients, orders, and events. Try an example below or type your request!',
-        timestamp: new Date(),
-      };
-      setMessages([welcomeMessage]);
+    if (hasScaleAccess) {
+      scrollToBottom();
     }
-  }, [userLanguage]);
+  }, [messages, hasScaleAccess]);
+
+  // Initial welcome message - only if has access
+  useEffect(() => {
+    if (hasScaleAccess && messages.length === 0) {
+      try {
+        const welcomeMessage: AssistantMessage = {
+          id: 'welcome',
+          type: 'assistant',
+          content: userLanguage === 'fr' 
+            ? '👋 Hello! I\'m your AI assistant. I can help you manage your tasks, clients, orders, and events. Try an example below or type your request!'
+            : '👋 Hello! I\'m your AI assistant. I can help you manage your tasks, clients, orders, and events. Try an example below or type your request!',
+          timestamp: new Date(),
+        };
+        setMessages([welcomeMessage]);
+      } catch (error) {
+        console.error('Error setting welcome message:', error);
+      }
+    }
+  }, [userLanguage, hasScaleAccess]);
 
   // Handle sending a message
   const handleSendMessage = async () => {
