@@ -110,9 +110,9 @@ const AIAssistantPage: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen">
-      {/* Header */}
-      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+    <div className="absolute inset-0 flex flex-col">
+      {/* Header - fixed at top */}
+      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
@@ -131,8 +131,8 @@ const AIAssistantPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Messages - takes remaining space and scrolls */}
-      <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+      {/* Messages - scrollable area in the middle */}
+      <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900" style={{ height: 0 }}>
         <div className="max-w-4xl mx-auto py-4">
           {messages.length === 1 && (
             <div className="px-4 mb-4">
@@ -213,8 +213,8 @@ const AIAssistantPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Input - always visible at bottom */}
-      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3">
+      {/* Input - fixed at bottom */}
+      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3 z-10">
         <div className="max-w-4xl mx-auto">
           <div className="flex gap-3">
             <textarea
