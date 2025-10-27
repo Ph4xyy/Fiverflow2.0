@@ -43,7 +43,7 @@ type OrderRow = {
   id: string;
   title: string;
   budget: number | null;
-  status: 'Pending' | 'In Progress' | 'Completed' | 'On Hold' | 'Cancelled' | 'Awaiting Payment' | 'In Review' | string;
+  status: 'Pending' | 'In Progress' | 'Completed' | 'On Hold' | 'Cancelled' | string;
   due_date: string | null;
   created_at: string | null;
   clients: {
@@ -70,15 +70,13 @@ type OrderRow = {
 
 const PAGE_SIZE = 12; // Reduced for card layout
 
-// Status options for dropdown
+// Status options for dropdown (matching database enum)
 const ALL_STATUSES: Array<OrderRow['status']> = [
   'Pending',
   'In Progress',
   'Completed',
   'On Hold',
-  'Cancelled',
-  'Awaiting Payment',
-  'In Review'
+  'Cancelled'
 ];
 
 const PageOrders: React.FC = () => {
@@ -239,8 +237,6 @@ const PageOrders: React.FC = () => {
           case 'completed': return 'Completed';
           case 'cancelled': return 'Cancelled';
           case 'on_hold': return 'On Hold';
-          case 'awaiting_payment': return 'Awaiting Payment';
-          case 'in_review': return 'In Review';
           default: return status;
         }
       };
@@ -404,9 +400,7 @@ const PageOrders: React.FC = () => {
         case 'Completed': return 'completed';
         case 'Cancelled': return 'cancelled';
         case 'On Hold': return 'on_hold';
-        case 'Awaiting Payment': return 'awaiting_payment';
-        case 'In Review': return 'in_review';
-        default: return status.toLowerCase().replace(/ /g, '_');
+        default: return 'pending'; // Valeur par défaut si non reconnu
       }
     };
 

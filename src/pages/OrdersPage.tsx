@@ -175,8 +175,6 @@ const OrdersPage: React.FC = () => {
           case 'completed': return 'Completed';
           case 'cancelled': return 'Cancelled';
           case 'on_hold': return 'On Hold';
-          case 'awaiting_payment': return 'Awaiting Payment';
-          case 'in_review': return 'In Review';
           default: return status;
         }
       };
@@ -325,9 +323,7 @@ const OrdersPage: React.FC = () => {
     'In Progress',
     'Completed',
     'On Hold',
-    'Cancelled',
-    'Awaiting Payment',
-    'In Review'
+    'Cancelled'
   ];
 
   const updateOrderStatus = async (orderId: string, newStatus: OrderRow['status']) => {
@@ -339,9 +335,7 @@ const OrdersPage: React.FC = () => {
         case 'Completed': return 'completed';
         case 'Cancelled': return 'cancelled';
         case 'On Hold': return 'on_hold';
-        case 'Awaiting Payment': return 'awaiting_payment';
-        case 'In Review': return 'in_review';
-        default: return status.toLowerCase().replace(/ /g, '_');
+        default: return 'pending'; // Valeur par défaut si non reconnu
       }
     };
 
