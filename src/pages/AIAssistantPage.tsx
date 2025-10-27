@@ -29,7 +29,6 @@ import { useNavigate } from 'react-router-dom';
 
 const AIAssistantPage: React.FC = () => {
   const { user } = useAuth();
-  const { currentTheme } = useTheme();
   const navigate = useNavigate();
   const permissions = useSubscriptionPermissions();
   
@@ -40,10 +39,10 @@ const AIAssistantPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Extract permission values - with safe fallbacks
-  const subscription = (permissions && 'subscription' in permissions) ? permissions.subscription : null;
-  const isUserAdmin = (permissions && 'isAdmin' in permissions) ? permissions.isAdmin : false;
-  const permissionsLoading = (permissions && 'loading' in permissions) ? permissions.loading : false;
+  // Extract permission values with defaults
+  const subscription = permissions?.subscription || null;
+  const isUserAdmin = permissions?.isAdmin || false;
+  const permissionsLoading = permissions?.loading || false;
 
   // Detect user language
   const userLanguage = navigator.language.startsWith('fr') ? 'fr' : 'en';

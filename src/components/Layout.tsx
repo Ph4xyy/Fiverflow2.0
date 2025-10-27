@@ -99,7 +99,10 @@ class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, 
     return { hasError: true, error };
   }
   componentDidCatch(error: any, info: any) {
-    console.error('[Layout ErrorBoundary]', error, info);
+    console.error('[Layout ErrorBoundary] ERREUR DETECTEE:', error);
+    console.error('[Layout ErrorBoundary] Stack:', error.stack);
+    console.error('[Layout ErrorBoundary] Info:', info);
+    console.error('[Layout ErrorBoundary] Component stack:', info.componentStack);
   }
   render() {
     if (this.state.hasError) {
