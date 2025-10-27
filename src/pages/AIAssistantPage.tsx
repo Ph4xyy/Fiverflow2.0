@@ -41,18 +41,19 @@ import { useNavigate } from 'react-router-dom';
 
 const AIAssistantPage: React.FC = () => {
   const { user } = useAuth();
-  const subscriptionPermissions = useSubscriptionPermissions();
-  const { currentTheme } = useTheme();
   const navigate = useNavigate();
+  // Safely call useSubscriptionPermissions
+  const permissions = useSubscriptionPermissions();
+  const subscription = permissions?.subscription || null;
+  const isUserAdmin = permissions?.isAdmin || false;
+  const permissionsLoading = permissions?.loading || false;
+  
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [pendingConfirmation, setPendingConfirmation] = useState<AssistantMessage | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  // Safely extract values
-  const { subscription, isAdmin: isUserAdmin = false, loading: permissionsLoading = false } = subscriptionPermissions || {};
 
   // Detect user language
   const userLanguage = navigator.language.startsWith('fr') ? 'fr' : 'en';
