@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ModernCard from './ModernCard';
 import ModernButton from './ModernButton';
+import TaskPreviewModal from './TaskPreviewModal';
 import { useTasks } from '../hooks/useTasks';
 import { useOrders } from '../hooks/useOrders';
 import { useAuth } from '../contexts/AuthContext';
@@ -62,6 +63,7 @@ interface TaskCardProps {
   onStatusChange: (taskId: string, status: string) => void;
   getPriorityColor: (priority: string) => string;
   completed?: boolean;
+  onPreview?: (task: any) => void;
 }
 
 const TaskCard: React.FC<TaskCardProps> = ({
@@ -71,7 +73,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
   onStartTimer,
   onStatusChange,
   getPriorityColor,
-  completed = false
+  completed = false,
+  onPreview
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -102,7 +105,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
   };
 
   return (
-    <div className={`group relative overflow-hidden rounded-xl bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] hover:border-white/[0.12] transition-all duration-300 shadow-lg hover:shadow-2xl ${completed ? 'opacity-50' : ''}`}>
+    <div 
+      className={`group relative overflow-hidden rounded-xl bg-white/[0.02] backdrop-blur-sm border border-white/[0.08] hover:border-white/[0.12] transition-all duration-300 shadow-lg hover:shadow-2xl ${completed ? 'opacity-50' : ''}`}
+      onClick={() => onPreview && onPreview(task)}
+    >
       {/* Accent bar with gradient based on priority */}
       <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${
         task.priority === 'high' ? 'from-red-500 via-pink-500 to-red-600' :
@@ -204,7 +210,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
               </button>
               
               {showDropdown && (
-                <div className="absolute right-0 bottom-full mb-2 w-56 bg-[#1a1f2e] border border-white/[0.08] rounded-xl shadow-2xl z-50 backdrop-blur-md">
+                <div 
+                  className="absolute right-0 bottom-full mb-2 w-56 bg-[#1a1f2e] border border-white/[0.08] rounded-xl shadow-2xl z-50 backdrop-blur-md"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="py-2">
                     {statusOptions.map(option => {
                       const OptionIcon = option.icon || Clock;
@@ -253,6 +262,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [previewTask, setPreviewTask] = useState<any>(null);
   
   // État du formulaire de tâche
   const [taskForm, setTaskForm] = useState<TaskFormData>({
@@ -410,6 +420,39 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
       toast.success('Task status updated!');
     } catch (error) {
       toast.error('Failed to update task status');
+    }
+  };
+
+  const handlePreviewTask = (task: any) => {
+    setPreviewTask(task);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewTask(null);
+  };
+
+  const handlePreviewEdit = () => {
+    if (previewTask) {
+      handleEditTask(previewTask);
+    }
+  };
+
+  const handlePreviewDelete = () => {
+    if (previewTask) {
+      setShowDeleteConfirm(previewTask.id);
+      setPreviewTask(null);
+    }
+  };
+
+  const handlePreviewStartTimer = () => {
+    if (previewTask) {
+      handleStartTimer(previewTask.id);
+    }
+  };
+
+  const handlePreviewStatusChange = async (status: string) => {
+    if (previewTask) {
+      await handleStatusChange(previewTask.id, status);
     }
   };
 
@@ -665,6 +708,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                       onStartTimer={handleStartTimer}
                       onStatusChange={handleStatusChange}
                       getPriorityColor={getPriorityColor}
+                      onPreview={handlePreviewTask}
                     />
                   ))
                 )}
@@ -696,6 +740,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                       onStartTimer={handleStartTimer}
                       onStatusChange={handleStatusChange}
                       getPriorityColor={getPriorityColor}
+                      onPreview={handlePreviewTask}
                     />
                   ))
                 )}
@@ -728,6 +773,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                       onStatusChange={handleStatusChange}
                       getPriorityColor={getPriorityColor}
                       completed={true}
+                      onPreview={handlePreviewTask}
                     />
                   ))
                 )}
@@ -759,6 +805,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                           onStartTimer={handleStartTimer}
                           onStatusChange={handleStatusChange}
                           getPriorityColor={getPriorityColor}
+                          onPreview={handlePreviewTask}
                         />
                       ))}
                     </div>
@@ -786,6 +833,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                           onStatusChange={handleStatusChange}
                           getPriorityColor={getPriorityColor}
                           completed={true}
+                          onPreview={handlePreviewTask}
                         />
                       ))}
                     </div>
@@ -813,6 +861,7 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
                           onStatusChange={handleStatusChange}
                           getPriorityColor={getPriorityColor}
                           completed={true}
+                          onPreview={handlePreviewTask}
                         />
                       ))}
                     </div>
@@ -1072,6 +1121,17 @@ const ModernWorkboard: React.FC<ModernWorkboardProps> = () => {
             </div>
           </div>
         )}
+
+        {/* Task Preview Modal */}
+        <TaskPreviewModal
+          task={previewTask}
+          isOpen={!!previewTask}
+          onClose={handleClosePreview}
+          onEdit={handlePreviewEdit}
+          onDelete={handlePreviewDelete}
+          onStartTimer={handlePreviewStartTimer}
+          onStatusChange={handlePreviewStatusChange}
+        />
 
         {/* Modal de confirmation de suppression */}
         {showDeleteConfirm && (
