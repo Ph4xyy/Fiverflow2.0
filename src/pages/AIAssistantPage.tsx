@@ -41,7 +41,7 @@ import { useNavigate } from 'react-router-dom';
 
 const AIAssistantPage: React.FC = () => {
   const { user } = useAuth();
-  const { subscription, loading: permissionsLoading } = useSubscriptionPermissions();
+  const { subscription, isAdmin: isUserAdmin, loading: permissionsLoading } = useSubscriptionPermissions();
   const { currentTheme } = useTheme();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
@@ -56,7 +56,6 @@ const AIAssistantPage: React.FC = () => {
   const examples = getExamplesForLanguage(userLanguage);
 
   // Check if user has scale plan access OR is admin
-  const isUserAdmin = useSubscriptionPermissions().isAdmin;
   const hasScaleAccess = isUserAdmin || 
                         subscription?.plan_name?.toLowerCase() === 'scale' || 
                         subscription?.plan_name?.toLowerCase() === 'teams';
