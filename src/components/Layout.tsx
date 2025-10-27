@@ -6,6 +6,7 @@ import LogoImage from '../assets/LogoFiverFlow.png';
 // import ErrorBoundary from './ErrorBoundary'; // Non utilisé pour le moment
 
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
+import { useSubscriptionPermissions } from '../hooks/useSubscriptionPermissions';
 import NotificationsDropdown from './NotificationsDropdown';
 import CentralizedSearchBar from './CentralizedSearchBar';
 import { useAuth } from '../contexts/AuthContext';
@@ -127,6 +128,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { restrictions, checkAccess } = usePlanRestrictions();
+  const { subscription } = useSubscriptionPermissions();
   useEffect(() => {
     // Définir le rôle utilisateur basé sur l'authentification
     if (user) {
@@ -168,15 +170,18 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     },
   ];
 
-  // Section 2: AI
-  const aiItems = [
+  // Section 2: AI - Only show for Scale plan
+  const hasScalePlan = subscription?.plan_name?.toLowerCase() === 'scale' || 
+                       subscription?.plan_name?.toLowerCase() === 'teams';
+  
+  const aiItems = hasScalePlan ? [
     { 
       path: '/assistant', 
       label: 'Assistant', 
       icon: Bot,
       restricted: false
     },
-  ];
+  ] : [];
 
   // Section 3: Workspace
   const workspaceItems = [

@@ -18,6 +18,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useSubscriptionPermissions } from '../hooks/useSubscriptionPermissions';
 import { parseIntent } from '../lib/assistant/intent';
 import { assistantExecute } from '../lib/assistant/actions';
 import { QUICK_EXAMPLES, getExamplesForLanguage } from '../lib/assistant/examples';
@@ -31,12 +32,18 @@ import {
   Sparkles,
   Loader2,
   MessageSquare,
-  Lightbulb
+  Lightbulb,
+  Sparkles as SparklesIcon,
+  Zap,
+  Check
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const AIAssistantPage: React.FC = () => {
   const { user } = useAuth();
+  const { subscription, loading: permissionsLoading } = useSubscriptionPermissions();
   const { currentTheme } = useTheme();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -47,6 +54,89 @@ const AIAssistantPage: React.FC = () => {
   // Detect user language
   const userLanguage = navigator.language.startsWith('fr') ? 'fr' : 'en';
   const examples = getExamplesForLanguage(userLanguage);
+
+  // Check if user has scale plan access
+  const hasScaleAccess = subscription?.plan_name?.toLowerCase() === 'scale' || 
+                        subscription?.plan_name?.toLowerCase() === 'teams';
+
+  // Loading state
+  if (permissionsLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+      </div>
+    );
+  }
+
+  // Upsell screen for non-scale users
+  if (!hasScaleAccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+        <div className="max-w-2xl w-full">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 shadow-lg">
+            {/* Icon */}
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                <SparklesIcon className="w-10 h-10 text-white" />
+              </div>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-4">
+              Assistant AI (réservé au plan Scale)
+            </h1>
+
+            {/* Description */}
+            <p className="text-lg text-gray-600 dark:text-gray-300 text-center mb-8">
+              Passez à Scale pour débloquer l'assistant intelligent, capable de créer vos clients, tâches et événements automatiquement.
+            </p>
+
+            {/* Features */}
+            <div className="space-y-4 mb-8">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                  <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Création multi-tâches en une commande</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Créez plusieurs tâches, clients et événements simultanément via des commandes naturelles.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                  <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Actions directes sur vos clients et commandes</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Gérez vos données business sans quitter le chat.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                  <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Planification intelligente dans votre calendrier</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Organisez automatiquement vos rendez-vous et échéances.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <button
+              onClick={() => navigate('/billing')}
+              className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-blue-600 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg"
+            >
+              <Zap className="w-5 h-5" />
+              Voir les plans
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {

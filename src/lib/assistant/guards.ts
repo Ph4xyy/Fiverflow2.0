@@ -8,6 +8,22 @@ import { ParsedIntent } from '../../types/assistant';
 import { checkUsageLimit, incrementUsage } from './usage';
 
 /**
+ * Vérifie que l'utilisateur a accès au plan Scale
+ */
+export function assertAssistantEntitlement(user?: User | { plan?: string }): void {
+  const userPlan = user && 'plan' in user ? user.plan : 
+                   user && 'user_metadata' in user ? user.user_metadata?.subscription_plan : 
+                   undefined;
+  
+  if (!user || userPlan !== 'scale') {
+    const err: any = new Error('entitlement_denied');
+    err.code = 'entitlement_denied';
+    err.explanation = 'Assistant AI réservé au plan Scale.';
+    throw err;
+  }
+}
+
+/**
  * Vérifie les permissions de l'utilisateur
  */
 export async function assertPermission(

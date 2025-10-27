@@ -6,10 +6,11 @@ import { supabase } from '../supabase';
 import { UserPlan, PlanLimits } from '../../types/assistant';
 
 // Limites par plan
+// Limites par plan (seul scale a accès)
 export const PLAN_LIMITS: PlanLimits = {
-  free: parseInt(import.meta.env.VITE_ASSISTANT_USAGE_LIMIT_FREE || '100'),
-  pro: parseInt(import.meta.env.VITE_ASSISTANT_USAGE_LIMIT_PRO || '2000'),
-  teams: parseInt(import.meta.env.VITE_ASSISTANT_USAGE_LIMIT_TEAMS || '10000'),
+  free: 0, // Pas d'accès
+  pro: 0, // Pas d'accès
+  teams: parseInt(import.meta.env.VITE_ASSISTANT_USAGE_LIMIT_TEAMS || '10000'), // 10000 pour scale/teams
 };
 
 /**
@@ -145,9 +146,13 @@ export async function checkUsageLimit(userId: string): Promise<{
 
 /**
  * Obtient la limite pour un plan donné
+ * Retourne 0 pour free et boost (pas d'accès)
  */
-export function getPlanLimit(plan: string): number {
-  return PLAN_LIMITS[plan as keyof PlanLimits] || PLAN_LIMITS.free;
+export function getPlanLimit(plan?: string): number {
+  if (plan === 'scale' || plan === 'teams') {
+    return Number(import.meta.env.VITE_ASSISTANT_USAGE_LIMIT_TEAMS || '10000');
+  }
+  return 0; // Free et Boost n'ont aucun accès
 }
 
 /**

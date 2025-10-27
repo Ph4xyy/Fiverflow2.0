@@ -23,13 +23,8 @@ import {
   generateConfirmationMessage,
   logAssistantAction,
   incrementActionUsage,
+  assertAssistantEntitlement,
 } from './guards';
-import {
-  sendTaskWebhook,
-  sendOrderWebhook,
-  sendClientWebhook,
-  sendEventWebhook,
-} from './n8n';
 
 /**
  * Exécute une action de l'assistant
@@ -44,6 +39,9 @@ export async function assistantExecute(
   requiresConfirmation?: boolean;
 }> {
   try {
+    // Vérifier l'accès au plan Scale
+    assertAssistantEntitlement(user);
+    
     // Vérifier les limites de plan
     const planCheck = await enforcePlanLimits(user);
     if (!planCheck.canProceed) {
@@ -244,9 +242,6 @@ async function createTask(user: User, params: any) {
 
     if (error) throw error;
 
-    // Envoyer webhook n8n
-    await sendTaskWebhook('created', data, user.id);
-
     return {
       success: true,
       message: `✅ Tâche créée : "${data.title}"`,
@@ -328,9 +323,6 @@ async function updateTask(user: User, params: any) {
 
     if (error) throw error;
 
-    // Envoyer webhook n8n
-    await sendTaskWebhook('updated', data, user.id);
-
     return {
       success: true,
       message: `✅ Tâche mise à jour : "${data.title}"`,
@@ -355,9 +347,6 @@ async function deleteTask(user: User, params: any) {
       .single();
 
     if (error) throw error;
-
-    // Envoyer webhook n8n
-    await sendTaskWebhook('deleted', data, user.id);
 
     return {
       success: true,
@@ -388,9 +377,6 @@ async function createClient(user: User, params: any) {
       .single();
 
     if (error) throw error;
-
-    // Envoyer webhook n8n
-    await sendClientWebhook('created', data, user.id);
 
     return {
       success: true,
@@ -469,9 +455,6 @@ async function updateClient(user: User, params: any) {
 
     if (error) throw error;
 
-    // Envoyer webhook n8n
-    await sendClientWebhook('updated', data, user.id);
-
     return {
       success: true,
       message: `✅ Client mis à jour : "${data.name}"`,
@@ -496,9 +479,6 @@ async function deleteClient(user: User, params: any) {
       .single();
 
     if (error) throw error;
-
-    // Envoyer webhook n8n
-    await sendClientWebhook('deleted', data, user.id);
 
     return {
       success: true,
@@ -537,9 +517,6 @@ async function createOrder(user: User, params: any) {
       .single();
 
     if (error) throw error;
-
-    // Envoyer webhook n8n
-    await sendOrderWebhook('created', data, user.id);
 
     return {
       success: true,
@@ -638,9 +615,6 @@ async function updateOrder(user: User, params: any) {
 
     if (error) throw error;
 
-    // Envoyer webhook n8n
-    await sendOrderWebhook('updated', data, user.id, params.status);
-
     return {
       success: true,
       message: `✅ Commande mise à jour : "${data.title}"`,
@@ -665,9 +639,6 @@ async function deleteOrder(user: User, params: any) {
       .single();
 
     if (error) throw error;
-
-    // Envoyer webhook n8n
-    await sendOrderWebhook('deleted', data, user.id);
 
     return {
       success: true,
@@ -698,9 +669,6 @@ async function createEvent(user: User, params: any) {
       .single();
 
     if (error) throw error;
-
-    // Envoyer webhook n8n
-    await sendEventWebhook('created', data, user.id);
 
     return {
       success: true,
@@ -779,9 +747,6 @@ async function updateEvent(user: User, params: any) {
 
     if (error) throw error;
 
-    // Envoyer webhook n8n
-    await sendEventWebhook('updated', data, user.id);
-
     return {
       success: true,
       message: `✅ Événement mis à jour : "${data.title}"`,
@@ -806,9 +771,6 @@ async function deleteEvent(user: User, params: any) {
       .single();
 
     if (error) throw error;
-
-    // Envoyer webhook n8n
-    await sendEventWebhook('deleted', data, user.id);
 
     return {
       success: true,
