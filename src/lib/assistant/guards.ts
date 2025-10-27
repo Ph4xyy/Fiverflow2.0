@@ -68,16 +68,17 @@ export async function assertPermission(
 async function isAdmin(user: User): Promise<boolean> {
   try {
     const { data, error } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
+      .from('user_profiles')
+      .select('is_admin, role')
+      .eq('user_id', user.id)
       .single();
 
     if (error || !data) {
       return false;
     }
 
-    return data.role === 'admin';
+    // Admin si is_admin = true OU role = 'Admin'
+    return data.is_admin === true || data.role === 'Admin';
   } catch (error) {
     console.error('Erreur lors de la vérification admin:', error);
     return false;
