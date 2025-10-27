@@ -20,21 +20,21 @@ const particles = generateParticles();
 
 export const GlowBackground = () => {
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10 bg-gradient-to-b from-black via-slate-950 to-black">
-      {/* Radial gradient glows */}
-      <div className="absolute top-1/4 left-1/4 w-[800px] h-[800px] bg-indigo-500/20 rounded-full blur-[120px] animate-pulse" />
-      <div className="absolute top-3/4 right-1/4 w-[600px] h-[600px] bg-cyan-400/15 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute bottom-1/4 left-1/2 w-[900px] h-[900px] bg-purple-500/15 rounded-full blur-[140px] animate-pulse" style={{ animationDelay: '2s' }} />
-      <div className="absolute top-1/2 right-1/3 w-[500px] h-[500px] bg-teal-500/10 rounded-full blur-[110px] animate-pulse" style={{ animationDelay: '0.5s' }} />
+    <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10 bg-black">
+      {/* Radial gradient glows - très subtiles */}
+      <div className="absolute top-1/4 left-1/4 w-[800px] h-[800px] bg-indigo-500/5 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute top-3/4 right-1/4 w-[600px] h-[600px] bg-cyan-400/5 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
+      <div className="absolute bottom-1/4 left-1/2 w-[900px] h-[900px] bg-purple-500/5 rounded-full blur-[140px] animate-pulse" style={{ animationDelay: '2s' }} />
+      <div className="absolute top-1/2 right-1/3 w-[500px] h-[500px] bg-teal-500/5 rounded-full blur-[110px] animate-pulse" style={{ animationDelay: '0.5s' }} />
 
-      {/* Animated floating orbs */}
+      {/* Animated floating orbs - très subtiles */}
       {[...Array(8)].map((_, i) => {
         const sizes = ['w-8 h-8', 'w-12 h-12', 'w-16 h-16'];
         const colors = [
-          'bg-indigo-400/30',
-          'bg-purple-400/30',
-          'bg-cyan-400/30',
-          'bg-teal-400/30'
+          'bg-indigo-400/15',
+          'bg-purple-400/15',
+          'bg-cyan-400/15',
+          'bg-teal-400/15'
         ];
         return (
           <motion.div
@@ -48,7 +48,7 @@ export const GlowBackground = () => {
               y: [0, -30 + Math.random() * 60, 0],
               x: [0, 20 - Math.random() * 40, 0],
               scale: [1, 1.2 + Math.random(), 1],
-              opacity: [0.2, 0.5, 0.2],
+              opacity: [0.05, 0.15, 0.05],
             }}
             transition={{
               duration: 8 + Math.random() * 5,
@@ -64,7 +64,7 @@ export const GlowBackground = () => {
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
-          className="absolute rounded-full bg-white/20 backdrop-blur-sm"
+          className="absolute rounded-full bg-white/10 backdrop-blur-sm"
           style={{
             width: particle.size,
             height: particle.size,
@@ -74,7 +74,7 @@ export const GlowBackground = () => {
           animate={{
             y: [0, -50, 0],
             x: [0, Math.random() * 20 - 10, 0],
-            opacity: [0, 0.5, 0],
+            opacity: [0, 0.3, 0],
             scale: [0.8, 1.2, 0.8],
           }}
           transition={{
@@ -90,7 +90,7 @@ export const GlowBackground = () => {
       {[...Array(15)].map((_, i) => (
         <motion.div
           key={`particle-${i}`}
-          className="absolute rounded-full bg-gradient-to-r from-indigo-400/20 to-cyan-400/20"
+          className="absolute rounded-full bg-gradient-to-r from-indigo-400/10 to-cyan-400/10"
           style={{
             width: 6 + Math.random() * 4,
             height: 6 + Math.random() * 4,
@@ -102,7 +102,7 @@ export const GlowBackground = () => {
             x: [0, 50 - Math.random() * 100, 0],
             rotate: [0, 360],
             scale: [0.5, 1.2, 0.5],
-            opacity: [0, 0.6, 0],
+            opacity: [0, 0.4, 0],
           }}
           transition={{
             duration: 15 + Math.random() * 10,
