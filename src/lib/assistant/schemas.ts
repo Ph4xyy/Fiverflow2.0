@@ -50,9 +50,11 @@ export const CreateOrderSchema = z.object({
   title: z.string().min(1, 'Le titre est requis').max(200, 'Le titre ne peut pas dépasser 200 caractères').trim(),
   client_id: z.string().uuid().optional(),
   status: OrderStatusSchema.default('pending'),
-  amount: z.number().min(0, 'Le montant doit être positif').optional(),
+  budget: z.number().min(0, 'Le montant doit être positif').optional(),
+  amount: z.number().min(0, 'Le montant doit être positif').optional(), // Pour compatibilité
   currency: z.string().length(3, 'La devise doit avoir 3 caractères').optional(),
   due_date: z.string().optional(),
+  deadline: z.string().optional(), // Pour compatibilité
 });
 
 export const UpdateOrderSchema = z.object({
@@ -60,9 +62,11 @@ export const UpdateOrderSchema = z.object({
   title: z.string().min(1).max(200).trim().optional(),
   client_id: z.string().uuid().optional(),
   status: OrderStatusSchema.optional(),
-  amount: z.number().min(0).optional(),
+  budget: z.number().min(0).optional(),
+  amount: z.number().min(0).optional(), // Pour compatibilité
   currency: z.string().length(3).optional(),
   due_date: z.string().optional(),
+  deadline: z.string().optional(), // Pour compatibilité
 });
 
 export const CreateEventSchema = z.object({

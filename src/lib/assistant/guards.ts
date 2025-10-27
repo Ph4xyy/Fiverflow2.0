@@ -3,6 +3,7 @@
  */
 
 import { User } from '@supabase/supabase-js';
+import { supabase } from '../supabase';
 import { ParsedIntent } from '../../types/assistant';
 import { checkUsageLimit, incrementUsage } from './usage';
 

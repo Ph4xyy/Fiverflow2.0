@@ -237,7 +237,7 @@ async function createTask(user: User, params: any) {
       .from('tasks')
       .insert({
         ...validatedData,
-        owner_id: user.id,
+        user_id: user.id,
       })
       .select()
       .single();
@@ -266,7 +266,7 @@ async function readTask(user: User, params: any) {
       .from('tasks')
       .select('*')
       .eq('id', params.id)
-      .eq('owner_id', user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (error) throw error;
@@ -289,7 +289,7 @@ async function listTasks(user: User, params: any) {
     let query = supabase
       .from('tasks')
       .select('*')
-      .eq('owner_id', user.id);
+      .eq('user_id', user.id);
 
     // Appliquer les filtres
     if (params.status) query = query.eq('status', params.status);
@@ -322,7 +322,7 @@ async function updateTask(user: User, params: any) {
       .from('tasks')
       .update(validatedData)
       .eq('id', validatedData.id)
-      .eq('owner_id', user.id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -350,7 +350,7 @@ async function deleteTask(user: User, params: any) {
       .from('tasks')
       .delete()
       .eq('id', params.id)
-      .eq('owner_id', user.id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -380,7 +380,10 @@ async function createClient(user: User, params: any) {
     
     const { data, error } = await supabase
       .from('clients')
-      .insert(validatedData)
+      .insert({
+        ...validatedData,
+        user_id: user.id,
+      })
       .select()
       .single();
 
@@ -408,6 +411,7 @@ async function readClient(user: User, params: any) {
       .from('clients')
       .select('*')
       .eq('id', params.id)
+      .eq('user_id', user.id)
       .single();
 
     if (error) throw error;
@@ -427,7 +431,10 @@ async function readClient(user: User, params: any) {
 
 async function listClients(user: User, params: any) {
   try {
-    let query = supabase.from('clients').select('*');
+    let query = supabase
+      .from('clients')
+      .select('*')
+      .eq('user_id', user.id);
 
     if (params.search) query = query.ilike('name', `%${params.search}%`);
 
@@ -456,6 +463,7 @@ async function updateClient(user: User, params: any) {
       .from('clients')
       .update(validatedData)
       .eq('id', validatedData.id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -483,6 +491,7 @@ async function deleteClient(user: User, params: any) {
       .from('clients')
       .delete()
       .eq('id', params.id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -510,9 +519,20 @@ async function createOrder(user: User, params: any) {
   try {
     const validatedData = CreateOrderSchema.parse(params);
     
+    // Mapping pour correspondre aux colonnes de la DB
+    const orderData = {
+      title: validatedData.title,
+      client_id: validatedData.client_id,
+      status: validatedData.status,
+      budget: validatedData.budget || validatedData.amount, // Utiliser amount comme fallback
+      currency: validatedData.currency || 'USD',
+      due_date: validatedData.due_date || validatedData.deadline,
+      user_id: user.id,
+    };
+    
     const { data, error } = await supabase
       .from('orders')
-      .insert(validatedData)
+      .insert(orderData)
       .select()
       .single();
 
@@ -540,6 +560,7 @@ async function readOrder(user: User, params: any) {
       .from('orders')
       .select('*')
       .eq('id', params.id)
+      .eq('user_id', user.id)
       .single();
 
     if (error) throw error;
@@ -559,7 +580,10 @@ async function readOrder(user: User, params: any) {
 
 async function listOrders(user: User, params: any) {
   try {
-    let query = supabase.from('orders').select('*');
+    let query = supabase
+      .from('orders')
+      .select('*')
+      .eq('user_id', user.id);
 
     if (params.status) query = query.eq('status', params.status);
     if (params.client_id) query = query.eq('client_id', params.client_id);
@@ -586,10 +610,29 @@ async function updateOrder(user: User, params: any) {
   try {
     const validatedData = UpdateOrderSchema.parse(params);
     
+    // Mapping pour correspondre aux colonnes de la DB
+    const { id, ...restData } = validatedData;
+    const orderData: any = {
+      ...restData,
+    };
+    
+    // Map budget/amount et due_date/deadline
+    if (validatedData.budget !== undefined) orderData.budget = validatedData.budget;
+    else if (validatedData.amount !== undefined) orderData.budget = validatedData.amount;
+    
+    if (validatedData.due_date !== undefined) orderData.due_date = validatedData.due_date;
+    else if (validatedData.deadline !== undefined) orderData.due_date = validatedData.deadline;
+    
+    // Nettoyer les undefined
+    Object.keys(orderData).forEach(key => {
+      if (orderData[key] === undefined) delete orderData[key];
+    });
+    
     const { data, error } = await supabase
       .from('orders')
-      .update(validatedData)
-      .eq('id', validatedData.id)
+      .update(orderData)
+      .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -617,6 +660,7 @@ async function deleteOrder(user: User, params: any) {
       .from('orders')
       .delete()
       .eq('id', params.id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
