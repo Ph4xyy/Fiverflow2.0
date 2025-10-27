@@ -1,11 +1,10 @@
 /**
  * Page Assistant AI - Interface style ChatGPT
- * Accès réservé au plan Scale ou aux admins
+ * Design responsive avec barre d'input toujours visible
  */
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
 import { parseIntent } from '../lib/assistant/intent';
 import { assistantExecute } from '../lib/assistant/actions';
 import { getExamplesForLanguage } from '../lib/assistant/examples';
@@ -14,20 +13,13 @@ import {
   Send, 
   Bot, 
   User, 
-  HelpCircle, 
   Trash2, 
   Sparkles as SparklesIcon,
-  Loader2,
-  Zap,
-  Check
+  Loader2
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const AIAssistantPage: React.FC = () => {
   const { user } = useAuth();
-  const { currentTheme } = useTheme();
-  const navigate = useNavigate();
-  
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -35,46 +27,28 @@ const AIAssistantPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Detect user language
   const userLanguage = navigator.language.startsWith('fr') ? 'fr' : 'en';
   const examples = getExamplesForLanguage(userLanguage);
 
-  // Loading state
-  if (!user) {
-    return (
-      <div className="fixed inset-0 bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
-      </div>
-    );
-  }
-
-  // Auto-scroll to bottom
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
+  // Scroll to bottom
   useEffect(() => {
-    if (messages.length > 0) {
-      scrollToBottom();
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Initial welcome message
+  // Welcome message
   useEffect(() => {
     if (messages.length === 0) {
-      const welcomeMessage: AssistantMessage = {
+      setMessages([{
         id: 'welcome',
         type: 'assistant',
         content: userLanguage === 'fr' 
-          ? '👋 Bonjour ! Je suis votre assistant IA. Je peux vous aider à gérer vos tâches, clients, commandes et événements. Essayez un exemple ci-dessous ou tapez votre demande !'
-          : '👋 Hello! I\'m your AI assistant. I can help you manage your tasks, clients, orders, and events. Try an example below or type your request!',
+          ? '👋 Bonjour ! Je suis votre assistant IA. Je peux vous aider à gérer vos tâches, clients, commandes et événements.'
+          : '👋 Hello! I\'m your AI assistant. I can help you manage your tasks, clients, orders, and events.',
         timestamp: new Date(),
-      };
-      setMessages([welcomeMessage]);
+      }]);
     }
   }, [userLanguage]);
 
-  // Handle sending a message
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading || !user) return;
 
@@ -93,81 +67,28 @@ const AIAssistantPage: React.FC = () => {
       const intent = parseIntent(inputValue.trim());
       const result = await assistantExecute(user, intent);
 
-      const assistantMessage: AssistantMessage = {
+      setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
         content: result.message,
         timestamp: new Date(),
-        metadata: {
-          intent,
-          result: result.data,
-          error: result.success ? undefined : result.message,
-        },
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
+      }]);
 
       if (result.requiresConfirmation) {
-        setPendingConfirmation(assistantMessage);
+        setPendingConfirmation({ ...userMessage, metadata: { intent, result: result.data } });
       }
     } catch (error: any) {
-      const errorMessage: AssistantMessage = {
+      setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: error?.message || '❌ Une erreur est survenue. Veuillez réessayer.',
+        content: error?.message || '❌ Une erreur est survenue.',
         timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      }]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle confirmation
-  const handleConfirmation = async (confirmed: boolean) => {
-    if (!pendingConfirmation || !user) return;
-
-    if (confirmed) {
-      const intent = pendingConfirmation.metadata?.intent;
-      if (intent) {
-        setIsLoading(true);
-        try {
-          const result = await assistantExecute(user, intent);
-          
-          const confirmationMessage: AssistantMessage = {
-            id: Date.now().toString(),
-            type: 'assistant',
-            content: result.message,
-            timestamp: new Date(),
-          };
-          
-          setMessages(prev => [...prev, confirmationMessage]);
-        } catch (error) {
-          const errorMessage: AssistantMessage = {
-            id: Date.now().toString(),
-            type: 'assistant',
-            content: '❌ Erreur lors de la confirmation.',
-            timestamp: new Date(),
-          };
-          setMessages(prev => [...prev, errorMessage]);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    } else {
-      const cancelMessage: AssistantMessage = {
-        id: Date.now().toString(),
-        type: 'assistant',
-        content: '❌ Action annulée.',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, cancelMessage]);
-    }
-
-    setPendingConfirmation(null);
-  };
-
-  // Handle keyboard keys
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -175,154 +96,145 @@ const AIAssistantPage: React.FC = () => {
     }
   };
 
-  // Clear conversation
   const clearConversation = () => {
     setMessages([]);
     setPendingConfirmation(null);
   };
 
-  // Use example
-  const useExample = (example: string) => {
-    setInputValue(example);
-    inputRef.current?.focus();
-  };
-
-  // Render message
-  const renderMessage = (message: AssistantMessage) => {
-    const isUser = message.type === 'user';
-
+  if (!user) {
     return (
-      <div
-        key={message.id}
-        className={`flex gap-2 sm:gap-3 p-3 sm:p-4 ${isUser ? 'justify-end' : 'justify-start'}`}
-      >
-        {!isUser && (
-          <div className="flex-shrink-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-              <Bot size={14} className="sm:w-4 sm:h-4 text-white" />
-            </div>
-          </div>
-        )}
-        
-        <div
-          className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 py-2 sm:px-4 sm:py-3 ${
-            isUser
-              ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-          }`}
-        >
-          <div className="text-sm sm:text-base whitespace-pre-wrap break-words">{message.content}</div>
-          <div className="text-xs opacity-70 mt-1">
-            {message.timestamp.toLocaleTimeString()}
-          </div>
-        </div>
-
-        {isUser && (
-          <div className="flex-shrink-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-              <User size={14} className="sm:w-4 sm:h-4 text-gray-600 dark:text-gray-300" />
-            </div>
-          </div>
-        )}
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
       </div>
     );
-  };
+  }
 
   return (
-    <div className="h-full w-full bg-gray-50 dark:bg-gray-900 flex flex-col">
-      {/* Header - fixed */}
-      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-3 sm:py-4">
+    <div className="flex flex-col h-screen">
+      {/* Header */}
+      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-              <SparklesIcon size={18} className="sm:w-5 sm:h-5 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+              <SparklesIcon size={20} className="text-white" />
             </div>
-            <div>
-              <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
-                Assistant AI
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
-                {userLanguage === 'fr' 
-                  ? 'Gérez vos tâches, clients, commandes et événements'
-                  : 'Manage your tasks, clients, orders, and events'
-                }
-              </p>
-            </div>
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Assistant AI
+            </h1>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <button
-              onClick={clearConversation}
-              className="p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              title={userLanguage === 'fr' ? 'Effacer la conversation' : 'Clear conversation'}
-            >
-              <Trash2 size={18} />
-            </button>
-            <button
-              onClick={() => useExample('/help')}
-              className="p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              title="Help"
-            >
-              <HelpCircle size={18} />
-            </button>
-          </div>
+          <button
+            onClick={clearConversation}
+            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <Trash2 size={18} />
+          </button>
         </div>
       </div>
 
-      {/* Messages - scrollable */}
-      <div className="flex-1 overflow-y-auto min-h-0">
-        {messages.length === 1 && (
-          <div className="p-4 sm:p-6">
-            <div className="max-w-4xl mx-auto">
-              <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white mb-3 sm:mb-4">
-                {userLanguage === 'fr' ? 'Exemples rapides' : 'Quick examples'}
+      {/* Messages - takes remaining space and scrolls */}
+      <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-4xl mx-auto py-4">
+          {messages.length === 1 && (
+            <div className="px-4 mb-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
+                {userLanguage === 'fr' ? 'Exemples' : 'Examples'}
               </h3>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                {examples.slice(0, 6).map((example) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {examples.slice(0, 6).map((ex) => (
                   <button
-                    key={example.id}
-                    onClick={() => useExample(example.prompt)}
-                    className="p-3 sm:p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
+                    key={ex.id}
+                    onClick={() => {
+                      setInputValue(ex.prompt);
+                      inputRef.current?.focus();
+                    }}
+                    className="p-3 text-left rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
-                    <h4 className="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-1">
-                      {example.title}
+                    <h4 className="font-medium text-sm text-gray-900 dark:text-white mb-1">
+                      {ex.title}
                     </h4>
-                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">
-                      {example.description}
-                    </p>
-                    <code className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-gray-700 dark:text-gray-300">
-                      {example.prompt}
+                    <code className="text-xs text-gray-500 dark:text-gray-400">
+                      {ex.prompt}
                     </code>
                   </button>
                 ))}
               </div>
             </div>
-          </div>
-        )}
-        
-        <div className="max-w-4xl mx-auto">
-          {messages.map(renderMessage)}
-          
-          {isLoading && (
-            <div className="flex gap-2 sm:gap-3 p-3 sm:p-4 justify-start">
-              <div className="flex-shrink-0">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-                  <Bot size={14} className="sm:w-4 sm:h-4 text-white" />
-                </div>
-              </div>
-              <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl px-3 py-2 sm:px-4 sm:py-3">
-                <div className="flex items-center gap-2">
-                  <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin text-gray-500" />
-                  <span className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
-                    {userLanguage === 'fr' ? 'Réflexion...' : 'Thinking...'}
-                  </span>
-                </div>
-              </div>
-            </div>
           )}
-          
-          <div ref={messagesEndRef} />
+
+          <div className="space-y-4">
+            {messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`flex gap-3 px-4 ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                {msg.type === 'assistant' && (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center flex-shrink-0">
+                    <Bot size={16} className="text-white" />
+                  </div>
+                )}
+                <div
+                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                    msg.type === 'user'
+                      ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                  }`}
+                >
+                  <div className="whitespace-pre-wrap break-words">{msg.content}</div>
+                  <div className="text-xs opacity-70 mt-1">
+                    {msg.timestamp.toLocaleTimeString()}
+                  </div>
+                </div>
+                {msg.type === 'user' && (
+                  <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
+                    <User size={16} className="text-gray-600 dark:text-gray-300" />
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {isLoading && (
+              <div className="flex gap-3 px-4 justify-start">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                  <Bot size={16} className="text-white" />
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-2xl px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <Loader2 size={16} className="animate-spin text-gray-500" />
+                    <span className="text-sm text-gray-500">
+                      {userLanguage === 'fr' ? 'Réflexion...' : 'Thinking...'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
+      </div>
+
+      {/* Input - always visible at bottom */}
+      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-3">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex gap-3">
+            <textarea
+              ref={inputRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={userLanguage === 'fr' ? 'Tapez votre message...' : 'Type your message...'}
+              className="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+              rows={1}
+              style={{ maxHeight: '120px' }}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={!inputValue.trim() || isLoading}
+              className="px-4 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -331,21 +243,21 @@ const AIAssistantPage: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md mx-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {userLanguage === 'fr' ? 'Confirmation requise' : 'Confirmation required'}
+              {userLanguage === 'fr' ? 'Confirmation' : 'Confirmation'}
             </h3>
             <p className="text-gray-600 dark:text-gray-300 mb-6">
               {pendingConfirmation.content}
             </p>
             <div className="flex gap-3 justify-end">
               <button
-                onClick={() => handleConfirmation(false)}
-                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                onClick={() => setPendingConfirmation(null)}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 dark:text-gray-300"
               >
                 {userLanguage === 'fr' ? 'Annuler' : 'Cancel'}
               </button>
               <button
-                onClick={() => handleConfirmation(true)}
-                className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 transition-colors"
+                onClick={() => setPendingConfirmation(null)}
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white"
               >
                 {userLanguage === 'fr' ? 'Confirmer' : 'Confirm'}
               </button>
@@ -353,52 +265,6 @@ const AIAssistantPage: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Input - fixed at bottom */}
-      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-3 sm:p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex gap-2 sm:gap-3">
-            <div className="flex-1 relative">
-              <textarea
-                ref={inputRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder={
-                  userLanguage === 'fr' 
-                    ? 'Tapez votre message...'
-                    : 'Type your message...'
-                }
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 pr-10 sm:pr-12 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-sm sm:text-base"
-                rows={1}
-                style={{
-                  minHeight: '40px',
-                  maxHeight: '100px',
-                }}
-              />
-            </div>
-            
-            <button
-              onClick={handleSendMessage}
-              disabled={!inputValue.trim() || isLoading || !user}
-              className="px-3 py-2 sm:px-4 sm:py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center flex-shrink-0"
-            >
-              {isLoading ? (
-                <Loader2 size={16} className="sm:w-5 sm:h-5 animate-spin" />
-              ) : (
-                <Send size={16} className="sm:w-5 sm:h-5" />
-              )}
-            </button>
-          </div>
-          
-          <div className="hidden sm:block mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-            {userLanguage === 'fr' 
-              ? 'Appuyez sur Entrée pour envoyer, Shift+Entrée pour une nouvelle ligne'
-              : 'Press Enter to send, Shift+Enter for new line'
-            }
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
