@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import LogoImage from '../../assets/LogoFiverFlow.png';
 
 export const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -36,11 +37,12 @@ export const Navbar = () => {
           {/* Brand */}
           <motion.a
             href="/"
-            className="text-2xl font-bold text-white"
+            className="flex items-center space-x-3"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            FiverFlow
+            <img src={LogoImage} alt="FiverFlow Logo" className="h-8 w-auto" />
+            <span className="text-2xl font-bold text-white">FiverFlow</span>
           </motion.a>
 
           {/* Desktop Navigation */}

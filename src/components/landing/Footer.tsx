@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import LogoImage from '../../assets/LogoFiverFlow.png';
 
 export const Footer = () => {
   const columns = [
@@ -46,10 +47,11 @@ export const Footer = () => {
           <div className="col-span-2 md:col-span-1">
             <motion.a
               href="/"
-              className="text-2xl font-bold text-white mb-4 inline-block"
+              className="flex items-center space-x-3 mb-4"
               whileHover={{ scale: 1.05 }}
             >
-              FiverFlow
+              <img src={LogoImage} alt="FiverFlow Logo" className="h-8 w-auto" />
+              <span className="text-2xl font-bold text-white">FiverFlow</span>
             </motion.a>
             <p className="text-sm text-neutral-500">
               Streamline your freelance workflow
