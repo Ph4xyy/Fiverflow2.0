@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useLocation, Link } from 'react-router-dom';
 import { docsNav } from '../../lib/docsNav';
-import { SearchCommand } from './SearchCommand';
+import { SearchCommand } from './SearchCommand.tsx';
 
 export const DocsSidebar = () => {
   const location = useLocation();
