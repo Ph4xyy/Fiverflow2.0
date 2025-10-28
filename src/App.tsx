@@ -35,8 +35,11 @@ import { usePreloadData } from './hooks/usePreloadData';
 
 // Pages principales de l'application
 import RootRedirect from './components/RootRedirect';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import AuthSignIn from './pages/AuthSignIn';
+import AuthRegister from './pages/AuthRegister';
+import AuthCallback from './pages/AuthCallback';
+import CreateUsername from './pages/CreateUsername';
+import OAuthDebug from './pages/OAuthDebug';
 import LandingPage from './pages/LandingPage';
 import ReferralLandingModern from './pages/ReferralLandingModern';
 import DocsPage from './pages/DocsPage';
@@ -107,8 +110,12 @@ function AppContent() {
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/cancel" element={<CancelPage />} />
           <Route path="/support" element={<SupportPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          {/* Auth pages */}
+          <Route path="/login" element={<AuthSignIn />} />
+          <Route path="/register" element={<AuthRegister />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/create-username" element={<CreateUsername />} />
+          <Route path="/oauth-debug" element={<OAuthDebug />} />
 
           {/* Dashboard principal - Accessible à tous les abonnements */}
           <Route path="/dashboard" element={

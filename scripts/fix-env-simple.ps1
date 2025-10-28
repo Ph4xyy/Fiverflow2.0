@@ -28,3 +28,4 @@ $envContent | Out-File -FilePath ".env.local" -Encoding UTF8
 Write-Host "✅ Nouveau fichier .env.local créé" -ForegroundColor Green
 Write-Host "📋 N'oubliez pas de configurer vos clés Stripe de test!" -ForegroundColor Yellow
 
+
