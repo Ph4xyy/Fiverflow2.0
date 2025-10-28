@@ -1,9 +1,9 @@
 import { GlowBackground } from '../components/ui/GlowBackground';
-import { DocsSidebar } from '../components/docs/DocsSidebar';
-import { DocsContent } from '../components/docs/DocsContent';
-import { DocsTOC } from '../components/docs/DocsTOC';
-import { DocsFooter } from '../components/docs/DocsFooter';
-import { SearchCommand } from '../components/docs/SearchCommand';
+import { DocsSidebar } from '../components/docs/DocsSidebar.tsx';
+import { DocsContent } from '../components/docs/DocsContent.tsx';
+import { DocsTOC } from '../components/docs/DocsTOC.tsx';
+import { DocsFooter } from '../components/docs/DocsFooter.tsx';
+import { SearchCommand } from '../components/docs/SearchCommand.tsx';
 import { motion } from 'framer-motion';
 
 export default function DocsPage() {
