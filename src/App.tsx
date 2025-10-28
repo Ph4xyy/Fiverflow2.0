@@ -103,9 +103,7 @@ function AppContent() {
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/cancel" element={<CancelPage />} />
           <Route path="/support" element={<SupportPage />} />
-          {/* Standalone auth pages (no dashboard layout) */}
-          <Route path="/login" element={<AuthSignIn />} />
-          <Route path="/register" element={<AuthRegister />} />
+          {/* Auth pages will be rendered inside Layout below */}
 
           {/* Dashboard principal - Accessible à tous les abonnements */}
           <Route path="/dashboard" element={
