@@ -1,3 +1,4 @@
+import React from 'react';
 import { GlowBackground } from '../components/ui/GlowBackground';
 import { DocsSidebar } from '../components/docs/DocsSidebar';
 import { DocsContent } from '../components/docs/DocsContent';
