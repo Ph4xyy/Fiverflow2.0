@@ -9,6 +9,7 @@ import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import { useSubscriptionPermissions } from '../hooks/useSubscriptionPermissions';
 import NotificationsDropdown from './NotificationsDropdown';
 import CentralizedSearchBar from './CentralizedSearchBar';
+import AssistantWidget from './AssistantWidget';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
@@ -183,8 +184,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   
   const aiItems = [
     { 
-      path: '/assistant', 
-      label: 'Assistant', 
+      path: '/ai-assistant', 
+      label: 'Assistant IA', 
       icon: Bot,
       restricted: !hasAssistantAccess,
       requiredPlan: 'Scale' as const
@@ -449,6 +450,9 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             <LocalErrorBoundary>{children}</LocalErrorBoundary>
           </div>
         </main>
+        
+        {/* Assistant Widget */}
+        <AssistantWidget />
       </div>
 
       {upgradeOpen && (

@@ -1,298 +1,186 @@
-/**
- * Page Assistant AI - Interface style ChatGPT
- * Design responsive avec barre d'input toujours visible
- */
-
-import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { getExamplesForLanguage } from '../lib/assistant/examples';
-import { handleAssistantMessage } from '../lib/assistant/apiRoute';
-import { AssistantMessage } from '../types/assistant';
-import { 
-  Send, 
-  Bot, 
-  User, 
-  Trash2, 
-  Sparkles as SparklesIcon,
-  Loader2,
-  Zap
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { Bot, MessageSquare, Zap, Users, TrendingUp, HelpCircle } from 'lucide-react';
+import AssistantChat from '../components/AssistantChat';
+import AssistantDemo from '../components/AssistantDemo';
 
 const AIAssistantPage: React.FC = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [messages, setMessages] = useState<AssistantMessage[]>([]);
-  const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [pendingConfirmation, setPendingConfirmation] = useState<any>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [activeTab, setActiveTab] = useState<'chat' | 'features' | 'demo'>('chat');
 
-  const userLanguage = navigator.language.startsWith('fr') ? 'fr' : 'en';
-  const examples = getExamplesForLanguage(userLanguage);
-
-  // Scroll to bottom
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // Welcome message
-  useEffect(() => {
-    if (messages.length === 0) {
-      setMessages([{
-        id: 'welcome',
-        type: 'assistant',
-        content: userLanguage === 'fr' 
-          ? '👋 Bonjour ! Je suis votre assistant IA. Je peux vous aider à gérer vos tâches, clients, commandes et événements.'
-          : '👋 Hello! I\'m your AI assistant. I can help you manage your tasks, clients, orders, and events.',
-        timestamp: new Date(),
-      }]);
+  const features = [
+    {
+      icon: <MessageSquare className="w-6 h-6" />,
+      title: 'Assistant IA Intelligent',
+      description: 'Posez vos questions et obtenez des réponses personnalisées pour optimiser votre workflow freelance.',
+      color: 'from-blue-500 to-cyan-500'
+    },
+    {
+      icon: <Zap className="w-6 h-6" />,
+      title: 'Conseils en Temps Réel',
+      description: 'Recevez des conseils instantanés pour améliorer votre productivité et vos revenus.',
+      color: 'from-yellow-500 to-orange-500'
+    },
+    {
+      icon: <Users className="w-6 h-6" />,
+      title: 'Gestion des Clients',
+      description: 'Apprenez à gérer efficacement vos clients et à maintenir de bonnes relations.',
+      color: 'from-green-500 to-emerald-500'
+    },
+    {
+      icon: <TrendingUp className="w-6 h-6" />,
+      title: 'Optimisation des Revenus',
+      description: 'Découvrez des stratégies pour augmenter vos revenus et développer votre business.',
+      color: 'from-purple-500 to-pink-500'
     }
-  }, [userLanguage]);
+  ];
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim() || isLoading || !user) return;
-
-    const userMessage: AssistantMessage = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: inputValue.trim(),
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    const currentMessage = inputValue.trim();
-    setInputValue('');
-    setIsLoading(true);
-
-    try {
-      // Construire l'historique de conversation
-      const conversationHistory = messages
-        .filter(m => m.type !== 'assistant' || !m.content.includes('👋'))
-        .map(m => ({
-          role: m.type === 'user' ? 'user' : 'assistant',
-          content: m.content
-        }));
-
-      // Appeler la route API
-      const result = await handleAssistantMessage(user, {
-        message: currentMessage,
-        conversationHistory,
-        pendingConfirmation: pendingConfirmation?.confirmationData
-      });
-
-      // Gérer les erreurs d'entitlement
-      if (result.error === 'entitlement_denied') {
-        setMessages(prev => [...prev, {
-          id: (Date.now() + 1).toString(),
-          type: 'assistant',
-          content: result.text,
-          timestamp: new Date(),
-          metadata: {
-            error: 'entitlement_denied'
-          }
-        }]);
-        return;
-      }
-
-      // Afficher la réponse
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant',
-        content: result.text,
-        timestamp: new Date(),
-      }]);
-
-      // Gérer la confirmation si nécessaire
-      if (result.requiresConfirmation) {
-        setPendingConfirmation({ confirmationData: pendingConfirmation?.confirmationData });
-      } else {
-        setPendingConfirmation(null);
-      }
-    } catch (error: any) {
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant',
-        content: error?.message || '❌ Une erreur est survenue.',
-        timestamp: new Date(),
-      }]);
-    } finally {
-      setIsLoading(false);
+  const quickActions = [
+    {
+      title: 'Comment gérer mes clients ?',
+      description: 'Conseils pour une gestion client efficace'
+    },
+    {
+      title: 'Optimiser mes factures',
+      description: 'Créer des factures professionnelles'
+    },
+    {
+      title: 'Augmenter mes revenus',
+      description: 'Stratégies de croissance'
+    },
+    {
+      title: 'Organiser mon temps',
+      description: 'Gestion du temps et productivité'
     }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
-  const clearConversation = () => {
-    setMessages([]);
-    setPendingConfirmation(null);
-  };
-
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
-      </div>
-    );
-  }
+  ];
 
   return (
-    <div className="absolute inset-0 flex flex-col">
-      {/* Header - fixed at top */}
-      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 z-10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-              <SparklesIcon size={20} className="text-white" />
+    <div className="min-h-screen bg-slate-950">
+      {/* Header */}
+      <div className="bg-slate-900 border-b border-slate-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#9c68f2] to-[#422ca5] rounded-xl flex items-center justify-center">
+                <Bot className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white">Assistant IA FiverFlow</h1>
+                <p className="text-slate-400">Votre partenaire intelligent pour optimiser votre workflow freelance</p>
+              </div>
             </div>
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Assistant AI
-            </h1>
+            
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setActiveTab('features')}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  activeTab === 'features'
+                    ? 'bg-[#9c68f2] text-white'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                Fonctionnalités
+              </button>
+              <button
+                onClick={() => setActiveTab('demo')}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  activeTab === 'demo'
+                    ? 'bg-[#9c68f2] text-white'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                Démo
+              </button>
+              <button
+                onClick={() => setActiveTab('chat')}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  activeTab === 'chat'
+                    ? 'bg-[#9c68f2] text-white'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                Chat
+              </button>
+            </div>
           </div>
-          <button
-            onClick={clearConversation}
-            className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            <Trash2 size={18} />
-          </button>
         </div>
       </div>
 
-      {/* Messages - scrollable area in the middle */}
-      <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900" style={{ height: 0 }}>
-        <div className="max-w-4xl mx-auto py-4">
-          {messages.length === 1 && (
-            <div className="px-4 mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
-                {userLanguage === 'fr' ? 'Exemples' : 'Examples'}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activeTab === 'features' ? (
+          <div className="space-y-8">
+            {/* Features Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {features.map((feature, index) => (
+                <div
+                  key={index}
+                  className="bg-slate-800 rounded-xl p-6 border border-slate-700 hover:border-slate-600 transition-colors"
+                >
+                  <div className={`w-12 h-12 bg-gradient-to-r ${feature.color} rounded-lg flex items-center justify-center mb-4`}>
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
+                  <p className="text-slate-400">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+              <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+                <HelpCircle className="w-5 h-5 mr-2" />
+                Actions Rapides
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {examples.slice(0, 6).map((ex) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {quickActions.map((action, index) => (
                   <button
-                    key={ex.id}
-                    onClick={() => {
-                      setInputValue(ex.prompt);
-                      inputRef.current?.focus();
-                    }}
-                    className="p-3 text-left rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    key={index}
+                    onClick={() => setActiveTab('chat')}
+                    className="p-4 bg-slate-700 hover:bg-slate-600 rounded-lg text-left transition-colors group"
                   >
-                    <h4 className="font-medium text-sm text-gray-900 dark:text-white mb-1">
-                      {ex.title}
+                    <h4 className="font-medium text-white group-hover:text-[#9c68f2] transition-colors">
+                      {action.title}
                     </h4>
-                    <code className="text-xs text-gray-500 dark:text-gray-400">
-                      {ex.prompt}
-                    </code>
+                    <p className="text-sm text-slate-400 mt-1">{action.description}</p>
                   </button>
                 ))}
               </div>
             </div>
-          )}
 
-          <div className="space-y-4">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex gap-3 px-4 ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                {msg.type === 'assistant' && (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center flex-shrink-0">
-                    <Bot size={16} className="text-white" />
+            {/* How it works */}
+            <div className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-xl p-8 text-white">
+              <h3 className="text-2xl font-bold mb-4">Comment ça marche ?</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold">1</span>
                   </div>
-                )}
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                    msg.type === 'user'
-                      ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
-                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-                  }`}
-                >
-                  <div className="whitespace-pre-wrap break-words">{msg.content}</div>
-                  <div className="text-xs opacity-70 mt-1">
-                    {msg.timestamp.toLocaleTimeString()}
-                  </div>
+                  <h4 className="font-semibold mb-2">Posez votre question</h4>
+                  <p className="text-sm opacity-90">Décrivez votre problème ou votre besoin</p>
                 </div>
-                {msg.type === 'user' && (
-                  <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
-                    <User size={16} className="text-gray-600 dark:text-gray-300" />
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold">2</span>
                   </div>
-                )}
-              </div>
-            ))}
-
-            {isLoading && (
-              <div className="flex gap-3 px-4 justify-start">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-                  <Bot size={16} className="text-white" />
+                  <h4 className="font-semibold mb-2">L'IA analyse</h4>
+                  <p className="text-sm opacity-90">Notre assistant comprend votre contexte</p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-2xl px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <Loader2 size={16} className="animate-spin text-gray-500" />
-                    <span className="text-sm text-gray-500">
-                      {userLanguage === 'fr' ? 'Réflexion...' : 'Thinking...'}
-                    </span>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold">3</span>
                   </div>
+                  <h4 className="font-semibold mb-2">Recevez des conseils</h4>
+                  <p className="text-sm opacity-90">Obtenez des réponses personnalisées</p>
                 </div>
               </div>
-            )}
-
-            <div ref={messagesEndRef} />
-          </div>
-        </div>
-      </div>
-
-      {/* Input - fixed at bottom */}
-      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-4 z-10">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex gap-3 items-end">
-            <textarea
-              ref={inputRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder={userLanguage === 'fr' ? 'Message' : 'Message'}
-              className="flex-1 px-4 py-3 rounded-2xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
-              rows={1}
-              style={{ maxHeight: '200px' }}
-            />
-            <button
-              onClick={handleSendMessage}
-              disabled={!inputValue.trim() || isLoading}
-              className="p-3 rounded-2xl bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-shrink-0"
-            >
-              {isLoading ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Entitlement denied modal with upgrade button */}
-      {messages.some(m => m.metadata?.error === 'entitlement_denied') && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md mx-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center mx-auto mb-4">
-              <Zap className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-              Plan Scale requis
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
-              L'Assistant AI est réservé au plan Scale. Passe à Scale pour débloquer cette fonctionnalité.
-            </p>
-            <button
-              onClick={() => navigate('/billing')}
-              className="w-full px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold hover:from-purple-600 hover:to-blue-600 transition-colors"
-            >
-              Voir les plans
-            </button>
           </div>
-        </div>
-      )}
+        ) : activeTab === 'demo' ? (
+          <AssistantDemo />
+        ) : (
+          <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden" style={{ height: '600px' }}>
+            <AssistantChat />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
