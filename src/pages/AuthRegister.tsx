@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { GitHubIcon, GoogleIcon, DiscordIcon } from '../components/OAuthIcons'
+import { oauthConfig } from '../lib/oauth-config'
 
 const AuthRegister: React.FC = () => {
   const navigate = useNavigate()
@@ -31,13 +32,7 @@ const AuthRegister: React.FC = () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: { 
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        }
+        options: oauthConfig
       })
       if (error) setError(error.message)
     } catch (err: any) {
