@@ -2,8 +2,26 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 
-export const Navbar = () => {
+interface NavbarProps {
+  onTryNow?: () => void;
+}
+
+export const Navbar = ({ onTryNow }: NavbarProps = {}) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleTryNow = () => {
+    if (onTryNow) {
+      onTryNow();
+    } else {
+      // Si un referral est en sessionStorage, aller à register, sinon dashboard
+      const referralUsername = sessionStorage.getItem('referralUsername');
+      if (referralUsername) {
+        window.location.href = '/register';
+      } else {
+        window.location.href = '/dashboard';
+      }
+    }
+  };
 
   const navLinks = [
     { label: "Features", href: "#features" },
@@ -65,14 +83,14 @@ export const Navbar = () => {
 
           {/* Desktop CTA & Mobile Menu Button */}
           <div className="flex items-center gap-4">
-            <motion.a
-              href="/dashboard"
+            <motion.button
+              onClick={handleTryNow}
               className="hidden lg:inline-flex items-center justify-center rounded-full text-white font-medium text-sm px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 shadow-[0_20px_80px_rgba(99,102,241,0.6)] hover:shadow-[0_30px_120px_rgba(99,102,241,0.9)] transition-shadow"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               Try FiverFlow for free
-            </motion.a>
+            </motion.button>
 
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -105,12 +123,12 @@ export const Navbar = () => {
                 {link.label}
               </a>
             ))}
-            <a
-              href="/dashboard"
+            <button
+              onClick={handleTryNow}
               className="inline-flex items-center justify-center rounded-full text-white font-medium text-sm px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 shadow-[0_20px_80px_rgba(99,102,241,0.6)] hover:shadow-[0_30px_120px_rgba(99,102,241,0.9)] transition-shadow mt-2"
             >
               Try FiverFlow for free
-            </a>
+            </button>
           </motion.div>
         )}
       </div>

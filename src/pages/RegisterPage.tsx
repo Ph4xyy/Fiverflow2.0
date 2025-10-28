@@ -30,8 +30,17 @@ const RegisterPage: React.FC = () => {
   const [success, setSuccess] = useState(false);
 
   const { signUp } = useAuth();
-  const { referralCode, referrerInfo, applyReferralCode, loading: referralLoading, error: referralError } = useReferral();
+  const { referralCode, referrerInfo, applyReferralCode, loading: referralLoading, error: referralError, setReferralCode } = useReferral();
   const navigate = useNavigate();
+
+  // Vérifier si un referralUsername est dans sessionStorage et l'appliquer
+  useEffect(() => {
+    const referralUsername = sessionStorage.getItem('referralUsername');
+    if (referralUsername && !referralCode) {
+      console.log('🎯 Applying referral username from sessionStorage:', referralUsername);
+      setReferralCode(referralUsername);
+    }
+  }, [referralCode, setReferralCode]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({

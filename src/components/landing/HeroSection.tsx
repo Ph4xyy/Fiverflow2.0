@@ -1,9 +1,23 @@
 import { motion } from 'framer-motion';
 import { Play, CheckCircle2 } from 'lucide-react';
 
-export const HeroSection = () => {
+interface HeroSectionProps {
+  onGetStarted?: () => void;
+}
+
+export const HeroSection = ({ onGetStarted }: HeroSectionProps = {}) => {
   const handleGetStarted = () => {
-    window.location.href = '/dashboard';
+    if (onGetStarted) {
+      onGetStarted();
+    } else {
+      // Si un referral est en sessionStorage, aller à register, sinon dashboard
+      const referralUsername = sessionStorage.getItem('referralUsername');
+      if (referralUsername) {
+        window.location.href = '/register';
+      } else {
+        window.location.href = '/dashboard';
+      }
+    }
   };
 
   return (
