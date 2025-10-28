@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { Github, Mail, MessageCircle } from 'lucide-react'
 
 const AuthRegister: React.FC = () => {
   const navigate = useNavigate()
@@ -17,6 +18,22 @@ const AuthRegister: React.FC = () => {
       const { error } = await supabase.auth.signUp({ email, password })
       if (error) setError(error.message)
       else navigate('/dashboard')
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSocialLogin = async (provider: 'github' | 'google' | 'discord') => {
+    setLoading(true)
+    setError('')
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: `${window.location.origin}/dashboard` }
+      })
+      if (error) setError(error.message)
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -42,6 +59,38 @@ const AuthRegister: React.FC = () => {
             <div className="mb-8">
               <h1 className="text-3xl font-bold mb-2">Create your account</h1>
               <p className="text-slate-400">Start your journey with FiverFlow</p>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <button
+                onClick={() => handleSocialLogin('github')}
+                disabled={loading}
+                className="w-full flex items-center justify-center px-4 py-3 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
+              >
+                <Github className="w-5 h-5 mr-3 text-white" />
+                Continue with GitHub
+              </button>
+              <button
+                onClick={() => handleSocialLogin('google')}
+                disabled={loading}
+                className="w-full flex items-center justify-center px-4 py-3 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
+              >
+                <Mail className="w-5 h-5 mr-3 text-red-500" />
+                Continue with Google
+              </button>
+              <button
+                onClick={() => handleSocialLogin('discord')}
+                disabled={loading}
+                className="w-full flex items-center justify-center px-4 py-3 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
+              >
+                <MessageCircle className="w-5 h-5 mr-3 text-indigo-400" />
+                Continue with Discord
+              </button>
+            </div>
+
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-800" /></div>
+              <div className="relative flex justify-center text-sm"><span className="px-2 bg-slate-950 text-slate-400">or</span></div>
             </div>
 
             <form onSubmit={handleRegister} className="space-y-4">
