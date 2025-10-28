@@ -37,6 +37,8 @@ import { usePreloadData } from './hooks/usePreloadData';
 import RootRedirect from './components/RootRedirect';
 import AuthSignIn from './pages/AuthSignIn';
 import AuthRegister from './pages/AuthRegister';
+import AuthCallback from './pages/AuthCallback';
+import CreateUsername from './pages/CreateUsername';
 import LandingPage from './pages/LandingPage';
 import DocsPage from './pages/DocsPage';
 import DashboardExample from './pages/DashboardExample';
@@ -106,6 +108,8 @@ function AppContent() {
           {/* Auth pages */}
           <Route path="/login" element={<AuthSignIn />} />
           <Route path="/register" element={<AuthRegister />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/create-username" element={<CreateUsername />} />
 
           {/* Dashboard principal - Accessible à tous les abonnements */}
           <Route path="/dashboard" element={
