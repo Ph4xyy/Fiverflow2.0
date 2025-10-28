@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { Github, Mail, MessageCircle } from 'lucide-react'
 
 const AuthSignIn: React.FC = () => {
   const navigate = useNavigate()
@@ -41,7 +42,7 @@ const AuthSignIn: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 text-white flex flex-col">
+    <div className="fixed inset-0 z-50 min-h-screen w-full bg-slate-950 text-white flex flex-col">
       {/* Header with diagonal separator and logo + name */}
       <div className="w-full px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -66,7 +67,7 @@ const AuthSignIn: React.FC = () => {
                 disabled={loading}
                 className="w-full flex items-center justify-center px-4 py-3 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
               >
-                <span className="w-5 h-5 mr-3">🐙</span>
+                <Github className="w-5 h-5 mr-3 text-white" />
                 Continue with GitHub
               </button>
               <button
@@ -74,7 +75,7 @@ const AuthSignIn: React.FC = () => {
                 disabled={loading}
                 className="w-full flex items-center justify-center px-4 py-3 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
               >
-                <span className="w-5 h-5 mr-3">🟢</span>
+                <Mail className="w-5 h-5 mr-3 text-red-500" />
                 Continue with Google
               </button>
               <button
@@ -82,7 +83,7 @@ const AuthSignIn: React.FC = () => {
                 disabled={loading}
                 className="w-full flex items-center justify-center px-4 py-3 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
               >
-                <span className="w-5 h-5 mr-3">💬</span>
+                <MessageCircle className="w-5 h-5 mr-3 text-indigo-400" />
                 Continue with Discord
               </button>
             </div>

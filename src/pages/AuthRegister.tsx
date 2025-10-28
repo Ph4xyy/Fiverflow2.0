@@ -25,7 +25,7 @@ const AuthRegister: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-slate-950 text-white flex flex-col">
+    <div className="fixed inset-0 z-50 min-h-screen w-full bg-slate-950 text-white flex flex-col">
       {/* Header */}
       <div className="w-full px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
