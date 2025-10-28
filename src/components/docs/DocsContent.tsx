@@ -1,3 +1,4 @@
+import React from 'react';
 import { motion } from 'framer-motion';
 import { welcomePageContent, TOC_SECTIONS } from '../../lib/docsPageContent';
 import { ArrowLeft, ArrowRight, MessageCircle, Mail } from 'lucide-react';

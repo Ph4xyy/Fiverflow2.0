@@ -1,3 +1,4 @@
+import React from 'react';
 import { TOC_SECTIONS } from '../../lib/docsPageContent';
 
 export const DocsTOC = () => {
