@@ -148,16 +148,6 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 
   const { isAdmin, loading: adminLoading } = useIsAdminFromRole(user);
 
-  // If auth route, render children full-screen without sidebar/nav but keep global providers
-  const isAuthRoute = location.pathname === '/login' || location.pathname === '/register';
-  if (isAuthRoute) {
-    return (
-      <div className="min-h-screen bg-[#0f1117] text-white">
-        {children}
-      </div>
-    );
-  }
-
   /* ---------- NAV STRUCTURE EN 3 SECTIONS + MICRO SECTION BAS ---------- */
   // Section 1: Overview (principales)
   const overviewItems = [

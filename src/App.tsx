@@ -86,7 +86,7 @@ function AppContent() {
   usePreloadData();
 
   return (
-    <>
+    <Layout>
       <Suspense fallback={null}>
         <Routes>
           {/* Redirection racine intelligente */}
@@ -103,7 +103,9 @@ function AppContent() {
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/cancel" element={<CancelPage />} />
           <Route path="/support" element={<SupportPage />} />
-          {/* Auth pages will be rendered inside Layout below */}
+          {/* Auth pages */}
+          <Route path="/login" element={<AuthSignIn />} />
+          <Route path="/register" element={<AuthRegister />} />
 
           {/* Dashboard principal - Accessible à tous les abonnements */}
           <Route path="/dashboard" element={
@@ -225,129 +227,9 @@ function AppContent() {
 
           {/* Onboarding pour nouveaux utilisateurs */}
           <Route path="/onboarding" element={<InstantProtectedRoute><OnboardingPage /></InstantProtectedRoute>} />
-          {/* Wrap all remaining app routes with main Layout */}
-          <Route path="*" element={
-            <Layout>
-              <Suspense fallback={null}>
-                <Routes>
-                  <Route path="/" element={<RootRedirect />} />
-                  <Route path="/landing" element={<LandingPage />} />
-                  <Route path="/docs" element={<DocsPage />} />
-                  <Route path="/pricing" element={<PagePricing />} />
-                  <Route path="/success" element={<SuccessPage />} />
-                  <Route path="/cancel" element={<CancelPage />} />
-                  <Route path="/support" element={<SupportPage />} />
-                  <Route path="/dashboard" element={
-                    <InstantProtectedRoute>
-                      <SubscriptionGuard requiredPlan="Lunch" pageName="dashboard">
-                        <DashboardExample />
-                      </SubscriptionGuard>
-                    </InstantProtectedRoute>
-                  } />
-                  <Route path="/clients" element={
-                    <InstantProtectedRoute>
-                      <SubscriptionGuard requiredPlan="Lunch" pageName="clients" description="Gestion des clients (max 5 avec Lunch)">
-                        <PageClients />
-                      </SubscriptionGuard>
-                    </InstantProtectedRoute>
-                  } />
-                  <Route path="/orders" element={
-                    <InstantProtectedRoute>
-                      <SubscriptionGuard requiredPlan="Lunch" pageName="orders" description="Gestion des commandes (max 10 avec Lunch)">
-                        <PageOrders />
-                      </SubscriptionGuard>
-                    </InstantProtectedRoute>
-                  } />
-                  <Route path="/calendar" element={
-                    <InstantProtectedRoute>
-                      <TempSubscriptionGuard requiredPlan="Boost" pageName="calendar" description="Calendrier disponible avec Boost">
-                        <PageCalendar />
-                      </TempSubscriptionGuard>
-                    </InstantProtectedRoute>
-                  } />
-                  <Route path="/tasks" element={
-                    <InstantProtectedRoute>
-                      <TempSubscriptionGuard requiredPlan="Boost" pageName="workboard" description="Tableau de travail disponible avec Boost">
-                        <WorkboardPage />
-                      </TempSubscriptionGuard>
-                    </InstantProtectedRoute>
-                  } />
-                  <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
-                  <Route path="/stats" element={
-                    <InstantProtectedRoute>
-                      <TempSubscriptionGuard requiredPlan="Scale" pageName="stats" description="Statistiques avancées disponibles avec Scale">
-                        <StatsPage />
-                      </TempSubscriptionGuard>
-                    </InstantProtectedRoute>
-                  } />
-                  <Route path="/profile" element={<InstantProtectedRoute><ProfileRedirect /></InstantProtectedRoute>} />
-                  <Route path="/profile/:username" element={<InstantProtectedRoute><ProfileUsername /></InstantProtectedRoute>} />
-                  <Route path="/settings" element={<InstantProtectedRoute><PageSettings /></InstantProtectedRoute>} />
-                  <Route path="/project/:projectId" element={<InstantProtectedRoute><ProjectDetailPage /></InstantProtectedRoute>} />
-                  <Route path="/network" element={
-                    <InstantProtectedRoute>
-                      <TempSubscriptionGuard requiredPlan="Boost" pageName="referrals" description="Système de parrainage disponible avec Boost">
-                        <NetworkPage />
-                      </TempSubscriptionGuard>
-                    </InstantProtectedRoute>
-                  } />
-                  <Route path="/upgrade" element={<InstantProtectedRoute><PagePricing /></InstantProtectedRoute>} />
-                  <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
-                  <Route path="/referrals" element={<InstantProtectedRoute><PageReferrals /></InstantProtectedRoute>} />
-                  <Route path="/assistant" element={
-                    <InstantProtectedRoute>
-                      <SubscriptionGuard requiredPlan="Lunch" pageName="assistant" description="Assistant AI disponible avec Lunch">
-                        <AIAssistantPage />
-                      </SubscriptionGuard>
-                    </InstantProtectedRoute>
-                  } />
-                  <Route path="/admin/dashboard" element={
-                    <InstantProtectedRoute>
-                      <AdminRoute><AdminDashboard /></AdminRoute>
-                    </InstantProtectedRoute>
-                  } />
-                  <Route path="/admin/users" element={
-                    <InstantProtectedRoute>
-                      <AdminRoute><AdminUsersPage /></AdminRoute>
-                    </InstantProtectedRoute>
-                  } />
-                  <Route path="/admin/stats" element={
-                    <InstantProtectedRoute>
-                      <AdminRoute><AdminStatsPage /></AdminRoute>
-                    </InstantProtectedRoute>
-                  } />
-                  <Route path="/admin/ai" element={
-                    <InstantProtectedRoute>
-                      <AdminRoute><AdminAIPage /></AdminRoute>
-                    </InstantProtectedRoute>
-                  } />
-                  {import.meta.env.DEV && (
-                    <Route path="/error-406-diagnostic" element={<InstantProtectedRoute><Error406Diagnostic /></InstantProtectedRoute>} />
-                  )}
-                  <Route path="/terms-of-service" element={<TermsOfService />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/cookie-policy" element={<CookiePolicy />} />
-                  <Route path="/invoices" element={
-                    <InstantProtectedRoute>
-                      <SubscriptionGuard requiredPlan="Scale" pageName="invoices" description="Système de facturation disponible avec Scale">
-                        <InvoicesLayout />
-                      </SubscriptionGuard>
-                    </InstantProtectedRoute>
-                  }>
-                    <Route index element={<PageInvoices />} />
-                    <Route path="sent" element={<PageInvoices />} />
-                    <Route path="create" element={<PageInvoices />} />
-                    <Route path="templates" element={<InvoiceTemplatesPage />} />
-                    <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
-                  </Route>
-                  <Route path="/onboarding" element={<InstantProtectedRoute><OnboardingPage /></InstantProtectedRoute>} />
-                </Routes>
-              </Suspense>
-            </Layout>
-          } />
         </Routes>
       </Suspense>
-    </>
+    </Layout>
   );
 }
 
