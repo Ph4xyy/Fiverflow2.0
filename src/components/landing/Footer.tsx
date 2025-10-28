@@ -45,14 +45,9 @@ export const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <motion.a
-              href="/"
-              className="flex items-center space-x-3 mb-4"
-              whileHover={{ scale: 1.05 }}
-            >
-              <img src={LogoImage} alt="FiverFlow Logo" className="h-8 w-auto" />
-              <span className="text-2xl font-bold text-white">FiverFlow</span>
-            </motion.a>
+            <a href="/" className="mb-4 inline-block">
+              <img src={LogoImage} alt="FiverFlow Logo" className="h-6 w-auto" />
+            </a>
             <p className="text-sm text-neutral-500">
               Streamline your freelance workflow
             </p>

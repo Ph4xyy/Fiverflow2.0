@@ -37,10 +37,9 @@ export const HeroSection = ({ onGetStarted }: HeroSectionProps = {}) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="flex items-center space-x-2 text-neutral-400 uppercase tracking-wider text-[10px] md:text-xs font-medium"
+              className="text-neutral-400 uppercase tracking-wider text-[10px] md:text-xs font-medium"
             >
-              <img src={LogoImage} alt="FiverFlow Logo" className="h-4 w-auto" />
-              <span>FiverFlow</span>
+              <img src={LogoImage} alt="FiverFlow Logo" className="h-3 w-auto inline-block" />
             </motion.div>
 
             {/* Headline */}
