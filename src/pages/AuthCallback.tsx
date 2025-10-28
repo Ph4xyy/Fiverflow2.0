@@ -24,53 +24,8 @@ const AuthCallback: React.FC = () => {
         if (data.session) {
           console.log('✅ Session trouvée, utilisateur connecté:', data.session.user.email)
           
-          // Vérifier si l'utilisateur a un profil
-          const { data: profile, error: profileError } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('user_id', data.session.user.id)
-            .single()
-
-          if (profileError && profileError.code !== 'PGRST116') {
-            console.error('Erreur lors de la récupération du profil:', profileError)
-            setError('Erreur lors de la récupération du profil.')
-            setTimeout(() => navigate('/login'), 3000)
-            return
-          }
-
-          // Si l'utilisateur n'a pas de profil, le créer
-          if (!profile) {
-            console.log('🔄 Création du profil utilisateur...')
-            const { error: insertError } = await supabase
-              .from('user_profiles')
-              .insert({
-                user_id: data.session.user.id,
-                email: data.session.user.email,
-                full_name: data.session.user.user_metadata?.full_name || data.session.user.user_metadata?.name,
-                username: data.session.user.user_metadata?.preferred_username || 
-                         data.session.user.user_metadata?.user_name ||
-                         data.session.user.email?.split('@')[0],
-                subscription: 'Lunch',
-                role: 'member',
-                created_at: new Date().toISOString()
-              })
-
-            if (insertError) {
-              console.error('Erreur lors de la création du profil:', insertError)
-              setError('Erreur lors de la création du profil.')
-              setTimeout(() => navigate('/login'), 3000)
-              return
-            }
-          }
-
-          // Vérifier si l'utilisateur a besoin de créer un username
-          if (profile && !profile.username) {
-            console.log('🔄 Redirection vers la création d\'username...')
-            navigate('/create-username')
-            return
-          }
-
-          // Rediriger vers le dashboard
+          // Le trigger handle_new_user() s'occupe automatiquement de créer le profil
+          // On redirige directement vers le dashboard
           console.log('✅ Redirection vers le dashboard...')
           navigate('/dashboard')
         } else {

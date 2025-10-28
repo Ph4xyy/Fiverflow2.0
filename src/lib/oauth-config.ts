@@ -4,15 +4,13 @@
  */
 
 export const getOAuthRedirectUrl = (): string => {
-  // En production, utiliser l'URL Vercel
+  // En production, utiliser fiverflow.com
   if (import.meta.env.PROD) {
-    // Récupérer l'URL depuis les variables d'environnement ou utiliser une valeur par défaut
-    const prodUrl = import.meta.env.VITE_APP_URL || 'https://fiverflow2-0.vercel.app'
-    return `${prodUrl}/auth/callback`
+    return 'https://fiverflow.com/dashboard'
   }
   
-  // En développement, utiliser l'URL locale
-  return `${window.location.origin}/auth/callback`
+  // En développement, utiliser l'URL locale vers le dashboard
+  return `${window.location.origin}/dashboard`
 }
 
 export const oauthConfig = {
