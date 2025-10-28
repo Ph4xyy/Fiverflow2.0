@@ -38,6 +38,7 @@ import RootRedirect from './components/RootRedirect';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import LandingPage from './pages/LandingPage';
+import DocsPage from './pages/DocsPage';
 import DashboardExample from './pages/DashboardExample';
 import PageCalendar from './pages/PageCalendar';
 import PagePricing from './pages/PagePricing';
@@ -93,6 +94,9 @@ function AppContent() {
           
           {/* Landing page - has its own Navbar */}
           <Route path="/landing" element={<LandingPage />} />
+          
+          {/* Documentation */}
+          <Route path="/docs" element={<DocsPage />} />
           
           {/* Pages publiques */}
           <Route path="/pricing" element={<PagePricing />} />
