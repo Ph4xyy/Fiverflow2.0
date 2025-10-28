@@ -53,7 +53,7 @@ export class FiverFlowAssistant {
   private conversationHistory: AssistantMessage[] = [];
 
   constructor() {
-    // Initialiser avec le prompt systèmem
+    // Initialiser avec le prompt système
     this.conversationHistory.push({
       role: 'system',
       content: SYSTEM_PROMPT

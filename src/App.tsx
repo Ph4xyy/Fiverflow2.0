@@ -64,6 +64,7 @@ import AssistantPage from './pages/AssistantPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminStatsPage from './pages/admin/AdminStatsPage';
+import AdminAIPage from './pages/admin/AdminAIPage';
 
 // Pages d'abonnement Stripe
 import CancelPage from './pages/CancelPage';
