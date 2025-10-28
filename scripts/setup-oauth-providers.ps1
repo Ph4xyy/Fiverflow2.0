@@ -81,3 +81,4 @@ Write-Host ""
 
 Write-Host "🎉 Configuration OAuth terminée!" -ForegroundColor Green
 Write-Host "Les boutons de connexion sociale devraient maintenant fonctionner." -ForegroundColor Green
+

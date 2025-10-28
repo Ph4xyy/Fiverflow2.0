@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { Github, Mail, MessageCircle } from 'lucide-react'
+import { GitHubIcon, GoogleIcon, DiscordIcon } from '../components/OAuthIcons'
 
 const AuthRegister: React.FC = () => {
   const navigate = useNavigate()
@@ -67,7 +67,7 @@ const AuthRegister: React.FC = () => {
                 disabled={loading}
                 className="w-full flex items-center justify-center px-4 py-3 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
               >
-                <Github className="w-5 h-5 mr-3 text-white" />
+                <GitHubIcon className="w-5 h-5 mr-3 text-white" />
                 Continue with GitHub
               </button>
               <button
@@ -75,7 +75,7 @@ const AuthRegister: React.FC = () => {
                 disabled={loading}
                 className="w-full flex items-center justify-center px-4 py-3 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
               >
-                <Mail className="w-5 h-5 mr-3 text-red-500" />
+                <GoogleIcon className="w-5 h-5 mr-3" />
                 Continue with Google
               </button>
               <button
@@ -83,7 +83,7 @@ const AuthRegister: React.FC = () => {
                 disabled={loading}
                 className="w-full flex items-center justify-center px-4 py-3 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
               >
-                <MessageCircle className="w-5 h-5 mr-3 text-indigo-400" />
+                <DiscordIcon className="w-5 h-5 mr-3 text-indigo-400" />
                 Continue with Discord
               </button>
             </div>
