@@ -41,6 +41,7 @@ import AuthCallback from './pages/AuthCallback';
 import CreateUsername from './pages/CreateUsername';
 import OAuthDebug from './pages/OAuthDebug';
 import LandingPage from './pages/LandingPage';
+import ReferralLandingModern from './pages/ReferralLandingModern';
 import DocsPage from './pages/DocsPage';
 import DashboardExample from './pages/DashboardExample';
 import PageCalendar from './pages/PageCalendar';
@@ -97,6 +98,9 @@ function AppContent() {
           
           {/* Landing page - has its own Navbar */}
           <Route path="/landing" element={<LandingPage />} />
+          
+          {/* Referral landing page with modern design - /app/:username */}
+          <Route path="/app/:username" element={<ReferralLandingModern />} />
           
           {/* Documentation */}
           <Route path="/docs" element={<DocsPage />} />
