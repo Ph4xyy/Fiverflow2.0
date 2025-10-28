@@ -9,6 +9,7 @@ import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import { useSubscriptionPermissions } from '../hooks/useSubscriptionPermissions';
 import NotificationsDropdown from './NotificationsDropdown';
 import CentralizedSearchBar from './CentralizedSearchBar';
+import AssistantFloatingButton from './AssistantFloatingButton';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
@@ -449,6 +450,9 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             <LocalErrorBoundary>{children}</LocalErrorBoundary>
           </div>
         </main>
+        
+        {/* Assistant Floating Button */}
+        <AssistantFloatingButton />
       </div>
 
       {upgradeOpen && (
