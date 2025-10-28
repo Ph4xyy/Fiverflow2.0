@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 
 // Configuration OpenAI
 const openai = new OpenAI({
-  apiKey: process.env.VITE_OPENAI_API_KEY || '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',
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY || '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',
   dangerouslyAllowBrowser: true // Nécessaire pour le côté client
 });
 

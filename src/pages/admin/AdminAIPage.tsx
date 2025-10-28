@@ -3,6 +3,7 @@ import AdminLayout from '../../components/AdminLayout'
 import AdminNavigation from '../../components/AdminNavigation'
 import { useAdminAI } from '../../hooks/useAdminAI'
 import { AIResponse } from '../../services/adminService'
+import { assistant } from '../../lib/openai'
 import {
   Bot,
   Send,
@@ -61,12 +62,26 @@ const AdminAIPage: React.FC = () => {
     }
 
     try {
-      const response = await generateInsights(prompt, context)
+      // Utiliser l'assistant OpenAI au lieu de generateInsights
+      const response = await assistant.sendMessage(prompt.trim())
+      
+      // Créer une réponse compatible avec le format existant
+      const aiResponse: AIResponse = {
+        summary: response.message,
+        insights: [
+          'Analyse générée par l\'assistant IA FiverFlow',
+          'Réponse contextuelle basée sur vos données'
+        ],
+        recommendations: [
+          'Consultez les statistiques détaillées dans le dashboard',
+          'Utilisez les outils de gestion pour optimiser votre workflow'
+        ]
+      }
       
       const newChat = {
         id: Date.now().toString(),
         prompt: prompt.trim(),
-        response,
+        response: aiResponse,
         timestamp: new Date()
       }
       
@@ -76,6 +91,7 @@ const AdminAIPage: React.FC = () => {
       
       toast.success('Analyse générée avec succès')
     } catch (error) {
+      console.error('Erreur assistant:', error)
       toast.error('Erreur lors de la génération de l\'analyse')
     }
   }
