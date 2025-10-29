@@ -53,15 +53,14 @@ const PageUpgrade: React.FC = () => {
     {
       id: 'lunch',
       name: 'Lunch',
-      subtitle: 'Perfect for beginners',
+      subtitle: 'Parfait pour démarrer',
       price: '0',
       period: 'free',
-      description: 'All essential features to start your freelance business.',
+      description: 'Les essentiels pour démarrer en freelance.',
       features: [
         { icon: <Users size={20} />, title: 'Up to 5 clients', description: 'Gérez vos premiers clients' },
         { icon: <FileText size={20} />, title: '10 orders / month', description: 'Suivi simple des commandes' },
         { icon: <Shield size={20} />, title: 'Email support', description: 'Assistance standard' },
-        { icon: <Sparkles size={20} />, title: 'AI Assistant', description: 'Accès de base à l’assistant AI' },
         { icon: <LayoutDashboard size={20} />, title: 'Dashboard, Clients, Orders', description: 'Pages incluses' },
         { icon: <Lock size={20} />, title: 'Calendar & Workboard', description: 'Non inclus — disponible avec Boost' },
         { icon: <Lock size={20} />, title: 'Referrals', description: 'Non inclus — disponible avec Boost' },
@@ -76,15 +75,14 @@ const PageUpgrade: React.FC = () => {
     {
       id: 'boost',
       name: 'Boost',
-      subtitle: 'For active freelancers',
+      subtitle: 'Pour freelances actifs',
       price: isYearly ? '240' : '24',
       period: isYearly ? 'year' : 'month',
-      description: 'Increase your productivity with advanced tools and more capacity.',
+      description: 'Gagnez en productivité avec plus de pages et de capacités.',
       features: [
         { icon: <Users size={20} />, title: 'Unlimited clients & orders', description: 'Aucune limite de croissance' },
         { icon: <Calendar size={20} />, title: 'Calendar & Workboard', description: 'Planifiez et suivez vos tâches' },
         { icon: <Network size={20} />, title: 'Referrals', description: 'Programme de parrainage activé' },
-        { icon: <Sparkles size={20} />, title: 'AI Assistant', description: 'Assistances et prompts avancés' },
         { icon: <Headphones size={20} />, title: 'Priority support', description: 'Support prioritaire' },
         { icon: <LayoutDashboard size={20} />, title: 'Dashboard, Clients, Orders', description: 'Pages incluses' },
         { icon: <Lock size={20} />, title: 'Statistics & Invoices', description: 'Disponible avec Scale' }
@@ -98,10 +96,10 @@ const PageUpgrade: React.FC = () => {
     {
       id: 'scale',
       name: 'Scale',
-      subtitle: 'For businesses',
+      subtitle: 'Pour freelances avancés',
       price: isYearly ? '390' : '39',
       period: isYearly ? 'year' : 'month',
-      description: 'The complete solution to scale your business to new heights.',
+      description: 'Le pack complet pour passer au niveau supérieur.',
       features: [
         { icon: <Crown size={20} />, title: 'Everything in Boost', description: 'Toutes les fonctionnalités de Boost' },
         { icon: <BarChart3 size={20} />, title: 'Statistics', description: 'Statistiques avancées' },
