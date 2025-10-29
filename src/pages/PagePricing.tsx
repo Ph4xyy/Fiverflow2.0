@@ -52,19 +52,21 @@ const PagePricing: React.FC = () => {
     {
       id: 'lunch',
       name: 'Lunch',
-      subtitle: 'Free plan',
+      subtitle: 'Parfait pour démarrer',
       monthlyPrice: 0,
       yearlyPrice: 0,
-      description: 'Perfect to get started',
+      description: 'Les essentiels pour démarrer en freelance',
       features: [
-        { text: '1 active project', included: true },
-        { text: '5 clients maximum', included: true },
-        { text: '1 GB storage', included: true },
+        { text: 'Up to 5 clients', included: true },
+        { text: '10 orders / month', included: true },
+        { text: 'Dashboard, Clients, Orders', included: true },
         { text: 'Email support', included: true },
-        { text: 'Basic templates', included: true },
-        { text: 'Basic reports', included: false },
-        { text: 'Limited integrations', included: false },
-        { text: 'Priority support', included: false }
+        { text: 'Calendar access', included: false },
+        { text: 'Workboard access', included: false },
+        { text: 'Referrals program', included: false },
+        { text: 'Statistics', included: false },
+        { text: 'Invoices', included: false },
+        { text: 'AI Assistant', included: false }
       ],
       buttonText: 'Current Plan',
       buttonVariant: 'outline'
@@ -72,21 +74,20 @@ const PagePricing: React.FC = () => {
     {
       id: 'boost',
       name: 'Boost',
-      subtitle: 'For freelancers',
+      subtitle: 'Pour freelances actifs',
       monthlyPrice: 24,
       yearlyPrice: 240, // 20% discount
-      description: 'Perfect for active freelancers',
+      description: 'Plus de pages et de capacités pour booster votre activité',
       features: [
-        { text: '5 projects', included: true },
-        { text: '25 clients', included: true },
-        { text: '10 GB storage', included: true },
+        { text: 'Unlimited clients & orders', included: true },
+        { text: 'Dashboard, Clients, Orders', included: true },
+        { text: 'Calendar access', included: true },
+        { text: 'Workboard access', included: true },
+        { text: 'Referrals program', included: true },
         { text: 'Priority support', included: true },
-        { text: 'Premium templates', included: true },
-        { text: 'Advanced reports', included: true },
-        { text: 'Full integrations', included: true },
-        { text: 'API access', included: true },
-        { text: 'Automations', included: true },
-        { text: 'Advanced analytics', included: true }
+        { text: 'Statistics', included: false },
+        { text: 'Invoices', included: false },
+        { text: 'AI Assistant', included: false }
       ],
       popular: true,
       buttonText: 'Choose Boost',
@@ -95,23 +96,16 @@ const PagePricing: React.FC = () => {
     {
       id: 'scale',
       name: 'Scale',
-      subtitle: 'For businesses',
+      subtitle: 'Pour freelances avancés',
       monthlyPrice: 39,
       yearlyPrice: 390, // 20% discount
-      description: 'Complete solution for businesses',
+      description: 'Le pack complet pour passer au niveau supérieur',
       features: [
-        { text: '15 projects', included: true },
-        { text: '100 clients', included: true },
-        { text: '50 GB storage', included: true },
-        { text: 'Dedicated support', included: true },
-        { text: 'Premium templates', included: true },
-        { text: 'Advanced reports', included: true },
-        { text: 'Full integrations', included: true },
-        { text: 'API access', included: true },
-        { text: 'Team collaboration', included: true },
-        { text: 'Automations', included: true },
-        { text: 'White label', included: true },
-        { text: 'Advanced analytics', included: true }
+        { text: 'Everything in Boost', included: true },
+        { text: 'Statistics', included: true },
+        { text: 'Invoices', included: true },
+        { text: 'AI Assistant', included: true },
+        { text: 'Priority support', included: true }
       ],
       buttonText: 'Choose Scale',
       buttonVariant: 'primary'
