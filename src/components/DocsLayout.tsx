@@ -171,13 +171,18 @@ const DocsLayout: React.FC = () => {
         </div>
       </nav>
 
-      <div className="flex justify-center">
-        {/* Sidebar - More centered */}
+      <div className="flex">
+        {/* Main Content - On the left */}
+        <main className="flex-1 max-w-4xl px-8 py-8 ml-0">
+          <Outlet />
+        </main>
+
+        {/* Sidebar - On the right */}
         <aside
           className={`
             fixed lg:sticky top-0 h-screen bg-transparent w-72 overflow-y-auto z-40
-            transition-transform duration-300 ease-in-out pl-24
-            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            transition-transform duration-300 ease-in-out pr-8
+            ${sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
           `}
         >
           <nav className="p-6 space-y-6 pt-24">
@@ -224,11 +229,6 @@ const DocsLayout: React.FC = () => {
             ))}
           </nav>
         </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 max-w-4xl px-8 py-8 ml-0">
-          <Outlet />
-        </main>
       </div>
 
       {/* Overlay for mobile */}
