@@ -15,7 +15,7 @@ if (!apiKey) {
 }
 
 const openai = new OpenAI({
-  apiKey: apiKey || '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',
+  apiKey: apiKey || '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',
   dangerouslyAllowBrowser: true // Nécessaire pour le côté client
 });
 
