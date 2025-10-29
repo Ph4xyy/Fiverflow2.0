@@ -1,8 +1,21 @@
 import OpenAI from 'openai';
 
 // Configuration OpenAI
+const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+// Debug: Logger la clé utilisée (seulement les premiers caractères pour la sécurité)
+if (!apiKey) {
+  console.warn('⚠️ VITE_OPENAI_API_KEY non trouvée dans import.meta.env');
+  console.warn('Vérifiez que:');
+  console.warn('1. Le fichier .env existe à la racine du projet');
+  console.warn('2. Le fichier .env.development existe (pour npm run dev)');
+  console.warn('3. Le serveur a été redémarré après la création/modification du fichier .env');
+} else {
+  console.log('✅ Clé OpenAI trouvée:', apiKey.substring(0, 20) + '...');
+}
+
 const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY || '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',
+  apiKey: apiKey || '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',
   dangerouslyAllowBrowser: true // Nécessaire pour le côté client
 });
 
@@ -78,8 +91,10 @@ export class FiverFlowAssistant {
       }
 
       // Appeler l'API OpenAI
+      // Utilisation de gpt-3.5-turbo pour meilleure compatibilité
+      // Si vous avez accès à gpt-4o-mini, vous pouvez le changer
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini', // Modèle optimisé pour les assistants
+        model: 'gpt-3.5-turbo', // Modèle plus accessible
         messages: this.conversationHistory,
         max_tokens: 1000,
         temperature: 0.7,
