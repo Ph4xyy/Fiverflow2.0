@@ -1,20 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  BarChart3, 
-  Network, 
-  Bot, 
-  Users, 
-  ShoppingBag, 
-  FileText, 
-  CheckSquare, 
-  User, 
-  Shield, 
-  ArrowUp 
-} from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+import TableOfContents from './TableOfContents';
+import FeedbackSection from './FeedbackSection';
 
 const contentMap: Record<string, string> = {};
 
