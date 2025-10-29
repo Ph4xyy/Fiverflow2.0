@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Bot, Send, RotateCcw, Lightbulb, Loader2, MessageSquare, Zap, Users, TrendingUp, HelpCircle } from 'lucide-react';
-import { assistant } from '../lib/openai';
+import { callLLM } from '../lib/assistant/llmService';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Message {
   id: string;
@@ -10,6 +11,7 @@ interface Message {
 }
 
 const AssistantPage: React.FC = () => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -55,8 +57,7 @@ const AssistantPage: React.FC = () => {
   ];
 
   const handleSendMessage = async () => {
-    if (!input.trim() || isLoading) return;
-    const hasOpenAIKey = Boolean((import.meta as any)?.env?.VITE_OPENAI_API_KEY);
+    if (!input.trim() || isLoading || !user) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -66,20 +67,25 @@ const AssistantPage: React.FC = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentMessage = input.trim();
     setInput('');
     setIsLoading(true);
     setShowSuggestions(false);
 
     try {
-      if (!hasOpenAIKey) {
-        throw new Error('Missing OpenAI API key. Set VITE_OPENAI_API_KEY in your environment.');
-      }
-      const response = await assistant.sendMessage(input.trim());
+      // Convertir l'historique en format LLM
+      const conversationHistory = messages.map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content
+      }));
+
+      // Appeler l'Edge Function Supabase (sécurisé, clé côté serveur)
+      const response = await callLLM(user, currentMessage, conversationHistory);
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response.message,
+        content: response.text,
         timestamp: new Date()
       };
 
@@ -90,10 +96,10 @@ const AssistantPage: React.FC = () => {
       
       // Afficher un message d'erreur plus détaillé
       if (error?.message) {
-        if (error.message.includes('OpenAI API key') || error.message.includes('401') || error.message.includes('unauthorized')) {
-          errorText = '❌ Erreur: Clé OpenAI invalide ou manquante. Vérifiez votre fichier .env et redémarrez le serveur.';
-        } else if (error.message.includes('429') || error.message.includes('rate limit')) {
-          errorText = '❌ Erreur: Limite de requêtes dépassée. Veuillez réessayer dans quelques instants.';
+        if (error.message.includes('401') || error.message.includes('unauthorized') || error.message.includes('invalid')) {
+          errorText = '❌ Erreur: Clé OpenAI invalide. Configurez OPENAI_API_KEY dans Supabase Dashboard → Edge Functions → assistant-message → Secrets';
+        } else if (error.message.includes('429') || error.message.includes('rate limit') || error.message.includes('Rate limit') || error.message.includes('Limite de requêtes')) {
+          errorText = '❌ Erreur: Limite de requêtes atteinte. Veuillez attendre 1-2 minutes avant de réessayer. Vous pouvez aussi vérifier vos crédits sur platform.openai.com';
         } else if (error.message.includes('network') || error.message.includes('fetch')) {
           errorText = '❌ Erreur: Problème de connexion. Vérifiez votre connexion internet.';
         } else {
@@ -125,7 +131,6 @@ const AssistantPage: React.FC = () => {
   };
 
   const resetConversation = () => {
-    assistant.resetConversation();
     setMessages([]);
     setShowSuggestions(true);
   };
@@ -141,7 +146,7 @@ const AssistantPage: React.FC = () => {
                 <Bot className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">FiverFlow AI Assistant</h1>
+                <h1 className="text-2xl font-bold text-white">Jett — FiverFlow AI Assistant</h1>
                 <p className="text-slate-400">Your intelligent partner to optimize your freelance workflow</p>
               </div>
             </div>
@@ -253,7 +258,7 @@ const AssistantPage: React.FC = () => {
                     <Bot className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white">FiverFlow Assistant</h3>
+                    <h3 className="font-semibold text-white">Jett</h3>
                     <p className="text-sm text-slate-400">AI to optimize your workflow</p>
                   </div>
                 </div>
