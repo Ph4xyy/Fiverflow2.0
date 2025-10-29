@@ -1,25 +1,134 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { ChevronRight } from 'lucide-react';
-import indexContent from '../../../public/docs/index.mdx?raw';
-import dashboardContent from '../../../public/docs/dashboard.mdx?raw';
+
+// Hardcoded content
+const contentMap: Record<string, string> = {
+  index: `# Welcome to FiverFlow Documentation
+
+Comprehensive guides to help you make the most of every feature in the FiverFlow platform.
+
+## Getting Started
+
+FiverFlow is your all-in-one platform for managing freelance projects, clients, invoices, and more. Start by exploring the key sections below.
+
+## Key Areas
+
+### Overview
+
+Essential features to manage your business:
+
+- **Dashboard**: Your central hub for managing your freelance business
+- **Calendar**: Schedule and track events and deadlines
+- **Statistics**: Analyze your performance with detailed reports
+- **Referrals**: Grow your network with our referral system
+
+### AI Features
+
+Leverage artificial intelligence to automate and optimize:
+
+- **Assistant**: Get AI-powered help with tasks and insights
+
+### Workspace
+
+Organize your work and manage clients:
+
+- **Clients**: Manage client information and relationships
+- **Orders**: Track projects and deadlines
+- **Invoices**: Handle billing and payment tracking
+- **Workboard**: Organize tasks with Kanban boards
+
+### More
+
+Additional features to configure and manage:
+
+- **Profile**: Account settings and preferences
+- **Admin**: Administrative tools (for admins)
+- **Upgrade**: View and manage your subscription
+
+## Getting Help
+
+If you need assistance or have questions:
+
+- Check the individual documentation pages for detailed guides
+- Contact support through the dashboard
+- Visit the pricing page to upgrade your plan
+
+---
+
+*Last updated: October 2024*`,
+  
+  dashboard: `# Dashboard
+
+Manage your freelance business from a central dashboard with real-time metrics, activity feeds, and quick actions.
+
+## Overview
+
+The Dashboard provides an at-a-glance view of your business health with key metrics, recent activity, and quick access to important functions.
+
+## Features
+
+### Quick Stats
+
+Monitor your key performance indicators:
+- Total revenue for selected period
+- Active projects count
+- Pending invoices amount
+- Client count
+- Weekly time tracked
+
+### Recent Activity
+
+Stay updated with the latest happenings:
+- Recent client interactions
+- Project updates and comments
+- Payment notifications
+- Upcoming deadlines and reminders
+
+### Visual Analytics
+
+Interactive charts and graphs help you visualize:
+- Revenue trends over time
+- Project status distribution
+- Client activity patterns
+- Time tracking summaries by project
+
+## Getting Started
+
+### Customize Your Dashboard
+
+1. Click "Customize Dashboard" to rearrange widgets
+2. Add or remove widgets based on what matters to you
+3. Set your preferred date ranges
+4. Save your layout for future sessions
+
+### Quick Actions
+
+Access common tasks directly from the dashboard:
+- **Create Project**: Start a new client project
+- **Add Client**: Quickly add new client information
+- **Generate Invoice**: Create invoice for any client
+- **Track Time**: Start time tracking for active work
+
+## Tips
+
+- Review your dashboard daily to stay informed about your business health
+- Set up notifications for important metrics and deadlines
+- Export data periodically for backup and analysis
+- Customize the layout to show what matters most to your workflow
+
+---
+
+*Last updated: October 2024*`,
+};
 
 const DocPage: React.FC = () => {
   const { page } = useParams<{ page: string }>();
   
-  // Map page params to content
   const getContent = () => {
     const docPage = page || 'index';
-    
-    switch (docPage) {
-      case 'index':
-        return indexContent;
-      case 'dashboard':
-        return dashboardContent;
-      default:
-        return `# ${docPage} Documentation\n\nContent coming soon for ${docPage}...`;
-    }
+    return contentMap[docPage] || `# ${docPage} Documentation\n\nContent coming soon...`;
   };
 
   const content = getContent();

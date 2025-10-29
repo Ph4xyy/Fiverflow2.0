@@ -2,6 +2,7 @@
   "buildCommand": "vite build",
   "framework": "vite",
   "rewrites": [
+    { "source": "/docs/(.*).mdx", "destination": "/docs/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
