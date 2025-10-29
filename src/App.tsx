@@ -123,8 +123,8 @@ function AppContent() {
           <Route path="/oauth-debug" element={<OAuthDebug />} />
 
           {/* Routes protégées avec Layout du dashboard */}
-          <Route path="/dashboard" element={
-            <Layout>
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={
               <InstantProtectedRoute>
                 <SubscriptionGuard requiredPlan="Lunch" pageName="dashboard">
                   <DashboardExample />
@@ -134,83 +134,66 @@ function AppContent() {
 
             {/* Pages internes du dashboard avec protection par abonnement */}
             <Route path="/clients" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Lunch" pageName="clients" description="Gestion des clients (max 5 avec Lunch)">
-                <PageClients />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
-          } />
-          <Route path="/orders" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Lunch" pageName="orders" description="Gestion des commandes (max 10 avec Lunch)">
-                <PageOrders />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
-          } />
-          <Route path="/calendar" element={
+              <InstantProtectedRoute>
+                <SubscriptionGuard requiredPlan="Lunch" pageName="clients" description="Gestion des clients (max 5 avec Lunch)">
+                  <PageClients />
+                </SubscriptionGuard>
+              </InstantProtectedRoute>
+            } />
+            <Route path="/orders" element={
+              <InstantProtectedRoute>
+                <SubscriptionGuard requiredPlan="Lunch" pageName="orders" description="Gestion des commandes (max 10 avec Lunch)">
+                  <PageOrders />
+                </SubscriptionGuard>
+              </InstantProtectedRoute>
+            } />
+            <Route path="/calendar" element={
             <InstantProtectedRoute>
               <TempSubscriptionGuard requiredPlan="Boost" pageName="calendar" description="Calendrier disponible avec Boost">
                 <PageCalendar />
               </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          <Route path="/tasks" element={
+            <Route path="/tasks" element={
             <InstantProtectedRoute>
               <TempSubscriptionGuard requiredPlan="Boost" pageName="workboard" description="Tableau de travail disponible avec Boost">
                 <WorkboardPage />
               </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
-          <Route path="/stats" element={
+            <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
+            <Route path="/stats" element={
             <InstantProtectedRoute>
               <TempSubscriptionGuard requiredPlan="Scale" pageName="stats" description="Statistiques avancées disponibles avec Scale">
                 <StatsPage />
               </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          {/* Système de profil universel */}
-          <Route path="/profile" element={<InstantProtectedRoute><ProfileRedirect /></InstantProtectedRoute>} />
-          <Route path="/profile/:username" element={<InstantProtectedRoute><ProfileUsername /></InstantProtectedRoute>} />
-          <Route path="/settings" element={<InstantProtectedRoute><PageSettings /></InstantProtectedRoute>} />
-          <Route path="/project/:projectId" element={<InstantProtectedRoute><ProjectDetailPage /></InstantProtectedRoute>} />
-          <Route path="/network" element={
+            {/* Système de profil universel */}
+            <Route path="/profile" element={<InstantProtectedRoute><ProfileRedirect /></InstantProtectedRoute>} />
+            <Route path="/profile/:username" element={<InstantProtectedRoute><ProfileUsername /></InstantProtectedRoute>} />
+            <Route path="/settings" element={<InstantProtectedRoute><PageSettings /></InstantProtectedRoute>} />
+            <Route path="/project/:projectId" element={<InstantProtectedRoute><ProjectDetailPage /></InstantProtectedRoute>} />
+            <Route path="/network" element={
             <InstantProtectedRoute>
               <TempSubscriptionGuard requiredPlan="Boost" pageName="referrals" description="Système de parrainage disponible avec Boost">
                 <NetworkPage />
               </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          <Route path="/upgrade" element={<InstantProtectedRoute><PagePricing /></InstantProtectedRoute>} />
-          <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
-          <Route path="/referrals" element={<InstantProtectedRoute><PageReferrals /></InstantProtectedRoute>} />
+            <Route path="/upgrade" element={<InstantProtectedRoute><PagePricing /></InstantProtectedRoute>} />
+            <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
+            <Route path="/referrals" element={<InstantProtectedRoute><PageReferrals /></InstantProtectedRoute>} />
 
-          {/* Assistant AI */}
-          <Route path="/assistant" element={
+            {/* Assistant AI */}
+            <Route path="/assistant" element={
             <InstantProtectedRoute>
               <SubscriptionGuard requiredPlan="Lunch" pageName="assistant" description="AI Assistant available on Lunch plan">
                 <AssistantPage />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          <Route path="/clients" element={
-            <Layout>
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Lunch" pageName="clients" description="Gestion des clients (max 5 avec Lunch)">
-                <PageClients />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
-            </Layout>
-          } />
-          <Route path="/orders" element={
-            <Layout>
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Lunch" pageName="orders" description="Gestion des commandes (max 10 avec Lunch)">
-                <PageOrders />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
-            </Layout>
-          } />
+          </Route>
 
           {/* Administration - Accès libre pour les admins */}
           <Route path="/admin/dashboard" element={
