@@ -76,8 +76,8 @@ const AdminDashboard: React.FC = () => {
     setSelectedUserForStats(null);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusColor = (status?: string | null) => {
+    switch ((status || '').toLowerCase()) {
       case 'completed':
       case 'paid':
         return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300';
@@ -547,14 +547,14 @@ const AdminDashboard: React.FC = () => {
                       <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xs font-semibold">
-                            {order.client_name.charAt(0).toUpperCase()}
+                            {(order.client_name?.charAt(0) || order.title?.charAt(0) || '?').toUpperCase()}
                           </div>
                           <div className="min-w-0">
                             <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
                               {order.title}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {order.client_name} • {formatDate(order.created_at)}
+                              {(order.client_name || 'Client')} • {formatDate(order.created_at)}
                             </div>
                           </div>
                         </div>
@@ -591,14 +591,14 @@ const AdminDashboard: React.FC = () => {
                       <div key={invoice.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xs font-semibold">
-                            {invoice.client_name.charAt(0).toUpperCase()}
+                            {(invoice.client_name?.charAt(0) || invoice.number?.charAt(0) || '?').toUpperCase()}
                           </div>
                           <div className="min-w-0">
                             <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
                               {invoice.number}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {invoice.client_name} • {formatDate(invoice.created_at)}
+                              {(invoice.client_name || 'Client')} • {formatDate(invoice.created_at)}
                             </div>
                           </div>
                         </div>
