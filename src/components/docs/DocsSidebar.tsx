@@ -93,7 +93,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ isOpen, onClose }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="lg:hidden fixed inset-0 bg-black/70 z-40"
+          className="lg:hidden fixed top-[73px] left-0 right-0 bottom-0 bg-black/70 z-40"
           onClick={onClose}
         />
       )}
