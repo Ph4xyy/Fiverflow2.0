@@ -41,7 +41,6 @@ import CreateUsername from './pages/CreateUsername';
 import OAuthDebug from './pages/OAuthDebug';
 import LandingPage from './pages/LandingPage';
 import ReferralLandingModern from './pages/ReferralLandingModern';
-import DocsPage from './pages/DocsPage';
 import DashboardExample from './pages/DashboardExample';
 import PageCalendar from './pages/PageCalendar';
 import PagePricing from './pages/PagePricing';
@@ -76,7 +75,6 @@ import TermsOfService from "./components/TermsOfService";
 // Pages de documentation
 import DocsLayout from './components/DocsLayout';
 import DocPage from './pages/docs/DocPage';
-import DocsPage from './pages/DocsPage';
 
 // Pages de facturation (lazy loading pour optimiser les performances)
 const InvoicesLayout = lazy(() => import('./pages/InvoicesLayout'));
@@ -125,9 +123,8 @@ function AppContent() {
           <Route path="/oauth-debug" element={<OAuthDebug />} />
 
           {/* Routes protégées avec Layout du dashboard */}
-          <Route element={<Layout />}>
-            {/* Dashboard principal - Accessible à tous les abonnements */}
-            <Route path="/dashboard" element={
+          <Route path="/dashboard" element={
+            <Layout>
               <InstantProtectedRoute>
                 <SubscriptionGuard requiredPlan="Lunch" pageName="dashboard">
                   <DashboardExample />
@@ -196,8 +193,24 @@ function AppContent() {
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
-
-          </Route>
+          <Route path="/clients" element={
+            <Layout>
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="Lunch" pageName="clients" description="Gestion des clients (max 5 avec Lunch)">
+                <PageClients />
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+            </Layout>
+          } />
+          <Route path="/orders" element={
+            <Layout>
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="Lunch" pageName="orders" description="Gestion des commandes (max 10 avec Lunch)">
+                <PageOrders />
+              </SubscriptionGuard>
+            </InstantProtectedRoute>
+            </Layout>
+          } />
 
           {/* Administration - Accès libre pour les admins */}
           <Route path="/admin/dashboard" element={
