@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bot, Send, RotateCcw, Lightbulb, Loader2, MessageSquare, Zap, Users, TrendingUp, HelpCircle } from 'lucide-react';
 import { callLLM } from '../lib/assistant/llmService';
 import { useAuth } from '../contexts/AuthContext';
+import { loadConversation, saveConversation, clearConversation, ConversationMessage } from '../lib/assistant/conversationService';
 
 interface Message {
   id: string;
@@ -17,6 +18,61 @@ const AssistantPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [activeTab, setActiveTab] = useState<'chat' | 'features'>('chat');
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
+  // Charger l'historique au montage du composant
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (!user) {
+        setIsLoadingHistory(false);
+        return;
+      }
+
+      try {
+        const savedMessages = await loadConversation(user.id);
+        if (savedMessages.length > 0) {
+          // Convertir les messages en format Message
+          const convertedMessages: Message[] = savedMessages.map(msg => ({
+            id: msg.id,
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp instanceof Date 
+              ? msg.timestamp 
+              : new Date(msg.timestamp)
+          }));
+          setMessages(convertedMessages);
+          setShowSuggestions(false);
+        }
+      } catch (error) {
+        console.error('Error loading conversation history:', error);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    loadHistory();
+  }, [user]);
+
+  // Sauvegarder l'historique après chaque changement
+  useEffect(() => {
+    if (!user || messages.length === 0 || isLoadingHistory) return;
+
+    // Debounce: sauvegarder seulement après 1 seconde d'inactivité
+    const timeoutId = setTimeout(() => {
+      const messagesToSave: ConversationMessage[] = messages.map(msg => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        timestamp: msg.timestamp.toISOString()
+      }));
+
+      saveConversation(user.id, messagesToSave).catch(error => {
+        console.error('Error saving conversation:', error);
+      });
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [messages, user, isLoadingHistory]);
 
   const features = [
     {
@@ -130,7 +186,10 @@ const AssistantPage: React.FC = () => {
     setInput(suggestion);
   };
 
-  const resetConversation = () => {
+  const resetConversation = async () => {
+    if (user) {
+      await clearConversation(user.id);
+    }
     setMessages([]);
     setShowSuggestions(true);
   };
@@ -273,13 +332,21 @@ const AssistantPage: React.FC = () => {
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.length === 0 && showSuggestions && (
+                {isLoadingHistory && (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <Loader2 className="w-8 h-8 animate-spin text-[#9c68f2] mx-auto mb-2" />
+                      <p className="text-slate-400">Loading conversation history...</p>
+                    </div>
+                  </div>
+                )}
+                {!isLoadingHistory && messages.length === 0 && showSuggestions && (
                   <div className="space-y-4">
                     <div className="text-center">
                       <div className="w-16 h-16 bg-gradient-to-br from-[#9c68f2] to-[#422ca5] rounded-full mx-auto mb-4 flex items-center justify-center">
                         <Bot className="w-8 h-8 text-white" />
                       </div>
-                      <h3 className="text-lg font-semibold text-white mb-2">Hello! I am your FiverFlow assistant</h3>
+                      <h3 className="text-lg font-semibold text-white mb-2">Hello! I am Jett, your FiverFlow assistant</h3>
                       <p className="text-slate-400 mb-6">How can I help you optimize your freelance workflow?</p>
                     </div>
                     
@@ -300,7 +367,7 @@ const AssistantPage: React.FC = () => {
                   </div>
                 )}
 
-                {messages.map((message) => (
+                {!isLoadingHistory && messages.map((message) => (
                   <div
                     key={message.id}
                     className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
