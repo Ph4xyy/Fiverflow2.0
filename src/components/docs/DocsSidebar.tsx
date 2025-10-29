@@ -105,7 +105,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ isOpen, onClose }) => {
           x: isOpen || window.innerWidth >= 1024 ? 0 : -260,
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed lg:sticky top-[73px] h-[calc(100vh-73px)] w-[260px] bg-[#0A0A0A] border-r border-[rgba(255,255,255,0.04)] z-40 overflow-y-auto"
+        className="h-full w-full bg-[#0A0A0A] border-r border-[rgba(255,255,255,0.04)] z-40 overflow-y-auto"
       >
         <div className="p-6">
           {/* Docs Home Link */}
