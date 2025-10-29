@@ -64,7 +64,7 @@ const DocPage: React.FC = () => {
   return (
     <div className="flex gap-8">
       {/* Main Content */}
-      <div className="flex-1 prose prose-invert max-w-none">
+      <div className="flex-1 prose prose-invert max-w-none mr-72">
         {/* Breadcrumb */}
         {page && (
           <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
@@ -157,29 +157,18 @@ const DocPage: React.FC = () => {
                   </h3>
                 );
               },
-              h2: ({ children, id }) => (
-                <h2 id={id || children?.toString().toLowerCase().replace(/\s+/g, '-')} className="text-2xl font-bold text-white mt-12 mb-4 first:mt-0 scroll-mt-20">
-                  {children}
-                </h2>
-              ),
-              h3: ({ children, id }) => (
-                <h3 id={id || children?.toString().toLowerCase().replace(/\s+/g, '-')} className="text-xl font-semibold text-white mt-8 mb-3 scroll-mt-20">
-                  {children}
-                </h3>
-              ),
             }}
           >
             {content}
           </ReactMarkdown>
         </div>
 
-        {/* Feedback Section */}
-        <FeedbackSection />
       </div>
 
       {/* Sidebar - On this page */}
-      <div className="hidden xl:block w-64 flex-shrink-0">
+      <div className="hidden xl:block w-64 flex-shrink-0 fixed right-8 top-20">
         {features.length > 0 && <TableOfContents items={features} />}
+        <FeedbackSection />
       </div>
     </div>
   );
