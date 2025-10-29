@@ -58,26 +58,14 @@ const PageUpgrade: React.FC = () => {
       period: 'free',
       description: 'All essential features to start your freelance business.',
       features: [
-        {
-          icon: <Users size={20} />,
-          title: 'Up to 5 clients',
-          description: 'Manage your first clients easily'
-        },
-        {
-          icon: <FileText size={20} />,
-          title: '10 orders per month',
-          description: 'Track your first orders'
-        },
-        {
-          icon: <Calendar size={20} />,
-          title: 'Basic calendar',
-          description: 'Organize your schedule'
-        },
-        {
-          icon: <Shield size={20} />,
-          title: 'Email support',
-          description: 'Email assistance only'
-        }
+        { icon: <Users size={20} />, title: 'Up to 5 clients', description: 'Gérez vos premiers clients' },
+        { icon: <FileText size={20} />, title: '10 orders / month', description: 'Suivi simple des commandes' },
+        { icon: <Shield size={20} />, title: 'Email support', description: 'Assistance standard' },
+        { icon: <Sparkles size={20} />, title: 'AI Assistant', description: 'Accès de base à l’assistant AI' },
+        { icon: <LayoutDashboard size={20} />, title: 'Dashboard, Clients, Orders', description: 'Pages incluses' },
+        { icon: <Lock size={20} />, title: 'Calendar & Workboard', description: 'Non inclus — disponible avec Boost' },
+        { icon: <Lock size={20} />, title: 'Referrals', description: 'Non inclus — disponible avec Boost' },
+        { icon: <Lock size={20} />, title: 'Statistics & Invoices', description: 'Non inclus — disponible avec Scale' }
       ],
       icon: <Users size={24} />,
       gradient: false,
@@ -89,40 +77,17 @@ const PageUpgrade: React.FC = () => {
       id: 'boost',
       name: 'Boost',
       subtitle: 'For active freelancers',
-      price: isYearly ? '240' : '22',
+      price: isYearly ? '240' : '24',
       period: isYearly ? 'year' : 'month',
       description: 'Increase your productivity with advanced tools and more capacity.',
       features: [
-        {
-          icon: <Users size={20} />,
-          title: 'Unlimited clients',
-          description: 'Manage as many clients as needed'
-        },
-        {
-          icon: <FileText size={20} />,
-          title: 'Unlimited orders',
-          description: 'No limits on your orders'
-        },
-        {
-          icon: <BarChart3 size={20} />,
-          title: 'Advanced statistics',
-          description: 'Detailed analysis of your performance'
-        },
-        {
-          icon: <Calendar size={20} />,
-          title: 'Smart calendar',
-          description: 'Automatic planning and reminders'
-        },
-        {
-          icon: <Network size={20} />,
-          title: 'Partner network',
-          description: 'Connect with other freelancers'
-        },
-        {
-          icon: <Headphones size={20} />,
-          title: 'Priority support',
-          description: 'Fast assistance via chat and email'
-        }
+        { icon: <Users size={20} />, title: 'Unlimited clients & orders', description: 'Aucune limite de croissance' },
+        { icon: <Calendar size={20} />, title: 'Calendar & Workboard', description: 'Planifiez et suivez vos tâches' },
+        { icon: <Network size={20} />, title: 'Referrals', description: 'Programme de parrainage activé' },
+        { icon: <Sparkles size={20} />, title: 'AI Assistant', description: 'Assistances et prompts avancés' },
+        { icon: <Headphones size={20} />, title: 'Priority support', description: 'Support prioritaire' },
+        { icon: <LayoutDashboard size={20} />, title: 'Dashboard, Clients, Orders', description: 'Pages incluses' },
+        { icon: <Lock size={20} />, title: 'Statistics & Invoices', description: 'Disponible avec Scale' }
       ],
       icon: <Zap size={24} />,
       gradient: true,
@@ -138,41 +103,12 @@ const PageUpgrade: React.FC = () => {
       period: isYearly ? 'year' : 'month',
       description: 'The complete solution to scale your business to new heights.',
       features: [
-        {
-          icon: <Crown size={20} />,
-          title: 'Everything from Boost',
-          description: 'All Boost features included'
-        },
-        {
-          icon: <Users size={20} />,
-          title: 'Team management',
-          description: 'Collaborate with your team'
-        },
-        {
-          icon: <Shield size={20} />,
-          title: 'Complete API',
-          description: 'Custom integrations'
-        },
-        {
-          icon: <BarChart3 size={20} />,
-          title: 'Advanced reports',
-          description: 'Detailed analytics and insights'
-        },
-        {
-          icon: <Headphones size={20} />,
-          title: '24/7 support',
-          description: 'Assistance available 24/7'
-        },
-        {
-          icon: <Award size={20} />,
-          title: 'Custom training',
-          description: 'Dedicated training sessions'
-        },
-        {
-          icon: <Sparkles size={20} />,
-          title: 'Premium features',
-          description: 'Early access to new features'
-        }
+        { icon: <Crown size={20} />, title: 'Everything in Boost', description: 'Toutes les fonctionnalités de Boost' },
+        { icon: <BarChart3 size={20} />, title: 'Statistics', description: 'Statistiques avancées' },
+        { icon: <FileText size={20} />, title: 'Invoices', description: 'Gestion de la facturation' },
+        { icon: <Sparkles size={20} />, title: 'AI Assistant', description: 'Accès complet à l’assistant' },
+        { icon: <Headphones size={20} />, title: 'Priority support', description: 'Support prioritaire' },
+        { icon: <LayoutDashboard size={20} />, title: 'Dashboard, Clients, Orders, Calendar, Workboard, Referrals', description: 'Toutes les pages incluses' }
       ],
       icon: <Rocket size={24} />,
       gradient: true,

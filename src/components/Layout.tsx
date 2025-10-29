@@ -361,9 +361,10 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           {/* Upgrade button */}
           <button
             onClick={() => navigate('/upgrade')}
-            className="hidden xs:inline-flex items-center justify-center h-10 px-4 sm:px-5 rounded-lg font-semibold text-black bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:via-amber-300 hover:to-yellow-400 shadow-[0_8px_24px_rgba(245,158,11,0.35)] transition-all duration-200"
+            className="inline-flex items-center justify-center h-10 px-4 sm:px-5 rounded-lg font-semibold text-black bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:via-amber-300 hover:to-yellow-400 shadow-[0_8px_24px_rgba(245,158,11,0.35)] transition-all duration-200"
             title="Upgrade"
           >
+            <Crown size={16} className="mr-2" />
             Upgrade
           </button>
 
