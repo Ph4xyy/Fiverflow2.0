@@ -7,19 +7,19 @@ import FeedbackSection from './FeedbackSection';
 
 const contentMap: Record<string, string> = {};
 
-const iconMap: Record<string, React.ReactNode> = {
-  dashboard: <LayoutDashboard size={24} />,
-  calendar: <Calendar size={24} />,
-  statistics: <BarChart3 size={24} />,
-  referrals: <Network size={24} />,
-  assistant: <Bot size={24} />,
-  clients: <Users size={24} />,
-  orders: <ShoppingBag size={24} />,
-  invoices: <FileText size={24} />,
-  workboard: <CheckSquare size={24} />,
-  profile: <User size={24} />,
-  admin: <Shield size={24} />,
-  upgrade: <ArrowUp size={24} />,
+const featuresMap: Record<string, string[]> = {
+  dashboard: ['Overview', 'Quick Stats', 'Recent Activity', 'Performance Metrics'],
+  calendar: ['Create Events', 'Manage Deadlines', 'Multiple Views', 'Smart Notifications'],
+  statistics: ['Revenue Analytics', 'Client Metrics', 'Time Tracking', 'Custom Reports'],
+  referrals: ['Share Links', 'Track Invites', 'Earn Rewards', 'Manage Payouts'],
+  assistant: ['AI Suggestions', 'Task Automation', 'Natural Language', 'Custom Workflows'],
+  clients: ['Add Clients', 'Manage Contacts', 'Track History', 'Custom Fields'],
+  orders: ['Create Orders', 'Track Progress', 'Set Deadlines', 'Attach Files'],
+  invoices: ['Create Invoices', 'Custom Templates', 'Track Payments', 'Recurring Invoices'],
+  workboard: ['Task Management', 'Time Tracking', 'Kanban Board', 'Set Priorities'],
+  profile: ['Account Settings', 'Security', 'Notifications', 'Integrations'],
+  admin: ['User Management', 'System Monitoring', 'Analytics', 'Support Tools'],
+  upgrade: ['Compare Plans', 'See Features', 'Manage Billing', 'Usage Limits'],
 };
 
 const DocPage: React.FC = () => {
@@ -59,29 +59,32 @@ const DocPage: React.FC = () => {
     );
   }
 
-  const icon = page ? iconMap[page] : null;
+  const features = page ? featuresMap[page] || [] : [];
 
   return (
-    <div className="prose prose-invert max-w-none">
-      {/* Hero Section */}
-      <div className="mb-12">
+    <div className="flex gap-8">
+      {/* Main Content */}
+      <div className="flex-1 prose prose-invert max-w-none">
+        {/* Breadcrumb */}
         {page && (
-          <div className="flex items-center gap-4 mb-4">
-            {icon && (
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#8B5CF6] to-[#7C3AED] flex items-center justify-center text-white shadow-glow-sm">
-                {icon}
-              </div>
-            )}
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white m-0">
-              {page.charAt(0).toUpperCase() + page.slice(1)}
-            </h1>
+          <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
+            <span>Docs</span>
+            <ChevronRight size={14} />
+            <span className="text-white">{page.charAt(0).toUpperCase() + page.slice(1)}</span>
           </div>
         )}
-      </div>
 
-      {/* Content */}
-      <div className="prose prose-invert prose-lg max-w-none">
-        <div className="bg-[#0B0E14] rounded-xl border border-[#1C2230] p-6 md:p-8">
+        {/* Hero Section */}
+        <div className="mb-12">
+          {page && (
+            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">
+              {page.charAt(0).toUpperCase() + page.slice(1)}
+            </h1>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="prose prose-invert prose-lg max-w-none">
           <ReactMarkdown
             components={{
               h1: ({ children }) => (
@@ -138,6 +141,22 @@ const DocPage: React.FC = () => {
               hr: () => (
                 <hr className="border-t border-[#1C2230] my-8" />
               ),
+              h2: ({ children }) => {
+                const id = children?.toString().toLowerCase().replace(/\s+/g, '-');
+                return (
+                  <h2 id={id} className="text-2xl font-bold text-white mt-12 mb-4 first:mt-0 scroll-mt-20">
+                    {children}
+                  </h2>
+                );
+              },
+              h3: ({ children }) => {
+                const id = children?.toString().toLowerCase().replace(/\s+/g, '-');
+                return (
+                  <h3 id={id} className="text-xl font-semibold text-white mt-8 mb-3 scroll-mt-20">
+                    {children}
+                  </h3>
+                );
+              },
               h2: ({ children, id }) => (
                 <h2 id={id || children?.toString().toLowerCase().replace(/\s+/g, '-')} className="text-2xl font-bold text-white mt-12 mb-4 first:mt-0 scroll-mt-20">
                   {children}
