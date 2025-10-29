@@ -235,7 +235,7 @@ const PricingSection = () => {
                       priceId={isYearly ? `price_${plan.id}_yearly` : `price_${plan.id}_monthly`}
                       planName={plan.name}
                       amount={`$${isYearly ? plan.yearlyPrice : plan.monthlyPrice}/${isYearly ? 'year' : 'month'}`}
-                      className="w-full"
+                      className="w-full text-white shadow-[0_10px_40px_rgba(99,102,241,0.4)] hover:shadow-[0_15px_60px_rgba(99,102,241,0.6)] bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400"
                       trialDays={7}
                       label="Start 7-day free trial"
                     />
@@ -244,7 +244,7 @@ const PricingSection = () => {
                       priceId={isYearly ? `price_${plan.id}_yearly` : `price_${plan.id}_monthly`}
                       planName={plan.name}
                       amount={`$${isYearly ? plan.yearlyPrice : plan.monthlyPrice}/${isYearly ? 'year' : 'month'}`}
-                      className="w-full"
+                      className="w-full text-white shadow-[0_10px_40px_rgba(99,102,241,0.4)] hover:shadow-[0_15px_60px_rgba(99,102,241,0.6)] bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400"
                     />
                   )}
                 </div>

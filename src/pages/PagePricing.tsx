@@ -235,7 +235,7 @@ const PagePricing: React.FC = () => {
                       priceId={isYearly ? `price_${plan.id}_yearly` : `price_${plan.id}_monthly`}
                       planName={plan.name}
                       amount={`$${isYearly ? plan.yearlyPrice : plan.monthlyPrice}/${isYearly ? 'year' : 'month'}`}
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] text-white"
                       trialDays={7}
                       label="Start 7-day free trial"
                       onSuccess={() => {
@@ -248,7 +248,7 @@ const PagePricing: React.FC = () => {
                       priceId={isYearly ? `price_${plan.id}_yearly` : `price_${plan.id}_monthly`}
                       planName={plan.name}
                       amount={`$${isYearly ? plan.yearlyPrice : plan.monthlyPrice}/${isYearly ? 'year' : 'month'}`}
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] text-white"
                       onSuccess={() => {
                         console.log(`Successfully subscribed to ${plan.name}`);
                         setSelectedPlan(plan.id);
