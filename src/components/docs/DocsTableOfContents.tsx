@@ -60,7 +60,7 @@ const DocsTableOfContents: React.FC<DocsTableOfContentsProps> = ({ headings }) =
   if (headings.length === 0) return null;
 
   return (
-    <div className="sticky top-20">
+    <div>
       <h3 className="text-xs font-semibold text-[#A6A6A6] mb-4 uppercase tracking-wide">
         On this page
       </h3>

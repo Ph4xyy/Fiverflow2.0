@@ -156,10 +156,12 @@ const DocsLayout: React.FC = () => {
           <Outlet />
         </main>
 
-        {/* Right: TOC and Helpful Widget */}
-        <aside className="hidden xl:block w-64 flex-shrink-0 pr-8 pt-8">
-          {headings.length > 0 && <DocsTableOfContents headings={headings} />}
-          <HelpfulWidget />
+        {/* Right: TOC and Helpful Widget - Fixed */}
+        <aside className="hidden xl:block w-64 flex-shrink-0 pr-8 pt-24">
+          <div className="sticky top-24">
+            {headings.length > 0 && <DocsTableOfContents headings={headings} />}
+            <HelpfulWidget />
+          </div>
         </aside>
       </div>
     </div>
