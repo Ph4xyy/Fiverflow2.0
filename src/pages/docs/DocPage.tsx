@@ -13,11 +13,15 @@ const DocPage: React.FC = () => {
       try {
         setLoading(true);
         const docPage = page || 'index';
+        console.log('Loading doc page:', docPage);
         const response = await fetch(`/docs/${docPage}.mdx`);
+        console.log('Response status:', response.status);
         if (response.ok) {
           const text = await response.text();
+          console.log('Content loaded:', text.substring(0, 100));
           setContent(text);
         } else {
+          console.log('Response not OK, using fallback content');
           setContent(`# ${docPage} Documentation\n\nContent coming soon...`);
         }
       } catch (error) {

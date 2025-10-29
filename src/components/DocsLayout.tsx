@@ -45,7 +45,7 @@ const DocsLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
       {/* Top Navigation Bar - Same as Landing */}
-      <nav className="sticky top-0 z-50 bg-[rgba(0,0,0,0.4)] backdrop-blur-md border-b border-white/10 shadow-lg">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgba(0,0,0,0.4)] backdrop-blur-md border-b border-white/10 shadow-lg">
         <div className="max-w-[1300px] mx-auto px-4 md:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Brand with Docs label */}
@@ -109,19 +109,19 @@ const DocsLayout: React.FC = () => {
         </div>
       </nav>
 
-      {/* Hamburger button for mobile */}
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="lg:hidden fixed top-20 left-4 z-50 p-2 bg-[#0F0F0F] border border-[rgba(255,255,255,0.1)] rounded"
-        aria-label="Toggle menu"
-      >
-        <Menu size={20} className="text-white" />
-      </button>
-
       {/* Three Column Layout */}
-      <div className="flex">
+      <div className="flex pt-16">
         {/* Left: Sidebar */}
         <DocsSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+        {/* Hamburger button for mobile */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="lg:hidden fixed top-20 left-4 z-50 p-2 bg-[#0F0F0F] border border-[rgba(255,255,255,0.1)] rounded"
+          aria-label="Toggle menu"
+        >
+          <Menu size={20} className="text-white" />
+        </button>
 
         {/* Middle: Main Content */}
         <main className="flex-1 max-w-4xl px-8 py-8 lg:pl-64 lg:pr-16 bg-[#0A0A0A] min-h-screen">
@@ -129,7 +129,7 @@ const DocsLayout: React.FC = () => {
         </main>
 
         {/* Right: TOC and Helpful Widget */}
-        <aside className="hidden xl:block w-64 flex-shrink-0 pr-8 pt-20">
+        <aside className="hidden xl:block w-64 flex-shrink-0 pr-8 pt-8">
           {headings.length > 0 && <DocsTableOfContents headings={headings} />}
           <HelpfulWidget />
         </aside>
