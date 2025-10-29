@@ -33,7 +33,6 @@ import RootRedirect from './components/RootRedirect';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardExample from './pages/DashboardExample';
-import ProtectedRoute from './components/ProtectedRoute';
 import CalendarPageNew from './pages/CalendarPageNew';
 import PricingPageNew from './pages/PricingPageNew';
 import WorkboardPageNew from './pages/WorkboardPageNew';
@@ -53,6 +52,10 @@ import SupportPage from './pages/SupportPage';
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import CookiePolicy from "./components/CookiePolicy";
 import TermsOfService from "./components/TermsOfService";
+
+// Pages de documentation
+import DocsLayout from './components/DocsLayout';
+import DocPage from './pages/docs/DocPage';
 
 // Pages de facturation (lazy loading pour optimiser les performances)
 const InvoicesLayout = lazy(() => import('./pages/InvoicesLayout'));
@@ -164,6 +167,12 @@ function AppContent() {
 
           {/* Onboarding pour nouveaux utilisateurs */}
           <Route path="/onboarding" element={<InstantProtectedRoute><OnboardingPage /></InstantProtectedRoute>} />
+
+          {/* Documentation */}
+          <Route path="/docs" element={<DocsLayout />}>
+            <Route index element={<DocPage />} />
+            <Route path=":page" element={<DocPage />} />
+          </Route>
         </Routes>
       </Suspense>
       
