@@ -13,21 +13,48 @@ interface LLMMessage {
   content: string;
 }
 
+// Headers CORS pour permettre les requêtes depuis le client
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 serve(async (req) => {
+  // Gérer la requête preflight OPTIONS pour CORS
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders
+    });
+  }
+
   try {
     const { message, conversationHistory = [] } = await req.json();
 
     if (!message) {
       return new Response(
         JSON.stringify({ error: 'Message requis' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { 
+          status: 400, 
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
       );
     }
 
     if (!OPENAI_API_KEY) {
       return new Response(
         JSON.stringify({ error: 'OPENAI_API_KEY non configurée' }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+        { 
+          status: 500, 
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
       );
     }
 
@@ -91,7 +118,13 @@ FORMAT
             error: 'Rate limit atteint. Veuillez attendre quelques instants avant de réessayer.',
             retryAfter: response.headers.get('retry-after')
           }),
-          { status: 429, headers: { 'Content-Type': 'application/json' } }
+          { 
+            status: 429, 
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json'
+            }
+          }
         );
       }
       
@@ -106,7 +139,13 @@ FORMAT
         success: true,
         text: assistantMessage
       }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      { 
+        status: 200, 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
     );
 
   } catch (error: any) {
@@ -116,7 +155,13 @@ FORMAT
         success: false,
         error: error.message
       }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { 
+        status: 500, 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
     );
   }
 });

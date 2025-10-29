@@ -27,11 +27,14 @@ export async function callLLM(
 ): Promise<LLMResponse> {
   try {
     // Vérifier que l'utilisateur est authentifié
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session) {
+      console.error('Session error:', sessionError);
       throw new Error('Vous devez être connecté pour utiliser l\'assistant');
     }
 
+    console.log('📡 Appel de l\'Edge Function assistant-message...');
+    
     // Appeler l'Edge Function Supabase pour sécuriser l'appel OpenAI
     const { data, error } = await supabase.functions.invoke('assistant-message', {
       body: {
@@ -40,15 +43,25 @@ export async function callLLM(
       }
     });
 
+    console.log('📥 Réponse Edge Function:', { data, error });
+
     if (error) {
-      console.error('Supabase function error:', error);
+      console.error('❌ Supabase function error:', {
+        message: error.message,
+        context: error.context,
+        status: error.status,
+        name: error.name
+      });
+      
       // Messages d'erreur plus spécifiques selon le type d'erreur
-      if (error.message?.includes('Function not found') || error.message?.includes('404')) {
-        throw new Error('La fonction assistant-message n\'existe pas ou n\'est pas déployée. Vérifiez dans Supabase Dashboard.');
-      } else if (error.message?.includes('Permission denied') || error.message?.includes('401') || error.message?.includes('403')) {
-        throw new Error('Erreur d\'authentification. Vérifiez que vous êtes bien connecté.');
+      if (error.message?.includes('Function not found') || error.message?.includes('404') || error.status === 404) {
+        throw new Error('La fonction assistant-message n\'existe pas ou n\'est pas déployée. Allez dans Supabase Dashboard → Edge Functions → Créez une fonction nommée "assistant-message"');
+      } else if (error.message?.includes('Permission denied') || error.message?.includes('401') || error.message?.includes('403') || error.status === 401 || error.status === 403) {
+        throw new Error('Erreur d\'authentification. Vérifiez que vous êtes bien connecté et réessayez.');
+      } else if (error.message?.includes('Failed to send') || error.message?.includes('network') || error.message?.includes('fetch')) {
+        throw new Error('Impossible de contacter l\'Edge Function. Vérifiez que la fonction "assistant-message" est bien déployée dans Supabase Dashboard → Edge Functions.');
       } else {
-        throw new Error(error.message || 'Erreur lors de l\'appel à l\'Edge Function');
+        throw new Error(error.message || `Erreur Edge Function (${error.status || 'unknown'})`);
       }
     }
 
