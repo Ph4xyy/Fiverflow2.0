@@ -230,16 +230,31 @@ const PagePricing: React.FC = () => {
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </ModernButton>
                 ) : (
-                  <SubscriptionButton
-                    priceId={isYearly ? `price_${plan.id}_yearly` : `price_${plan.id}_monthly`}
-                    planName={plan.name}
-                    amount={`$${isYearly ? plan.yearlyPrice : plan.monthlyPrice}/${isYearly ? 'year' : 'month'}`}
-                    className="w-full"
-                    onSuccess={() => {
-                      console.log(`Successfully subscribed to ${plan.name}`);
-                      setSelectedPlan(plan.id);
-                    }}
-                  />
+                  plan.id === 'boost' ? (
+                    <SubscriptionButton
+                      priceId={isYearly ? `price_${plan.id}_yearly` : `price_${plan.id}_monthly`}
+                      planName={plan.name}
+                      amount={`$${isYearly ? plan.yearlyPrice : plan.monthlyPrice}/${isYearly ? 'year' : 'month'}`}
+                      className="w-full"
+                      trialDays={7}
+                      label="Start 7-day free trial"
+                      onSuccess={() => {
+                        console.log(`Successfully started trial for ${plan.name}`);
+                        setSelectedPlan(plan.id);
+                      }}
+                    />
+                  ) : (
+                    <SubscriptionButton
+                      priceId={isYearly ? `price_${plan.id}_yearly` : `price_${plan.id}_monthly`}
+                      planName={plan.name}
+                      amount={`$${isYearly ? plan.yearlyPrice : plan.monthlyPrice}/${isYearly ? 'year' : 'month'}`}
+                      className="w-full"
+                      onSuccess={() => {
+                        console.log(`Successfully subscribed to ${plan.name}`);
+                        setSelectedPlan(plan.id);
+                      }}
+                    />
+                  )
                 )}
               </div>
             );

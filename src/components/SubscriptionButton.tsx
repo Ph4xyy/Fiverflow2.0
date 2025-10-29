@@ -11,6 +11,8 @@ interface SubscriptionButtonProps {
   amount: string;
   onSuccess?: () => void;
   className?: string;
+  trialDays?: number; // Optional: add trial period in days
+  label?: string; // Optional: custom button label
 }
 
 export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
@@ -18,7 +20,9 @@ export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
   planName,
   amount,
   onSuccess,
-  className
+  className,
+  trialDays,
+  label
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
@@ -55,6 +59,7 @@ export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
           success_url: `${window.location.origin}/dashboard?success=true`,
           cancel_url: `${window.location.origin}/upgrade?canceled=true`,
           mode: 'subscription',
+          ...(trialDays && trialDays > 0 ? { trial_period_days: trialDays } : {}),
         }),
       });
 
@@ -94,7 +99,7 @@ export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
       ) : (
         <>
           <CreditCard className="w-4 h-4 mr-2" />
-          S'abonner à {planName} - {amount}
+          {label ? label : `S'abonner à ${planName} - ${amount}`}
         </>
       )}
     </Button>

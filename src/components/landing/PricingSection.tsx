@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Star, Sparkles, Zap, Crown } from 'lucide-react';
+import SubscriptionButton from '../../components/SubscriptionButton';
 
 interface Plan {
   id: string;
@@ -24,15 +25,16 @@ const PricingSection = () => {
       subtitle: 'Perfect to get started',
       monthlyPrice: 0,
       yearlyPrice: 0,
-      description: 'Everything you need to start your freelance journey',
+      description: 'Essentials to start your freelance journey',
       icon: Sparkles,
       features: [
-        '1 active project',
-        '5 clients maximum',
-        '1 GB storage',
+        'Up to 5 clients',
+        '10 orders / month',
+        'Pages: Dashboard, Clients, Orders',
         'Email support',
-        'Basic templates',
-        'Basic reports'
+        'Calendar, Workboard, Referrals: not included',
+        'Statistics & Invoices: not included',
+        'AI Assistant: not included'
       ]
     },
     {
@@ -41,43 +43,34 @@ const PricingSection = () => {
       subtitle: 'For active freelancers',
       monthlyPrice: 24,
       yearlyPrice: 240,
-      description: 'Perfect for growing your freelance business',
+      description: 'More pages and capabilities to boost your activity',
       popular: true,
       icon: Zap,
       features: [
-        '5 active projects',
-        '25 clients',
-        '10 GB storage',
+        'Unlimited clients & orders',
+        'Pages: Dashboard, Clients, Orders',
+        'Calendar access',
+        'Workboard access',
+        'Referrals program',
         'Priority support',
-        'Premium templates',
-        'Advanced reports',
-        'Full integrations',
-        'API access',
-        'Automations',
-        'Advanced analytics'
+        'Statistics & Invoices: not included',
+        'AI Assistant: not included'
       ]
     },
     {
       id: 'scale',
       name: 'Scale',
-      subtitle: 'For businesses',
+      subtitle: 'For advanced freelancers',
       monthlyPrice: 39,
       yearlyPrice: 390,
-      description: 'Complete solution for scaling teams',
+      description: 'Complete pack to reach the next level',
       icon: Crown,
       features: [
-        '15 active projects',
-        '100 clients',
-        '50 GB storage',
-        'Dedicated support',
-        'Premium templates',
-        'Advanced reports',
-        'Full integrations',
-        'API access',
-        'Team collaboration',
-        'Automations',
-        'White label',
-        'Advanced analytics'
+        'Everything in Boost',
+        'Statistics',
+        'Invoices',
+        'AI Assistant',
+        'Priority support'
       ]
     }
   ];
@@ -87,7 +80,7 @@ const PricingSection = () => {
   };
 
   const handleGetStarted = (planId: string) => {
-    window.location.href = '/dashboard';
+    window.location.href = '/register';
   };
 
   return (
@@ -228,18 +221,32 @@ const PricingSection = () => {
                   </div>
 
                   {/* CTA Button */}
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleGetStarted(plan.id)}
-                    className={`w-full py-3 rounded-xl font-medium transition-all ${
-                      plan.popular
-                        ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 text-white shadow-[0_10px_40px_rgba(99,102,241,0.4)] hover:shadow-[0_15px_60px_rgba(99,102,241,0.6)]'
-                        : 'border border-white/20 text-white hover:bg-white/10'
-                    }`}
-                  >
-                    {plan.monthlyPrice === 0 ? 'Get Started' : plan.popular ? 'Choose Plan' : 'Get Started'}
-                  </motion.button>
+                  {plan.monthlyPrice === 0 ? (
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleGetStarted(plan.id)}
+                      className="w-full py-3 rounded-xl font-medium transition-all border border-white/20 text-white hover:bg-white/10"
+                    >
+                      Get Started
+                    </motion.button>
+                  ) : plan.id === 'boost' ? (
+                    <SubscriptionButton
+                      priceId={isYearly ? `price_${plan.id}_yearly` : `price_${plan.id}_monthly`}
+                      planName={plan.name}
+                      amount={`$${isYearly ? plan.yearlyPrice : plan.monthlyPrice}/${isYearly ? 'year' : 'month'}`}
+                      className="w-full"
+                      trialDays={7}
+                      label="Start 7-day free trial"
+                    />
+                  ) : (
+                    <SubscriptionButton
+                      priceId={isYearly ? `price_${plan.id}_yearly` : `price_${plan.id}_monthly`}
+                      planName={plan.name}
+                      amount={`$${isYearly ? plan.yearlyPrice : plan.monthlyPrice}/${isYearly ? 'year' : 'month'}`}
+                      className="w-full"
+                    />
+                  )}
                 </div>
 
                 {/* Animated gradient border for popular plan */}
