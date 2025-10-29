@@ -1,49 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { ChevronRight } from 'lucide-react';
+import indexContent from '../../../public/docs/index.mdx?raw';
+import dashboardContent from '../../../public/docs/dashboard.mdx?raw';
 
 const DocPage: React.FC = () => {
   const { page } = useParams<{ page: string }>();
-  const [content, setContent] = useState<string>('');
-  const [loading, setLoading] = useState(true);
   
-  useEffect(() => {
-    const loadContent = async () => {
-      try {
-        setLoading(true);
-        const docPage = page || 'index';
-        console.log('Loading doc page:', docPage);
-        const response = await fetch(`/docs/${docPage}.mdx`);
-        console.log('Response status:', response.status);
-        if (response.ok) {
-          const text = await response.text();
-          console.log('Content loaded:', text.substring(0, 100));
-          setContent(text);
-        } else {
-          console.log('Response not OK, using fallback content');
-          setContent(`# ${docPage} Documentation\n\nContent coming soon...`);
-        }
-      } catch (error) {
-        console.error('Error loading documentation:', error);
-        setContent(`# ${page || 'index'} Documentation\n\nContent coming soon...`);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Map page params to content
+  const getContent = () => {
+    const docPage = page || 'index';
+    
+    switch (docPage) {
+      case 'index':
+        return indexContent;
+      case 'dashboard':
+        return dashboardContent;
+      default:
+        return `# ${docPage} Documentation\n\nContent coming soon for ${docPage}...`;
+    }
+  };
 
-    loadContent();
-  }, [page]);
-  
-  if (loading) {
-    return (
-      <div className="text-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B5CF6] mx-auto mb-4"></div>
-        <p className="text-[#A6A6A6]">Loading documentation...</p>
-      </div>
-    );
-  }
-
+  const content = getContent();
   return (
     <div className="prose prose-invert max-w-none text-[#A6A6A6]">
       {/* Breadcrumb */}
