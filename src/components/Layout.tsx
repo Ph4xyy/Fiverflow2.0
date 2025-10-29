@@ -358,6 +358,15 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               </div>
             </LocalErrorBoundary>
 
+          {/* Upgrade button */}
+          <button
+            onClick={() => navigate('/upgrade')}
+            className="hidden xs:inline-flex items-center justify-center h-10 px-4 sm:px-5 rounded-lg font-semibold text-black bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:via-amber-300 hover:to-yellow-400 shadow-[0_8px_24px_rgba(245,158,11,0.35)] transition-all duration-200"
+            title="Upgrade"
+          >
+            Upgrade
+          </button>
+
             <button 
               onClick={handleSignOut}
               className="size-10 rounded-lg grid place-items-center text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200"
