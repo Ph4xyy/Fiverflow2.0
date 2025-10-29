@@ -1,5 +1,4 @@
 import React from 'react';
-import AdminTopNavigation from './AdminTopNavigation';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -7,8 +6,7 @@ interface AdminLayoutProps {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      <AdminTopNavigation />
+    <div className="min-h-screen bg-transparent">
       <main className="flex-1 overflow-auto">
         {children}
       </main>
