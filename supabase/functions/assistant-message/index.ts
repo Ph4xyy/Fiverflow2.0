@@ -34,7 +34,10 @@ const FUNCTIONS = [
         name: { type: 'string', description: 'Client full name' },
         email: { type: 'string', description: 'Client email address' },
         phone: { type: 'string', description: 'Client phone number (optional)' },
-        company: { type: 'string', description: 'Company name (optional)' }
+        company: { type: 'string', description: 'Company name (optional)' },
+        platform: { type: 'string', description: 'Platform where client found (Fiverr, Upwork, etc.) - optional' },
+        country: { type: 'string', description: 'Client country (optional)' },
+        status: { type: 'string', enum: ['active', 'prospect', 'inactive'], description: 'Client status (optional, default: active)' }
       },
       required: ['name', 'email']
     }
@@ -153,9 +156,15 @@ async function executeFunction(functionName: string, args: any, userId: string, 
           .insert({
             user_id: userId,
             name: args.name,
-            email: args.email,
+            email: args.email, // Garde pour compatibilité
+            email_primary: args.email, // Colonne attendue par la page
             phone: args.phone || null,
-            company: args.company || null
+            phone_primary: args.phone || null, // Version primaire
+            company: args.company || null, // Garde pour compatibilité
+            company_name: args.company || null, // Colonne attendue par la page
+            platform: args.platform || null, // Optionnel mais utile
+            country: args.country || null, // Pays du client
+            client_status: args.status || 'active' // Par défaut 'active'
           })
           .select()
           .single();
@@ -340,16 +349,30 @@ LANGUAGE POLICY :
 - If the user writes in another language (French, Spanish, etc.), automatically switch to that language for your response.
 - Match the user's language naturally - if they write in French, respond in French; if in English, respond in English.
 
+PERSONALITY - BE FRIENDLY AND HUMAN :
+- Use emojis naturally when appropriate (😊 😄 😉 ✨ 💪 🎉 👍) - not in every message, but when it adds warmth or expresses emotions
+- Be friendly, relaxed, and approachable - like chatting with a smart coworker or friend
+- You can joke a bit, make light humor, show personality
+- Express yourself naturally: "awesome!", "oh cool!", "haha yeah", "interesting!", "sure thing!", etc.
+- Show enthusiasm and positivity when appropriate
+- Be empathetic and encouraging
+
 IMPORTANT - GOLDEN RULES :
-- NEVER repeat "How can I help you?" unless it's truly relevant
-- Don't reintroduce yourself unless explicitly asked
-- Answer DIRECTLY to questions
+- NEVER repeat "How can I help you?" or "Comment puis-je t'aider?" unless it's truly relevant
+- Don't reintroduce yourself ("I'm Jett") unless explicitly asked
+- Answer DIRECTLY to questions. If asked "how are you?" or "ça va ?", answer really ("I'm doing great, thanks! How about you?" 😊) — not just "I'm here to help"
+- If the conversation is social/casual, respond like a normal person would
+- Engage in the conversation. Be present, react, ask natural follow-up questions
+- Vary your responses — don't sound robotic or repetitive
+
+ACTIONS - FUNCTION CALLING :
 - When the user asks you to CREATE, UPDATE, or LIST items (clients, orders, tasks, events), you MUST call the appropriate function
-- After executing a function, summarize the result naturally to the user
+- After executing a function successfully, show enthusiasm: "✅ Done! I've created...", "Great! I've updated...", "Perfect! Here's..."
+- Use emojis when announcing successful actions (✅ 🎉 ✨)
 - For dates, convert natural language ("tomorrow 9am", "next Friday") to ISO format before calling functions
 - If you need to search for a client ID before creating an order, use list_clients first
 
-Be yourself — natural, friendly and intelligent.
+Be yourself — natural, friendly, intelligent, and engaging! 😊
 `;
 
     let messages: LLMMessage[] = [

@@ -40,7 +40,7 @@ type ClientRow = {
   id: string;
   name: string;
   company_name: string | null;
-  platform: string;
+  platform: string | null; // Peut être null
   email_primary: string | null;
   country: string | null;
   client_status: string | null;
@@ -252,7 +252,7 @@ const PageClients: React.FC = () => {
           id: client.id,
           name: client.name,
           company_name: client.company_name,
-          platform: client.platform,
+          platform: client.platform || null,
           email_primary: client.email_primary,
           country: client.country,
           client_status: client.client_status,
@@ -317,7 +317,8 @@ const PageClients: React.FC = () => {
   };
 
   // Get platform icon
-  const getPlatformIcon = (platform: string) => {
+  const getPlatformIcon = (platform: string | null) => {
+    if (!platform) return <Globe className="w-4 h-4" />; // Par défaut si null
     switch (platform.toLowerCase()) {
       case 'fiverr': return <Globe className="w-4 h-4" />;
       case 'upwork': return <Building2 className="w-4 h-4" />;
@@ -550,7 +551,7 @@ const PageClients: React.FC = () => {
               <div className="space-y-2 mb-4">
                 <div className="flex items-center gap-2 text-xs text-gray-400">
                   {getPlatformIcon(client.platform)}
-                  <span>{client.platform}</span>
+                  <span>{client.platform || 'N/A'}</span>
                 </div>
                 {client.email_primary && (
                   <div className="flex items-center gap-2 text-xs text-gray-400">
@@ -627,7 +628,7 @@ const PageClients: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center text-sm text-gray-300">
                         {getPlatformIcon(client.platform)}
-                        <span className="ml-2">{client.platform}</span>
+                        <span className="ml-2">{client.platform || 'N/A'}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
