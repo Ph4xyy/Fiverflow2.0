@@ -109,13 +109,22 @@ const DocsLayout: React.FC = () => {
         </div>
       </nav>
 
+      {/* Hamburger button for mobile */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="lg:hidden fixed top-20 left-4 z-50 p-2 bg-[#0F0F0F] border border-[rgba(255,255,255,0.1)] rounded"
+        aria-label="Toggle menu"
+      >
+        <Menu size={20} className="text-white" />
+      </button>
+
       {/* Three Column Layout */}
       <div className="flex">
         {/* Left: Sidebar */}
         <DocsSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         {/* Middle: Main Content */}
-        <main className="flex-1 max-w-4xl px-8 py-8 lg:pl-8 lg:pr-16">
+        <main className="flex-1 max-w-4xl px-8 py-8 lg:pl-64 lg:pr-16 bg-[#0A0A0A] min-h-screen">
           <Outlet />
         </main>
 

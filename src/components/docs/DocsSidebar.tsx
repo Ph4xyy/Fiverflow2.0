@@ -102,7 +102,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ isOpen, onClose }) => {
       <motion.aside
         initial={false}
         animate={{
-          x: isOpen ? 0 : -260,
+          x: isOpen || window.innerWidth >= 1024 ? 0 : -260,
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         className="fixed lg:sticky top-0 h-screen w-[260px] bg-[#0F0F0F] border-r border-[rgba(255,255,255,0.04)] z-50 overflow-y-auto"

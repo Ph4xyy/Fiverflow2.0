@@ -41,7 +41,7 @@ const DocPage: React.FC = () => {
   }
 
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert max-w-none text-[#A6A6A6]">
       {/* Breadcrumb */}
       {page && (
         <div className="flex items-center gap-2 text-sm text-[#A6A6A6] mb-6">
@@ -52,7 +52,8 @@ const DocPage: React.FC = () => {
       )}
 
       {/* Content */}
-      <ReactMarkdown
+      <div className="markdown-content">
+        <ReactMarkdown
         components={{
           h1: ({ children }) => {
             const id = children?.toString().toLowerCase().replace(/\s+/g, '-');
@@ -127,6 +128,7 @@ const DocPage: React.FC = () => {
       >
         {content}
       </ReactMarkdown>
+      </div>
     </div>
   );
 };
