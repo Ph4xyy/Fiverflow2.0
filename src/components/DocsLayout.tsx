@@ -1,76 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import LogoImage from '../assets/LogoFiverFlow.png';
-
-interface NavItem {
-  label: string;
-  path: string;
-  items?: string[];
-}
-
-const navItems = [
-  { 
-    label: 'Dashboard', 
-    path: '/docs/dashboard',
-    items: ['Overview', 'Quick Stats', 'Recent Activity', 'Performance Metrics']
-  },
-  { 
-    label: 'Calendar', 
-    path: '/docs/calendar',
-    items: ['Create Events', 'Manage Deadlines', 'Multiple Views', 'Smart Notifications']
-  },
-  { 
-    label: 'Statistics', 
-    path: '/docs/statistics',
-    items: ['Revenue Analytics', 'Client Metrics', 'Time Tracking', 'Custom Reports']
-  },
-  { 
-    label: 'Referrals', 
-    path: '/docs/referrals',
-    items: ['Share Links', 'Track Invites', 'Earn Rewards', 'Manage Payouts']
-  },
-  { 
-    label: 'Assistant', 
-    path: '/docs/assistant',
-    items: ['AI Suggestions', 'Task Automation', 'Natural Language', 'Custom Workflows']
-  },
-  { 
-    label: 'Clients', 
-    path: '/docs/clients',
-    items: ['Add Clients', 'Manage Contacts', 'Track History', 'Custom Fields']
-  },
-  { 
-    label: 'Orders', 
-    path: '/docs/orders',
-    items: ['Create Orders', 'Track Progress', 'Set Deadlines', 'Attach Files']
-  },
-  { 
-    label: 'Invoices', 
-    path: '/docs/invoices',
-    items: ['Create Invoices', 'Custom Templates', 'Track Payments', 'Recurring Invoices']
-  },
-  { 
-    label: 'Workboard', 
-    path: '/docs/workboard',
-    items: ['Task Management', 'Time Tracking', 'Kanban Board', 'Set Priorities']
-  },
-  { 
-    label: 'Profile', 
-    path: '/docs/profile',
-    items: ['Account Settings', 'Security', 'Notifications', 'Integrations']
-  },
-  { 
-    label: 'Admin', 
-    path: '/docs/admin',
-    items: ['User Management', 'System Monitoring', 'Analytics', 'Support Tools']
-  },
-  { 
-    label: 'Upgrade', 
-    path: '/docs/upgrade',
-    items: ['Compare Plans', 'See Features', 'Manage Billing', 'Usage Limits']
-  },
-];
+import DocsSidebar from './docs/DocsSidebar';
+import DocsTableOfContents from './docs/DocsTableOfContents';
+import HelpfulWidget from './docs/HelpfulWidget';
 
 const navLinks = [
   { label: "Features", href: "/home#features" },
@@ -84,59 +18,63 @@ const navLinks = [
 const DocsLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const [headings, setHeadings] = useState<Array<{ id: string; text: string; level: number }>>([]);
 
   useEffect(() => {
-    // Close sidebar on mobile when route changes
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
   }, [location]);
 
-  const isActive = (path: string, currentPath: string) => {
-    // For index page, only active if exactly /docs
-    if (path === '/docs' && currentPath === '/docs') {
-      return true;
-    }
-    // For other pages, check if it starts with the path
-    if (path !== '/docs') {
-      return currentPath.startsWith(path);
-    }
-    return false;
-  };
+  // Extract headings from page content for TOC
+  useEffect(() => {
+    const extractHeadings = () => {
+      const elements = document.querySelectorAll('h2, h3');
+      const extracted = Array.from(elements).map((el) => ({
+        id: el.id || '',
+        text: el.textContent || '',
+        level: parseInt(el.tagName.replace('H', ''), 10),
+      }));
+      setHeadings(extracted);
+    };
+
+    // Small delay to ensure DOM is rendered
+    setTimeout(extractHeadings, 100);
+  }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-[#0B0E14]">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Top Navigation Bar - Same as Landing */}
       <nav className="sticky top-0 z-50 bg-[rgba(0,0,0,0.4)] backdrop-blur-md border-b border-white/10 shadow-lg">
         <div className="max-w-[1300px] mx-auto px-4 md:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Brand with Docs label */}
-            <Link to="/home" className="flex items-center space-x-3">
+            <a href="/home" className="flex items-center space-x-3">
               <img src={LogoImage} alt="FiverFlow Logo" className="h-6 w-auto" />
               <span className="text-[#8B5CF6] font-semibold text-sm">DOCS</span>
-            </Link>
+            </a>
 
-            {/* Desktop Navigation - Same links as Landing */}
+            {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-8">
               {navLinks.map((link) => (
-                <Link
+                <a
                   key={link.label}
-                  to={link.href}
+                  href={link.href}
                   className="text-neutral-300 hover:text-white transition-colors"
                 >
                   {link.label}
-                </Link>
+                </a>
               ))}
             </div>
 
             {/* Desktop CTA & Mobile Menu Button */}
             <div className="flex items-center gap-4">
-              <Link
-                to="/dashboard"
+              <a
+                href="/dashboard"
                 className="hidden lg:inline-flex items-center justify-center rounded-full text-white font-medium text-sm px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 shadow-[0_20px_80px_rgba(99,102,241,0.6)] hover:shadow-[0_30px_120px_rgba(99,102,241,0.9)] transition-shadow"
               >
                 Try FiverFlow for free
-              </Link>
+              </a>
 
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -152,95 +90,43 @@ const DocsLayout: React.FC = () => {
           {sidebarOpen && (
             <div className="lg:hidden mt-4 space-y-2">
               {navLinks.map((link) => (
-                <Link
+                <a
                   key={link.label}
-                  to={link.href}
+                  href={link.href}
                   className="block py-2 text-neutral-300 hover:text-white transition-colors"
                 >
                   {link.label}
-                </Link>
+                </a>
               ))}
-              <Link
-                to="/dashboard"
+              <a
+                href="/dashboard"
                 className="inline-flex items-center justify-center rounded-full text-white font-medium text-sm px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 shadow-[0_20px_80px_rgba(99,102,241,0.6)] hover:shadow-[0_30px_120px_rgba(99,102,241,0.9)] transition-shadow mt-2"
               >
                 Try FiverFlow for free
-              </Link>
+              </a>
             </div>
           )}
         </div>
       </nav>
 
+      {/* Three Column Layout */}
       <div className="flex">
-        {/* Main Content - On the left */}
-        <main className="flex-1 max-w-4xl px-8 py-8 ml-0">
+        {/* Left: Sidebar */}
+        <DocsSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+        {/* Middle: Main Content */}
+        <main className="flex-1 max-w-4xl px-8 py-8 lg:pl-8 lg:pr-16">
           <Outlet />
         </main>
 
-        {/* Sidebar - On the right */}
-        <aside
-          className={`
-            fixed lg:sticky top-0 h-screen bg-transparent w-72 overflow-y-auto z-40
-            transition-transform duration-300 ease-in-out pr-8
-            ${sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
-          `}
-        >
-          <nav className="p-6 space-y-6 pt-24">
-            {navItems.map((item) => (
-              <div key={item.path} className="relative">
-                {/* Category Title - Not clickable */}
-                <div
-                  className={`
-                    block text-sm font-semibold mb-2
-                    ${isActive(item.path, location.pathname) ? 'text-white' : 'text-gray-400'}
-                  `}
-                >
-                  {item.label}
-                </div>
-                
-                {/* Feature Items with line */}
-                {item.items && (
-                  <div className="relative ml-4">
-                    {/* Line running from first to last item in category */}
-                    <div className="absolute left-0 top-2 bottom-0 w-0.5 bg-gray-700" />
-                    
-                    {/* Purple line for active category */}
-                    {isActive(item.path, location.pathname) && (
-                      <div className="absolute left-0 top-2 bottom-0 w-0.5 bg-[#8B5CF6] z-10" />
-                    )}
-                    
-                    <div className="space-y-1 pl-3">
-                      {item.items.map((feature, idx) => (
-                        <Link
-                          key={idx}
-                          to={`${item.path}/${feature.toLowerCase().replace(/\s+/g, '-')}`}
-                          className={`
-                            block text-sm py-1.5 transition-all duration-200
-                            ${isActive(item.path, location.pathname) ? 'text-white' : 'text-gray-500 hover:text-gray-300'}
-                          `}
-                        >
-                          {feature}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </nav>
+        {/* Right: TOC and Helpful Widget */}
+        <aside className="hidden xl:block w-64 flex-shrink-0 pr-8 pt-20">
+          {headings.length > 0 && <DocsTableOfContents headings={headings} />}
+          <HelpfulWidget />
         </aside>
       </div>
-
-      {/* Overlay for mobile */}
-      {sidebarOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-30"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
     </div>
   );
 };
 
 export default DocsLayout;
-
