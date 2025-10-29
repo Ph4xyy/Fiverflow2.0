@@ -8,19 +8,67 @@ interface NavItem {
   path: string;
 }
 
-const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/docs/dashboard' },
-  { label: 'Calendar', path: '/docs/calendar' },
-  { label: 'Statistics', path: '/docs/statistics' },
-  { label: 'Referrals', path: '/docs/referrals' },
-  { label: 'Assistant', path: '/docs/assistant' },
-  { label: 'Clients', path: '/docs/clients' },
-  { label: 'Orders', path: '/docs/orders' },
-  { label: 'Invoices', path: '/docs/invoices' },
-  { label: 'Workboard', path: '/docs/workboard' },
-  { label: 'Profile', path: '/docs/profile' },
-  { label: 'Admin', path: '/docs/admin' },
-  { label: 'Upgrade', path: '/docs/upgrade' },
+const navItems = [
+  { 
+    label: 'Dashboard', 
+    path: '/docs/dashboard',
+    items: ['Overview', 'Quick Stats', 'Recent Activity', 'Performance Metrics']
+  },
+  { 
+    label: 'Calendar', 
+    path: '/docs/calendar',
+    items: ['Create Events', 'Manage Deadlines', 'Multiple Views', 'Smart Notifications']
+  },
+  { 
+    label: 'Statistics', 
+    path: '/docs/statistics',
+    items: ['Revenue Analytics', 'Client Metrics', 'Time Tracking', 'Custom Reports']
+  },
+  { 
+    label: 'Referrals', 
+    path: '/docs/referrals',
+    items: ['Share Links', 'Track Invites', 'Earn Rewards', 'Manage Payouts']
+  },
+  { 
+    label: 'Assistant', 
+    path: '/docs/assistant',
+    items: ['AI Suggestions', 'Task Automation', 'Natural Language', 'Custom Workflows']
+  },
+  { 
+    label: 'Clients', 
+    path: '/docs/clients',
+    items: ['Add Clients', 'Manage Contacts', 'Track History', 'Custom Fields']
+  },
+  { 
+    label: 'Orders', 
+    path: '/docs/orders',
+    items: ['Create Orders', 'Track Progress', 'Set Deadlines', 'Attach Files']
+  },
+  { 
+    label: 'Invoices', 
+    path: '/docs/invoices',
+    items: ['Create Invoices', 'Custom Templates', 'Track Payments', 'Recurring Invoices']
+  },
+  { 
+    label: 'Workboard', 
+    path: '/docs/workboard',
+    items: ['Task Management', 'Time Tracking', 'Kanban Board', 'Set Priorities']
+  },
+  { 
+    label: 'Profile', 
+    path: '/docs/profile',
+    items: ['Account Settings', 'Security', 'Notifications', 'Integrations']
+  },
+  { 
+    label: 'Admin', 
+    path: '/docs/admin',
+    items: ['User Management', 'System Monitoring', 'Analytics', 'Support Tools']
+  },
+  { 
+    label: 'Upgrade', 
+    path: '/docs/upgrade',
+    items: ['Compare Plans', 'See Features', 'Manage Billing', 'Usage Limits']
+  },
 ];
 
 const navLinks = [
@@ -136,44 +184,59 @@ const DocsLayout: React.FC = () => {
         </div>
       </nav>
 
-      <div className="flex">
-        {/* Sidebar */}
+      <div className="flex justify-center">
+        {/* Sidebar - Centered but leaning left */}
         <aside
           className={`
-            fixed lg:sticky top-0 h-screen bg-[#0B0E14] border-r border-[#1C2230] w-64 overflow-y-auto z-40
+            fixed lg:sticky top-0 h-screen bg-transparent w-72 overflow-y-auto z-40
             transition-transform duration-300 ease-in-out
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}
         >
-          <nav className="p-4 space-y-1">
+          <nav className="p-6 space-y-6">
             {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`
-                  block px-3 py-2.5 text-sm transition-all duration-200 relative
-                  ${
-                    isActive(item.path)
-                      ? 'text-white'
-                      : 'text-gray-400 hover:text-white'
-                  }
-                `}
-              >
-                {/* Purple line indicator for active page */}
-                {isActive(item.path) && (
-                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#8B5CF6]" />
+              <div key={item.path}>
+                {/* Category Title */}
+                <Link
+                  to={item.path}
+                  className={`
+                    block text-sm font-semibold mb-2
+                    ${isActive(item.path) ? 'text-white' : 'text-gray-400'}
+                  `}
+                >
+                  {item.label}
+                </Link>
+                
+                {/* Feature Items */}
+                {item.items && (
+                  <div className="space-y-1 ml-4">
+                    {item.items.map((feature, idx) => (
+                      <Link
+                        key={idx}
+                        to={`${item.path}#${feature.toLowerCase().replace(/\s+/g, '-')}`}
+                        className={`
+                          block text-sm py-1.5 transition-all duration-200 relative
+                          ${isActive(item.path) ? 'text-white' : 'text-gray-500 hover:text-gray-300'}
+                        `}
+                      >
+                        {/* Gray line for all items, purple for active page */}
+                        <div className={`
+                          absolute left-0 top-0 bottom-0 w-0.5
+                          ${isActive(item.path) ? 'bg-[#8B5CF6]' : 'bg-gray-700'}
+                        `} />
+                        <span className="ml-3">{feature}</span>
+                      </Link>
+                    ))}
+                  </div>
                 )}
-                <span>{item.label}</span>
-              </Link>
+              </div>
             ))}
           </nav>
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 min-w-0">
-          <div className="max-w-4xl mx-auto px-4 md:px-6 py-8">
-            <Outlet />
-          </div>
+        <main className="flex-1 max-w-4xl px-8 py-8">
+          <Outlet />
         </main>
       </div>
 

@@ -149,11 +149,29 @@ const DocPage: React.FC = () => {
               hr: () => (
                 <hr className="border-t border-[#1C2230] my-8" />
               ),
+              h2: ({ children, id }) => (
+                <h2 id={id || children?.toString().toLowerCase().replace(/\s+/g, '-')} className="text-2xl font-bold text-white mt-12 mb-4 first:mt-0 scroll-mt-20">
+                  {children}
+                </h2>
+              ),
+              h3: ({ children, id }) => (
+                <h3 id={id || children?.toString().toLowerCase().replace(/\s+/g, '-')} className="text-xl font-semibold text-white mt-8 mb-3 scroll-mt-20">
+                  {children}
+                </h3>
+              ),
             }}
           >
             {content}
           </ReactMarkdown>
         </div>
+
+        {/* Feedback Section */}
+        <FeedbackSection />
+      </div>
+
+      {/* Sidebar - On this page */}
+      <div className="hidden xl:block w-64 flex-shrink-0">
+        {features.length > 0 && <TableOfContents items={features} />}
       </div>
     </div>
   );
