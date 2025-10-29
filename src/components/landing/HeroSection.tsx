@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Play, CheckCircle2 } from 'lucide-react';
+import LogoImage from '../../assets/LogoFiverFlow.png';
 
 interface HeroSectionProps {
   onGetStarted?: () => void;
@@ -32,14 +33,14 @@ export const HeroSection = ({ onGetStarted }: HeroSectionProps = {}) => {
           {/* Left: Text Content */}
           <div className="space-y-8">
             {/* Eyebrow */}
-            <motion.p
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="text-neutral-400 uppercase tracking-wider text-[10px] md:text-xs font-medium"
             >
-              FiverFlow
-            </motion.p>
+              <img src={LogoImage} alt="FiverFlow Logo" className="h-3 w-auto inline-block" />
+            </motion.div>
 
             {/* Headline */}
             <motion.h1

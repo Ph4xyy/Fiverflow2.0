@@ -29,3 +29,4 @@ Write-Host "✅ Nouveau fichier .env.local créé" -ForegroundColor Green
 Write-Host "📋 N'oubliez pas de configurer vos clés Stripe de test!" -ForegroundColor Yellow
 
 
+

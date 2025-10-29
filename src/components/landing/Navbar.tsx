@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import LogoImage from '../../assets/LogoFiverFlow.png';
 
 interface NavbarProps {
   onTryNow?: () => void;
@@ -52,14 +53,9 @@ export const Navbar = ({ onTryNow }: NavbarProps = {}) => {
       <div className="max-w-[1300px] mx-auto px-4 md:px-8 py-4">
         <div className="flex items-center justify-between">
           {/* Brand */}
-          <motion.a
-            href="/"
-            className="text-2xl font-bold text-white"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            FiverFlow
-          </motion.a>
+          <a href="/">
+            <img src={LogoImage} alt="FiverFlow Logo" className="h-6 w-auto" />
+          </a>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">

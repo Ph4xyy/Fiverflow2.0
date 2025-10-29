@@ -60,7 +60,7 @@ import NetworkPage from './pages/NetworkPage';
 import PageReferrals from './pages/PageReferrals';
 import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
-import AIAssistantPage from './pages/AIAssistantPage';
+import AssistantPage from './pages/AssistantPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminStatsPage from './pages/admin/AdminStatsPage';
@@ -180,10 +180,10 @@ function AppContent() {
           <Route path="/referrals" element={<InstantProtectedRoute><PageReferrals /></InstantProtectedRoute>} />
 
           {/* Assistant AI */}
-          <Route path="/assistant" element={
+          <Route path="/ai-assistant" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Lunch" pageName="assistant" description="Assistant AI disponible avec Lunch">
-                <AIAssistantPage />
+              <SubscriptionGuard requiredPlan="Scale" pageName="assistant" description="Assistant AI disponible avec Scale">
+                <AssistantPage />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
