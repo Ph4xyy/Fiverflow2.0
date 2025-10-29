@@ -24,7 +24,6 @@ import InstantProtectedRoute from './components/InstantProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
-import LoadingDiagnostic from './components/LoadingDiagnostic';
 import SubscriptionGuard from './components/SubscriptionGuard';
 import TempSubscriptionGuard from './components/TempSubscriptionGuard';
 import Layout from './components/Layout';
@@ -77,6 +76,7 @@ import TermsOfService from "./components/TermsOfService";
 // Pages de documentation
 import DocsLayout from './components/DocsLayout';
 import DocPage from './pages/docs/DocPage';
+import DocsPage from './pages/DocsPage';
 
 // Pages de facturation (lazy loading pour optimiser les performances)
 const InvoicesLayout = lazy(() => import('./pages/InvoicesLayout'));
@@ -94,7 +94,7 @@ function AppContent() {
   usePreloadData();
 
   return (
-    <Layout>
+    <>
       <Suspense fallback={null}>
         <Routes>
           {/* Redirection racine intelligente */}
@@ -106,8 +106,11 @@ function AppContent() {
           {/* Referral landing page with modern design - /app/:username */}
           <Route path="/app/:username" element={<ReferralLandingModern />} />
           
-          {/* Documentation */}
-          <Route path="/docs" element={<DocsPage />} />
+          {/* Documentation - Sépare complètement du Layout */}
+          <Route path="/docs" element={<DocsLayout />}>
+            <Route index element={<DocPage />} />
+            <Route path=":page" element={<DocPage />} />
+          </Route>
           
           {/* Pages publiques */}
           <Route path="/pricing" element={<PagePricing />} />
@@ -121,17 +124,19 @@ function AppContent() {
           <Route path="/create-username" element={<CreateUsername />} />
           <Route path="/oauth-debug" element={<OAuthDebug />} />
 
-          {/* Dashboard principal - Accessible à tous les abonnements */}
-          <Route path="/dashboard" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Lunch" pageName="dashboard">
-                <DashboardExample />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
-          } />
+          {/* Routes protégées avec Layout du dashboard */}
+          <Route element={<Layout />}>
+            {/* Dashboard principal - Accessible à tous les abonnements */}
+            <Route path="/dashboard" element={
+              <InstantProtectedRoute>
+                <SubscriptionGuard requiredPlan="Lunch" pageName="dashboard">
+                  <DashboardExample />
+                </SubscriptionGuard>
+              </InstantProtectedRoute>
+            } />
 
-          {/* Pages internes du dashboard avec protection par abonnement */}
-          <Route path="/clients" element={
+            {/* Pages internes du dashboard avec protection par abonnement */}
+            <Route path="/clients" element={
             <InstantProtectedRoute>
               <SubscriptionGuard requiredPlan="Lunch" pageName="clients" description="Gestion des clients (max 5 avec Lunch)">
                 <PageClients />
@@ -192,6 +197,8 @@ function AppContent() {
             </InstantProtectedRoute>
           } />
 
+          </Route>
+
           {/* Administration - Accès libre pour les admins */}
           <Route path="/admin/dashboard" element={
             <InstantProtectedRoute>
@@ -241,15 +248,9 @@ function AppContent() {
 
           {/* Onboarding pour nouveaux utilisateurs */}
           <Route path="/onboarding" element={<InstantProtectedRoute><OnboardingPage /></InstantProtectedRoute>} />
-
-          {/* Documentation */}
-          <Route path="/docs" element={<DocsLayout />}>
-            <Route index element={<DocPage />} />
-            <Route path=":page" element={<DocPage />} />
-          </Route>
         </Routes>
       </Suspense>
-    </Layout>
+    </>
   );
 }
 
