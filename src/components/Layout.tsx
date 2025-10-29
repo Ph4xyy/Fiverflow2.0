@@ -184,8 +184,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   
   const aiItems = [
     { 
-      path: '/ai-assistant', 
-      label: 'Assistant IA', 
+      path: '/assistant', 
+      label: 'Assistant', 
       icon: Bot,
       restricted: !hasAssistantAccess,
       requiredPlan: 'Scale' as const

@@ -19,43 +19,44 @@ const AssistantPage: React.FC = () => {
   const features = [
     {
       icon: <MessageSquare className="w-6 h-6" />,
-      title: 'Assistant IA Intelligent',
-      description: 'Posez vos questions et obtenez des réponses personnalisées pour optimiser votre workflow freelance.',
+      title: 'Smart AI Assistant',
+      description: 'Ask questions and get tailored answers to optimize your freelance workflow.',
       color: 'from-blue-500 to-cyan-500'
     },
     {
       icon: <Zap className="w-6 h-6" />,
-      title: 'Conseils en Temps Réel',
-      description: 'Recevez des conseils instantanés pour améliorer votre productivité et vos revenus.',
+      title: 'Real-time Advice',
+      description: 'Receive instant tips to improve your productivity and revenue.',
       color: 'from-yellow-500 to-orange-500'
     },
     {
       icon: <Users className="w-6 h-6" />,
-      title: 'Gestion des Clients',
-      description: 'Apprenez à gérer efficacement vos clients et à maintenir de bonnes relations.',
+      title: 'Client Management',
+      description: 'Learn to manage clients effectively and maintain strong relationships.',
       color: 'from-green-500 to-emerald-500'
     },
     {
       icon: <TrendingUp className="w-6 h-6" />,
-      title: 'Optimisation des Revenus',
-      description: 'Découvrez des stratégies pour augmenter vos revenus et développer votre business.',
+      title: 'Revenue Optimization',
+      description: 'Discover strategies to increase your revenue and grow your business.',
       color: 'from-purple-500 to-pink-500'
     }
   ];
 
   const quickQuestions = [
-    "Comment gérer mes clients efficacement ?",
-    "Quelle est la différence entre les plans Lunch, Boost et Scale ?",
-    "Comment créer une facture professionnelle ?",
-    "Comment optimiser mon workflow freelance ?",
-    "Comment utiliser le système de parrainage ?",
-    "Comment suivre mes revenus et statistiques ?",
-    "Comment organiser mes commandes ?",
-    "Quels sont les avantages de FiverFlow ?"
+    'How can I manage clients efficiently?',
+    'What is the difference between Lunch, Boost and Scale plans?',
+    'How do I create a professional invoice?',
+    'How can I optimize my freelance workflow?',
+    'How does the referral system work?',
+    'How do I track my revenue and stats?',
+    'How should I organize my orders?',
+    'What are FiverFlow’s key benefits?'
   ];
 
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
+    const hasOpenAIKey = Boolean((import.meta as any)?.env?.VITE_OPENAI_API_KEY);
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -70,6 +71,9 @@ const AssistantPage: React.FC = () => {
     setShowSuggestions(false);
 
     try {
+      if (!hasOpenAIKey) {
+        throw new Error('Missing OpenAI API key. Set VITE_OPENAI_API_KEY in your environment.');
+      }
       const response = await assistant.sendMessage(input.trim());
       
       const assistantMessage: Message = {
@@ -81,11 +85,11 @@ const AssistantPage: React.FC = () => {
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Erreur assistant:', error);
+      console.error('Assistant error:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Désolé, une erreur s\'est produite. Veuillez réessayer.',
+        content: 'Sorry, something went wrong. Please try again.',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -122,8 +126,8 @@ const AssistantPage: React.FC = () => {
                 <Bot className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">Assistant IA FiverFlow</h1>
-                <p className="text-slate-400">Votre partenaire intelligent pour optimiser votre workflow freelance</p>
+                <h1 className="text-2xl font-bold text-white">FiverFlow AI Assistant</h1>
+                <p className="text-slate-400">Your intelligent partner to optimize your freelance workflow</p>
               </div>
             </div>
             
@@ -136,7 +140,7 @@ const AssistantPage: React.FC = () => {
                     : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                 }`}
               >
-                Fonctionnalités
+                Features
               </button>
               <button
                 onClick={() => setActiveTab('chat')}
@@ -176,7 +180,7 @@ const AssistantPage: React.FC = () => {
             <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
               <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                 <HelpCircle className="w-5 h-5 mr-2" />
-                Actions Rapides
+                Quick Actions
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {quickQuestions.map((question, index) => (
@@ -198,28 +202,28 @@ const AssistantPage: React.FC = () => {
 
             {/* How it works */}
             <div className="bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-xl p-8 text-white">
-              <h3 className="text-2xl font-bold mb-4">Comment ça marche ?</h3>
+              <h3 className="text-2xl font-bold mb-4">How does it work?</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl font-bold">1</span>
                   </div>
-                  <h4 className="font-semibold mb-2">Posez votre question</h4>
-                  <p className="text-sm opacity-90">Décrivez votre problème ou votre besoin</p>
+                  <h4 className="font-semibold mb-2">Ask your question</h4>
+                  <p className="text-sm opacity-90">Describe your problem or need</p>
                 </div>
                 <div className="text-center">
                   <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl font-bold">2</span>
                   </div>
-                  <h4 className="font-semibold mb-2">L'IA analyse</h4>
-                  <p className="text-sm opacity-90">Notre assistant comprend votre contexte</p>
+                  <h4 className="font-semibold mb-2">AI analysis</h4>
+                  <p className="text-sm opacity-90">Our assistant understands your context</p>
                 </div>
                 <div className="text-center">
                   <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl font-bold">3</span>
                   </div>
-                  <h4 className="font-semibold mb-2">Recevez des conseils</h4>
-                  <p className="text-sm opacity-90">Obtenez des réponses personnalisées</p>
+                  <h4 className="font-semibold mb-2">Get advice</h4>
+                  <p className="text-sm opacity-90">Receive personalized answers</p>
                 </div>
               </div>
             </div>
@@ -234,14 +238,14 @@ const AssistantPage: React.FC = () => {
                     <Bot className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-white">Assistant FiverFlow</h3>
-                    <p className="text-sm text-slate-400">IA pour optimiser votre workflow</p>
+                    <h3 className="font-semibold text-white">FiverFlow Assistant</h3>
+                    <p className="text-sm text-slate-400">AI to optimize your workflow</p>
                   </div>
                 </div>
                 <button
                   onClick={resetConversation}
                   className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-                  title="Nouvelle conversation"
+                  title="New conversation"
                 >
                   <RotateCcw className="w-4 h-4" />
                 </button>
@@ -255,8 +259,8 @@ const AssistantPage: React.FC = () => {
                       <div className="w-16 h-16 bg-gradient-to-br from-[#9c68f2] to-[#422ca5] rounded-full mx-auto mb-4 flex items-center justify-center">
                         <Bot className="w-8 h-8 text-white" />
                       </div>
-                      <h3 className="text-lg font-semibold text-white mb-2">Bonjour ! Je suis votre assistant FiverFlow</h3>
-                      <p className="text-slate-400 mb-6">Comment puis-je vous aider à optimiser votre workflow freelance ?</p>
+                      <h3 className="text-lg font-semibold text-white mb-2">Hello! I am your FiverFlow assistant</h3>
+                      <p className="text-slate-400 mb-6">How can I help you optimize your freelance workflow?</p>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -268,7 +272,7 @@ const AssistantPage: React.FC = () => {
                         >
                           <div className="flex items-start space-x-3">
                             <Lightbulb className="w-4 h-4 text-[#9c68f2] mt-0.5 flex-shrink-0" />
-                            <span className="text-sm text-slate-300 group-hover:text-white">{suggestion}</span>
+                          <span className="text-sm text-slate-300 group-hover:text-white">{suggestion}</span>
                           </div>
                         </button>
                       ))}
@@ -318,7 +322,7 @@ const AssistantPage: React.FC = () => {
                       <div className="bg-slate-800 rounded-lg px-4 py-3">
                         <div className="flex items-center space-x-2">
                           <Loader2 className="w-4 h-4 animate-spin text-[#9c68f2]" />
-                          <span className="text-slate-400">L'assistant réfléchit...</span>
+                          <span className="text-slate-400">The assistant is thinking...</span>
                         </div>
                       </div>
                     </div>
@@ -334,7 +338,7 @@ const AssistantPage: React.FC = () => {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Posez votre question..."
+                    placeholder="Type your question..."
                     disabled={isLoading}
                     className="flex-1 px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-transparent disabled:opacity-50"
                   />
@@ -344,7 +348,7 @@ const AssistantPage: React.FC = () => {
                     className="px-6 py-3 bg-[#9c68f2] hover:bg-[#8655e6] disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2"
                   >
                     <Send className="w-4 h-4" />
-                    <span>Envoyer</span>
+                    <span>Send</span>
                   </button>
                 </div>
               </div>

@@ -180,9 +180,9 @@ function AppContent() {
           <Route path="/referrals" element={<InstantProtectedRoute><PageReferrals /></InstantProtectedRoute>} />
 
           {/* Assistant AI */}
-          <Route path="/ai-assistant" element={
+          <Route path="/assistant" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Scale" pageName="assistant" description="Assistant AI disponible avec Scale">
+              <SubscriptionGuard requiredPlan="Lunch" pageName="assistant" description="AI Assistant available on Lunch plan">
                 <AssistantPage />
               </SubscriptionGuard>
             </InstantProtectedRoute>

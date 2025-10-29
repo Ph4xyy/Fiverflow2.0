@@ -7,7 +7,7 @@ const AssistantFloatingButton: React.FC = () => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate('/ai-assistant');
+    navigate('/assistant');
   };
 
   return (
