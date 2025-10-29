@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { Shield, AlertCircle } from 'lucide-react'
-import Layout, { pageBgClass, cardClass } from './Layout'
+import AdminLayout from './AdminLayout'
 
 interface AdminRouteProps {
   children: React.ReactNode
@@ -66,9 +66,9 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
 
   if (authLoading || loading) {
     return (
-      <Layout>
-        <div className={`space-y-4 p-4 ${pageBgClass}`}>
-          <div className={`${cardClass} p-6 text-center`}>
+      <AdminLayout>
+        <div className="space-y-4 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 text-center">
             <div className="flex items-center justify-center mb-4">
               <Shield className="animate-pulse text-indigo-600" size={48} />
             </div>
@@ -80,15 +80,15 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
             </p>
           </div>
         </div>
-      </Layout>
+      </AdminLayout>
     )
   }
 
   if (error) {
     return (
-      <Layout>
-        <div className={`space-y-4 p-4 ${pageBgClass}`}>
-          <div className={`${cardClass} border border-red-200 dark:border-red-800 p-6 text-center`}>
+      <AdminLayout>
+        <div className="space-y-4 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-red-200 dark:border-red-800 p-6 text-center">
             <AlertCircle className="mx-auto mb-4 text-red-500" size={48} />
             <h2 className="text-xl font-semibold text-red-800 dark:text-red-200 mb-2">
               Accès non autorisé
@@ -102,7 +102,7 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
             </div>
           </div>
         </div>
-      </Layout>
+      </AdminLayout>
     )
   }
 

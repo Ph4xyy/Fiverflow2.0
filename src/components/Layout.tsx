@@ -598,8 +598,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   
-  // Skip Layout for landing page
-  if (location.pathname === '/landing') {
+  // Skip Layout for landing page and admin pages
+  if (location.pathname === '/landing' || location.pathname.startsWith('/admin')) {
     return <>{children}</>;
   }
   
