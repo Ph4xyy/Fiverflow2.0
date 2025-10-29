@@ -19,14 +19,32 @@ import SubscriptionLimits from '@/components/SubscriptionLimits';
 type OrderRow = {
   id: string;
   title: string;
-  amount: number | null;
+  budget: number | null;
   status: 'Pending' | 'In Progress' | 'Completed' | string;
-  deadline: string | null;
+  due_date: string | null;
   created_at: string | null;
   clients: {
     name: string;
     platform: string | null;
   };
+  // Champs existants dans la base de données
+  description?: string | null;
+  client_id?: string;
+  start_date?: string | null;
+  completed_date?: string | null;
+  platform?: string | null;
+  client_name?: string | null;
+  client_email?: string | null;
+  // Champs non disponibles dans la DB (pour compatibilité avec OrderForm)
+  project_type?: string | null;
+  priority_level?: string | null;
+  estimated_hours?: number | null;
+  hourly_rate?: number | null;
+  payment_status?: string | null;
+  notes?: string | null;
+  tags?: string[] | null;
+  revision_count?: number | null;
+  client_feedback?: string | null;
 };
 
 const PAGE_SIZE = 20;
@@ -109,35 +127,11 @@ const OrdersPage: React.FC = () => {
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      const demo: OrderRow[] = Array.from({ length: 42 }).map((_, i) => ({
-        id: String(i + 1),
-        title: i % 3 ? `Website Redesign #${i + 1}` : `Mobile App #${i + 1}`,
-        amount: 250 + (i % 7) * 150,
-        status: (['Pending', 'In Progress', 'Completed'] as const)[i % 3],
-        deadline: new Date(Date.now() + (i % 15) * 86400000).toISOString(),
-        created_at: new Date().toISOString(),
-        clients: {
-          name: i % 2 ? `Acme Corp` : `John Doe`,
-          platform: ['Fiverr', 'Upwork', 'Direct'][i % 3]
-        }
-      }));
-
-      let filtered = demo;
-      if (debouncedSearch) {
-        const term = debouncedSearch.toLowerCase();
-        filtered = filtered.filter(o =>
-          [o.title, o.clients.name, o.clients.platform || '']
-            .some(v => (v || '').toLowerCase().includes(term))
-        );
-      }
-      if (status) filtered = filtered.filter(o => (o.status || '') === status);
-      if (platform) filtered = filtered.filter(o => (o.clients.platform || '') === platform);
-
-      setTotal(filtered.length);
-      const start = (page - 1) * PAGE_SIZE;
-      setOrders(filtered.slice(start, start + PAGE_SIZE));
+      console.error('Supabase not configured - cannot fetch orders');
+      setOrders([]);
+      setTotal(0);
       setLoading(false);
-      setError(null);
+      setError('Database not configured');
       return;
     }
 
@@ -147,7 +141,12 @@ const OrdersPage: React.FC = () => {
 
       let query = supabase
         .from('orders')
-        .select(`id,title,amount,status,deadline,created_at, clients!inner(name,platform,user_id)`, { count: 'exact' })
+        .select(`
+          id,title,description,budget,status,due_date,created_at,
+          start_date,completed_date,platform,client_name,client_email,
+          client_id,
+          clients!inner(id,name,platform,user_id)
+        `, { count: 'exact' })
         .eq('clients.user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -166,8 +165,27 @@ const OrdersPage: React.FC = () => {
       const { data, error, count } = await query;
       if (error) throw error;
 
+      console.log('🔍 Données récupérées de Supabase:', data);
+      
+      // Convertir les statuts de la DB vers l'affichage utilisateur
+      const getStatusForDisplay = (status: string) => {
+        switch (status) {
+          case 'pending': return 'Pending';
+          case 'in_progress': return 'In Progress';
+          case 'completed': return 'Completed';
+          case 'cancelled': return 'Cancelled';
+          case 'on_hold': return 'On Hold';
+          default: return status;
+        }
+      };
+
       const transformed = (data || []).map((o: any) => ({
-        ...o,
+        id: o.id,
+        title: o.title,
+        budget: o.budget, // Utiliser 'budget' au lieu de 'amount'
+        status: getStatusForDisplay(o.status), // Convertir pour l'affichage
+        due_date: o.due_date, // Utiliser 'due_date' au lieu de 'deadline'
+        created_at: o.created_at,
         clients: {
           name: o.clients.name,
           platform: o.clients.platform
@@ -199,6 +217,16 @@ const OrdersPage: React.FC = () => {
     window.addEventListener('ff:session:refreshed', onRefreshed as any);
     return () => window.removeEventListener('ff:session:refreshed', onRefreshed as any);
   }, []); // 🔥 FIXED: Empty dependencies to prevent infinite loops
+
+  // Update selectedOrder when orders change (after status update, etc.)
+  useEffect(() => {
+    if (selectedOrder && orders.length > 0) {
+      const updatedOrder = orders.find(o => o.id === selectedOrder.id);
+      if (updatedOrder) {
+        setSelectedOrder(updatedOrder);
+      }
+    }
+  }, [orders, selectedOrder]);
 
   const handleAddOrder = async () => {
     const canAdd = await checkOrderLimit();
@@ -275,10 +303,10 @@ const OrdersPage: React.FC = () => {
       : 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-gray-300';
 
   const kpis = useMemo(() => {
-    const totalRevenue = orders.reduce((s, o) => s + (o.amount || 0), 0);
+    const totalRevenue = orders.reduce((s, o) => s + (o.budget || 0), 0);
     const pendingRevenue = orders
       .filter(o => o.status !== 'Completed')
-      .reduce((s, o) => s + (o.amount || 0), 0);
+      .reduce((s, o) => s + (o.budget || 0), 0);
     const inProgress = orders.filter(o => o.status === 'In Progress').length;
     return { totalRevenue, pendingRevenue, inProgress };
   }, [orders]);
@@ -295,28 +323,48 @@ const OrdersPage: React.FC = () => {
     'In Progress',
     'Completed',
     'On Hold',
-    'Cancelled',
-    'Awaiting Payment',
-    'In Review'
+    'Cancelled'
   ];
 
   const updateOrderStatus = async (orderId: string, newStatus: OrderRow['status']) => {
+    // Convertir le statut pour la base de données
+    const getStatusForDB = (status: string) => {
+      switch (status) {
+        case 'Pending': return 'pending';
+        case 'In Progress': return 'in_progress';
+        case 'Completed': return 'completed';
+        case 'Cancelled': return 'cancelled';
+        case 'On Hold': return 'on_hold';
+        default: return 'pending'; // Valeur par défaut si non reconnu
+      }
+    };
+
     if (!isSupabaseConfigured || !supabase) {
-      // Demo mode: just update local state
-      setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: newStatus } : o)));
-      toast.success(`Status updated to ${newStatus}`);
+      console.error('Supabase not configured - cannot update order status');
+      toast.error('Database not configured');
       return;
     }
     try {
-      const { error } = await supabase
+      console.log('🔄 Updating order status:', { orderId, newStatus, dbStatus: getStatusForDB(newStatus) });
+
+      const { error, data } = await supabase
         .from('orders')
-        .update({ status: newStatus })
-        .eq('id', orderId);
-      if (error) throw error;
+        .update({ status: getStatusForDB(newStatus) })
+        .eq('id', orderId)
+        .select();
+
+      if (error) {
+        console.error('❌ Supabase error:', error);
+        throw error;
+      }
+
+      console.log('✅ Status updated successfully:', data);
       toast.success(`Status updated to ${newStatus}`);
+      // Recharger toutes les données pour mettre à jour preview, edit, etc.
+      fetchOrders();
     } catch (e: any) {
-      console.error('Failed to update status', e);
-      toast.error('Failed to update status');
+      console.error('❌ Failed to update status:', e);
+      toast.error(`Failed to update status: ${e.message || e}`);
       // force refresh to revert optimistic update
       fetchOrders();
     }
@@ -333,7 +381,6 @@ const OrdersPage: React.FC = () => {
     e.stopPropagation();
     setOpenStatusFor(null);
     if (order.status === newStatus) return;
-    setOrders(prev => prev.map(o => (o.id === order.id ? { ...o, status: newStatus } : o)));
     updateOrderStatus(order.id, newStatus);
   };
 
@@ -359,8 +406,7 @@ const OrdersPage: React.FC = () => {
   }, [openStatusFor]);
 
   return (
-    <Layout>
-      <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -563,7 +609,7 @@ const OrdersPage: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                          {typeof o.amount === 'number' ? new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(o.amount) : '—'}
+                          {typeof o.budget === 'number' ? new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(o.budget) : '—'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap relative" ref={openStatusFor === o.id ? statusMenuRef : undefined}>
                           <button
@@ -596,7 +642,7 @@ const OrdersPage: React.FC = () => {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-200">
-                          {o.deadline ? new Date(o.deadline).toLocaleDateString() : '—'}
+                          {o.due_date ? new Date(o.due_date).toLocaleDateString() : '—'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <button
@@ -655,19 +701,86 @@ const OrdersPage: React.FC = () => {
           order={selectedOrder}
           isOpen={isDetailModalOpen}
           onClose={() => setIsDetailModalOpen(false)}
+          onOrderUpdated={(updatedOrder) => {
+            // Mettre à jour la liste des orders avec les nouvelles données
+            setOrders(prevOrders => 
+              prevOrders.map(order => 
+                order.id === updatedOrder.id ? { ...order, ...updatedOrder } : order
+              )
+            );
+            // Mettre à jour l'order sélectionné
+            setSelectedOrder(updatedOrder);
+          }}
           onEdit={(order: any) => {
+            console.log('🔍 OrderDetailModal onEdit - order reçu:', order);
             setIsDetailModalOpen(false);
-            const orow: OrderRow = order?.clients
-              ? order
-              : {
-                  ...order,
-                  clients: { name: order?.client_name || 'Client', platform: order?.platform || null },
-                };
-            editOrder(orow);
+            
+            // Convertir OrderDetail vers OrderRow puis vers OrderForm
+            const orderRow: OrderRow = {
+              id: order.id,
+              title: order.title,
+              description: order.description,
+              budget: order.budget,
+              status: order.status,
+              due_date: order.due_date,
+              created_at: order.created_at,
+              start_date: order.start_date,
+              completed_date: order.completed_date,
+              platform: order.platform,
+              client_name: order.client_name,
+              client_email: order.client_email,
+              // Pour l'instant, utiliser une valeur par défaut pour client_id
+              client_id: order.client_id || order.clients?.id || '',
+              clients: order.clients || { 
+                name: order.client_name || 'Client', 
+                platform: order.platform || null 
+              },
+              // Champs non disponibles dans la DB (pour compatibilité)
+              project_type: order.project_type,
+              priority_level: order.priority_level,
+              estimated_hours: order.estimated_hours,
+              hourly_rate: order.hourly_rate,
+              payment_status: order.payment_status,
+              notes: order.notes,
+              tags: order.tags,
+              revision_count: order.revision_count,
+              client_feedback: order.client_feedback,
+            };
+            
+            console.log('🔄 OrderRow converti:', orderRow);
+            
+            // Convertir OrderRow vers le format OrderForm (selon l'interface OrderFormProps)
+            const orderForForm = {
+              id: orderRow.id,
+              title: orderRow.title,
+              description: orderRow.description,
+              amount: orderRow.budget || 0, // budget -> amount
+              deadline: orderRow.due_date || '', // due_date -> deadline
+              client_id: orderRow.client_id || '', // Important: récupérer le client_id
+              status: orderRow.status as 'Pending' | 'In Progress' | 'Completed',
+              // Champs existants dans la DB
+              start_date: orderRow.start_date,
+              completion_date: orderRow.completed_date, // completed_date -> completion_date
+              // Champs non disponibles dans la DB (valeurs par défaut)
+              project_type: orderRow.project_type || '',
+              priority_level: orderRow.priority_level || 'medium',
+              estimated_hours: orderRow.estimated_hours || 0,
+              hourly_rate: orderRow.hourly_rate || 0,
+              payment_status: orderRow.payment_status || 'pending',
+              notes: orderRow.notes || '',
+              tags: orderRow.tags || [],
+              revision_count: orderRow.revision_count || 0,
+              client_feedback: orderRow.client_feedback || '',
+            };
+            
+            console.log('✅ OrderForForm final:', orderForForm);
+            
+            // Passer directement à setEditingOrder au lieu d'utiliser editOrder
+            setEditingOrder(orderForForm as any);
+            setIsFormOpen(true);
           }}
         />
       </div>
-    </Layout>
   );
 };
 

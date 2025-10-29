@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 
 export interface Task {
   id: string;
-  order_id: string;
+  order_id?: string;
   title: string;
   description?: string;
   status: 'todo' | 'in_progress' | 'completed';
@@ -64,63 +64,8 @@ interface UseTasksReturn {
 }
 
 // Mock data pour quand Supabase n'est pas configuré
-const mockTasks: Task[] = [
-  {
-    id: '1',
-    order_id: '1',
-    title: 'Design initial concepts',
-    description: 'Create 3 different logo concepts',
-    status: 'completed',
-    priority: 'high',
-    estimated_hours: 4,
-    actual_hours: 3.5,
-    due_date: '2024-02-10',
-    completed_at: '2024-02-09T15:30:00Z',
-    created_at: '2024-02-05T10:00:00Z',
-    updated_at: '2024-02-09T15:30:00Z',
-    order: {
-      title: 'Logo Design Project',
-      client: { name: 'John Doe' }
-    }
-  },
-  {
-    id: '2',
-    order_id: '1',
-    title: 'Client feedback integration',
-    description: 'Implement client feedback on chosen concept',
-    status: 'in_progress',
-    priority: 'medium',
-    estimated_hours: 2,
-    actual_hours: 1.2,
-    due_date: '2024-02-15',
-    created_at: '2024-02-10T09:00:00Z',
-    updated_at: '2024-02-12T14:20:00Z',
-    order: {
-      title: 'Logo Design Project',
-      client: { name: 'John Doe' }
-    }
-  }
-];
-
-const mockTimeEntries: TimeEntry[] = [
-  {
-    id: '1',
-    task_id: '1',
-    order_id: '1',
-    user_id: 'mock-user',
-    start_time: '2024-02-09T10:00:00Z',
-    end_time: '2024-02-09T13:30:00Z',
-    duration_minutes: 210,
-    description: 'Worked on logo concepts',
-    is_billable: true,
-    created_at: '2024-02-09T10:00:00Z',
-    task: { title: 'Design initial concepts' },
-    order: {
-      title: 'Logo Design Project',
-      client: { name: 'John Doe' }
-    }
-  }
-];
+const mockTasks: Task[] = [];
+const mockTimeEntries: TimeEntry[] = [];
 
 export const useTasks = (orderId?: string): UseTasksReturn => {
   const { user } = useAuth();
@@ -156,17 +101,14 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       setLoading(true);
       setError(null);
 
-      // Construire la requête pour les tâches
+      // Construire la requête pour les tâches (version compatible)
       let tasksQuery = supabase
         .from('tasks')
         .select(`
-          *,
-          orders!inner(
-            title,
-            clients!inner(name, user_id)
-          )
+          id, title, description, status, priority, due_date, created_at, updated_at,
+          order_id, estimated_hours, actual_hours, completed_at, user_id
         `)
-        .eq('orders.clients.user_id', user.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       // Filtrer par order_id si spécifié
@@ -178,15 +120,12 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
 
       if (tasksError) throw tasksError;
 
-      // Transformer les données des tâches
+      // Transformer les données des tâches (version compatible)
       const transformedTasks: Task[] = tasksData?.map(task => ({
         ...task,
-        order: {
-          title: (task.orders as any).title,
-          client: {
-            name: (task.orders as any).clients.name
-          }
-        }
+        estimated_hours: task.estimated_hours || 0,
+        actual_hours: task.actual_hours || 0,
+        order: undefined // Sera chargé séparément si nécessaire
       })) || [];
 
       // Récupérer les entrées de temps
@@ -245,19 +184,28 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       return false;
     }
 
-    if (!taskData.title || !taskData.order_id) {
-      toast.error('Title and order are required');
+    if (!user) {
+      toast.error('User not authenticated');
+      return false;
+    }
+
+    if (!taskData.title) {
+      toast.error('Title is required');
       return false;
     }
 
     try {
+      console.log('Creating task with data:', taskData);
+      console.log('User ID:', user.id);
+      
       const { error } = await supabase
         .from('tasks')
         .insert({
-          order_id: taskData.order_id,
+          user_id: user.id,
+          order_id: taskData.order_id || null,
           title: taskData.title,
           description: taskData.description || null,
-          status: taskData.status || 'todo',
+          status: taskData.status || 'pending',
           priority: taskData.priority || 'medium',
           estimated_hours: taskData.estimated_hours || 0,
           due_date: taskData.due_date || null
@@ -266,14 +214,33 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       if (error) throw error;
 
       toast.success('Task created successfully!');
-      await fetchTasks();
+      // Recharger les tâches
+      const { data: newTasksData, error: fetchError } = await supabase
+        .from('tasks')
+        .select(`
+          id, title, description, status, priority, due_date, created_at, updated_at,
+          order_id, estimated_hours, actual_hours, completed_at, user_id
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (!fetchError && newTasksData) {
+        const transformedTasks: Task[] = newTasksData.map(task => ({
+          ...task,
+          estimated_hours: task.estimated_hours || 0,
+          actual_hours: task.actual_hours || 0,
+          order: undefined
+        }));
+        setTasks(transformedTasks);
+      }
+      
       return true;
     } catch (error) {
       console.error('Error creating task:', error);
       toast.error('Failed to create task');
       return false;
     }
-  }, [fetchTasks]);
+  }, []);
 
   const updateTask = useCallback(async (taskId: string, updates: Partial<Task>): Promise<boolean> => {
     if (!isSupabaseConfigured || !supabase) {
@@ -290,14 +257,33 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
       if (error) throw error;
 
       toast.success('Task updated successfully!');
-      await fetchTasks();
+      // Recharger les tâches
+      const { data: newTasksData, error: fetchError } = await supabase
+        .from('tasks')
+        .select(`
+          id, title, description, status, priority, due_date, created_at, updated_at,
+          order_id, estimated_hours, actual_hours, completed_at, user_id
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (!fetchError && newTasksData) {
+        const transformedTasks: Task[] = newTasksData.map(task => ({
+          ...task,
+          estimated_hours: task.estimated_hours || 0,
+          actual_hours: task.actual_hours || 0,
+          order: undefined
+        }));
+        setTasks(transformedTasks);
+      }
+      
       return true;
     } catch (error) {
       console.error('Error updating task:', error);
       toast.error('Failed to update task');
       return false;
     }
-  }, [fetchTasks]);
+  }, []);
 
   const deleteTask = useCallback(async (taskId: string): Promise<boolean> => {
     if (!isSupabaseConfigured || !supabase) {
@@ -477,7 +463,7 @@ export const useTasks = (orderId?: string): UseTasksReturn => {
 
   const refetchTasks = useCallback(async () => {
     await fetchTasks();
-  }, [fetchTasks]);
+  }, [user, orderId]);
 
   useEffect(() => {
     fetchTasks();

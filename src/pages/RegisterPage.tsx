@@ -9,10 +9,11 @@
  * - Lien vers la page de connexion
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
+import { useReferral } from '../contexts/ReferralContext';
+import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Check, Gift, X } from 'lucide-react';
 
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -29,7 +30,17 @@ const RegisterPage: React.FC = () => {
   const [success, setSuccess] = useState(false);
 
   const { signUp } = useAuth();
+  const { referralCode, referrerInfo, applyReferralCode, loading: referralLoading, error: referralError, setReferralCode } = useReferral();
   const navigate = useNavigate();
+
+  // Vérifier si un referralUsername est dans sessionStorage et l'appliquer
+  useEffect(() => {
+    const referralUsername = sessionStorage.getItem('referralUsername');
+    if (referralUsername && !referralCode) {
+      console.log('🎯 Applying referral username from sessionStorage:', referralUsername);
+      setReferralCode(referralUsername);
+    }
+  }, [referralCode, setReferralCode]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -87,6 +98,18 @@ const RegisterPage: React.FC = () => {
       if (error) {
         setError(getErrorMessage(error.message));
       } else if (user) {
+        // 🎯 APPLIQUER LE CODE DE PARRAINAGE APRÈS INSCRIPTION RÉUSSIE
+        if (referralCode) {
+          console.log('🎯 Applying referral code after successful signup:', referralCode);
+          const referralApplied = await applyReferralCode(user.id);
+          
+          if (referralApplied) {
+            console.log('✅ Referral code applied successfully');
+          } else {
+            console.warn('⚠️ Failed to apply referral code, but signup was successful');
+          }
+        }
+
         setSuccess(true);
         setTimeout(() => {
           navigate('/login');
@@ -146,6 +169,38 @@ const RegisterPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-white mb-2">Créer un compte</h1>
           <p className="text-slate-400">Rejoignez FiverFlow dès aujourd'hui</p>
         </div>
+
+        {/* Affichage des informations de parrainage */}
+        {referralCode && referrerInfo && (
+          <div className="mb-6 bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <Gift className="w-5 h-5 text-green-400" />
+                </div>
+                <div>
+                  <p className="text-green-400 font-medium">Code de parrainage détecté !</p>
+                  <p className="text-slate-400 text-sm">
+                    Vous êtes parrainé par <span className="text-white font-medium">{referrerInfo.name}</span>
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-slate-500">Code: {referralCode}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Erreur de parrainage */}
+        {referralError && (
+          <div className="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+            <div className="flex items-center space-x-3">
+              <X className="w-5 h-5 text-red-400" />
+              <p className="text-red-400 text-sm">{referralError}</p>
+            </div>
+          </div>
+        )}
 
         {/* Formulaire d'inscription */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50">

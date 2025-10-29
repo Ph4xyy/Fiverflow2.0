@@ -51,6 +51,69 @@
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
   }
 
+  .halloween {
+    /* Halloween theme colors */
+    --bg-primary: #1a0d0d;
+    --bg-secondary: #2d1b1b;
+    --bg-tertiary: #3d2a2a;
+    --text-primary: #ff6b35;
+    --text-secondary: #ff8c42;
+    --text-tertiary: #ffa726;
+    --border-primary: #4a2c2c;
+    --border-secondary: #5d3a3a;
+    --accent-blue: #ff6b35;
+    --accent-green: #4caf50;
+    --accent-purple: #9c27b0;
+    --accent-orange: #ff9800;
+    --accent-red: #f44336;
+    --shadow-sm: 0 1px 2px 0 rgb(255 107 53 / 0.2);
+    --shadow-md: 0 4px 6px -1px rgb(255 107 53 / 0.3);
+    --shadow-lg: 0 10px 15px -3px rgb(255 107 53 / 0.4);
+  }
+
+  /* Halloween theme overrides for Tailwind classes */
+  .halloween {
+    background-color: #1a0d0d !important;
+  }
+  
+  .halloween .bg-\[#111726\],
+  .halloween .bg-\[#1e2938\],
+  .halloween .bg-\[#35414e\] {
+    background-color: #2d1b1b !important;
+  }
+  
+  .halloween .text-white {
+    color: #ff6b35 !important;
+  }
+  
+  .halloween .text-gray-400 {
+    color: #ff8c42 !important;
+  }
+  
+  .halloween .text-gray-300 {
+    color: #ffa726 !important;
+  }
+  
+  .halloween .border-\[#35414e\],
+  .halloween .border-\[#1e2938\] {
+    border-color: #4a2c2c !important;
+  }
+  
+  /* Halloween theme for specific components */
+  .halloween header {
+    background-color: #2d1b1b !important;
+    border-color: #4a2c2c !important;
+  }
+  
+  .halloween aside {
+    background-color: #2d1b1b !important;
+    border-color: #4a2c2c !important;
+  }
+  
+  .halloween .bg-\[#1e2938\] {
+    background-color: #2d1b1b !important;
+  }
+
   /* Smooth transitions for all elements */
   * {
     transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 

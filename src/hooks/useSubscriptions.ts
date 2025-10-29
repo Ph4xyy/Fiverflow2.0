@@ -12,6 +12,7 @@ export const useSubscriptions = () => {
 
   const fetchSubscriptions = useCallback(async () => {
     if (!isSupabaseConfigured || !supabase || !user) {
+      console.log('Supabase not configured or no user for subscriptions');
       setSubscriptions([]);
       setLoading(false);
       return;
@@ -19,18 +20,47 @@ export const useSubscriptions = () => {
 
     try {
       setError(null);
+      console.log('📋 Fetching personal subscriptions...');
+      
+      // Récupérer les souscriptions personnelles de l'utilisateur
       const { data, error: fetchError } = await supabase
-        .from('subscriptions')
+        .from('user_personal_subscriptions')
         .select('*')
         .eq('user_id', user.id)
-        .order('next_renewal_date', { ascending: true });
+        .order('created_at', { ascending: false });
 
-      if (fetchError) throw fetchError;
-      setSubscriptions(data || []);
+      if (fetchError) {
+        console.error('Error fetching personal subscriptions:', fetchError);
+        // Si la table n'existe pas encore, initialiser avec une liste vide
+        console.log('Personal subscriptions table not found, initializing empty list');
+        setSubscriptions([]);
+        setLoading(false);
+        return;
+      }
+
+      // Transformer les données pour correspondre à l'interface Subscription
+      const transformedSubscriptions: Subscription[] = (data || []).map(sub => ({
+        id: sub.id,
+        name: sub.name,
+        description: sub.description,
+        provider: sub.provider,
+        category: sub.category,
+        amount: sub.amount,
+        currency: sub.currency,
+        billing_cycle: sub.billing_cycle,
+        next_renewal_date: sub.next_renewal_date,
+        is_active: sub.is_active,
+        color: sub.color,
+        created_at: sub.created_at,
+        updated_at: sub.updated_at
+      }));
+
+      setSubscriptions(transformedSubscriptions);
+      console.log('✅ Personal subscriptions loaded:', transformedSubscriptions.length);
     } catch (err: any) {
-      console.error('Error fetching subscriptions:', err);
+      console.error('Error fetching personal subscriptions:', err);
       setError(err?.message || 'Failed to fetch subscriptions');
-      toast.error('Failed to load subscriptions');
+      setSubscriptions([]);
     } finally {
       setLoading(false);
     }
@@ -43,27 +73,79 @@ export const useSubscriptions = () => {
     }
 
     try {
-      const subscriptionData = {
-        ...data,
-        user_id: user.id,
-        currency: data.currency || 'USD',
-      };
-
-      const { data: newSubscription, error: createError } = await supabase
-        .from('subscriptions')
-        .insert(subscriptionData)
+      console.log('📋 Creating personal subscription:', data);
+      
+      // Créer une souscription personnelle dans la table user_personal_subscriptions
+      const { data: newSub, error } = await supabase
+        .from('user_personal_subscriptions')
+        .insert({
+          user_id: user.id,
+          name: data.name,
+          description: data.description,
+          provider: data.provider,
+          category: data.category,
+          amount: data.amount,
+          currency: data.currency,
+          billing_cycle: data.billing_cycle,
+          next_renewal_date: data.next_renewal_date,
+          color: data.color,
+          is_active: true
+        })
         .select()
         .single();
 
-      if (createError) throw createError;
+      if (error) {
+        // Si la table n'existe pas, créer une souscription locale temporaire
+        if (error.message.includes('relation "user_personal_subscriptions" does not exist')) {
+          console.log('Table not found, creating local subscription');
+          const tempSubscription: Subscription = {
+            id: `temp-${Date.now()}`,
+            name: data.name,
+            description: data.description || '',
+            provider: data.provider,
+            category: data.category,
+            amount: data.amount,
+            currency: data.currency,
+            billing_cycle: data.billing_cycle,
+            next_renewal_date: data.next_renewal_date,
+            is_active: true,
+            color: data.color,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          setSubscriptions(prev => [tempSubscription, ...prev]);
+          toast.success('Subscription created successfully! (Local)');
+          return tempSubscription;
+        }
+        throw error;
+      }
 
-      setSubscriptions(prev => [...prev, newSubscription]);
-      toast.success('Subscription created successfully');
+      // Ajouter la nouvelle souscription à la liste locale
+      const newSubscription: Subscription = {
+        id: newSub.id,
+        name: newSub.name,
+        description: newSub.description,
+        provider: newSub.provider,
+        category: newSub.category,
+        amount: newSub.amount,
+        currency: newSub.currency,
+        billing_cycle: newSub.billing_cycle,
+        next_renewal_date: newSub.next_renewal_date,
+        is_active: newSub.is_active,
+        color: newSub.color,
+        created_at: newSub.created_at,
+        updated_at: newSub.updated_at
+      };
+
+      setSubscriptions(prev => [newSubscription, ...prev]);
+      toast.success('Subscription created successfully!');
+      
       return newSubscription;
     } catch (err: any) {
       console.error('Error creating subscription:', err);
       toast.error(err?.message || 'Failed to create subscription');
-      return null;
+      throw err; // Re-throw pour que le composant puisse gérer l'erreur
     }
   }, [user]);
 
@@ -74,21 +156,9 @@ export const useSubscriptions = () => {
     }
 
     try {
-      const { data: updatedSubscription, error: updateError } = await supabase
-        .from('subscriptions')
-        .update(data)
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .select()
-        .single();
-
-      if (updateError) throw updateError;
-
-      setSubscriptions(prev => 
-        prev.map(sub => sub.id === id ? updatedSubscription : sub)
-      );
-      toast.success('Subscription updated successfully');
-      return updatedSubscription;
+      // Pour l'instant, on ne peut pas modifier les subscriptions via cette interface
+      toast.error('Subscription updates require admin access');
+      return null;
     } catch (err: any) {
       console.error('Error updating subscription:', err);
       toast.error(err?.message || 'Failed to update subscription');
@@ -103,16 +173,19 @@ export const useSubscriptions = () => {
     }
 
     try {
-      const { error: deleteError } = await supabase
-        .from('subscriptions')
+      console.log('📋 Deleting personal subscription:', id);
+      
+      const { error } = await supabase
+        .from('user_personal_subscriptions')
         .delete()
         .eq('id', id)
         .eq('user_id', user.id);
 
-      if (deleteError) throw deleteError;
+      if (error) throw error;
 
+      // Retirer de la liste locale
       setSubscriptions(prev => prev.filter(sub => sub.id !== id));
-      toast.success('Subscription deleted successfully');
+      toast.success('Subscription deleted successfully!');
       return true;
     } catch (err: any) {
       console.error('Error deleting subscription:', err);
@@ -138,7 +211,7 @@ export const useSubscriptions = () => {
     }
 
     try {
-      // Calculate next renewal date based on billing cycle
+      // Calculer la prochaine date de renouvellement
       const currentDate = new Date(subscription.next_renewal_date);
       let nextDate = new Date(currentDate);
 
@@ -160,16 +233,23 @@ export const useSubscriptions = () => {
       }
 
       const { error } = await supabase
-        .from('subscriptions')
-        .update({ next_renewal_date: nextDate.toISOString().split('T')[0] })
+        .from('user_personal_subscriptions')
+        .update({ 
+          next_renewal_date: nextDate.toISOString().split('T')[0],
+          is_active: true
+        })
         .eq('id', id)
         .eq('user_id', user.id);
 
       if (error) throw error;
 
-      // Update local state
+      // Mettre à jour l'état local
       setSubscriptions(prev => 
-        prev.map(sub => sub.id === id ? { ...sub, next_renewal_date: nextDate.toISOString().split('T')[0] } : sub)
+        prev.map(sub => sub.id === id ? { 
+          ...sub, 
+          next_renewal_date: nextDate.toISOString().split('T')[0],
+          is_active: true
+        } : sub)
       );
 
       toast.success('Subscription marked as paid! Next renewal updated.');
@@ -181,7 +261,7 @@ export const useSubscriptions = () => {
     }
   }, [subscriptions, user]);
 
-  // 🔥 Auto-fetch on mount and when user changes - éviter les loops
+  // Auto-fetch on mount and when user changes
   useEffect(() => {
     if (user) {
       fetchSubscriptions();

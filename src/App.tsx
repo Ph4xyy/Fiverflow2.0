@@ -16,6 +16,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { UserDataProvider } from './contexts/UserDataContext';
 import { LoadingProvider } from './contexts/LoadingContext';
 import { CurrencyProvider } from './contexts/CurrencyContext';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { ReferralProvider } from './contexts/ReferralContext';
 
 // Composants de protection et d'interface
 import InstantProtectedRoute from './components/InstantProtectedRoute';
@@ -24,29 +26,48 @@ import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
 import LoadingDiagnostic from './components/LoadingDiagnostic';
 import SubscriptionGuard from './components/SubscriptionGuard';
+import TempSubscriptionGuard from './components/TempSubscriptionGuard';
+import Layout from './components/Layout';
+import Error406Diagnostic from './components/Error406Diagnostic';
 
 // Hook pour le préchargement des données
 import { usePreloadData } from './hooks/usePreloadData';
 
 // Pages principales de l'application
 import RootRedirect from './components/RootRedirect';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import AuthSignIn from './pages/AuthSignIn';
+import AuthRegister from './pages/AuthRegister';
+import AuthCallback from './pages/AuthCallback';
+import CreateUsername from './pages/CreateUsername';
+import OAuthDebug from './pages/OAuthDebug';
+import LandingPage from './pages/LandingPage';
+import ReferralLandingModern from './pages/ReferralLandingModern';
+import DocsPage from './pages/DocsPage';
 import DashboardExample from './pages/DashboardExample';
-import CalendarPageNew from './pages/CalendarPageNew';
-import PricingPageNew from './pages/PricingPageNew';
-import WorkboardPageNew from './pages/WorkboardPageNew';
-import ProfilePageNew from './pages/ProfilePageNew';
-import ClientsPage from './pages/ClientsPageOptimized';
-import OrdersPage from './pages/OrdersPage';
+import PageCalendar from './pages/PageCalendar';
+import PagePricing from './pages/PagePricing';
+import WorkboardPage from './pages/TasksPage';
+import ProfileRedirect from './pages/ProfileRedirect';
+import ProfileUsername from './pages/ProfileUsername';
+import PageSettings from './pages/PageSettings';
+import ProjectDetailPage from './pages/ProjectDetailPage';
+import PageClients from './pages/PageClients';
+import PageOrders from './pages/PageOrders';
 import TemplatesPage from './pages/TemplatesPage';
 import StatsPage from './pages/StatsPage';
-import UpgradePageNew from './pages/UpgradePageNew';
 import OnboardingPage from './pages/OnboardingPage';
 import NetworkPage from './pages/NetworkPage';
-import AdminDashboard from './pages/AdminDashboard';
+import PageReferrals from './pages/PageReferrals';
 import SuccessPage from './pages/SuccessPage';
 import SupportPage from './pages/SupportPage';
+import AssistantPage from './pages/AssistantPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminStatsPage from './pages/admin/AdminStatsPage';
+import AdminAIPage from './pages/admin/AdminAIPage';
+
+// Pages d'abonnement Stripe
+import CancelPage from './pages/CancelPage';
 
 // Pages légales
 import PrivacyPolicy from "./components/PrivacyPolicy";
@@ -59,7 +80,7 @@ import DocPage from './pages/docs/DocPage';
 
 // Pages de facturation (lazy loading pour optimiser les performances)
 const InvoicesLayout = lazy(() => import('./pages/InvoicesLayout'));
-const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
+const PageInvoices = lazy(() => import('./pages/PageInvoices'));
 const InvoiceTemplatesPage = lazy(() => import('./pages/InvoiceTemplatesPage'));
 const InvoiceTemplateEditorPage = lazy(() => import('./pages/InvoiceTemplateEditorPage'));
 
@@ -73,22 +94,37 @@ function AppContent() {
   usePreloadData();
 
   return (
-    <>
+    <Layout>
       <Suspense fallback={null}>
         <Routes>
           {/* Redirection racine intelligente */}
           <Route path="/" element={<RootRedirect />} />
           
+          {/* Landing page - has its own Navbar */}
+          <Route path="/landing" element={<LandingPage />} />
+          
+          {/* Referral landing page with modern design - /app/:username */}
+          <Route path="/app/:username" element={<ReferralLandingModern />} />
+          
+          {/* Documentation */}
+          <Route path="/docs" element={<DocsPage />} />
+          
           {/* Pages publiques */}
-          <Route path="/pricing" element={<PricingPageNew />} />
+          <Route path="/pricing" element={<PagePricing />} />
+          <Route path="/success" element={<SuccessPage />} />
+          <Route path="/cancel" element={<CancelPage />} />
           <Route path="/support" element={<SupportPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          {/* Auth pages */}
+          <Route path="/login" element={<AuthSignIn />} />
+          <Route path="/register" element={<AuthRegister />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/create-username" element={<CreateUsername />} />
+          <Route path="/oauth-debug" element={<OAuthDebug />} />
 
           {/* Dashboard principal - Accessible à tous les abonnements */}
           <Route path="/dashboard" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="launch" pageName="dashboard">
+              <SubscriptionGuard requiredPlan="Lunch" pageName="dashboard">
                 <DashboardExample />
               </SubscriptionGuard>
             </InstantProtectedRoute>
@@ -97,53 +133,91 @@ function AppContent() {
           {/* Pages internes du dashboard avec protection par abonnement */}
           <Route path="/clients" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="launch" pageName="clients" description="Gestion des clients (max 5 avec Launch)">
-                <ClientsPage />
+              <SubscriptionGuard requiredPlan="Lunch" pageName="clients" description="Gestion des clients (max 5 avec Lunch)">
+                <PageClients />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
           <Route path="/orders" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="launch" pageName="orders" description="Gestion des commandes (max 10 avec Launch)">
-                <OrdersPage />
+              <SubscriptionGuard requiredPlan="Lunch" pageName="orders" description="Gestion des commandes (max 10 avec Lunch)">
+                <PageOrders />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
           <Route path="/calendar" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="boost" pageName="calendar" description="Calendrier disponible avec Boost">
-                <CalendarPageNew />
-              </SubscriptionGuard>
+              <TempSubscriptionGuard requiredPlan="Boost" pageName="calendar" description="Calendrier disponible avec Boost">
+                <PageCalendar />
+              </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
           <Route path="/tasks" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="boost" pageName="workboard" description="Tableau de travail disponible avec Boost">
-                <WorkboardPageNew />
-              </SubscriptionGuard>
+              <TempSubscriptionGuard requiredPlan="Boost" pageName="workboard" description="Tableau de travail disponible avec Boost">
+                <WorkboardPage />
+              </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
           <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
           <Route path="/stats" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="scale" pageName="stats" description="Statistiques avancées disponibles avec Scale">
+              <TempSubscriptionGuard requiredPlan="Scale" pageName="stats" description="Statistiques avancées disponibles avec Scale">
                 <StatsPage />
-              </SubscriptionGuard>
+              </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          <Route path="/profile" element={<InstantProtectedRoute><ProfilePageNew /></InstantProtectedRoute>} />
+          {/* Système de profil universel */}
+          <Route path="/profile" element={<InstantProtectedRoute><ProfileRedirect /></InstantProtectedRoute>} />
+          <Route path="/profile/:username" element={<InstantProtectedRoute><ProfileUsername /></InstantProtectedRoute>} />
+          <Route path="/settings" element={<InstantProtectedRoute><PageSettings /></InstantProtectedRoute>} />
+          <Route path="/project/:projectId" element={<InstantProtectedRoute><ProjectDetailPage /></InstantProtectedRoute>} />
           <Route path="/network" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="boost" pageName="referrals" description="Système de parrainage disponible avec Boost">
+              <TempSubscriptionGuard requiredPlan="Boost" pageName="referrals" description="Système de parrainage disponible avec Boost">
                 <NetworkPage />
+              </TempSubscriptionGuard>
+            </InstantProtectedRoute>
+          } />
+          <Route path="/upgrade" element={<InstantProtectedRoute><PagePricing /></InstantProtectedRoute>} />
+          <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
+          <Route path="/referrals" element={<InstantProtectedRoute><PageReferrals /></InstantProtectedRoute>} />
+
+          {/* Assistant AI */}
+          <Route path="/assistant" element={
+            <InstantProtectedRoute>
+              <SubscriptionGuard requiredPlan="Lunch" pageName="assistant" description="AI Assistant available on Lunch plan">
+                <AssistantPage />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          <Route path="/upgrade" element={<InstantProtectedRoute><UpgradePageNew /></InstantProtectedRoute>} />
-          <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
 
-          {/* Administration */}
-          <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+          {/* Administration - Accès libre pour les admins */}
+          <Route path="/admin/dashboard" element={
+            <InstantProtectedRoute>
+              <AdminRoute><AdminDashboard /></AdminRoute>
+            </InstantProtectedRoute>
+          } />
+          <Route path="/admin/users" element={
+            <InstantProtectedRoute>
+              <AdminRoute><AdminUsersPage /></AdminRoute>
+            </InstantProtectedRoute>
+          } />
+          <Route path="/admin/stats" element={
+            <InstantProtectedRoute>
+              <AdminRoute><AdminStatsPage /></AdminRoute>
+            </InstantProtectedRoute>
+          } />
+          <Route path="/admin/ai" element={
+            <InstantProtectedRoute>
+              <AdminRoute><AdminAIPage /></AdminRoute>
+            </InstantProtectedRoute>
+          } />
+
+          {/* Diagnostic Erreur 406 (développement uniquement) */}
+          {import.meta.env.DEV && (
+            <Route path="/error-406-diagnostic" element={<InstantProtectedRoute><Error406Diagnostic /></InstantProtectedRoute>} />
+          )}
 
           {/* Pages légales */}
           <Route path="/terms-of-service" element={<TermsOfService />} />
@@ -153,14 +227,14 @@ function AppContent() {
           {/* Système de facturation (lazy loaded) - Scale uniquement */}
           <Route path="/invoices" element={
             <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="scale" pageName="invoices" description="Système de facturation disponible avec Scale">
+              <SubscriptionGuard requiredPlan="Scale" pageName="invoices" description="Système de facturation disponible avec Scale">
                 <InvoicesLayout />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           }>
-            <Route index element={<InvoicesPage />} />
-            <Route path="sent" element={<InvoicesPage />} />
-            <Route path="create" element={<InvoicesPage />} />
+            <Route index element={<PageInvoices />} />
+            <Route path="sent" element={<PageInvoices />} />
+            <Route path="create" element={<PageInvoices />} />
             <Route path="templates" element={<InvoiceTemplatesPage />} />
             <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
           </Route>
@@ -175,17 +249,7 @@ function AppContent() {
           </Route>
         </Routes>
       </Suspense>
-      
-      {/* Composants de debug - seulement en développement */}
-      {import.meta.env.DEV && (
-        <>
-          {/* Debug components removed for cleaner code */}
-        </>
-      )}
-      
-      {/* Diagnostic de chargement - visible avec Ctrl+Shift+L */}
-      <LoadingDiagnostic />
-    </>
+    </Layout>
   );
 }
 
@@ -197,17 +261,21 @@ function App() {
   return (
     <AppErrorBoundary>
       <AuthProvider>
-        <Router>
-          <AnalyticsWrapper>
-            <LoadingProvider>
-              <CurrencyProvider>
-                <UserDataProvider>
-                  <AppContent />
-                </UserDataProvider>
-              </CurrencyProvider>
-            </LoadingProvider>
-          </AnalyticsWrapper>
-        </Router>
+        <ThemeProvider>
+          <ReferralProvider>
+            <Router>
+              <AnalyticsWrapper>
+                <LoadingProvider>
+                  <CurrencyProvider>
+                    <UserDataProvider>
+                      <AppContent />
+                    </UserDataProvider>
+                  </CurrencyProvider>
+                </LoadingProvider>
+              </AnalyticsWrapper>
+            </Router>
+          </ReferralProvider>
+        </ThemeProvider>
       </AuthProvider>
     </AppErrorBoundary>
   );

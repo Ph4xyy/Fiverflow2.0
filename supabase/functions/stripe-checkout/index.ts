@@ -120,58 +120,17 @@ Deno.serve(async (req) => {
         return corsResponse({ error: 'Failed to create customer mapping' }, 500);
       }
 
-      if (mode === 'subscription') {
-        const { error: createSubscriptionError } = await supabase.from('stripe_subscriptions').insert({
-          customer_id: newCustomer.id,
-          status: 'not_started',
-        });
-
-        if (createSubscriptionError) {
-          console.error('Failed to save subscription in the database', createSubscriptionError);
-
-          // Try to clean up the Stripe customer since we couldn't create the subscription
-          try {
-            await stripe.customers.del(newCustomer.id);
-          } catch (deleteError) {
-            console.error('Failed to delete Stripe customer after subscription creation error:', deleteError);
-          }
-
-          return corsResponse({ error: 'Unable to save the subscription in the database' }, 500);
-        }
-      }
+      // Note: We don't create subscription records here because the subscription doesn't exist yet
+      // The subscription will be created by Stripe webhook after successful payment
 
       customerId = newCustomer.id;
 
-      console.log(`Successfully set up new customer ${customerId} with subscription record`);
+      console.log(`Successfully set up new customer ${customerId}`);
     } else {
       customerId = customer.customer_id;
 
-      if (mode === 'subscription') {
-        // Verify subscription exists for existing customer
-        const { data: subscription, error: getSubscriptionError } = await supabase
-          .from('stripe_subscriptions')
-          .select('status')
-          .eq('customer_id', customerId)
-          .maybeSingle();
-
-        if (getSubscriptionError) {
-          console.error('Failed to fetch subscription information from the database', getSubscriptionError);
-          return corsResponse({ error: 'Failed to fetch subscription information' }, 500);
-        }
-
-        if (!subscription) {
-          // Create subscription record for existing customer if missing
-          const { error: createSubscriptionError } = await supabase.from('stripe_subscriptions').insert({
-            customer_id: customerId,
-            status: 'not_started',
-          });
-
-          if (createSubscriptionError) {
-            console.error('Failed to create subscription record for existing customer', createSubscriptionError);
-            return corsResponse({ error: 'Failed to create subscription record for existing customer' }, 500);
-          }
-        }
-      }
+      // Note: We don't check or create subscription records here because the subscription doesn't exist yet
+      // The subscription will be created by Stripe webhook after successful payment
     }
 
     // Prepare checkout session parameters

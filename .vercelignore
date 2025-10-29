@@ -29,7 +29,8 @@ coverage
 
 # Fichiers de documentation
 *.md
-docs/
+# N'ignore que le dossier docs à la racine, pas src/components/docs
+/docs/
 
 # Fichiers de configuration locale
 .vscode

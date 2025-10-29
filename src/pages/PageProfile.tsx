@@ -1,0 +1,1596 @@
+import React, { useState, useEffect } from 'react';
+import ModernCard from '../components/ModernCard';
+import ModernButton from '../components/ModernButton';
+import ThemeSelector from '../components/ThemeSelector';
+import StatusSelector from '../components/StatusSelector';
+import ImageUpload from '../components/ImageUpload';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
+import { ProfileService, ProfileData, PrivacySettings } from '../services/profileService';
+import { OrdersService, Order } from '../services/ordersService';
+import { SkillsService, Skill as UserSkill } from '../services/skillsService';
+import { AwardsService, Award as UserAward } from '../services/awardsService';
+import { ActivityService, Activity as UserActivity } from '../services/activityService';
+import { StatisticsService } from '../services/statisticsService';
+import { useProfile } from '../hooks/useProfile';
+// import ProjectCard from '../components/ProjectCard';
+// import SocialLinks from '../components/SocialLinks';
+import { 
+  Edit3, 
+  MapPin, 
+  Calendar, 
+  Users, 
+  Star, 
+  Share2, 
+  Plus,
+  Globe,
+  Mail,
+  Phone,
+  Briefcase,
+  Award,
+  Settings,
+  TrendingUp,
+  Save,
+  X,
+  Loader2,
+  Activity,
+  Shield,
+  Crown,
+  Coffee,
+  Heart,
+  Eye,
+  Copy,
+  Check
+} from 'lucide-react';
+
+// Interfaces supprimées - utilise maintenant les types des services
+
+// Interface Project supprimée - utilise maintenant UserProject du service
+
+// Interface Achievement supprimée - utilise maintenant les vraies données
+
+interface PageProfileProps {
+  username?: string;
+}
+
+const PageProfile: React.FC<PageProfileProps> = ({ username }) => {
+  const { user } = useAuth();
+  
+  // Use the useProfile hook to retrieve data
+  const { 
+    profileData: profileDataFromHook, 
+    isOwnProfile 
+  } = useProfile(username);
+  
+  const [activeTab, setActiveTab] = useState<'overview' | 'projects' | 'activity'>('overview');
+  const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
+  const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
+  // isOwnProfile now comes from the useProfile hook
+  const [isAdmin, setIsAdmin] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUsernameCopied, setIsUsernameCopied] = useState(false);
+  
+  // Profile data - uses hook data or default values
+  const [profileData, setProfileData] = useState<ProfileData>({
+    full_name: 'User',
+    professional_title: 'UI/UX Designer & Frontend Developer',
+    location: 'Paris, France',
+    bio: 'Passionate about design and development, I create exceptional user experiences for 5 years.',
+    website: 'https://johndoe.design',
+    email: user?.email || 'john@example.com',
+    phone: '+33 6 12 34 56 78',
+    status: 'available',
+    show_email: true,
+    show_phone: true
+  });
+
+  // Mettre à jour les données du profil quand les données du hook changent
+  useEffect(() => {
+    if (profileDataFromHook) {
+      const publicData = profileDataFromHook.public_data;
+      setProfileData(prev => ({
+        ...prev,
+        full_name: publicData.full_name || prev.full_name,
+        bio: publicData.bio || prev.bio,
+        location: publicData.location || prev.location,
+        website: publicData.website || prev.website,
+        // Don't expose email and phone for other users
+        email: isOwnProfile ? (user?.email || prev.email) : '',
+        phone: isOwnProfile ? prev.phone : ''
+      }));
+
+      // Load social networks from public data
+      setSocialNetworks({
+        github: publicData.github_url || '',
+        linkedin: publicData.linkedin_url || '',
+        twitter: publicData.twitter_url || '',
+        discord: publicData.discord_username || '',
+        website: publicData.website || ''
+      });
+    }
+  }, [profileDataFromHook, isOwnProfile, user?.email]);
+
+  // Load real data (statistics, skills, awards, etc.)
+  useEffect(() => {
+    const loadRealData = async () => {
+      if (!profileDataFromHook) return;
+
+      const targetUserId = profileDataFromHook.user_id;
+      
+      console.log('🔄 Loading data for userId:', targetUserId);
+      
+      try {
+        // Load statistics
+        try {
+          const userStats = await StatisticsService.getUserStatistics(targetUserId);
+          // Adapt data to expected format
+          setStatistics({
+            clients: userStats.totalClients || 0,
+            orders: userStats.totalOrders || 0,
+            rating: 4.5, // Default value
+            experience: Math.max(1, Math.floor((userStats.totalOrders || 0) / 10)) // Calculation based on orders
+          });
+          console.log('✅ Statistics loaded:', userStats);
+        } catch (error) {
+          console.warn('⚠️ Statistics error:', error);
+          setStatistics({ clients: 0, orders: 0, rating: 0, experience: 0 });
+        }
+
+        // Load skills
+        try {
+          const userSkills = await SkillsService.getUserSkills(targetUserId);
+          setSkills(userSkills);
+          console.log('✅ Skills loaded:', userSkills.length);
+        } catch (error) {
+          console.warn('⚠️ Skills error:', error);
+          setSkills([]);
+        }
+
+        // Load awards
+        try {
+          const userAwards = await AwardsService.getUserAwards(targetUserId);
+          setAwards(userAwards);
+          console.log('✅ Awards loaded:', userAwards.length);
+        } catch (error) {
+          console.warn('⚠️ Awards error:', error);
+          setAwards([]);
+        }
+
+        // Load orders
+        try {
+          const userOrders = await OrdersService.getUserOrders(targetUserId);
+          setOrders(userOrders);
+          console.log('✅ Orders loaded:', userOrders.length);
+        } catch (error) {
+          console.warn('⚠️ Orders error:', error);
+          setOrders([]);
+        }
+
+        // Load activities
+        try {
+          const userActivities = await ActivityService.getUserActivity(targetUserId);
+          setActivities(userActivities);
+          console.log('✅ Activities loaded:', userActivities.length);
+        } catch (error) {
+          console.warn('⚠️ Activities error:', error);
+          setActivities([]);
+        }
+
+        console.log('📊 Real data loaded for profile:', {
+          userId: targetUserId,
+          username: profileDataFromHook.public_data?.username,
+          statistics: statistics,
+          skills: skills.length,
+          awards: awards.length,
+          orders: orders.length,
+          activities: activities.length
+        });
+
+      } catch (error) {
+        console.error('Error loading real data:', error);
+        // In case of error, reset data
+        setStatistics({ clients: 0, orders: 0, rating: 0, experience: 0 });
+        setSkills([]);
+        setAwards([]);
+        setOrders([]);
+        setActivities([]);
+      }
+    };
+
+    loadRealData();
+  }, [profileDataFromHook]);
+
+  // Privacy settings
+  const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
+    show_email: true,
+    show_phone: true
+  });
+
+  // Nouvelles données
+  const [skills, setSkills] = useState<UserSkill[]>([]);
+  const [awards, setAwards] = useState<UserAward[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [activities, setActivities] = useState<UserActivity[]>([]);
+  const [statistics, setStatistics] = useState({
+    clients: 0,
+    orders: 0,
+    rating: 4.5,
+    experience: 1
+  });
+  const [socialNetworks, setSocialNetworks] = useState({
+    github: '',
+    linkedin: '',
+    twitter: '',
+    discord: '',
+    website: ''
+  });
+
+  // Load profile data from database
+    const loadProfileData = async () => {
+      if (!user) {
+        console.log('🔍 ProfilePage: No user connected');
+        return;
+      }
+
+      // setIsLoading(true);
+      console.log('🔍 ProfilePage: Loading profile for user:', user.id, 'email:', user.email);
+
+      try {
+        const data = await ProfileService.getProfile(user.id);
+        
+        if (data) {
+          setProfileData((prev: ProfileData) => ({
+            ...prev,
+            ...data,
+            email: data.email || user.email || 'john@example.com'
+          }));
+          
+          // Mettre à jour les paramètres de confidentialité
+          setPrivacySettings({
+            show_email: data.show_email ?? true,
+            show_phone: data.show_phone ?? true
+          });
+        } else {
+          // Use auth user data as fallback
+          setProfileData((prev: ProfileData) => ({
+            ...prev,
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+            email: user.email || 'john@example.com'
+          }));
+        }
+
+        // Load skills
+        try {
+          const userSkills = await SkillsService.getPublicSkills(user.id);
+          setSkills(userSkills);
+        } catch (error) {
+          console.error('Error loading skills:', error);
+        }
+
+        // Load awards
+        try {
+          const userAwards = await AwardsService.getPublicAwards(user.id);
+          setAwards(userAwards);
+        } catch (error) {
+          console.error('Error loading awards:', error);
+        }
+
+        // Load orders
+        try {
+          const userOrders = await OrdersService.getUserOrders(user.id);
+          setOrders(userOrders);
+        } catch (error) {
+          console.error('Error loading orders:', error);
+        }
+
+        // Load activity
+        try {
+          const userActivity = await ActivityService.getUserActivity(user.id);
+          setActivities(userActivity);
+        } catch (error) {
+          console.error('Error loading activity:', error);
+        }
+
+        // Load statistics
+        try {
+          const userStats = await StatisticsService.getProfileStatistics(user.id);
+          setStatistics(userStats);
+        } catch (error) {
+          console.error('Error loading statistics:', error);
+        }
+
+        // Load social networks
+        if (data) {
+          setSocialNetworks({
+            github: data.github_url || '',
+            linkedin: data.linkedin_url || '',
+            twitter: data.twitter_url || '',
+            discord: data.discord_username || '',
+            website: data.website || ''
+          });
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        // Fallback to auth data
+        setProfileData((prev: ProfileData) => ({
+          ...prev,
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+          email: user.email || 'john@example.com'
+        }));
+      } finally {
+        // setIsLoading(false);
+      }
+    };
+
+  // Only load data if it's the connected user's profile (no username provided)
+  useEffect(() => {
+    if (!username && user) {
+      loadProfileData();
+      
+      // Also load real data for own profile
+      const loadOwnData = async () => {
+        try {
+          // Load statistics
+          const userStats = await StatisticsService.getUserStatistics(user.id);
+          // Adapt data to expected format
+          setStatistics({
+            clients: userStats.totalClients || 0,
+            orders: userStats.totalOrders || 0,
+            rating: 4.5, // Default value
+            experience: Math.max(1, Math.floor((userStats.totalOrders || 0) / 10)) // Calculation based on orders
+          });
+
+          // Load skills
+          const userSkills = await SkillsService.getUserSkills(user.id);
+          setSkills(userSkills);
+
+          // Load awards
+          const userAwards = await AwardsService.getUserAwards(user.id);
+          setAwards(userAwards);
+
+          // Load orders
+          const userOrders = await OrdersService.getUserOrders(user.id);
+          setOrders(userOrders);
+
+          // Load activities
+          const userActivities = await ActivityService.getUserActivity(user.id);
+          setActivities(userActivities);
+
+          console.log('📊 Clean data loaded:', {
+            statistics: userStats,
+            skills: userSkills.length,
+            awards: userAwards.length,
+            orders: userOrders.length,
+            activities: userActivities.length
+          });
+
+        } catch (error) {
+          console.error('Error loading clean data:', error);
+        }
+      };
+
+      loadOwnData();
+    }
+  }, [user, username]);
+
+  // Reload data when user returns from settings page (only for own profile)
+  useEffect(() => {
+    if (!username) {
+      const handleFocus = () => {
+        if (document.visibilityState === 'visible') {
+          loadProfileData();
+        }
+      };
+
+      document.addEventListener('visibilitychange', handleFocus);
+      window.addEventListener('focus', handleFocus);
+
+      return () => {
+        document.removeEventListener('visibilitychange', handleFocus);
+        window.removeEventListener('focus', handleFocus);
+      };
+    }
+  }, [user, username]);
+
+  // Check admin status
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) return;
+
+      try {
+        if (!supabase) return;
+        
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('is_admin')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!error && data) {
+          setIsAdmin(data.is_admin);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
+
+  // Functions to handle image uploads
+  const handleAvatarUpload = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    return await ProfileService.uploadProfileImage(user.id, file, 'avatar');
+  };
+
+  const handleBannerUpload = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    return await ProfileService.uploadProfileImage(user.id, file, 'banner');
+  };
+
+  const handleAvatarRemove = async (): Promise<boolean> => {
+    if (!user) return false;
+    return await ProfileService.deleteProfileImage(user.id, 'avatar');
+  };
+
+  const handleBannerRemove = async (): Promise<boolean> => {
+    if (!user) return false;
+    return await ProfileService.deleteProfileImage(user.id, 'banner');
+  };
+
+  // Function to save profile
+  const handleSaveProfile = async () => {
+    if (!user) return;
+
+    setIsSaving(true);
+    try {
+      // Prepare data to save including social networks
+      const dataToSave = {
+        ...profileData,
+        github_url: socialNetworks.github,
+        linkedin_url: socialNetworks.linkedin,
+        twitter_url: socialNetworks.twitter,
+        discord_username: socialNetworks.discord,
+        website: socialNetworks.website
+      };
+
+      const success = await ProfileService.updateProfile(user.id, dataToSave);
+      if (success) {
+        setIsEditMenuOpen(false);
+        // Reload data
+        const updatedData = await ProfileService.getProfile(user.id);
+        if (updatedData) {
+          setProfileData((prev: ProfileData) => ({ ...prev, ...updatedData }));
+          // Update social networks
+          setSocialNetworks({
+            github: updatedData.github_url || '',
+            linkedin: updatedData.linkedin_url || '',
+            twitter: updatedData.twitter_url || '',
+            discord: updatedData.discord_username || '',
+            website: updatedData.website || ''
+          });
+        }
+      } else {
+        console.error('Error saving profile');
+        // Ne pas afficher d'alerte, juste log l'erreur
+      }
+    } catch (error) {
+      console.error('Error saving:', error);
+      // Ne pas afficher d'alerte, juste log l'erreur
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Function to save settings
+  // Function to copy username
+  const handleCopyUsername = async () => {
+    const usernameToCopy = profileDataFromHook?.public_data?.username || profileData.username;
+    if (usernameToCopy) {
+      try {
+        await navigator.clipboard.writeText(usernameToCopy);
+        setIsUsernameCopied(true);
+        setTimeout(() => setIsUsernameCopied(false), 2000);
+      } catch (err) {
+        console.error('Error copying:', err);
+      }
+    }
+  };
+
+
+  const handleSaveSettings = async () => {
+    if (!user) return;
+
+    setIsSaving(true);
+    try {
+      // Prepare data to save including social networks
+      const dataToSave = {
+        ...profileData,
+        github_url: socialNetworks.github,
+        linkedin_url: socialNetworks.linkedin,
+        twitter_url: socialNetworks.twitter,
+        discord_username: socialNetworks.discord,
+        website: socialNetworks.website
+      };
+
+      const success = await ProfileService.updateProfile(user.id, dataToSave);
+      const privacySuccess = await ProfileService.updatePrivacySettings(user.id, privacySettings);
+      
+      if (success && privacySuccess) {
+        setIsSettingsMenuOpen(false);
+        // Reload data
+        const updatedData = await ProfileService.getProfile(user.id);
+        if (updatedData) {
+          setProfileData((prev: ProfileData) => ({ ...prev, ...updatedData }));
+          setPrivacySettings({
+            show_email: updatedData.show_email ?? true,
+            show_phone: updatedData.show_phone ?? true
+          });
+          // Update social networks
+          setSocialNetworks({
+            github: updatedData.github_url || '',
+            linkedin: updatedData.linkedin_url || '',
+            twitter: updatedData.twitter_url || '',
+            discord: updatedData.discord_username || '',
+            website: updatedData.website || ''
+          });
+        }
+      } else {
+        console.error('Error saving settings');
+        // Ne pas afficher d'alerte, juste log l'erreur
+      }
+    } catch (error) {
+      console.error('Error saving:', error);
+      // Ne pas afficher d'alerte, juste log l'erreur
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Function to change status
+  const handleStatusChange = async (status: 'available' | 'busy' | 'away' | 'do_not_disturb') => {
+    if (!user) return;
+
+    try {
+      const success = await ProfileService.updateStatus(user.id, status);
+      if (success) {
+        setProfileData((prev: ProfileData) => ({ ...prev, status }));
+      } else {
+        console.error('Error updating status');
+        // Ne pas afficher d'alerte, juste log l'erreur
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+      // Ne pas afficher d'alerte, juste log l'erreur
+    }
+  };
+
+  // badges supprimé - utilise maintenant les vraies données
+
+  // Social networks data (utilise la déclaration plus haut)
+
+  // socialLinks supprimé - utilise maintenant les vraies données
+
+  // projects statiques supprimés - utilise maintenant les vraies données
+
+  // achievements supprimé - utilise maintenant les vraies données
+
+  // stats supprimé - utilise maintenant les vraies données
+
+  // recentActivity supprimé - utilise maintenant les vraies données
+
+  return (
+    <div className="p-6 space-y-6">
+        {/* Header Profile */}
+        <ModernCard className="relative overflow-hidden p-0">
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] opacity-10" />
+          
+          <div className="relative">
+            {/* Cover Photo */}
+            <div className="h-48 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-t-xl relative overflow-hidden">
+              {profileData.banner_url ? (
+                <img 
+                  src={profileData.banner_url} 
+                  alt="Banner" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-r from-[#9c68f2] to-[#422ca5]" />
+              )}
+              {isOwnProfile && (
+                <div className="absolute inset-0 group">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200 flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <ImageUpload
+                        currentImageUrl={profileData.banner_url}
+                        onImageChange={handleBannerUpload}
+                        onImageRemove={handleBannerRemove}
+                        type="banner"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Profile Info */}
+            <div className="p-6 -mt-16 relative">
+              <div className="flex items-end justify-between">
+                <div className="flex items-end gap-6">
+                  {/* Profile Picture */}
+                  <div className="relative">
+                    {profileData.avatar_url ? (
+                      <img 
+                        src={profileData.avatar_url} 
+                        alt="Avatar" 
+                        className="w-32 h-32 rounded-full object-cover border-4 border-[#2a3441]"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center text-white text-4xl font-bold border-4 border-[#2a3441]">
+                        {profileData.full_name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
+                      </div>
+                    )}
+                    {isOwnProfile && (
+                      <div className="absolute inset-0 group">
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 rounded-full transition-all duration-200 flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <ImageUpload
+                              currentImageUrl={profileData.avatar_url}
+                              onImageChange={handleAvatarUpload}
+                              onImageRemove={handleAvatarRemove}
+                              type="avatar"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Basic Info */}
+                  <div className="pb-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h1 className="text-3xl font-bold text-white">{profileData.full_name || 'User'}</h1>
+                          {/* Badges */}
+                          <div className="flex items-center gap-2">
+                            {/* Badge Administrateur */}
+                            {isAdmin && (
+                              <div className="relative group">
+                                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-full flex items-center justify-center cursor-pointer">
+                                  <Shield size={16} className="text-white" />
+                                </div>
+                                {/* Tooltip */}
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                                  <div className="bg-gray-900 text-white text-sm rounded-lg px-3 py-2 whitespace-nowrap shadow-lg border border-gray-700">
+                                    <div className="font-semibold">Administrator</div>
+                                    <div className="text-gray-300 text-xs">Full system access</div>
+                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Badge Abonnement */}
+                            <div className="relative group">
+                              <div className="w-8 h-8 bg-gradient-to-r from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center cursor-pointer">
+                                <Crown size={16} className="text-white" />
+                              </div>
+                              {/* Tooltip */}
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                                <div className="bg-gray-900 text-white text-sm rounded-lg px-3 py-2 whitespace-nowrap shadow-lg border border-gray-700">
+                                  <div className="font-semibold">Subscriber</div>
+                                  <div className="text-gray-300 text-xs">Subscribed for 3 months</div>
+                                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {/* Username displayed below name with copy button */}
+                        {(profileDataFromHook?.public_data?.username || profileData.username) && (
+                          <div className="flex items-center gap-2 mt-1 group">
+                            <p className="text-sm text-gray-400">@{profileDataFromHook?.public_data?.username || profileData.username}</p>
+                            <button
+                              onClick={handleCopyUsername}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-gray-700 rounded"
+                              title="Copier le username"
+                            >
+                              {isUsernameCopied ? (
+                                <Check className="w-3 h-3 text-green-400" />
+                              ) : (
+                                <Copy className="w-3 h-3 text-gray-400 hover:text-white" />
+                              )}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-lg text-gray-400 mb-2">{profileData.professional_title || 'Professional'}</p>
+                    <div className="flex items-center gap-4 text-sm text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <MapPin size={16} />
+                        {profileData.location || 'Not specified'}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Calendar size={16} />
+                        Member since {new Date().getFullYear()}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Coffee size={16} />
+                        {profileData.status === 'available' && 'Available'}
+                        {profileData.status === 'busy' && 'Busy'}
+                        {profileData.status === 'away' && 'Away'}
+                        {profileData.status === 'do_not_disturb' && 'Do not disturb'}
+                        {!profileData.status && 'Available'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pb-4">
+                  {isOwnProfile ? (
+                    <>
+                      <ModernButton 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          window.location.href = '/settings?category=profile';
+                        }}
+                      >
+                        <Edit3 size={16} className="mr-2" />
+                        Edit Profile
+                      </ModernButton>
+                      <ModernButton 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          window.location.href = '/settings?category=privacy';
+                        }}
+                      >
+                        <Settings size={16} className="mr-2" />
+                        Settings
+                      </ModernButton>
+                    </>
+                  ) : (
+                    <>
+                      <ModernButton variant="outline" size="sm">
+                        <Share2 size={16} className="mr-2" />
+                        Share
+                      </ModernButton>
+                      <ModernButton size="sm">
+                        <Plus size={16} className="mr-2" />
+                        Follow
+                      </ModernButton>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </ModernCard>
+
+        {/* Edit Profile Menu */}
+        {isEditMenuOpen && isOwnProfile && (
+          <>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setIsEditMenuOpen(false)}></div>
+            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+              <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <ModernCard>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-white">Edit profile</h3>
+              <button 
+                onClick={() => setIsEditMenuOpen(false)}
+                className="p-2 hover:bg-[#35414e] rounded-lg transition-colors"
+              >
+                <X size={20} className="text-gray-400" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Nom complet
+                  </label>
+                  <input
+                    type="text"
+                    value={profileData.full_name || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, full_name: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Professional Title
+                  </label>
+                  <input
+                    type="text"
+                    value={profileData.professional_title || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, professional_title: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    value={profileData.location || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, location: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Website
+                  </label>
+                  <input
+                    type="url"
+                    value={profileData.website || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, website: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                    placeholder="https://votre-site.com"
+                  />
+                </div>
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={profileData.contact_email || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, contact_email: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={profileData.phone || ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, phone: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                    placeholder="+33 6 12 34 56 78"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Bio
+                  </label>
+                  <textarea
+                    value={profileData.bio || ''}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setProfileData({...profileData, bio: e.target.value})}
+                    rows={4}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2] resize-none"
+                    placeholder="Parlez-nous de vous..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Statut
+                  </label>
+                  <StatusSelector
+                    currentStatus={profileData.status || 'available'}
+                    onStatusChange={handleStatusChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-[#35414e]">
+              <ModernButton 
+                variant="outline" 
+                onClick={() => setIsEditMenuOpen(false)}
+                disabled={isSaving}
+              >
+                Annuler
+              </ModernButton>
+              <ModernButton 
+                onClick={handleSaveProfile}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 size={16} className="mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} className="mr-2" />
+                    Save
+                  </>
+                )}
+              </ModernButton>
+            </div>
+                </ModernCard>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Settings Menu */}
+        {isSettingsMenuOpen && isOwnProfile && (
+          <>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" onClick={() => setIsSettingsMenuOpen(false)}></div>
+            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+              <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <ModernCard>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-semibold text-white">Profile settings</h3>
+                    <div className="flex items-center gap-2">
+                      <ModernButton 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setIsSettingsMenuOpen(false);
+                          // Navigation to settings page
+                          window.location.href = '/settings';
+                        }}
+                      >
+                        <Settings size={16} className="mr-2" />
+                        Advanced Settings
+                      </ModernButton>
+                      <button 
+                        onClick={() => setIsSettingsMenuOpen(false)}
+                        className="p-2 hover:bg-[#35414e] rounded-lg transition-colors"
+                      >
+                        <X size={20} className="text-gray-400" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Left Column - Profile Settings */}
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold text-white mb-4">Basic Information</h4>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Nom complet
+                        </label>
+                        <input
+                          type="text"
+                          value={profileData.full_name || ''}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, full_name: e.target.value})}
+                          className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Professional Title
+                        </label>
+                        <input
+                          type="text"
+                          value={profileData.professional_title || ''}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, professional_title: e.target.value})}
+                          className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Location
+                        </label>
+                        <input
+                          type="text"
+                          value={profileData.location || ''}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, location: e.target.value})}
+                          className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Bio
+                        </label>
+                        <textarea
+                          value={profileData.bio || ''}
+                          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setProfileData({...profileData, bio: e.target.value})}
+                          rows={3}
+                          className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2] resize-none"
+                        />
+                      </div>
+
+                      {/* Privacy Settings */}
+                      <div className="pt-4 border-t border-[#35414e]">
+                        <h5 className="text-md font-semibold text-white mb-3">Privacy</h5>
+                        
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="text-sm font-medium text-gray-300">
+                                Afficher l'email
+                              </label>
+                              <p className="text-xs text-gray-400">
+                                Permet aux autres utilisateurs de voir votre email
+                              </p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={privacySettings.show_email}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrivacySettings({...privacySettings, show_email: e.target.checked})}
+                                className="sr-only peer"
+                              />
+                              <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#9c68f2]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#9c68f2]"></div>
+                            </label>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <label className="text-sm font-medium text-gray-300">
+                                Show phone
+                              </label>
+                              <p className="text-xs text-gray-400">
+                                Allow other users to see your phone
+                              </p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={privacySettings.show_phone}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrivacySettings({...privacySettings, show_phone: e.target.checked})}
+                                className="sr-only peer"
+                              />
+                              <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#9c68f2]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#9c68f2]"></div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column - Contact & Social Networks */}
+                    <div className="space-y-6">
+                      {/* Contact Section */}
+                      <div>
+                        <h4 className="text-lg font-semibold text-white mb-4">Contact Information</h4>
+                        
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Email de contact
+                            </label>
+                            <input
+                              type="email"
+                              value={profileData.contact_email || ''}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, contact_email: e.target.value})}
+                              className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                              placeholder="contact@example.com"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Email professionnel pour les clients
+                            </p>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                              Phone de contact
+                            </label>
+                            <input
+                              type="tel"
+                              value={profileData.contact_phone || ''}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProfileData({...profileData, contact_phone: e.target.value})}
+                              className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                              placeholder="+33 6 12 34 56 78"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Professional number for clients
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Social Networks Section */}
+                      <div>
+                        <h4 className="text-lg font-semibold text-white mb-4">Social Networks</h4>
+                        
+                        <div className="space-y-4">
+                          <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-gray-800 rounded flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                      </div>
+                      GitHub
+                    </div>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="https://github.com/username"
+                    value={socialNetworks.github}
+                    onChange={(e) => setSocialNetworks({...socialNetworks, github: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                        </svg>
+                      </div>
+                      Discord
+                    </div>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="username#1234"
+                    value={socialNetworks.discord}
+                    onChange={(e) => setSocialNetworks({...socialNetworks, discord: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-black rounded flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                      </div>
+                      Twitter (X)
+                    </div>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="@username"
+                    value={socialNetworks.twitter}
+                    onChange={(e) => setSocialNetworks({...socialNetworks, twitter: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                      </div>
+                      LinkedIn
+                    </div>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="https://linkedin.com/in/username"
+                    value={socialNetworks.linkedin}
+                    onChange={(e) => setSocialNetworks({...socialNetworks, linkedin: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div className="flex items-center gap-2">
+                      <Globe size={16} className="text-[#9c68f2]" />
+                      Website
+                    </div>
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://yourwebsite.com"
+                    value={socialNetworks.website}
+                    onChange={(e) => setSocialNetworks({...socialNetworks, website: e.target.value})}
+                    className="w-full px-3 py-2 bg-[#35414e] border border-[#1e2938] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2]"
+                  />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Theme Preferences */}
+                    <div className="mt-6 pt-6 border-t border-[#35414e]">
+                      <ThemeSelector />
+                    </div>
+                  </div>
+
+                  {/* Save Button */}
+                  <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-[#35414e]">
+                    <ModernButton 
+                      variant="outline" 
+                      onClick={() => setIsSettingsMenuOpen(false)}
+                      disabled={isSaving}
+                    >
+                      Annuler
+                    </ModernButton>
+                    <ModernButton 
+                      onClick={handleSaveSettings}
+                      disabled={isSaving}
+                    >
+                      {isSaving ? (
+                        <>
+                          <Loader2 size={16} className="mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save size={16} className="mr-2" />
+                          Save
+                        </>
+                      )}
+                    </ModernButton>
+                  </div>
+                </ModernCard>
+              </div>
+            </div>
+            </>
+          )}
+
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <ModernCard>
+            <div className="relative">
+              <div>
+                <p className="text-2xl font-bold text-white">{statistics.orders}</p>
+                <p className="text-sm text-gray-400">Orders</p>
+              </div>
+              <Briefcase size={20} className="absolute top-0 right-0 text-[#9c68f2]" />
+            </div>
+          </ModernCard>
+          <ModernCard>
+            <div className="relative">
+              <div>
+                <p className="text-2xl font-bold text-white">{statistics.clients}</p>
+                <p className="text-sm text-gray-400">Clients</p>
+              </div>
+              <Users size={20} className="absolute top-0 right-0 text-[#9c68f2]" />
+            </div>
+          </ModernCard>
+          <ModernCard>
+            <div className="relative">
+              <div>
+                <p className="text-2xl font-bold text-white">{statistics.rating}</p>
+                <p className="text-sm text-gray-400">Rating</p>
+              </div>
+              <Star size={20} className="absolute top-0 right-0 text-[#9c68f2]" />
+            </div>
+          </ModernCard>
+          <ModernCard>
+            <div className="relative">
+              <div>
+                <p className="text-2xl font-bold text-white">{statistics.experience}+</p>
+                <p className="text-sm text-gray-400">Years exp.</p>
+              </div>
+              <TrendingUp size={20} className="absolute top-0 right-0 text-[#9c68f2]" />
+            </div>
+          </ModernCard>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Tabs */}
+            <ModernCard>
+              <div className="flex gap-1 mb-6">
+                {[
+                  { id: 'overview', label: 'Overview' },
+                  { id: 'projects', label: 'Projects' },
+                  { id: 'activity', label: 'Activity' }
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      activeTab === tab.id
+                        ? 'bg-[#9c68f2] text-white'
+                        : 'text-gray-400 hover:text-white hover:bg-[#35414e]'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Tab Content */}
+              {activeTab === 'overview' && (
+                <div className="space-y-6">
+                  {/* About */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-3">About</h3>
+                    <p className="text-gray-400 leading-relaxed">
+                      <div className="whitespace-pre-line">{profileData.bio || 'No bio available.'}</div>
+                    </p>
+                  </div>
+
+                  {/* Skills */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-3">Skills</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {skills.length > 0 ? (
+                        skills.map(skill => (
+                          <div key={skill.id} className="flex items-center gap-2 px-3 py-1 bg-[#35414e] text-white rounded-full text-sm">
+                            <span>{skill.name}</span>
+                            <span className={`text-xs ${
+                              skill.level === 'expert' ? 'text-orange-400' :
+                              skill.level === 'advanced' ? 'text-purple-400' :
+                              skill.level === 'intermediate' ? 'text-blue-400' :
+                              'text-green-400'
+                            }`}>
+                              {skill.level === 'expert' ? 'Expert' :
+                               skill.level === 'advanced' ? 'Advanced' :
+                               skill.level === 'intermediate' ? 'Intermediate' : 'Beginner'}
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <span className="text-gray-400 text-sm">No skills added</span>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+              {activeTab === 'projects' && (
+                <div className="space-y-4">
+                  {orders.length > 0 ? (
+                    <div className="space-y-4">
+                      {orders.map(order => (
+                        <div 
+                          key={order.id} 
+                          className="bg-[#35414e] rounded-lg p-4 border border-[#1e2938] hover:border-[#9c68f2]/50 transition-colors cursor-pointer group"
+                          onClick={() => window.location.href = `/project/${order.id}`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-[#9c68f2] transition-colors">{order.title}</h3>
+                              {order.description && (
+                                <p className="text-gray-400 text-sm mb-3 line-clamp-2">{order.description}</p>
+                              )}
+                              <div className="flex items-center gap-4 text-sm text-gray-400">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  order.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                                  order.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' :
+                                  order.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                                  'bg-red-500/20 text-red-400'
+                                }`}>
+                                  {order.status === 'completed' ? 'Completed' :
+                                   order.status === 'in_progress' ? 'In Progress' :
+                                   order.status === 'pending' ? 'Pending' : 'Cancelled'}
+                                </span>
+                                {order.budget && (
+                                  <span className="text-white font-medium">
+                                    {order.budget} {order.currency}
+                                  </span>
+                                )}
+                                {order.due_date && (
+                                  <span>
+                                    Due: {new Date(order.due_date).toLocaleDateString('en-US')}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xs text-gray-500">
+                                {new Date(order.created_at).toLocaleDateString('fr-FR')}
+                              </p>
+                              {/* Simulated likes and views */}
+                              <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                                <span className="flex items-center gap-1">
+                                  <Heart size={12} className="text-red-400" />
+                                  {Math.floor(Math.random() * 50) + 5}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Eye size={12} className="text-blue-400" />
+                                  {Math.floor(Math.random() * 200) + 20}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Briefcase size={48} className="mx-auto text-gray-400 mb-4" />
+                      <h3 className="text-lg font-semibold text-white mb-2">No projects</h3>
+                      <p className="text-gray-400">Your projects will appear here once you create them</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'activity' && (
+                <div className="space-y-4">
+                  {activities.map((activity) => (
+                    <div key={activity.id} className="flex items-start gap-3 p-3 bg-[#35414e] rounded-lg">
+                      <div className="w-8 h-8 bg-[#9c68f2] rounded-full flex items-center justify-center">
+                        <Activity size={16} className="text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-medium text-white">{activity.title}</h4>
+                        <p className="text-xs text-gray-400">{activity.description}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(activity.created_at).toLocaleDateString('fr-FR', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  {activities.length === 0 && (
+                    <div className="text-center py-12">
+                      <Activity size={48} className="mx-auto text-gray-400 mb-4" />
+                      <h3 className="text-lg font-semibold text-white mb-2">No activity</h3>
+                      <p className="text-gray-400">Your activity will appear here</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </ModernCard>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Social Links */}
+            <ModernCard title="Social Networks" icon={<Globe size={20} className="text-white" />}>
+              <div className="space-y-3">
+                {socialNetworks.github && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-gray-800 rounded flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                      </svg>
+                    </div>
+                    <a href={`https://github.com/${socialNetworks.github}`} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9c68f2] hover:text-white transition-colors">
+                      GitHub
+                    </a>
+                  </div>
+                )}
+                {socialNetworks.linkedin && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                      </svg>
+                    </div>
+                    <a href={`https://linkedin.com/in/${socialNetworks.linkedin}`} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9c68f2] hover:text-white transition-colors">
+                      LinkedIn
+                    </a>
+                  </div>
+                )}
+                {socialNetworks.twitter && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-black rounded flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                    </div>
+                    <a href={`https://twitter.com/${socialNetworks.twitter}`} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9c68f2] hover:text-white transition-colors">
+                      Twitter
+                    </a>
+                  </div>
+                )}
+                {socialNetworks.discord && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                      </svg>
+                    </div>
+                    <span className="text-sm text-gray-300">{socialNetworks.discord}</span>
+                  </div>
+                )}
+                {socialNetworks.website && (
+                  <div className="flex items-center gap-3">
+                    <Globe size={16} className="text-gray-400" />
+                    <a href={socialNetworks.website.startsWith('http') ? socialNetworks.website : `https://${socialNetworks.website}`} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9c68f2] hover:text-white transition-colors">
+                      Website
+                    </a>
+                  </div>
+                )}
+                {!socialNetworks.github && !socialNetworks.linkedin && !socialNetworks.twitter && !socialNetworks.discord && !socialNetworks.website && (
+                  <div className="text-sm text-gray-500 text-center py-4">
+                    No social networks configured
+                  </div>
+                )}
+              </div>
+            </ModernCard>
+
+            {/* Achievements */}
+            <ModernCard title="Awards" icon={<Award size={20} className="text-white" />}>
+              <div className="space-y-3">
+                {awards.length > 0 ? (
+                  awards.map(award => (
+                    <div key={award.id} className="flex items-start gap-3 p-3 bg-[#35414e] rounded-lg">
+                      <Award size={20} className="text-yellow-400 mt-1 flex-shrink-0" />
+                      <div className="flex-1">
+                        <h4 className="text-white font-medium">{award.title}</h4>
+                        <p className="text-sm text-gray-400">{award.issuer}</p>
+                        {award.description && (
+                          <p className="text-sm text-gray-400 mt-1">{award.description}</p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(award.date_received).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <Award size={48} className="mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-semibold text-white mb-2">No awards</h3>
+                    <p className="text-gray-400">Your awards will appear here</p>
+                  </div>
+                )}
+              </div>
+            </ModernCard>
+
+            {/* Contact */}
+            <ModernCard title="Contact" icon={<Mail size={20} className="text-white" />}>
+              <div className="space-y-3">
+                {profileData.contact_email && (
+                  <div className="flex items-center gap-3">
+                    <Mail size={16} className="text-gray-400" />
+                    <span className="text-sm text-gray-300">{profileData.contact_email}</span>
+                  </div>
+                )}
+                {profileData.contact_phone && (
+                  <div className="flex items-center gap-3">
+                    <Phone size={16} className="text-gray-400" />
+                    <span className="text-sm text-gray-300">{profileData.contact_phone}</span>
+                  </div>
+                )}
+                {profileData.website && (
+                  <div className="flex items-center gap-3">
+                    <Globe size={16} className="text-gray-400" />
+                    <a 
+                      href={profileData.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-[#9c68f2] hover:text-white transition-colors"
+                    >
+                      {profileData.website}
+                    </a>
+                  </div>
+                )}
+                {!profileData.show_email && !profileData.show_phone && !profileData.website && (
+                  <div className="text-sm text-gray-500 text-center py-4">
+                    Aucune information de contact visible
+                  </div>
+                )}
+              </div>
+            </ModernCard>
+          </div>
+        </div>
+      </div>
+  );
+};
+
+// Loading and error state management
+const PageProfileWithErrorHandling: React.FC<PageProfileProps> = (props) => {
+  return <PageProfile {...props} />;
+};
+
+export default PageProfileWithErrorHandling;

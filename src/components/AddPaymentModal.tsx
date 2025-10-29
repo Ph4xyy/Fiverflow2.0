@@ -29,8 +29,8 @@ const AddPaymentModal: React.FC<AddPaymentModalProps> = ({ isOpen, onClose, invo
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      toast.success('Paiement (demo) ajouté');
-      onSuccess(); onClose();
+      console.error('Supabase not configured - cannot add payment');
+      toast.error('Database not configured');
       return;
     }
 

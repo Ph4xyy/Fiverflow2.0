@@ -19,9 +19,9 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const contextValue: UserDataContextType = {
     role: 'user', // Rôle par défaut
     loading: false, // Plus de loading
-    refreshUserRole: async () => {
-      console.log('🔄 UserDataContext: refreshUserRole disabled - auth system removed');
-    }
+           refreshUserRole: async () => {
+             // refreshUserRole disabled - auth system removed
+           }
   };
 
   return (

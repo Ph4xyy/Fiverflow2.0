@@ -1,139 +1,149 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useSubscription } from '../hooks/useSubscription';
 import { useSubscriptionPermissions } from '../hooks/useSubscriptionPermissions';
-import { Lock, Crown, Zap, TrendingUp } from 'lucide-react';
-import ModernButton from './ModernButton';
+import { Button } from './ui/Button';
+import { Lock, Crown, Star, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface SubscriptionGuardProps {
   children: React.ReactNode;
-  requiredPlan: 'launch' | 'boost' | 'scale';
-  pageName: string;
+  requiredPlan: 'Lunch' | 'Boost' | 'Scale';
+  pageType?: 'admin' | 'pro' | 'premium';
+  pageName?: string;
   description?: string;
+  fallback?: React.ReactNode;
 }
 
-const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
+export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
   children,
   requiredPlan,
+  pageType,
   pageName,
-  description
+  description,
+  fallback
 }) => {
-  const { subscription, isAdmin, canAccessPage, loading } = useSubscriptionPermissions();
-  const [showLockScreen, setShowLockScreen] = useState(false);
+  const { plan, isLoading, canAccess } = useSubscription();
+  const { isAdmin, loading: permissionsLoading } = useSubscriptionPermissions();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    // Ne pas bloquer l'affichage, vérifier en arrière-plan
-    if (!loading) {
-      const hasAccess = canAccessPage(pageName as any);
-      
-      // Les admins ont toujours accès
-      if (isAdmin) {
-        setShowLockScreen(false);
-        return;
-      }
-
-      // Afficher l'écran de verrouillage seulement si pas d'accès
-      setShowLockScreen(!hasAccess);
-    }
-  }, [loading, canAccessPage, pageName, isAdmin]);
-
-  // Afficher l'écran de verrouillage seulement si nécessaire
-  if (showLockScreen) {
+  if (isLoading || permissionsLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155] flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-[#1e2938] border border-[#35414e] rounded-xl shadow-2xl p-8 text-center">
-          {/* Icône de verrouillage */}
-          <div className="w-20 h-20 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Lock size={32} className="text-white" />
-          </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
-          {/* Titre */}
-          <h1 className="text-2xl font-bold text-white mb-4">
-            Page Verrouillée
-          </h1>
+  // Les admins ont toujours accès à toutes les pages
+  if (isAdmin) {
+    console.log('✅ SubscriptionGuard: Admin bypass - accès autorisé');
+    return <>{children}</>;
+  }
 
-          {/* Description */}
-          <p className="text-gray-400 mb-6">
-            {description || `Cette page nécessite un abonnement ${requiredPlan.toUpperCase()}.`}
-          </p>
+  const hasAccess = pageType ? canAccess(pageType) : (() => {
+    // Debug: afficher les informations
+    console.log('SubscriptionGuard Debug:', {
+      userPlan: plan,
+      requiredPlan,
+      pageType,
+      canAccess: canAccess
+    });
+    
+    // Si le plan requis est Lunch, autoriser l'accès
+    if (requiredPlan === 'Lunch') {
+      return true;
+    }
+    // Pour les autres plans, vérifier la hiérarchie
+    const planHierarchy = { 'Lunch': 0, 'Boost': 1, 'Scale': 2 };
+    const userPlanLevel = planHierarchy[plan as keyof typeof planHierarchy] || 0;
+    const requiredPlanLevel = planHierarchy[requiredPlan as keyof typeof planHierarchy] || 0;
+    return userPlanLevel >= requiredPlanLevel;
+  })();
 
-          {/* Plan actuel */}
-          <div className="bg-[#35414e] rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              {subscription?.plan_name === 'launch' && <Crown size={20} className="text-yellow-500" />}
-              {subscription?.plan_name === 'boost' && <Zap size={20} className="text-blue-500" />}
-              {subscription?.plan_name === 'scale' && <TrendingUp size={20} className="text-purple-500" />}
-              <span className="text-white font-semibold">
-                Plan Actuel: {subscription?.plan_display_name || 'Launch'}
-              </span>
-            </div>
-            <p className="text-gray-400 text-sm">
-              {subscription?.plan_name === 'launch' && 'Accès limité aux fonctionnalités de base'}
-              {subscription?.plan_name === 'boost' && 'Accès aux fonctionnalités premium'}
-              {subscription?.plan_name === 'scale' && 'Accès complet à toutes les fonctionnalités'}
+  if (!hasAccess) {
+    if (fallback) {
+      return <>{fallback}</>;
+    }
+
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="mb-6">
+            <Lock className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Accès Restreint
+            </h1>
+            <p className="text-gray-600 mb-4">
+              Cette fonctionnalité nécessite un abonnement {requiredPlan}.
+            </p>
+            <p className="text-sm text-gray-500">
+              Votre plan actuel : <span className="font-semibold">{plan}</span>
             </p>
           </div>
 
-          {/* Plans disponibles */}
-          <div className="space-y-3 mb-6">
-            <h3 className="text-white font-semibold mb-3">Plans Disponibles:</h3>
-            
-            <div className="bg-[#35414e] rounded-lg p-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Crown size={16} className="text-yellow-500" />
-                  <span className="text-white font-medium">Launch</span>
-                </div>
-                <span className="text-green-400 font-semibold">Gratuit</span>
+          <div className="space-y-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="font-medium text-blue-800 mb-2">Fonctionnalités Disponibles</h3>
+              <div className="space-y-2 text-sm text-blue-700">
+                {requiredPlan === 'Boost' && (
+                  <>
+                    <div className="flex items-center">
+                      <Star className="w-4 h-4 mr-2" />
+                      <span>Analyses avancées</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Star className="w-4 h-4 mr-2" />
+                      <span>Rapports personnalisés</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Star className="w-4 h-4 mr-2" />
+                      <span>Support prioritaire</span>
+                    </div>
+                  </>
+                )}
+                {requiredPlan === 'Scale' && (
+                  <>
+                    <div className="flex items-center">
+                      <Crown className="w-4 h-4 mr-2" />
+                      <span>Gestionnaire de compte dédié</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Crown className="w-4 h-4 mr-2" />
+                      <span>Développement personnalisé</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Crown className="w-4 h-4 mr-2" />
+                      <span>Support 24/7</span>
+                    </div>
+                  </>
+                )}
               </div>
-              <p className="text-gray-400 text-sm mt-1">Dashboard, Clients (5 max), Orders (10 max)</p>
             </div>
 
-            <div className="bg-[#35414e] rounded-lg p-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Zap size={16} className="text-blue-500" />
-                  <span className="text-white font-medium">Boost</span>
-                </div>
-                <span className="text-blue-400 font-semibold">24€/mois</span>
-              </div>
-              <p className="text-gray-400 text-sm mt-1">Tout de Launch + Calendar, Referrals, Workboard</p>
+            <div className="flex flex-col space-y-3">
+              <Button
+                onClick={() => navigate('/upgrade')}
+                className="w-full"
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                Mettre à Niveau vers {requiredPlan}
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={() => navigate('/dashboard')}
+                className="w-full"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                Retour au Tableau de Bord
+              </Button>
             </div>
-
-            <div className="bg-[#35414e] rounded-lg p-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <TrendingUp size={16} className="text-purple-500" />
-                  <span className="text-white font-medium">Scale</span>
-                </div>
-                <span className="text-purple-400 font-semibold">59€/mois</span>
-              </div>
-              <p className="text-gray-400 text-sm mt-1">Tout de Boost + Stats, Invoices</p>
-            </div>
-          </div>
-
-          {/* Boutons d'action */}
-          <div className="space-y-3">
-            <ModernButton
-              onClick={() => window.location.href = '/upgrade'}
-              className="w-full"
-            >
-              <Crown size={16} className="mr-2" />
-              Voir les Plans
-            </ModernButton>
-            
-            <ModernButton
-              variant="outline"
-              onClick={() => window.history.back()}
-              className="w-full"
-            >
-              Retour
-            </ModernButton>
           </div>
         </div>
       </div>
     );
   }
 
-  // Afficher le contenu immédiatement (pas de loader bloquant)
   return <>{children}</>;
 };
 

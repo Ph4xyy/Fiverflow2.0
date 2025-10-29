@@ -50,13 +50,10 @@ const LogoUploader: React.FC<Props> = ({ path, onChange, maxSizeMB = 5 }) => {
       return;
     }
 
-    // Mode DEMO : pas de supabase configuré → data URL locale
+    // Mode DEMO : pas de supabase configuré → erreur
     if (!isSupabaseConfigured || !supabase) {
-      const local = URL.createObjectURL(file);
-      setPreviewUrl(local);
-      onChange(null); // pas de path en mode demo
-      toast.success("Logo défini (demo)");
-      resetInput();
+      console.error('Supabase not configured - cannot upload logo');
+      toast.error('Database not configured');
       return;
     }
 
@@ -68,7 +65,7 @@ const LogoUploader: React.FC<Props> = ({ path, onChange, maxSizeMB = 5 }) => {
       if (se) throw se;
       const session = s?.session;
       if (!session) {
-        toast.error("Tu dois être connecté pour uploader un logo.");
+        toast.error("You must be logged in to upload a logo.");
         return;
       }
 
@@ -113,13 +110,13 @@ const LogoUploader: React.FC<Props> = ({ path, onChange, maxSizeMB = 5 }) => {
       const url = await getFileUrl(newPath);
       setPreviewUrl(url);
 
-      toast.success("Logo uploadé");
+      toast.success("Logo uploaded");
     } catch (err: any) {
       console.error("[LogoUploader]", err);
       const msg =
         err?.message?.includes("row-level security") || err?.message?.includes("RLS")
-          ? "Accès refusé par les règles RLS du bucket. Vérifie tes policies Storage."
-          : err?.message || "Upload impossible";
+          ? "Access denied by RLS bucket rules. Check your Storage policies."
+          : err?.message || "Upload failed";
       toast.error(msg);
       // Reset preview on error
       setPreviewUrl(null);
@@ -131,9 +128,8 @@ const LogoUploader: React.FC<Props> = ({ path, onChange, maxSizeMB = 5 }) => {
 
   const onRemove = async () => {
     if (!isSupabaseConfigured || !supabase) {
-      // demo
-      setPreviewUrl(null);
-      onChange(null);
+      console.error('Supabase not configured - cannot delete logo');
+      toast.error('Database not configured');
       return;
     }
 
@@ -144,10 +140,10 @@ const LogoUploader: React.FC<Props> = ({ path, onChange, maxSizeMB = 5 }) => {
       }
       setPreviewUrl(null);
       onChange(null);
-      toast.success("Logo supprimé");
+      toast.success("Logo deleted");
     } catch (err: any) {
       console.error("[LogoUploader] delete", err);
-      toast.error(err?.message || "Suppression impossible");
+      toast.error(err?.message || "Deletion failed");
     } finally {
       setLoading(false);
       resetInput();

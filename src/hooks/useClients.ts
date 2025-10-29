@@ -20,27 +20,7 @@ interface UseClientsReturn {
   refetchClients: () => Promise<void>;
 }
 
-const mockClients: Client[] = [
-  {
-    id: '1',
-    name: 'John Doe',
-    platform: 'Fiverr',
-    user_id: 'mock-user',
-    created_at: new Date().toISOString(),
-    company_name: 'Doe Industries',
-    client_status: 'active',
-    priority_level: 'high'
-  },
-  {
-    id: '2',
-    name: 'Jane Smith',
-    platform: 'Upwork',
-    user_id: 'mock-user',
-    created_at: new Date().toISOString(),
-    client_status: 'prospect',
-    priority_level: 'medium'
-  }
-];
+const mockClients: Client[] = [];
 
 export const useClients = (): UseClientsReturn => {
   const { user, authReady } = useAuth();
@@ -71,10 +51,10 @@ export const useClients = (): UseClientsReturn => {
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      console.log('[useClients] fetchClients: Using mock data (Supabase not configured)');
-      setClients(mockClients);
+      console.log('[useClients] fetchClients: Supabase not configured');
+      setClients([]);
       setLoading(false);
-      setError(null);
+      setError('Database not configured');
       return;
     }
 
@@ -116,12 +96,12 @@ export const useClients = (): UseClientsReturn => {
           setError(null);
           // Garder les données actuelles si disponibles
           if (clients.length === 0) {
-            setClients(mockClients); // Afficher mock en attendant
+            setClients([]); // Afficher vide en attendant
           }
         } else {
           // Erreur autre que JWT
           console.error('[useClients] fetchClients: ❌ Fetch error:', supabaseError);
-          setClients(mockClients); // Fallback sur mock
+          setClients([]); // Fallback sur vide
           setError(null); // Ne pas afficher d'erreur à l'utilisateur
         }
       } else {
@@ -139,11 +119,11 @@ export const useClients = (): UseClientsReturn => {
         console.warn('[useClients] fetchClients: ⚠️ Auth error in catch, will retry:', err);
         setError(null);
         if (clients.length === 0) {
-          setClients(mockClients);
+          setClients([]);
         }
       } else {
         console.error('[useClients] fetchClients: 💥 Unexpected error:', err);
-        setClients(mockClients);
+        setClients([]);
         setError(null);
       }
     } finally {

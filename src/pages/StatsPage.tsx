@@ -5,6 +5,7 @@ import PlanRestrictedPage from '../components/PlanRestrictedPage';
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
 import { useAuth } from '../contexts/AuthContext';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useDashboardStats } from '../hooks/useDashboardStats';
 
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
@@ -78,6 +79,7 @@ const StatsPage: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const { currency } = useCurrency();
   const { restrictions, loading: planLoading, checkAccess } = usePlanRestrictions();
+  const { stats, loading: statsLoading, error: statsError, refetch } = useDashboardStats();
 
   const [period, setPeriod] = useState<Period>('30d');
   const [customStart, setCustomStart] = useState<string>(''); // YYYY-MM-DD
@@ -85,9 +87,6 @@ const StatsPage: React.FC = () => {
   const [appliedCustom, setAppliedCustom] = useState<{ start: string; end: string } | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [offline, setOffline] = useState(false);
-
-  const [clients, setClients] = useState<any[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
 
   const { sinceTimestamp, sinceDateOnly, daysArray } = useMemo(() => {
     // Determine start and end based on preset or applied custom
@@ -117,236 +116,43 @@ const StatsPage: React.FC = () => {
     return { sinceTimestamp: iso, sinceDateOnly: iso.slice(0, 10), daysArray: days };
   }, [period, appliedCustom]);
 
-  // -------------------- DATA FETCH --------------------
-  const fetchStatsData = useCallback(async () => {
-    if (!isSupabaseConfigured) {
-      setOffline(true);
-      setClients([]);
-      setOrders([]);
-      return;
-    }
-    if (!user) return;
+  // Utiliser les données du hook useDashboardStats
+  const clients = stats?.recentOrders.map(o => ({ id: o.id, name: o.client_name })) || [];
+  const orders = stats?.recentOrders.map(o => ({ 
+    id: o.id, 
+    title: o.title, 
+    status: o.status, 
+    budget: 0, // Les données détaillées ne sont pas dans recentOrders
+    created_at: o.created_at 
+  })) || [];
 
-    setRefreshing(true);
-    setOffline(false);
+  // Utiliser les données du hook directement
+  const totalRevenue = stats?.totalRevenue || 0;
+  const pendingRevenue = stats?.pendingRevenue || 0;
+  const averageDeliveryTime = stats?.averageDeliveryTime || 0;
+  const completionRate = stats?.completionRate || 0;
+  const averageOrderValue = stats?.averageOrderValue || 0;
+  const orderVolume = stats?.totalOrders || 0;
+  const pendingOrdersCount = orderVolume - Math.round((completionRate / 100) * orderVolume);
 
-    try {
-      const { data: clientsData, error: clientsErr } = await supabase
-        .from('clients')
-        .select('id,name,platform,created_at,user_id')
-          .eq('user_id', user.id);
-
-      if (clientsErr) throw clientsErr;
-      const safeClients = clientsData || [];
-      setClients(safeClients);
-
-      const clientIds = safeClients.map((c) => c.id);
-      if (clientIds.length === 0) {
-        setOrders([]);
-        return;
-      }
-
-      // NOTE: garde la même logique que ta version pour préserver la compatibilité
-      const { data: ordersData, error: ordersErr } = await supabase
-        .from('orders')
-        .select('*')
-          .in('client_id', clientIds)
-        .or(
-          [
-            `created_at.gte.${sinceTimestamp}`,
-            `start_date.gte.${sinceDateOnly}`,
-            `completion_date.gte.${sinceDateOnly}`,
-          ].join(',')
-        );
-
-      if (ordersErr) throw ordersErr;
-      setOrders(ordersData || []);
-    } catch (e) {
-      console.warn('[Stats] fetch error:', e);
-      setOffline(true);
-      setClients([]);
-      setOrders([]);
-    } finally {
-      setRefreshing(false);
-    }
-  }, [user, sinceTimestamp, sinceDateOnly]);
-
-  useEffect(() => {
-    if (authLoading) return;
-    if (!user && !authLoading) {
-      setClients([]);
-      setOrders([]);
-      return;
-    }
-    fetchStatsData();
-    const i = setInterval(fetchStatsData, 30000);
-    return () => clearInterval(i);
-  }, [user, authLoading]); // 🔥 FIXED: Remove fetchStatsData from dependencies to prevent infinite loops
-
-  useEffect(() => {
-    if (!isSupabaseConfigured || !user) return;
-    const channel = supabase
-      .channel('stats-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, fetchStatsData)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'clients' }, fetchStatsData)
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, fetchStatsData]);
-
-  // -------------------- DERIVED --------------------
-  const clientsById: Record<string, any> = useMemo(
-    () => clients.reduce((acc, c) => ((acc[c.id] = c), acc), {} as Record<string, any>),
-    [clients]
-  );
-
-  const statusDone = (s: string) => ['completed', 'delivered', 'paid', 'done'].includes(norm(s));
-  const isDone = (o: any) => statusDone(o.status);
-
-  const completedOrders = useMemo(() => orders.filter(isDone), [orders]);
-  const pendingOrders = useMemo(() => orders.filter((o) => !isDone(o)), [orders]);
-
-  const totalRevenue = useMemo(
-    () => completedOrders.reduce((sum, o) => sum + parseNum(o.amount), 0),
-    [completedOrders]
-  );
-  const pendingRevenue = useMemo(
-    () => pendingOrders.reduce((sum, o) => sum + parseNum(o.amount), 0),
-    [pendingOrders]
-  );
-
-  const deliveryDurations = useMemo(() => {
-    return completedOrders
-      .map((o) => {
-        const start = toDate(o.start_date) || toDate(o.created_at);
-        const end = toDate(o.completion_date);
-        return start && end ? daysBetween(start, end) : null;
-      })
-      .filter((v): v is number => v !== null);
-  }, [completedOrders]);
-
-  const averageDeliveryTime = useMemo(() => {
-    return deliveryDurations.length
-      ? deliveryDurations.reduce((a, b) => a + b, 0) / deliveryDurations.length
-      : 0;
-  }, [deliveryDurations]);
-
-  const orderVolume = orders.length;
-  const completionRate = orderVolume ? Math.round((completedOrders.length / orderVolume) * 100) : 0;
-  const averageOrderValue = completedOrders.length
-    ? totalRevenue / completedOrders.length
-    : 0;
-
-  // Earnings per platform (Pie)
-  const earningsByPlatform = useMemo(() => {
-    return orders.reduce<Record<string, number>>((acc, o) => {
-      const cl = clientsById[o.client_id];
-      const platform = cl?.platform || 'Unknown';
-      acc[platform] = (acc[platform] || 0) + parseNum(o.amount);
-      return acc;
-    }, {});
-  }, [orders, clientsById]);
-
-  const pieData = useMemo(
-    () => Object.entries(earningsByPlatform).map(([name, value]) => ({ name, value })),
-    [earningsByPlatform]
-  );
-
-  // Top Clients
-  const revenueByClient: Record<string, number> = useMemo(() => {
-    return orders.reduce((acc, o) => {
-      const id = o.client_id;
-      if (!id) return acc;
-      acc[id] = (acc[id] || 0) + parseNum(o.amount);
-      return acc;
-    }, {} as Record<string, number>);
-  }, [orders]);
-
-  const topClients = useMemo(
-    () =>
-      Object.entries(revenueByClient)
-        .map(([clientId, revenue]) => ({ name: clientsById[clientId]?.name ?? 'Unknown', revenue }))
-        .sort((a, b) => b.revenue - a.revenue)
-        .slice(0, 5),
-    [revenueByClient, clientsById]
-  );
+  // Utiliser les données du hook pour les graphiques
+  const pieData = stats?.ordersByStatus.map(s => ({ name: s.status, value: s.count })) || [];
+  const topClients = stats?.topClients || [];
+  const allStatuses = stats?.ordersByStatus.map(s => s.status) || [];
 
   // Recent Activity
-  const recentActivities = useMemo(() => {
-    return [...orders]
-      .sort(
-        (a, b) =>
-          new Date(b.created_at || b.start_date || b.completion_date).getTime() -
-          new Date(a.created_at || a.start_date || a.completion_date).getTime()
-      )
-      .slice(0, 6)
-      .map((o) => ({
-        label:
-          o.title ||
-          o.description ||
-          `${clientsById[o.client_id]?.name ?? 'Order'} • ${o.status ?? ''}`,
-        created_at: o.created_at || o.start_date || o.completion_date,
-      }));
-  }, [orders, clientsById]);
+  const recentActivities = stats?.recentOrders.map(o => ({
+    label: o.title,
+    created_at: o.created_at,
+  })) || [];
 
-  // Trend: daily revenue (completed only)
-  const byDayRevenue: Record<string, number> = useMemo(() => {
-    const m: Record<string, number> = {};
-    completedOrders.forEach((o) => {
-      const d = toDate(o.completion_date);
-      if (!d) return;
-      const key = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString().slice(0, 10);
-      m[key] = (m[key] || 0) + parseNum(o.amount);
-    });
-    return m;
-  }, [completedOrders]);
-
-  const lineRevenueData = useMemo(() => {
-    return daysArray.map((d) => {
-      const key = d.toISOString().slice(0, 10);
-      return { date: key, revenue: byDayRevenue[key] || 0 };
-    });
-  }, [daysArray, byDayRevenue]);
-
-  // Cumulative revenue Area
-  const areaCumulativeData = useMemo(() => {
-    let running = 0;
-    return lineRevenueData.map((row) => {
-      running += row.revenue;
-      return { date: row.date, cumulative: running };
-    });
-  }, [lineRevenueData]);
-
-  // Stacked bars by status per day (volume)
-  const byDayStatus: Record<string, Record<string, number>> = useMemo(() => {
-    const m: Record<string, Record<string, number>> = {};
-    orders.forEach((o) => {
-      const d = toDate(o.created_at) || toDate(o.start_date) || toDate(o.completion_date);
-      if (!d) return;
-      const key = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString().slice(0, 10);
-      const s = norm(o.status) || 'unknown';
-      if (!m[key]) m[key] = {};
-      m[key][s] = (m[key][s] || 0) + 1;
-    });
-    return m;
-  }, [orders]);
-
-  const allStatuses = useMemo(() => {
-    const set = new Set<string>();
-    Object.values(byDayStatus).forEach((row) => Object.keys(row).forEach((s) => set.add(s)));
-    return Array.from(set);
-  }, [byDayStatus]);
-
-  const stackedData = useMemo(() => {
-    return daysArray.map((d) => {
-      const key = d.toISOString().slice(0, 10);
-      const base: any = { date: key };
-      const row = byDayStatus[key] || {};
-      allStatuses.forEach((s) => (base[s] = row[s] || 0));
-      return base;
-    });
-  }, [daysArray, byDayStatus, allStatuses]);
+  // Utiliser les données du hook pour les graphiques
+  const lineRevenueData = stats?.monthlyRevenue.map(m => ({ date: m.month, revenue: m.revenue })) || [];
+  const areaCumulativeData = lineRevenueData.map((row, index) => {
+    const cumulative = lineRevenueData.slice(0, index + 1).reduce((sum, r) => sum + r.revenue, 0);
+    return { date: row.date, cumulative };
+  });
+  const stackedData = stats?.ordersByStatus.map(s => ({ date: s.status, [s.status]: s.count })) || [];
 
   const periodOptions: { label: string; value: Period }[] = [
     { label: 'Last 7 Days', value: '7d' },
@@ -356,14 +162,12 @@ const StatsPage: React.FC = () => {
   ];
 
   // -------------------- ACCESS --------------------
-  if (planLoading) {
+  if (planLoading || statsLoading) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
           <p className="ml-3 text-gray-400">{'Loading...'}</p>
         </div>
-      </Layout>
     );
   }
 
@@ -379,10 +183,32 @@ const StatsPage: React.FC = () => {
     );
   }
 
+  if (statsError) {
+    return (
+      <div className="p-6 text-center">
+          <p className="text-red-400 font-semibold">Error loading statistics</p>
+          <p className="text-sm text-slate-400 mt-1">{statsError}</p>
+          <button
+            onClick={refetch}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="p-6 text-center">
+          <p className="text-gray-400">No statistics available</p>
+        </div>
+    );
+  }
+
   // -------------------- RENDER --------------------
   return (
-    <Layout>
-      <div className="space-y-6 p-4 sm:p-6">
+    <div className="space-y-6 p-4 sm:p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
@@ -444,10 +270,10 @@ const StatsPage: React.FC = () => {
               )}
             </div>
             <button
-              onClick={fetchStatsData}
+              onClick={refetch}
               className="inline-flex items-center px-3 py-2 rounded-lg text-white bg-gradient-to-r from-[#9c68f2] to-[#422ca5] hover:from-[#8a5cf0] hover:to-[#3a2590] transition"
             >
-              <RefreshCw className={`mr-2 ${refreshing ? 'animate-spin' : ''}`} size={16} />
+              <RefreshCw className={`mr-2 ${statsLoading ? 'animate-spin' : ''}`} size={16} />
               {'Refresh'}
             </button>
           </div>
@@ -478,7 +304,7 @@ const StatsPage: React.FC = () => {
                 <ShoppingCart size={20} className="text-gray-400" />
               </div>
             </div>
-            <p className="mt-2 text-xs text-slate-400">{'Open orders:'} {pendingOrders.length}</p>
+            <p className="mt-2 text-xs text-slate-400">{'Open orders:'} {pendingOrdersCount}</p>
           </div>
 
           <div className={`${cardClass} p-4`}>
@@ -522,8 +348,15 @@ const StatsPage: React.FC = () => {
                   <XAxis dataKey="date" tick={{ fill: COLORS.txtMuted, fontSize: 12 }} />
                   <YAxis tick={{ fill: COLORS.txtMuted, fontSize: 12 }} />
                   <Tooltip
-                    contentStyle={{ background: COLORS.bgCard, border: `1px solid ${COLORS.ring}`, color: COLORS.txt }}
-                    labelStyle={{ color: COLORS.txtMuted }}
+                    contentStyle={{ 
+                      background: '#1e2938', 
+                      border: '1px solid #35414e', 
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                    }}
+                    labelStyle={{ color: '#94a3b8', fontSize: '12px' }}
+                    itemStyle={{ color: '#ffffff', fontSize: '14px' }}
                   />
                   <Line type="monotone" dataKey="revenue" stroke={COLORS.sky} strokeWidth={2} dot={false} />
                 </LineChart>
@@ -543,8 +376,15 @@ const StatsPage: React.FC = () => {
                   <XAxis dataKey="date" tick={{ fill: COLORS.txtMuted, fontSize: 12 }} />
                   <YAxis tick={{ fill: COLORS.txtMuted, fontSize: 12 }} />
                   <Tooltip
-                    contentStyle={{ background: COLORS.bgCard, border: `1px solid ${COLORS.ring}`, color: COLORS.txt }}
-                    labelStyle={{ color: COLORS.txtMuted }}
+                    contentStyle={{ 
+                      background: '#1e2938', 
+                      border: '1px solid #35414e', 
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                    }}
+                    labelStyle={{ color: '#94a3b8', fontSize: '12px' }}
+                    itemStyle={{ color: '#ffffff', fontSize: '14px' }}
                   />
                   <Area type="monotone" dataKey="cumulative" stroke={COLORS.green} fill="#16a34a20" strokeWidth={2} />
                 </AreaChart>
@@ -564,8 +404,15 @@ const StatsPage: React.FC = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip
-                    contentStyle={{ background: COLORS.bgCard, border: `1px solid ${COLORS.ring}`, color: COLORS.txt }}
-                    labelStyle={{ color: COLORS.txtMuted }}
+                    contentStyle={{ 
+                      background: '#1e2938', 
+                      border: '1px solid #35414e', 
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                    }}
+                    labelStyle={{ color: '#94a3b8', fontSize: '12px' }}
+                    itemStyle={{ color: '#ffffff', fontSize: '14px' }}
                   />
                   <Legend verticalAlign="bottom" height={24} wrapperStyle={{ color: COLORS.txtMuted, fontSize: 12 }} />
                   <Pie
@@ -598,8 +445,15 @@ const StatsPage: React.FC = () => {
                   <XAxis dataKey="date" tick={{ fill: COLORS.txtMuted, fontSize: 12 }} />
                   <YAxis tick={{ fill: COLORS.txtMuted, fontSize: 12 }} />
                   <Tooltip
-                    contentStyle={{ background: COLORS.bgCard, border: `1px solid ${COLORS.ring}`, color: COLORS.txt }}
-                    labelStyle={{ color: COLORS.txtMuted }}
+                    contentStyle={{ 
+                      background: '#1e2938', 
+                      border: '1px solid #35414e', 
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                    }}
+                    labelStyle={{ color: '#94a3b8', fontSize: '12px' }}
+                    itemStyle={{ color: '#ffffff', fontSize: '14px' }}
                   />
                   {allStatuses.map((s, idx) => {
                     const c =
@@ -609,6 +463,139 @@ const StatsPage: React.FC = () => {
                   })}
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* ADDITIONAL STATISTICS ROW */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          {/* Client Growth Trend */}
+          <div className={`${cardClass} p-4`}>
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="text-blue-400" size={18} />
+              <h2 className="text-lg font-semibold text-white">{'Client Growth Trend'}</h2>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">New Clients This Month</span>
+                <span className="text-lg font-bold text-white">{stats?.totalClients || 0}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Growth Rate</span>
+                <span className="text-lg font-bold text-emerald-400">+{stats?.clientsGrowth || 0}%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Retention Rate</span>
+                <span className="text-lg font-bold text-blue-400">{completionRate}%</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Order Performance */}
+          <div className={`${cardClass} p-4`}>
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="text-purple-400" size={18} />
+              <h2 className="text-lg font-semibold text-white">{'Order Performance'}</h2>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Total Orders</span>
+                <span className="text-lg font-bold text-white">{orderVolume}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Avg. Order Value</span>
+                <span className="text-lg font-bold text-purple-400">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(averageOrderValue)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Pending Orders</span>
+                <span className="text-lg font-bold text-amber-400">{pendingOrdersCount}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Revenue Breakdown */}
+          <div className={`${cardClass} p-4`}>
+            <div className="flex items-center gap-2 mb-3">
+              <DollarSign className="text-green-400" size={18} />
+              <h2 className="text-lg font-semibold text-white">{'Revenue Breakdown'}</h2>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Total Revenue</span>
+                <span className="text-lg font-bold text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(totalRevenue)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Pending Revenue</span>
+                <span className="text-lg font-bold text-amber-400">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(pendingRevenue)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Revenue Growth</span>
+                <span className="text-lg font-bold text-emerald-400">+{stats?.revenueGrowth || 0}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* PERFORMANCE METRICS ROW */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          {/* Delivery Performance */}
+          <div className={`${cardClass} p-4`}>
+            <div className="flex items-center gap-2 mb-3">
+              <Clock className="text-orange-400" size={18} />
+              <h2 className="text-lg font-semibold text-white">{'Delivery Performance'}</h2>
+            </div>
+            <div className="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadialBarChart
+                  innerRadius="60%"
+                  outerRadius="90%"
+                  data={[{ name: 'Avg Delivery', value: averageDeliveryTime }]}
+                  startAngle={180}
+                  endAngle={0}
+                >
+                  <RadialBar dataKey="value" fill="#f59e0b" cornerRadius={8} />
+                  <Legend
+                    content={() => (
+                      <div className="text-center mt-2 text-slate-300">
+                        <span className="text-2xl font-bold text-white">{averageDeliveryTime.toFixed(1)}</span>
+                        <div className="text-xs text-slate-400">Days Average</div>
+                      </div>
+                    )}
+                  />
+                </RadialBarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Order Status Distribution */}
+          <div className={`${cardClass} p-4`}>
+            <div className="flex items-center gap-2 mb-3">
+              <BarChart3 className="text-indigo-400" size={18} />
+              <h2 className="text-lg font-semibold text-white">{'Order Status Distribution'}</h2>
+            </div>
+            <div className="space-y-3">
+              {pieData.map((status, index) => {
+                const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+                const total = pieData.reduce((sum, item) => sum + item.value, 0);
+                const percentage = total > 0 ? Math.round((status.value / total) * 100) : 0;
+                return (
+                  <div key={index} className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-4 h-4 rounded-full" 
+                        style={{ backgroundColor: colors[index % colors.length] }}
+                      />
+                      <span className="text-sm text-slate-300 capitalize">{status.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-white">{status.value}</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-slate-700 text-slate-300">
+                        {percentage}%
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -676,7 +663,6 @@ const StatsPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 

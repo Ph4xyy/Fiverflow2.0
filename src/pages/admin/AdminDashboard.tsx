@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import Layout, { pageBgClass, cardClass } from '../../components/Layout';
+import AdminLayout from '../../components/AdminLayout';
+import AdminNavigation from '../../components/AdminNavigation';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAdminStats } from '../../hooks/useAdminStats';
-import AdminSubscriptionManager from '../../components/AdminSubscriptionManager';
+import UserDetailedStats from '../../components/UserDetailedStats';
 import {
   Users,
   UserCheck,
@@ -18,7 +19,7 @@ import {
   CheckCircle,
   AlertCircle,
   Eye,
-  Activity,
+  Activity
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -30,6 +31,8 @@ const AdminDashboard: React.FC = () => {
   const [endDate, setEndDate] = useState<string>(
     new Date().toISOString().slice(0, 10)
   );
+  const [selectedUserForStats, setSelectedUserForStats] = useState<string | null>(null);
+  const [showUserStats, setShowUserStats] = useState(false);
 
   const { stats, loading, error } = useAdminStats(startDate, endDate);
 
@@ -63,8 +66,18 @@ const AdminDashboard: React.FC = () => {
     return 'US';
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+  const handleViewUserStats = (userId: string) => {
+    setSelectedUserForStats(userId);
+    setShowUserStats(true);
+  };
+
+  const handleCloseUserStats = () => {
+    setShowUserStats(false);
+    setSelectedUserForStats(null);
+  };
+
+  const getStatusColor = (status?: string | null) => {
+    switch ((status || '').toLowerCase()) {
       case 'completed':
       case 'paid':
         return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300';
@@ -82,9 +95,9 @@ const AdminDashboard: React.FC = () => {
 
   if (!user) {
     return (
-      <Layout>
-        <div className={`space-y-4 p-4 ${pageBgClass}`}>
-          <div className={`${cardClass} p-6 text-center`}>
+      <AdminLayout>
+        <div className="space-y-4 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 text-center">
             <AlertCircle className="mx-auto mb-4 text-red-500" size={48} />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               Accès non autorisé
@@ -94,76 +107,78 @@ const AdminDashboard: React.FC = () => {
             </p>
           </div>
         </div>
-      </Layout>
+      </AdminLayout>
     );
   }
 
   return (
-    <Layout>
-      <div className={`space-y-4 sm:space-y-6 p-4 sm:p-0 ${pageBgClass}`}>
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-600 rounded-lg flex items-center justify-center">
-              <Shield className="text-white" size={20} />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                Administration
-              </h1>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                Tableau de bord global — Données synchronisées en temps réel
-              </p>
-            </div>
-          </div>
+    <AdminLayout>
+      <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-600 rounded-lg flex items-center justify-center">
+                  <Shield className="text-white" size={20} />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                    Administration
+                  </h1>
+                  <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                    Tableau de bord global — Données synchronisées en temps réel
+                  </p>
+                </div>
+              </div>
 
-          {/* Date filters */}
-          <div className={`${cardClass} px-3 py-2 border border-gray-200 dark:border-slate-700 flex items-center gap-2`}>
-            <CalendarIcon className="text-gray-600 dark:text-gray-300" size={16} />
-            <input
-              type="date"
-              className="bg-transparent text-sm text-gray-900 dark:text-white outline-none"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              max={endDate}
-            />
-            <span className="text-gray-500 dark:text-gray-400 text-sm">→</span>
-            <input
-              type="date"
-              className="bg-transparent text-sm text-gray-900 dark:text-white outline-none"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              min={startDate}
-              max={new Date().toISOString().slice(0, 10)}
-            />
-            <div className="h-5 w-px bg-gray-200 dark:bg-slate-700 mx-1" />
-            <button
-              onClick={() => preset(7)}
-              className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600"
-              title="7 derniers jours"
-            >
-              7d
-            </button>
-            <button
-              onClick={() => preset(30)}
-              className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600"
-              title="30 derniers jours"
-            >
-              30d
-            </button>
-            <button
-              onClick={() => preset(90)}
-              className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600"
-              title="90 derniers jours"
-            >
-              90d
-            </button>
-          </div>
-        </div>
+              {/* Date filters */}
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 px-3 py-2 flex items-center gap-2 w-full sm:w-auto">
+                <CalendarIcon className="text-gray-600 dark:text-gray-300" size={16} />
+                <input
+                  type="date"
+                  className="bg-transparent text-sm text-gray-900 dark:text-white outline-none flex-1 sm:flex-none"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  max={endDate}
+                />
+                <span className="text-gray-500 dark:text-gray-400 text-sm">→</span>
+                <input
+                  type="date"
+                  className="bg-transparent text-sm text-gray-900 dark:text-white outline-none flex-1 sm:flex-none"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  min={startDate}
+                  max={new Date().toISOString().slice(0, 10)}
+                />
+                <div className="h-5 w-px bg-gray-200 dark:bg-slate-700 mx-1" />
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => preset(7)}
+                    className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600"
+                    title="7 derniers jours"
+                  >
+                    7d
+                  </button>
+                  <button
+                    onClick={() => preset(30)}
+                    className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600"
+                    title="30 derniers jours"
+                  >
+                    30d
+                  </button>
+                  <button
+                    onClick={() => preset(90)}
+                    className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-600"
+                    title="90 derniers jours"
+                  >
+                    90d
+                  </button>
+                </div>
+              </div>
+            </div>
 
         {/* Error State */}
         {error && (
-          <div className={`${cardClass} border border-red-200 dark:border-red-800 p-4`}>
+          <div className="bg-white dark:bg-slate-800 rounded-lg border border-red-200 dark:border-red-800 p-4">
             <div className="flex items-center gap-3">
               <AlertCircle className="text-red-500" size={20} />
               <div>
@@ -193,7 +208,7 @@ const AdminDashboard: React.FC = () => {
           <>
             {/* KPIs Principaux */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -212,7 +227,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -231,7 +246,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -250,7 +265,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -272,7 +287,7 @@ const AdminDashboard: React.FC = () => {
 
             {/* KPIs Secondaires */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -291,7 +306,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -310,7 +325,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -329,7 +344,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -350,7 +365,7 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Répartition des Plans Globale */}
-            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                   Répartition des Plans (GLOBALE)
@@ -398,7 +413,7 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Statistiques Abonnements */}
-            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                   Statistiques Abonnements
@@ -443,7 +458,7 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Top Plateformes */}
-            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                   Top Plateformes Clients
@@ -475,7 +490,7 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Utilisateurs Récents */}
-            <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                   Utilisateurs Récents
@@ -519,7 +534,7 @@ const AdminDashboard: React.FC = () => {
 
             {/* Commandes et Factures Récentes */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                     Commandes Récentes
@@ -532,14 +547,14 @@ const AdminDashboard: React.FC = () => {
                       <div key={order.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-xs font-semibold">
-                            {order.client_name.charAt(0).toUpperCase()}
+                            {(order.client_name?.charAt(0) || order.title?.charAt(0) || '?').toUpperCase()}
                           </div>
                           <div className="min-w-0">
                             <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
                               {order.title}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {order.client_name} • {formatDate(order.created_at)}
+                              {(order.client_name || 'Client')} • {formatDate(order.created_at)}
                             </div>
                           </div>
                         </div>
@@ -563,7 +578,7 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                     Factures Récentes
@@ -576,14 +591,14 @@ const AdminDashboard: React.FC = () => {
                       <div key={invoice.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800/60">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xs font-semibold">
-                            {invoice.client_name.charAt(0).toUpperCase()}
+                            {(invoice.client_name?.charAt(0) || invoice.number?.charAt(0) || '?').toUpperCase()}
                           </div>
                           <div className="min-w-0">
                             <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
                               {invoice.number}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {invoice.client_name} • {formatDate(invoice.created_at)}
+                              {(invoice.client_name || 'Client')} • {formatDate(invoice.created_at)}
                             </div>
                           </div>
                         </div>
@@ -610,7 +625,7 @@ const AdminDashboard: React.FC = () => {
 
             {/* Top Referrers */}
             {stats.topReferrers.length > 0 && (
-              <div className={`${cardClass} border border-gray-200 dark:border-slate-700 p-4 sm:p-6`}>
+              <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
                     Top Parrains (période)
@@ -642,8 +657,6 @@ const AdminDashboard: React.FC = () => {
               </div>
             )}
 
-            {/* Gestion des Abonnements */}
-            <AdminSubscriptionManager startDate={startDate} endDate={endDate} />
 
             {/* Footer Info */}
             <div className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">
@@ -655,9 +668,18 @@ const AdminDashboard: React.FC = () => {
             </div>
           </>
         )}
+
+            {/* Modal de Statistiques Détaillées */}
+            {selectedUserForStats && (
+              <UserDetailedStats
+                userId={selectedUserForStats}
+                isOpen={showUserStats}
+                onClose={handleCloseUserStats}
+              />
+            )}
       </div>
-    </Layout>
-  );
-};
+      </AdminLayout>
+    );
+  };
 
 export default AdminDashboard;

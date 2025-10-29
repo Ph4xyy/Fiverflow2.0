@@ -3,12 +3,18 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 // Import logo
 import LogoImage from '../assets/LogoFiverFlow.png';
+// import ErrorBoundary from './ErrorBoundary'; // Non utilisé pour le moment
 
 import { usePlanRestrictions } from '../hooks/usePlanRestrictions';
+import { useSubscriptionPermissions } from '../hooks/useSubscriptionPermissions';
 import NotificationsDropdown from './NotificationsDropdown';
 import CentralizedSearchBar from './CentralizedSearchBar';
+import AssistantFloatingButton from './AssistantFloatingButton';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
+import UserProfileManager from '../utils/userProfileManager';
+import { handleError406 } from '../utils/errorDiagnostic';
 
 import { 
   Menu, 
@@ -22,11 +28,16 @@ import {
   Crown,
   User,
   LogOut,
-  Network,
+  // Network, // Non utilisé pour le moment
   Lock,
   CheckCircle2,
   Shield,
   Receipt,
+  Sun,
+  Moon,
+  Zap,
+  Gift,
+  Bot,
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -41,75 +52,43 @@ export const buttonClass = 'bg-[#35414e] hover:bg-[#3d4a57] text-white';
 export const gradientClass = 'bg-gradient-to-r from-[#9c68f2] to-[#422ca5]';
 
 /* ---------- Helper: détecte admin ---------- */
-const useIsAdminFromEverywhere = (user: any, userRole?: string | null) => {
+const useIsAdminFromRole = (user: any) => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [adminCheckLoading, setAdminCheckLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAdminStatus = async () => {
+    const checkAdminRole = async () => {
       if (!user) {
-        console.log('🔍 Layout: Pas d\'utilisateur connecté');
         setIsAdmin(false);
-        setAdminCheckLoading(false);
+        setLoading(false);
         return;
       }
 
-      console.log('🔍 Layout: Vérification admin pour user:', user.id);
-
       try {
-        const { data, error } = await supabase
+        const { data: profile, error } = await supabase
           .from('user_profiles')
-          .select('is_admin')
+          .select('role')
           .eq('user_id', user.id)
           .single();
 
-        console.log('🔍 Layout: Résultat vérification:', { data, error });
-
         if (error) {
-          console.error('❌ Erreur lors de la vérification admin:', error);
-          console.error('❌ Détails de l\'erreur:', error.message, error.status, error.statusText);
-          
-          // Vérifier spécifiquement l'erreur 406
-          if (error.status === 406) {
-            console.error('❌ ERREUR 406 DÉTECTÉE DANS LAYOUT - Tentative de contournement...');
-            
-            // Solution de contournement: utiliser une requête alternative
-            try {
-              const { data: fallbackData, error: fallbackError } = await supabase
-                .from('user_profiles')
-                .select('is_admin')
-                .eq('user_id', user.id);
-              
-              if (fallbackError) {
-                console.error('❌ Erreur de contournement aussi:', fallbackError);
-                setIsAdmin(false);
-              } else {
-                console.log('✅ Contournement réussi:', fallbackData);
-                setIsAdmin(fallbackData?.[0]?.is_admin || false);
-              }
-            } catch (fallbackErr) {
-              console.error('❌ Erreur dans le contournement:', fallbackErr);
-              setIsAdmin(false);
-            }
-          } else {
-            setIsAdmin(false);
-          }
+          console.error('Erreur lors de la récupération du rôle:', error);
+          setIsAdmin(false);
         } else {
-          console.log('🔍 Layout: is_admin =', data?.is_admin);
-          setIsAdmin(data?.is_admin || false);
+          setIsAdmin(profile?.role === 'Admin' || profile?.role === 'Moderator');
         }
       } catch (error) {
-        console.error('Erreur lors de la vérification admin:', error);
+        console.error('Erreur lors de la vérification du rôle admin:', error);
         setIsAdmin(false);
       } finally {
-        setAdminCheckLoading(false);
+        setLoading(false);
       }
     };
 
-    checkAdminStatus();
+    checkAdminRole();
   }, [user]);
 
-  return isAdmin;
+  return { isAdmin, loading };
 };
 
 class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error?: any }> {
@@ -121,7 +100,10 @@ class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, 
     return { hasError: true, error };
   }
   componentDidCatch(error: any, info: any) {
-    console.error('[Layout ErrorBoundary]', error, info);
+    console.error('[Layout ErrorBoundary] ERREUR DETECTEE:', error);
+    console.error('[Layout ErrorBoundary] Stack:', error.stack);
+    console.error('[Layout ErrorBoundary] Info:', info);
+    console.error('[Layout ErrorBoundary] Component stack:', info.componentStack);
   }
   render() {
     if (this.state.hasError) {
@@ -140,14 +122,22 @@ class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, 
 const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const { currentTheme, setTheme, getThemeColors } = useTheme();
+  const themeColors = getThemeColors();
 
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const [requiredPlan, setRequiredPlan] = useState<'Pro' | 'Excellence'>('Pro');
+  const [requiredPlan, setRequiredPlan] = useState<'Pro' | 'Excellence' | 'Scale'>('Pro');
 
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { restrictions, checkAccess } = usePlanRestrictions();
+  
+  // Get subscription permissions
+  const perms = useSubscriptionPermissions();
+  const subscription = perms?.subscription || null;
+  const isUserAdmin = perms?.isAdmin || false;
+  
   useEffect(() => {
     // Définir le rôle utilisateur basé sur l'authentification
     if (user) {
@@ -157,7 +147,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     }
   }, [user]);
 
-  const isAdmin = useIsAdminFromEverywhere(user, userRole);
+  const { isAdmin, loading: adminLoading } = useIsAdminFromRole(user);
 
   /* ---------- NAV STRUCTURE EN 3 SECTIONS + MICRO SECTION BAS ---------- */
   // Section 1: Overview (principales)
@@ -182,16 +172,25 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       requiredPlan: 'Excellence' as const
     },
     { 
-      path: '/network', 
+      path: '/referrals', 
       label: 'Referrals', 
-      icon: Network,
-      restricted: !checkAccess('referrals') && !restrictions?.isAdmin,
-      requiredPlan: 'Pro' as const
+      icon: Gift,
+      restricted: false
     },
   ];
 
-  // Section 2: AI (vide pour l'instant)
-  // const aiItems: any[] = [];
+  // Section 2: AI - Restricted to Scale plan
+  const hasAssistantAccess = isUserAdmin || subscription?.plan_name?.toLowerCase() === 'scale' || subscription?.plan_name?.toLowerCase() === 'teams';
+  
+  const aiItems = [
+    { 
+      path: '/assistant', 
+      label: 'Assistant', 
+      icon: Bot,
+      restricted: !hasAssistantAccess,
+      requiredPlan: 'Scale' as const
+    },
+  ];
 
   // Section 3: Workspace
   const workspaceItems = [
@@ -244,6 +243,22 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
+  };
+
+  const handleThemeChange = () => {
+    const themes = ['light', 'dark', 'halloween'] as const;
+    const currentIndex = themes.indexOf(currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setTheme(themes[nextIndex]);
+  };
+
+  const getThemeIcon = () => {
+    switch (currentTheme) {
+      case 'light': return Sun;
+      case 'dark': return Moon;
+      case 'halloween': return Zap;
+      default: return Sun;
+    }
   };
 
   const LinkRow: React.FC<{
@@ -316,7 +331,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             </button>
             <Link to="/dashboard" className="text-2xl font-extrabold leading-none">
               <div className="flex items-center space-x-3">
-                <img src={LogoImage} alt="full" className="h-6 w-auto" />
+                <img src={LogoImage} alt="Logo" className="h-6 w-auto" />
               </div>
             </Link>
           </div>
@@ -326,13 +341,32 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             <CentralizedSearchBar />
           </div>
           
-          {/* Right section - Notifications, logout */}
+          {/* Right section - Theme, Notifications, logout */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Theme changer moved to settings */}
+            {/* <button 
+              onClick={handleThemeChange}
+              className="size-10 rounded-lg grid place-items-center text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200"
+              title={`Current theme: ${currentTheme}. Click to cycle through themes.`}
+            >
+              {React.createElement(getThemeIcon(), { size: 18 })}
+            </button> */}
+
             <LocalErrorBoundary>
               <div className="size-10 rounded-lg grid place-items-center text-white bg-[#35414e] hover:bg-[#3d4a57] transition-all duration-200">
                 <NotificationsDropdown />
               </div>
             </LocalErrorBoundary>
+
+          {/* Upgrade button */}
+          <button
+            onClick={() => navigate('/upgrade')}
+            className="inline-flex items-center justify-center h-10 px-4 sm:px-5 rounded-lg font-semibold text-black bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 hover:from-yellow-300 hover:via-amber-300 hover:to-yellow-400 shadow-[0_8px_24px_rgba(245,158,11,0.35)] transition-all duration-200"
+            title="Upgrade"
+          >
+            <Crown size={16} className="mr-2" />
+            Upgrade
+          </button>
 
             <button 
               onClick={handleSignOut}
@@ -373,10 +407,10 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               <div className="px-3 sm:px-4 pt-4 mb-2">
                 <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">AI</span>
               </div>
-              <div className="mx-3 sm:mx-4 mt-2">
-                <div className="text-xs text-gray-400 px-3 py-2 rounded-lg bg-[#35414e]">
-                  Coming soon!
-                </div>
+              <div className="space-y-1">
+                {aiItems.map((item) => (
+                  <LinkRow key={item.path} item={item} />
+                ))}
               </div>
 
               {/* -------- Section: Workspace -------- */}
@@ -426,6 +460,9 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
             <LocalErrorBoundary>{children}</LocalErrorBoundary>
           </div>
         </main>
+        
+        {/* Assistant Floating Button */}
+        <AssistantFloatingButton />
       </div>
 
       {upgradeOpen && (
@@ -573,6 +610,13 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
 };
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const location = useLocation();
+  
+  // Skip Layout for landing page only
+  if (location.pathname === '/landing') {
+    return <>{children}</>;
+  }
+  
   return (
     <LocalErrorBoundary>
       <LayoutInner>{children}</LayoutInner>

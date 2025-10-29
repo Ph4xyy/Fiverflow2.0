@@ -1,7 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://arnuyyyryvbfcvqauqur.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFybnV5eXlyeXZiZmN2cWF1cXVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMyMjY5MjQsImV4cCI6MjA2ODgwMjkyNH0.mWzoWkBbQcCNR2BHueu8mQpV6hFMZUacbv4EobzOIZs';
 
 export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
 
@@ -37,28 +37,9 @@ const detectStorageIssues = (): {
 // Détecter les problèmes de storage
 const storageInfo = detectStorageIssues();
 
-console.log('[Supabase] Storage diagnostics:', {
-  ...storageInfo,
-  userAgent: navigator.userAgent,
-  env: {
-    hasUrl: !!supabaseUrl,
-    hasKey: !!supabaseAnonKey,
-    url: supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : 'undefined'
-  }
-});
+// Storage diagnostics - logs supprimés pour la propreté
 
-// Avertir si problème détecté
-if (storageInfo.hasIssue) {
-  console.warn('[Supabase] ⚠️ STORAGE ISSUE DETECTED:', {
-    message: storageInfo.isSafari && storageInfo.isIFrame 
-      ? 'Safari dans iFrame - storage potentiellement partitionné'
-      : 'Impossible d\'accéder au localStorage',
-    solution: 'Ouvrir l\'application dans un nouvel onglet (hors iFrame)',
-    isSafari: storageInfo.isSafari,
-    isIFrame: storageInfo.isIFrame,
-    canAccessStorage: storageInfo.canAccessStorage
-  });
-}
+// Avertir si problème détecté (logs supprimés pour la propreté)
 
 // Custom storage avec gestion d'erreurs robuste
 const customStorage = {
@@ -66,19 +47,15 @@ const customStorage = {
     if (typeof window === 'undefined') return null;
     try {
       const item = window.localStorage.getItem(key);
-      console.log('[Supabase Storage] getItem:', { 
-        key, 
-        hasValue: !!item,
-        valueLength: item?.length || 0
-      });
+      // Log supprimé pour la propreté
       return item;
     } catch (e) {
-      console.error('[Supabase Storage] ❌ getItem failed:', e);
+      // Erreur de storage - gérée silencieusement
       // Si le storage échoue, essayer sessionStorage en fallback
       try {
         return window.sessionStorage.getItem(key);
       } catch (e2) {
-        console.error('[Supabase Storage] ❌ sessionStorage fallback failed:', e2);
+        // Erreur de fallback - gérée silencieusement
         return null;
       }
     }
@@ -87,18 +64,15 @@ const customStorage = {
     if (typeof window === 'undefined') return;
     try {
       window.localStorage.setItem(key, value);
-      console.log('[Supabase Storage] setItem:', { 
-        key, 
-        valueLength: value.length 
-      });
+      // Log supprimé pour la propreté
     } catch (e) {
-      console.error('[Supabase Storage] ❌ setItem failed:', e);
+      // Erreur de storage - gérée silencieusement
       // Fallback vers sessionStorage
       try {
         window.sessionStorage.setItem(key, value);
-        console.warn('[Supabase Storage] ⚠️ Using sessionStorage fallback for:', key);
+        // Fallback vers sessionStorage - géré silencieusement
       } catch (e2) {
-        console.error('[Supabase Storage] ❌ sessionStorage fallback failed:', e2);
+        // Erreur de fallback - gérée silencieusement
       }
     }
   },
@@ -106,13 +80,13 @@ const customStorage = {
     if (typeof window === 'undefined') return;
     try {
       window.localStorage.removeItem(key);
-      console.log('[Supabase Storage] removeItem:', { key });
+      // Log supprimé pour la propreté
     } catch (e) {
-      console.error('[Supabase Storage] ❌ removeItem failed:', e);
+      // Erreur de storage - gérée silencieusement
       try {
         window.sessionStorage.removeItem(key);
       } catch (e2) {
-        console.error('[Supabase Storage] ❌ sessionStorage fallback failed:', e2);
+        // Erreur de fallback - gérée silencieusement
       }
     }
   }

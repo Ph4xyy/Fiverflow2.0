@@ -22,32 +22,7 @@ const NotificationsDropdown: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Mock notifications for when Supabase is not configured
-  const mockNotifications: Notification[] = [
-    {
-      id: '1',
-      type: 'task_due',
-      content: 'Your logo design project for John Doe is due tomorrow',
-      is_read: false,
-      created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      related_id: '1'
-    },
-    {
-      id: '2',
-      type: 'invoice_pending',
-      content: 'Payment of $500 is pending from Jane Smith',
-      is_read: false,
-      created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-      related_id: '2'
-    },
-    {
-      id: '3',
-      type: 'client_message',
-      content: 'New message from Mike Johnson about website project',
-      is_read: false,
-      created_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-      related_id: '3'
-    }
-  ];
+  const mockNotifications: Notification[] = [];
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -71,10 +46,10 @@ const NotificationsDropdown: React.FC = () => {
   const fetchNotifications = async () => {
     console.log('🔔 Fetching notifications...');
     
-    // If Supabase is not configured, use mock data
+    // If Supabase is not configured, return empty data
     if (!isSupabaseConfigured || !supabase) {
-      console.log('🎭 Using mock notifications data');
-      setNotifications(mockNotifications);
+      console.error('Supabase not configured - cannot fetch notifications');
+      setNotifications([]);
       setLoading(false);
       return;
     }
@@ -117,11 +92,10 @@ const NotificationsDropdown: React.FC = () => {
   const markAsRead = async (notificationId: string) => {
     console.log('✅ Marking notification as read:', notificationId);
     
-    // If Supabase is not configured, just remove from local state
+    // If Supabase is not configured, return error
     if (!isSupabaseConfigured || !supabase) {
-      console.log('🎭 Mock: marking notification as read');
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
-      toast.success('Notification marked as read');
+      console.error('Supabase not configured - cannot mark notification as read');
+      toast.error('Database not configured');
       return;
     }
 
@@ -156,11 +130,10 @@ const NotificationsDropdown: React.FC = () => {
     
     console.log('✅ Marking all notifications as read');
     
-    // If Supabase is not configured, just clear local state
+    // If Supabase is not configured, return error
     if (!isSupabaseConfigured || !supabase) {
-      console.log('🎭 Mock: marking all notifications as read');
-      setNotifications([]);
-      toast.success('All notifications marked as read');
+      console.error('Supabase not configured - cannot mark all notifications as read');
+      toast.error('Database not configured');
       return;
     }
 
