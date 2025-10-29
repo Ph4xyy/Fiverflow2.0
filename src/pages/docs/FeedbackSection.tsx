@@ -26,15 +26,15 @@ const FeedbackSection: React.FC = () => {
             >
               <button
                 onClick={() => handleFeedback('positive')}
-                className="w-10 h-10 rounded-full border-2 border-gray-600 hover:border-green-500 flex items-center justify-center transition-all duration-200 hover:scale-110"
+                className="w-7 h-7 rounded-full border-2 border-gray-600 hover:border-green-500 flex items-center justify-center transition-all duration-200 hover:scale-110"
               >
-                <Check size={16} className="text-gray-400 hover:text-green-500" />
+                <Check size={12} className="text-gray-400 hover:text-green-500" />
               </button>
               <button
                 onClick={() => handleFeedback('negative')}
-                className="w-10 h-10 rounded-full border-2 border-gray-600 hover:border-red-500 flex items-center justify-center transition-all duration-200 hover:scale-110"
+                className="w-7 h-7 rounded-full border-2 border-gray-600 hover:border-red-500 flex items-center justify-center transition-all duration-200 hover:scale-110"
               >
-                <X size={16} className="text-gray-400 hover:text-red-500" />
+                <X size={12} className="text-gray-400 hover:text-red-500" />
               </button>
             </motion.div>
           ) : (
@@ -46,13 +46,13 @@ const FeedbackSection: React.FC = () => {
               className="flex items-center gap-3"
             >
               <div className={`
-                w-10 h-10 rounded-full border-2 flex items-center justify-center
+                w-7 h-7 rounded-full border-2 flex items-center justify-center
                 ${feedback === 'positive' ? 'border-green-500 bg-green-500/20' : 'border-red-500 bg-red-500/20'}
               `}>
                 {feedback === 'positive' ? (
-                  <Check size={18} className="text-green-500" />
+                  <Check size={14} className="text-green-500" />
                 ) : (
-                  <X size={18} className="text-red-500" />
+                  <X size={14} className="text-red-500" />
                 )}
               </div>
               <div className="flex items-center gap-2">

@@ -59,12 +59,13 @@ const DocPage: React.FC = () => {
     );
   }
 
+  // For index page, don't show TOC
   const features = page ? featuresMap[page] || [] : [];
 
   return (
     <div className="flex gap-8">
       {/* Main Content */}
-      <div className="flex-1 prose prose-invert max-w-none mr-72">
+      <div className={`flex-1 prose prose-invert max-w-none ${page ? 'mr-72' : ''}`}>
         {/* Breadcrumb */}
         {page && (
           <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
@@ -165,11 +166,13 @@ const DocPage: React.FC = () => {
 
       </div>
 
-      {/* Sidebar - On this page */}
-      <div className="hidden xl:block w-64 flex-shrink-0 fixed right-8 top-20">
-        {features.length > 0 && <TableOfContents items={features} />}
-        <FeedbackSection />
-      </div>
+      {/* Sidebar - On this page - Only show for individual pages, not index */}
+      {page && (
+        <div className="hidden xl:block w-64 flex-shrink-0 fixed right-16 top-32">
+          {features.length > 0 && <TableOfContents items={features} />}
+          <FeedbackSection />
+        </div>
+      )}
     </div>
   );
 };

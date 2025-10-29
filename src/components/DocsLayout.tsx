@@ -6,6 +6,7 @@ import LogoImage from '../assets/LogoFiverFlow.png';
 interface NavItem {
   label: string;
   path: string;
+  items?: string[];
 }
 
 const navItems = [
@@ -91,24 +92,22 @@ const DocsLayout: React.FC = () => {
     }
   }, [location]);
 
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
-
-  const handleScroll = (href: string) => {
-    if (href.startsWith('#')) {
-      const element = document.querySelector(href);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
+  const isActive = (path: string, currentPath: string) => {
+    // For index page, only active if exactly /docs
+    if (path === '/docs' && currentPath === '/docs') {
+      return true;
     }
-    setSidebarOpen(false);
+    // For other pages, check if it starts with the path
+    if (path !== '/docs') {
+      return currentPath.startsWith(path);
+    }
+    return false;
   };
 
   return (
     <div className="min-h-screen bg-[#0B0E14]">
       {/* Top Navigation Bar - Same as Landing */}
-      <nav className="sticky top-0 z-50 bg-[rgba(0,0,0,0.4)] backdrop-blur-md border-b border-white/10">
+      <nav className="sticky top-0 z-50 bg-[rgba(0,0,0,0.4)] backdrop-blur-md border-b border-white/10 shadow-lg">
         <div className="max-w-[1300px] mx-auto px-4 md:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Brand with Docs label */}
@@ -123,12 +122,6 @@ const DocsLayout: React.FC = () => {
                 <Link
                   key={link.label}
                   to={link.href}
-                  onClick={(e) => {
-                    if (link.href.startsWith('#')) {
-                      e.preventDefault();
-                      handleScroll(link.href);
-                    }
-                  }}
                   className="text-neutral-300 hover:text-white transition-colors"
                 >
                   {link.label}
@@ -162,12 +155,6 @@ const DocsLayout: React.FC = () => {
                 <Link
                   key={link.label}
                   to={link.href}
-                  onClick={(e) => {
-                    if (link.href.startsWith('#')) {
-                      e.preventDefault();
-                      handleScroll(link.href);
-                    }
-                  }}
                   className="block py-2 text-neutral-300 hover:text-white transition-colors"
                 >
                   {link.label}
@@ -184,23 +171,23 @@ const DocsLayout: React.FC = () => {
         </div>
       </nav>
 
-      <div className="flex">
-        {/* Sidebar - Centered */}
+      <div className="flex justify-center">
+        {/* Sidebar - More centered */}
         <aside
           className={`
             fixed lg:sticky top-0 h-screen bg-transparent w-72 overflow-y-auto z-40
-            transition-transform duration-300 ease-in-out pl-16
+            transition-transform duration-300 ease-in-out pl-24
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}
         >
-          <nav className="p-6 space-y-6">
+          <nav className="p-6 space-y-6 pt-24">
             {navItems.map((item) => (
               <div key={item.path} className="relative">
                 {/* Category Title - Not clickable */}
                 <div
                   className={`
                     block text-sm font-semibold mb-2
-                    ${isActive(item.path) ? 'text-white' : 'text-gray-400'}
+                    ${isActive(item.path, location.pathname) ? 'text-white' : 'text-gray-400'}
                   `}
                 >
                   {item.label}
@@ -213,7 +200,7 @@ const DocsLayout: React.FC = () => {
                     <div className="absolute left-0 top-2 bottom-0 w-0.5 bg-gray-700" />
                     
                     {/* Purple line for active category */}
-                    {isActive(item.path) && (
+                    {isActive(item.path, location.pathname) && (
                       <div className="absolute left-0 top-2 bottom-0 w-0.5 bg-[#8B5CF6] z-10" />
                     )}
                     
@@ -224,7 +211,7 @@ const DocsLayout: React.FC = () => {
                           to={`${item.path}/${feature.toLowerCase().replace(/\s+/g, '-')}`}
                           className={`
                             block text-sm py-1.5 transition-all duration-200
-                            ${isActive(item.path) ? 'text-white' : 'text-gray-500 hover:text-gray-300'}
+                            ${isActive(item.path, location.pathname) ? 'text-white' : 'text-gray-500 hover:text-gray-300'}
                           `}
                         >
                           {feature}
@@ -239,7 +226,7 @@ const DocsLayout: React.FC = () => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 max-w-4xl px-8 py-8">
+        <main className="flex-1 max-w-4xl px-8 py-8 ml-0">
           <Outlet />
         </main>
       </div>

@@ -40,7 +40,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ items }) => {
   };
 
   return (
-    <div className="sticky top-20">
+    <div className="sticky top-32">
       <h3 className="text-sm font-semibold text-gray-400 mb-4 uppercase">On this page</h3>
       <ul className="space-y-2">
         {items.map((item) => (
