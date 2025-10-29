@@ -105,9 +105,19 @@ export class FiverFlowAssistant {
         } : undefined
       };
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur OpenAI:', error);
-      throw new Error('Impossible de contacter l\'assistant. Veuillez réessayer plus tard.');
+      
+      // Messages d'erreur plus détaillés
+      if (error?.status === 401 || error?.message?.includes('401') || error?.message?.includes('Invalid API key')) {
+        throw new Error('Clé API OpenAI invalide. Vérifiez votre fichier .env.');
+      } else if (error?.status === 429 || error?.message?.includes('429') || error?.message?.includes('rate limit')) {
+        throw new Error('Limite de requêtes atteinte. Réessayez plus tard.');
+      } else if (error?.message?.includes('network') || error?.message?.includes('fetch failed')) {
+        throw new Error('Erreur de connexion réseau. Vérifiez votre connexion internet.');
+      } else {
+        throw new Error(error?.message || 'Impossible de contacter l\'assistant. Veuillez réessayer plus tard.');
+      }
     }
   }
 

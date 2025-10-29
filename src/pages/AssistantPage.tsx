@@ -84,12 +84,27 @@ const AssistantPage: React.FC = () => {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Assistant error:', error);
+      let errorText = 'Sorry, something went wrong. Please try again.';
+      
+      // Afficher un message d'erreur plus détaillé
+      if (error?.message) {
+        if (error.message.includes('OpenAI API key') || error.message.includes('401') || error.message.includes('unauthorized')) {
+          errorText = '❌ Erreur: Clé OpenAI invalide ou manquante. Vérifiez votre fichier .env et redémarrez le serveur.';
+        } else if (error.message.includes('429') || error.message.includes('rate limit')) {
+          errorText = '❌ Erreur: Limite de requêtes dépassée. Veuillez réessayer dans quelques instants.';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorText = '❌ Erreur: Problème de connexion. Vérifiez votre connexion internet.';
+        } else {
+          errorText = `❌ Erreur: ${error.message}`;
+        }
+      }
+      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Sorry, something went wrong. Please try again.',
+        content: errorText,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
