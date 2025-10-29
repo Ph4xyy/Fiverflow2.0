@@ -46,7 +46,8 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
           return
         }
 
-        if (!profile || !['Admin', 'Moderator'].includes(profile.role)) {
+        const normalizedRole = profile?.role?.toLowerCase()
+        if (!profile || !['admin', 'moderator'].includes(normalizedRole)) {
           setError('Accès refusé: Rôle administrateur ou modérateur requis')
           setLoading(false)
           return
