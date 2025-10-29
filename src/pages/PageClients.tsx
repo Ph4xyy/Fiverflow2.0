@@ -305,6 +305,34 @@ const PageClients: React.FC = () => {
     toast.success(editingClient ? 'Client updated successfully' : 'Client created successfully');
   }, [editingClient, refetch]);
 
+  // Handle delete client
+  const handleDelete = useCallback(async (client: ClientRow) => {
+    if (!confirm(`Are you sure you want to delete "${client.name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      if (!isSupabaseConfigured || !supabase || !user) {
+        toast.error('Database not configured');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', client.id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast.success(`Client "${client.name}" deleted successfully`);
+      refetch();
+    } catch (err: any) {
+      console.error('Error deleting client:', err);
+      toast.error(err.message || 'Failed to delete client');
+    }
+  }, [user, refetch]);
+
   // Get status color
   const getStatusColor = (status: string | null) => {
     switch (status?.toLowerCase()) {
@@ -576,20 +604,29 @@ const PageClients: React.FC = () => {
                 </span>
               </div>
 
-              <div className="mt-3 pt-3 border-t border-[#1C2230] flex items-center gap-2">
+              <div className="mt-3 pt-3 border-t border-[#1C2230] flex items-center justify-between">
+                <div className="flex items-center gap-2 flex-1">
+                  <button
+                    onClick={() => openView(client)}
+                    className="flex-1 px-3 py-1.5 text-xs font-medium text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-colors"
+                  >
+                    <Eye className="w-3 h-3 inline mr-1" />
+                    View
+                  </button>
+                  <button
+                    onClick={() => openEdit(client)}
+                    className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white hover:bg-gray-500/10 rounded-lg transition-colors"
+                  >
+                    <Edit className="w-3 h-3 inline mr-1" />
+                    Edit
+                  </button>
+                </div>
                 <button
-                  onClick={() => openView(client)}
-                  className="flex-1 px-3 py-1.5 text-xs font-medium text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-colors"
+                  onClick={() => handleDelete(client)}
+                  className="px-3 py-1.5 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors ml-2"
+                  title="Delete client"
                 >
-                  <Eye className="w-3 h-3 inline mr-1" />
-                  View
-                </button>
-                <button
-                  onClick={() => openEdit(client)}
-                  className="flex-1 px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white hover:bg-gray-500/10 rounded-lg transition-colors"
-                >
-                  <Edit className="w-3 h-3 inline mr-1" />
-                  Edit
+                  <Trash2 className="w-3 h-3" />
                 </button>
               </div>
             </div>
@@ -659,15 +696,24 @@ const PageClients: React.FC = () => {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => openView(client)}
-                          className="text-blue-400 hover:text-blue-300 p-1 rounded"
+                          className="text-blue-400 hover:text-blue-300 p-1 rounded transition-colors"
+                          title="View client"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => openEdit(client)}
-                          className="text-gray-400 hover:text-white p-1 rounded"
+                          className="text-gray-400 hover:text-white p-1 rounded transition-colors"
+                          title="Edit client"
                         >
                           <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(client)}
+                          className="text-red-400 hover:text-red-300 p-1 rounded transition-colors"
+                          title="Delete client"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
