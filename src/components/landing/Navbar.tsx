@@ -39,6 +39,9 @@ export const Navbar = ({ onTryNow }: NavbarProps = {}) => {
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
+    } else if (href === '/docs') {
+      // Navigate to docs page
+      window.location.href = href;
     }
     setIsMobileMenuOpen(false);
   };
@@ -64,8 +67,10 @@ export const Navbar = ({ onTryNow }: NavbarProps = {}) => {
                 key={link.label}
                 href={link.href}
                 onClick={(e) => {
-                  e.preventDefault();
-                  handleScroll(link.href);
+                  if (link.href.startsWith('#') || link.href === '/docs') {
+                    e.preventDefault();
+                    handleScroll(link.href);
+                  }
                 }}
                 className="text-neutral-300 hover:text-white transition-colors"
                 initial={{ opacity: 0, y: -20 }}
@@ -111,8 +116,10 @@ export const Navbar = ({ onTryNow }: NavbarProps = {}) => {
                 key={link.label}
                 href={link.href}
                 onClick={(e) => {
-                  e.preventDefault();
-                  handleScroll(link.href);
+                  if (link.href.startsWith('#') || link.href === '/docs') {
+                    e.preventDefault();
+                    handleScroll(link.href);
+                  }
                 }}
                 className="block py-2 text-neutral-300 hover:text-white transition-colors"
               >
