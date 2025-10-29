@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import LogoImage from '../assets/LogoFiverFlow.png';
 import DocsSidebar from './docs/DocsSidebar';
@@ -42,39 +43,66 @@ const DocsLayout: React.FC = () => {
     setTimeout(extractHeadings, 100);
   }, [location.pathname]);
 
+  const handleScroll = (href: string) => {
+    if (href.startsWith('#')) {
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else if (href === '/docs') {
+      // Navigate to docs page
+      window.location.href = href;
+    }
+    setSidebarOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
-      {/* Top Navigation Bar - Same as Landing */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[rgba(0,0,0,0.4)] backdrop-blur-md border-b border-white/10 shadow-lg">
+      {/* Top Navigation Bar - EXACT copy from landing */}
+      <motion.nav
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="sticky top-0 z-50 bg-[rgba(0,0,0,0.4)] backdrop-blur-md border-b border-white/10"
+      >
         <div className="max-w-[1300px] mx-auto px-4 md:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Brand with Docs label */}
-            <a href="/home" className="flex items-center space-x-3">
+            <Link to="/home" className="flex items-center space-x-3">
               <img src={LogoImage} alt="FiverFlow Logo" className="h-6 w-auto" />
               <span className="text-[#8B5CF6] font-semibold text-sm">DOCS</span>
-            </a>
+            </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-8">
-              {navLinks.map((link) => (
-                <a
+              {navLinks.map((link, index) => (
+                <motion.a
                   key={link.label}
                   href={link.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleScroll(link.href);
+                  }}
                   className="text-neutral-300 hover:text-white transition-colors"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
                 >
                   {link.label}
-                </a>
+                </motion.a>
               ))}
             </div>
 
             {/* Desktop CTA & Mobile Menu Button */}
             <div className="flex items-center gap-4">
-              <a
-                href="/dashboard"
+              <motion.button
+                onClick={() => (window.location.href = '/dashboard')}
                 className="hidden lg:inline-flex items-center justify-center rounded-full text-white font-medium text-sm px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 shadow-[0_20px_80px_rgba(99,102,241,0.6)] hover:shadow-[0_30px_120px_rgba(99,102,241,0.9)] transition-shadow"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 Try FiverFlow for free
-              </a>
+              </motion.button>
 
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -88,40 +116,40 @@ const DocsLayout: React.FC = () => {
 
           {/* Mobile Menu */}
           {sidebarOpen && (
-            <div className="lg:hidden mt-4 space-y-2">
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="lg:hidden mt-4 space-y-2"
+            >
               {navLinks.map((link) => (
                 <a
                   key={link.label}
                   href={link.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleScroll(link.href);
+                  }}
                   className="block py-2 text-neutral-300 hover:text-white transition-colors"
                 >
                   {link.label}
                 </a>
               ))}
-              <a
-                href="/dashboard"
+              <button
+                onClick={() => (window.location.href = '/dashboard')}
                 className="inline-flex items-center justify-center rounded-full text-white font-medium text-sm px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 shadow-[0_20px_80px_rgba(99,102,241,0.6)] hover:shadow-[0_30px_120px_rgba(99,102,241,0.9)] transition-shadow mt-2"
               >
                 Try FiverFlow for free
-              </a>
-            </div>
+              </button>
+            </motion.div>
           )}
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Three Column Layout */}
-      <div className="flex pt-16">
+      <div className="flex">
         {/* Left: Sidebar */}
         <DocsSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-        {/* Hamburger button for mobile */}
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="lg:hidden fixed top-20 left-4 z-50 p-2 bg-[#0F0F0F] border border-[rgba(255,255,255,0.1)] rounded"
-          aria-label="Toggle menu"
-        >
-          <Menu size={20} className="text-white" />
-        </button>
 
         {/* Middle: Main Content */}
         <main className="flex-1 max-w-4xl px-8 py-8 lg:pl-64 lg:pr-16 bg-[#0A0A0A] min-h-screen">
