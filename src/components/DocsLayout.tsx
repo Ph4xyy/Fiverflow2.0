@@ -184,62 +184,57 @@ const DocsLayout: React.FC = () => {
         </div>
       </nav>
 
-      <div className="flex justify-start pl-8">
-        {/* Sidebar - Slightly to the left */}
+      <div className="flex">
+        {/* Sidebar - Centered */}
         <aside
           className={`
             fixed lg:sticky top-0 h-screen bg-transparent w-72 overflow-y-auto z-40
-            transition-transform duration-300 ease-in-out
+            transition-transform duration-300 ease-in-out pl-16
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}
         >
           <nav className="p-6 space-y-6">
-            <div className="relative">
-              {/* Single continuous line running through all items */}
-              <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-700" />
-              
-              {navItems.map((item, index) => (
-                <div key={item.path} className="relative">
-                  {/* Purple indicator for active page */}
-                  {isActive(item.path) && (
-                    <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-[#8B5CF6] z-10" 
-                      style={{ 
-                        top: index > 0 ? '-1.5rem' : '0',
-                        bottom: index < navItems.length - 1 ? '-1.5rem' : '0' 
-                      }} 
-                    />
-                  )}
-                  
-                  {/* Category Title - Not clickable */}
-                  <div
-                    className={`
-                      block text-sm font-semibold mb-2
-                      ${isActive(item.path) ? 'text-white' : 'text-gray-400'}
-                    `}
-                  >
-                    {item.label}
-                  </div>
-                  
-                  {/* Feature Items */}
-                  {item.items && (
-                    <div className="space-y-1 ml-4">
+            {navItems.map((item) => (
+              <div key={item.path} className="relative">
+                {/* Category Title - Not clickable */}
+                <div
+                  className={`
+                    block text-sm font-semibold mb-2
+                    ${isActive(item.path) ? 'text-white' : 'text-gray-400'}
+                  `}
+                >
+                  {item.label}
+                </div>
+                
+                {/* Feature Items with line */}
+                {item.items && (
+                  <div className="relative ml-4">
+                    {/* Line running from first to last item in category */}
+                    <div className="absolute left-0 top-2 bottom-0 w-0.5 bg-gray-700" />
+                    
+                    {/* Purple line for active category */}
+                    {isActive(item.path) && (
+                      <div className="absolute left-0 top-2 bottom-0 w-0.5 bg-[#8B5CF6] z-10" />
+                    )}
+                    
+                    <div className="space-y-1 pl-3">
                       {item.items.map((feature, idx) => (
                         <Link
                           key={idx}
-                          to={`${item.path}#${feature.toLowerCase().replace(/\s+/g, '-')}`}
+                          to={`${item.path}/${feature.toLowerCase().replace(/\s+/g, '-')}`}
                           className={`
                             block text-sm py-1.5 transition-all duration-200
                             ${isActive(item.path) ? 'text-white' : 'text-gray-500 hover:text-gray-300'}
                           `}
                         >
-                          <span className="ml-3">{feature}</span>
+                          {feature}
                         </Link>
                       ))}
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </nav>
         </aside>
 
