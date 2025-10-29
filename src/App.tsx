@@ -99,6 +99,7 @@ function AppContent() {
           <Route path="/" element={<RootRedirect />} />
           
           {/* Landing page - has its own Navbar */}
+          <Route path="/home" element={<LandingPage />} />
           <Route path="/landing" element={<LandingPage />} />
           
           {/* Referral landing page with modern design - /app/:username */}

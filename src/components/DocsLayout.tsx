@@ -1,42 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  BarChart3, 
-  Network, 
-  Bot, 
-  Users, 
-  ShoppingBag, 
-  FileText, 
-  CheckSquare, 
-  User, 
-  Shield, 
-  ArrowUp, 
-  Menu, 
-  X
-} from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import LogoImage from '../assets/LogoFiverFlow.png';
 
 interface NavItem {
   label: string;
   path: string;
-  icon: React.ReactNode;
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/docs/dashboard', icon: <LayoutDashboard size={18} /> },
-  { label: 'Calendar', path: '/docs/calendar', icon: <Calendar size={18} /> },
-  { label: 'Statistics', path: '/docs/statistics', icon: <BarChart3 size={18} /> },
-  { label: 'Referrals', path: '/docs/referrals', icon: <Network size={18} /> },
-  { label: 'Assistant', path: '/docs/assistant', icon: <Bot size={18} /> },
-  { label: 'Clients', path: '/docs/clients', icon: <Users size={18} /> },
-  { label: 'Orders', path: '/docs/orders', icon: <ShoppingBag size={18} /> },
-  { label: 'Invoices', path: '/docs/invoices', icon: <FileText size={18} /> },
-  { label: 'Workboard', path: '/docs/workboard', icon: <CheckSquare size={18} /> },
-  { label: 'Profile', path: '/docs/profile', icon: <User size={18} /> },
-  { label: 'Admin', path: '/docs/admin', icon: <Shield size={18} /> },
-  { label: 'Upgrade', path: '/docs/upgrade', icon: <ArrowUp size={18} /> },
+  { label: 'Dashboard', path: '/docs/dashboard' },
+  { label: 'Calendar', path: '/docs/calendar' },
+  { label: 'Statistics', path: '/docs/statistics' },
+  { label: 'Referrals', path: '/docs/referrals' },
+  { label: 'Assistant', path: '/docs/assistant' },
+  { label: 'Clients', path: '/docs/clients' },
+  { label: 'Orders', path: '/docs/orders' },
+  { label: 'Invoices', path: '/docs/invoices' },
+  { label: 'Workboard', path: '/docs/workboard' },
+  { label: 'Profile', path: '/docs/profile' },
+  { label: 'Admin', path: '/docs/admin' },
+  { label: 'Upgrade', path: '/docs/upgrade' },
+];
+
+const navLinks = [
+  { label: "Features", href: "/home#features" },
+  { label: "Benefits", href: "/home#benefits" },
+  { label: "Testimonials", href: "/home#testimonials" },
+  { label: "Pricing", href: "/home#pricing" },
+  { label: "FAQ", href: "/home#faq" },
+  { label: "Docs", href: "/docs" }
 ];
 
 const DocsLayout: React.FC = () => {
@@ -54,6 +47,16 @@ const DocsLayout: React.FC = () => {
     return location.pathname === path;
   };
 
+  const handleScroll = (href: string) => {
+    if (href.startsWith('#')) {
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+    setSidebarOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-[#0B0E14]">
       {/* Top Navigation Bar - Same as Landing */}
@@ -61,10 +64,29 @@ const DocsLayout: React.FC = () => {
         <div className="max-w-[1300px] mx-auto px-4 md:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Brand with Docs label */}
-            <Link to="/" className="flex items-center space-x-3">
+            <Link to="/home" className="flex items-center space-x-3">
               <img src={LogoImage} alt="FiverFlow Logo" className="h-6 w-auto" />
               <span className="text-[#8B5CF6] font-semibold text-sm">DOCS</span>
             </Link>
+
+            {/* Desktop Navigation - Same links as Landing */}
+            <div className="hidden lg:flex items-center gap-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  to={link.href}
+                  onClick={(e) => {
+                    if (link.href.startsWith('#')) {
+                      e.preventDefault();
+                      handleScroll(link.href);
+                    }
+                  }}
+                  className="text-neutral-300 hover:text-white transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
 
             {/* Desktop CTA & Mobile Menu Button */}
             <div className="flex items-center gap-4">
@@ -72,7 +94,7 @@ const DocsLayout: React.FC = () => {
                 to="/dashboard"
                 className="hidden lg:inline-flex items-center justify-center rounded-full text-white font-medium text-sm px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 shadow-[0_20px_80px_rgba(99,102,241,0.6)] hover:shadow-[0_30px_120px_rgba(99,102,241,0.9)] transition-shadow"
               >
-                Go to App
+                Try FiverFlow for free
               </Link>
 
               <button
@@ -84,6 +106,33 @@ const DocsLayout: React.FC = () => {
               </button>
             </div>
           </div>
+
+          {/* Mobile Menu */}
+          {sidebarOpen && (
+            <div className="lg:hidden mt-4 space-y-2">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  to={link.href}
+                  onClick={(e) => {
+                    if (link.href.startsWith('#')) {
+                      e.preventDefault();
+                      handleScroll(link.href);
+                    }
+                  }}
+                  className="block py-2 text-neutral-300 hover:text-white transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center justify-center rounded-full text-white font-medium text-sm px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 shadow-[0_20px_80px_rgba(99,102,241,0.6)] hover:shadow-[0_30px_120px_rgba(99,102,241,0.9)] transition-shadow mt-2"
+              >
+                Try FiverFlow for free
+              </Link>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -102,7 +151,7 @@ const DocsLayout: React.FC = () => {
                 key={item.path}
                 to={item.path}
                 className={`
-                  flex items-center space-x-3 px-3 py-2.5 text-sm transition-all duration-200 relative
+                  block px-3 py-2.5 text-sm transition-all duration-200 relative
                   ${
                     isActive(item.path)
                       ? 'text-white'
@@ -114,9 +163,6 @@ const DocsLayout: React.FC = () => {
                 {isActive(item.path) && (
                   <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#8B5CF6]" />
                 )}
-                <span className={isActive(item.path) ? 'text-[#8B5CF6]' : ''}>
-                  {item.icon}
-                </span>
                 <span>{item.label}</span>
               </Link>
             ))}
