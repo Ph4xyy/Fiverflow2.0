@@ -11,10 +11,9 @@ import NotificationsDropdown from './NotificationsDropdown';
 import CentralizedSearchBar from './CentralizedSearchBar';
 import AssistantFloatingButton from './AssistantFloatingButton';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
+// import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
-import UserProfileManager from '../utils/userProfileManager';
-import { handleError406 } from '../utils/errorDiagnostic';
+// removed unused imports to satisfy linter without changing behavior
 
 import { 
   Menu, 
@@ -33,9 +32,9 @@ import {
   CheckCircle2,
   Shield,
   Receipt,
-  Sun,
-  Moon,
-  Zap,
+  // Sun,
+  // Moon,
+  // Zap,
   Gift,
   Bot,
 } from 'lucide-react';
@@ -91,19 +90,20 @@ const useIsAdminFromRole = (user: any) => {
   return { isAdmin, loading };
 };
 
-class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error?: any }> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false, error: undefined };
-  }
-  static getDerivedStateFromError(error: any) {
+interface LocalErrorBoundaryProps { children: React.ReactNode }
+interface LocalErrorBoundaryState { hasError: boolean; error?: unknown }
+
+class LocalErrorBoundary extends React.Component<LocalErrorBoundaryProps, LocalErrorBoundaryState> {
+  state: LocalErrorBoundaryState = { hasError: false };
+  static getDerivedStateFromError(error: unknown): LocalErrorBoundaryState {
     return { hasError: true, error };
   }
-  componentDidCatch(error: any, info: any) {
+  componentDidCatch(error: unknown, info: React.ErrorInfo) {
+    // keep logs for diagnostics without changing UI/UX
+    // eslint-disable-next-line no-console
     console.error('[Layout ErrorBoundary] ERREUR DETECTEE:', error);
-    console.error('[Layout ErrorBoundary] Stack:', error.stack);
+    // eslint-disable-next-line no-console
     console.error('[Layout ErrorBoundary] Info:', info);
-    console.error('[Layout ErrorBoundary] Component stack:', info.componentStack);
   }
   render() {
     if (this.state.hasError) {
@@ -119,11 +119,9 @@ class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, 
   }
 }
 
-const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
+const LayoutInner: React.FC<LayoutProps> = ({ children }: LayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const { currentTheme, setTheme, getThemeColors } = useTheme();
-  const themeColors = getThemeColors();
+  // theme context not used here; keeping UI identical while removing unused refs
 
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [requiredPlan, setRequiredPlan] = useState<'Pro' | 'Excellence' | 'Scale'>('Pro');
@@ -138,16 +136,9 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   const subscription = perms?.subscription || null;
   const isUserAdmin = perms?.isAdmin || false;
   
-  useEffect(() => {
-    // Définir le rôle utilisateur basé sur l'authentification
-    if (user) {
-      setUserRole('user');
-    } else {
-      setUserRole(null);
-    }
-  }, [user]);
+  // removed unused userRole logic (no functional impact)
 
-  const { isAdmin, loading: adminLoading } = useIsAdminFromRole(user);
+  const { isAdmin } = useIsAdminFromRole(user);
 
   /* ---------- NAV STRUCTURE EN 3 SECTIONS + MICRO SECTION BAS ---------- */
   // Section 1: Overview (principales)
@@ -245,26 +236,13 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
     navigate('/login');
   };
 
-  const handleThemeChange = () => {
-    const themes = ['light', 'dark', 'halloween'] as const;
-    const currentIndex = themes.indexOf(currentTheme);
-    const nextIndex = (currentIndex + 1) % themes.length;
-    setTheme(themes[nextIndex]);
-  };
+  // theme switcher UI is commented out; drop unused helpers to appease linter
 
-  const getThemeIcon = () => {
-    switch (currentTheme) {
-      case 'light': return Sun;
-      case 'dark': return Moon;
-      case 'halloween': return Zap;
-      default: return Sun;
-    }
-  };
-
-  const LinkRow: React.FC<{
+  interface LinkRowProps {
     item: any;
     activeMatcher?: (p: string) => boolean;
-  }> = ({ item, activeMatcher }) => {
+  }
+  const LinkRow: React.FC<LinkRowProps> = ({ item, activeMatcher }) => {
     const Icon = item.icon;
     const isRestricted = 'restricted' in item && (item as any).restricted;
     const isUpgrade = item.special === 'upgrade';
@@ -283,7 +261,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
       <Link
         key={item.path}
         to={item.path}
-        onClick={(e) => {
+        onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
           if (isRestricted) {
             e.preventDefault();
             setRequiredPlan((item as any).requiredPlan || 'Pro');
@@ -433,7 +411,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
                     <LinkRow
                       key={item.path}
                       item={item}
-                      activeMatcher={(p) =>
+                      activeMatcher={(p: string) =>
                         p === '/profile'
                           ? location.pathname === '/profile'
                           : p.startsWith('/admin')
@@ -609,7 +587,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   );
 };
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC<LayoutProps> = ({ children }: LayoutProps) => {
   const location = useLocation();
   
   // Skip Layout for landing page only
