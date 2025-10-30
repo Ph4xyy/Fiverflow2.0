@@ -5,59 +5,79 @@ import { ChevronRight } from 'lucide-react';
 
 // Hardcoded content
 const contentMap: Record<string, string> = {
-  index: `# Welcome to FiverFlow Documentation
+  index: `# Welcome to the FiverFlow Documentation
 
-Comprehensive guides to help you make the most of every feature in the FiverFlow platform.
+This home page helps you get started, understand how things work, and follow a clear syllabus across modules.
 
-## Getting Started
+## Welcome message
 
-FiverFlow is your all-in-one platform for managing freelance projects, clients, invoices, and more. Start by exploring the key sections below.
+Welcome! FiverFlow is your all‑in‑one cockpit to manage clients, orders, invoices, tasks, and analytics — built for freelancers and small teams.
 
-## Key Areas
+## How it works (overview)
 
-### Overview
+1. Sign in and profile: create your account, fill your public profile, set preferences.
+2. Workspace: use the left sidebar to access Dashboard, Calendar, Clients, Orders, Invoices, and Workboard.
+3. Real‑time data: all screens sync with the database (Supabase). Actions update instantly across the app.
+4. AI Assistant: available depending on plan; speeds up input, search, and automation.
 
-Essential features to manage your business:
+## Syllabus (learning path)
 
-- **Dashboard**: Your central hub for managing your freelance business
-- **Calendar**: Schedule and track events and deadlines
-- **Statistics**: Analyze your performance with detailed reports
-- **Referrals**: Grow your network with our referral system
+- Week 1: Dashboard basics, onboarding, initial configuration.
+- Week 2: Clients and Orders — end‑to‑end flow from offer to delivery.
+- Week 3: Invoices and payments — templates, sending, tracking, export.
+- Week 4: Workboard and Calendar — tasks, priorities, deadlines, sync.
+- Week 5: Statistics and growth — KPIs, reports, decisions.
+- Bonus: AI Assistant, automations, and advanced integrations.
 
-### AI Features
+## Video placeholder (coming soon)
 
-Leverage artificial intelligence to automate and optimize:
+A short walkthrough video will be embedded here to tour the interface and essential gestures.
 
-- **Assistant**: Get AI-powered help with tasks and insights
+> [Coming soon] Guided demo (5 minutes) — fast overview of each module.
+
+## Key areas
+
+Essential features to run your business:
+
+- **Dashboard**: central view of metrics and quick actions
+- **Calendar**: planning, events, and deadlines
+- **Statistics**: detailed reports and analysis
+- **Referrals**: referral program
+
+### AI
+
+Accelerate and automate with the assistant:
+
+- **Assistant**: contextual help, writing, search, and automations
 
 ### Workspace
 
-Organize your work and manage clients:
+Organize your work and clients:
 
-- **Clients**: Manage client information and relationships
-- **Orders**: Track projects and deadlines
-- **Invoices**: Handle billing and payment tracking
-- **Workboard**: Organize tasks with Kanban boards
+- **Clients**: contact and account management
+- **Orders**: project tracking and deliverables
+- **Invoices**: billing and payments
+- **Workboard**: tasks/kanban, priorities, progress
 
 ### More
 
-Additional features to configure and manage:
+Additional features:
 
-- **Profile**: Account settings and preferences
-- **Admin**: Administrative tools (for admins)
-- **Upgrade**: View and manage your subscription
+- **Profile**: settings, appearance, and security
+- **Admin**: administration tools (role‑based)
+- **Upgrade**: plans and billing
 
-## Getting Help
+## Need help
 
-If you need assistance or have questions:
+If you have questions or get stuck:
 
-- Check the individual documentation pages for detailed guides
-- Contact support through the dashboard
+- Browse the dedicated Docs pages from the sidebar
+- Open a support ticket from the dashboard
 - Visit the pricing page to upgrade your plan
 
 ---
 
-*Last updated: October 2024*`,
+*Last updated: ${new Date().toLocaleDateString()}*`,
   
   dashboard: `# Dashboard
 
