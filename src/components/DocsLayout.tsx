@@ -148,6 +148,9 @@ const DocsLayout: React.FC = () => {
 
       {/* Three Column Layout */}
       <div className="flex fixed inset-0 top-[73px]">
+        {/* Left padding */}
+        <div className="w-16 flex-shrink-0" />
+        
         {/* Left: Sidebar - Truly Fixed */}
         <div className="w-[260px] flex-shrink-0">
           <DocsSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -155,18 +158,21 @@ const DocsLayout: React.FC = () => {
 
         {/* Middle: Main Content - Only scrollable area */}
         <main className="flex-1 overflow-y-auto bg-[#0A0A0A]">
-          <div className="max-w-4xl px-8 py-8">
+          <div className="max-w-4xl px-8 py-8 pl-20 pr-8">
             <Outlet />
           </div>
         </main>
 
         {/* Right: TOC and Helpful Widget - Fixed */}
-        <aside className="hidden xl:block w-64 flex-shrink-0 pr-8 pt-8 fixed right-0 top-[73px] h-[calc(100vh-73px)] overflow-y-auto">
+        <aside className="hidden xl:block w-64 flex-shrink-0 pr-8 pt-8">
           <div className="sticky top-8">
             {headings.length > 0 && <DocsTableOfContents headings={headings} />}
             <HelpfulWidget />
           </div>
         </aside>
+        
+        {/* Right padding */}
+        <div className="hidden xl:block w-16 flex-shrink-0" />
       </div>
     </div>
   );
