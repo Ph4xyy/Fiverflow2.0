@@ -93,9 +93,21 @@ const customStorage = {
 };
 
 // SINGLETON Supabase Client - UNE SEULE initialisation avec options UNIFORMES
+// Utilisation d'une fonction getter pour garantir un vrai singleton même en cas de re-import
 let supabaseInstance: SupabaseClient | null = null;
 
-if (isSupabaseConfigured && !supabaseInstance) {
+function getSupabaseClient(): SupabaseClient | null {
+  // Si déjà initialisé, retourner l'instance existante
+  if (supabaseInstance) {
+    return supabaseInstance;
+  }
+
+  // Si non configuré, retourner null
+  if (!isSupabaseConfigured) {
+    return null;
+  }
+
+  // Créer l'instance unique
   console.log('[Supabase] Initializing singleton client...');
   
   supabaseInstance = createClient(supabaseUrl!, supabaseAnonKey!, {
@@ -104,8 +116,8 @@ if (isSupabaseConfigured && !supabaseInstance) {
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      multiTab: true,
-      storageKey: 'fiverflow.auth',
+      multiTab: true, // ✅ Autorise plusieurs onglets ouverts simultanément
+      storageKey: 'fiverflow.auth', // ✅ Clé unique pour éviter les conflits
       flowType: 'pkce',
       storage: customStorage,
       debug: import.meta.env.DEV,
@@ -117,9 +129,11 @@ if (isSupabaseConfigured && !supabaseInstance) {
   });
 
   console.log('[Supabase] ✅ Singleton client initialized successfully');
+  return supabaseInstance;
 }
 
-export const supabase = supabaseInstance;
+// Exporter via une fonction getter pour garantir le singleton
+export const supabase = getSupabaseClient();
 
 // Exposer les informations de storage pour diagnostic
 export const storageSupport = {

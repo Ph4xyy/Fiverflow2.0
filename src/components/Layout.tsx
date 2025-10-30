@@ -64,6 +64,12 @@ const useIsAdminFromRole = (user: any) => {
         return;
       }
 
+      if (!supabase) {
+        setIsAdmin(false);
+        setLoading(false);
+        return;
+      }
+
       try {
         const { data: profile, error } = await supabase
           .from('user_profiles')
@@ -455,8 +461,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           />
         )}
 
-        <main className="flex-1 lg:ml-64 min-h-screen">
-          <div className={`p-0 sm:p-6 min-h-screen transition-colors duration-300`}>
+        <main className="flex-1 lg:ml-64 min-h-screen bg-[#111726]">
+          <div className={`p-0 sm:p-6 min-h-screen transition-colors duration-300 bg-[#111726]`}>
             <LocalErrorBoundary>{children}</LocalErrorBoundary>
           </div>
         </main>
