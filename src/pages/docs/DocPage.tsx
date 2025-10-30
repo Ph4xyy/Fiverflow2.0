@@ -129,7 +129,44 @@ const DocPage: React.FC = () => {
   
   const getContent = () => {
     const docPage = page || 'index';
-    return contentMap[docPage] || `# ${docPage} Documentation\n\nContent coming soon...`;
+    
+    // Check if we have specific content for this page
+    if (contentMap[docPage]) {
+      return contentMap[docPage];
+    }
+    
+    // Generate content based on the page path
+    const pathParts = docPage.split('/');
+    const pageName = pathParts[pathParts.length - 1];
+    const category = pathParts[0];
+    
+    // Format the title nicely
+    const title = pageName
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    
+    const categoryTitle = category
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    
+    return `# ${title}
+
+This page provides detailed information about ${title} in the ${categoryTitle} section.
+
+## Overview
+
+Content coming soon for this page. We're working on comprehensive documentation.
+
+## Features
+
+Stay tuned for detailed instructions and examples.
+
+---
+
+*Page: ${docPage}*
+*Last updated: ${new Date().toLocaleDateString()}*`;
   };
 
   const content = getContent();
