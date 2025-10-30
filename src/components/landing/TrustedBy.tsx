@@ -4,9 +4,15 @@ export const TrustedBy = () => {
   const platforms = [
     'Fiverr',
     'Upwork',
-    'Shopify',
-    'TikTok Shop',
-    'Instagram DM',
+    'Freelancer.com',
+    'PeoplePerHour',
+    'Guru',
+    'Toptal',
+    'Malt',
+    'Contra',
+    '99designs',
+    'Codeable',
+    'Thumbtack',
     'Custom Clients',
   ];
 

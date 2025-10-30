@@ -160,7 +160,7 @@ const PricingSection = () => {
                     <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="absolute -top-4 left-1/2 -translate-x-1/2 z-10"
+                      className="absolute top-4 left-1/2 -translate-x-1/2 z-10"
                     >
                       <div className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg">
                         <Star className="h-4 w-4" fill="currentColor" />
@@ -171,7 +171,7 @@ const PricingSection = () => {
                   </>
                 )}
 
-                <div className="p-8 relative z-10">
+                <div className={`p-8 relative z-10 ${plan.popular ? 'pt-14' : ''}`}>
                   {/* Icon */}
                   <motion.div
                     whileHover={{ scale: 1.1, rotate: 5 }}
@@ -273,17 +273,7 @@ const PricingSection = () => {
           })}
         </div>
 
-        {/* Additional Info */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="mt-16 text-center"
-        >
-          <p className="text-sm text-neutral-400">
-            All plans include a 14-day free trial. No credit card required. Cancel anytime.
-          </p>
-        </motion.div>
+        {/* Additional Info removed as requested */}
       </div>
     </section>
   );

@@ -9,20 +9,28 @@ interface FAQItem {
 
 const FAQ_ITEMS: FAQItem[] = [
   {
-    q: "Is FiverFlow only for Fiverr?",
-    a: "No. You can track work from Fiverr, Upwork, TikTok Shop, private clients, and anywhere else."
+    q: "What platforms does FiverFlow support?",
+    a: "Track clients and orders from Fiverr, Upwork, TikTok Shop, Instagram DMs, and private clients — all in one workspace."
   },
   {
-    q: "Will this replace my spreadsheet?",
-    a: "Yes. You'll have tasks, clients, orders, invoices, and revenue tracking in one place."
+    q: "How do clients and orders get organized?",
+    a: "Add them as you work. FiverFlow centralizes your pipeline so you always know what’s active, due, and delivered."
   },
   {
-    q: "Can I use it if I'm an agency, not solo?",
-    a: "Yes. We're built for freelancers and small studios who need clarity and speed."
+    q: "Can I create invoices and get paid?",
+    a: "Yes. Generate invoices from your orders and accept payments through Stripe. Funds go directly to your Stripe account."
   },
   {
-    q: "Do I need a credit card to start?",
-    a: "No. You can explore the product first."
+    q: "Does FiverFlow include an AI assistant?",
+    a: "Yes. The AI Assistant helps draft replies, summarize orders, and speed up admin tasks so you can focus on delivery."
+  },
+  {
+    q: "Is it only for solo freelancers?",
+    a: "No. It works great for solo freelancers and small studios that need a shared, organized workflow."
+  },
+  {
+    q: "Can I change or cancel my plan anytime?",
+    a: "Yes. You can switch plans or cancel anytime from your billing settings."
   }
 ];
 

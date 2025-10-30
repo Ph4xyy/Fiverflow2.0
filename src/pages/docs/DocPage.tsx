@@ -5,59 +5,69 @@ import { ChevronRight } from 'lucide-react';
 
 // Hardcoded content
 const contentMap: Record<string, string> = {
-  index: `# Welcome to FiverFlow Documentation
+  index: `# Welcome to the FiverFlow Documentation
 
-Comprehensive guides to help you make the most of every feature in the FiverFlow platform.
+This home page helps you get started, understand how things work, and follow a clear syllabus across modules.
 
-## Getting Started
+## Welcome message
 
-FiverFlow is your all-in-one platform for managing freelance projects, clients, invoices, and more. Start by exploring the key sections below.
+Welcome! FiverFlow is your all‑in‑one cockpit to manage clients, orders, invoices, tasks, and analytics — built for freelancers and small teams.
 
-## Key Areas
+## How it works (overview)
 
-### Overview
+1. Sign in and profile: create your account, fill your public profile, set preferences.
+2. Workspace: use the left sidebar to access Dashboard, Calendar, Clients, Orders, Invoices, and Workboard.
+3. Real‑time data: all screens sync with the database (Supabase). Actions update instantly across the app.
+4. AI Assistant: available depending on plan; speeds up input, search, and automation.
 
-Essential features to manage your business:
+## Video placeholder (coming soon)
 
-- **Dashboard**: Your central hub for managing your freelance business
-- **Calendar**: Schedule and track events and deadlines
-- **Statistics**: Analyze your performance with detailed reports
-- **Referrals**: Grow your network with our referral system
+A short walkthrough video will be embedded here to tour the interface and essential gestures.
 
-### AI Features
+> [Coming soon] Guided demo (5 minutes) — fast overview of each module.
 
-Leverage artificial intelligence to automate and optimize:
+## Key areas
 
-- **Assistant**: Get AI-powered help with tasks and insights
+Essential features to run your business:
+
+- **Dashboard**: central view of metrics and quick actions
+- **Calendar**: planning, events, and deadlines
+- **Statistics**: detailed reports and analysis
+- **Referrals**: referral program
+
+### AI
+
+Accelerate and automate with the assistant:
+
+- **Assistant**: contextual help, writing, search, and automations
 
 ### Workspace
 
-Organize your work and manage clients:
+Organize your work and clients:
 
-- **Clients**: Manage client information and relationships
-- **Orders**: Track projects and deadlines
-- **Invoices**: Handle billing and payment tracking
-- **Workboard**: Organize tasks with Kanban boards
+- **Clients**: contact and account management
+- **Orders**: project tracking and deliverables
+- **Invoices**: billing and payments
+- **Workboard**: tasks/kanban, priorities, progress
 
 ### More
 
-Additional features to configure and manage:
+Additional features:
 
-- **Profile**: Account settings and preferences
-- **Admin**: Administrative tools (for admins)
-- **Upgrade**: View and manage your subscription
+- **Profile**: settings, appearance, and security
+- **Upgrade**: plans and billing
 
-## Getting Help
+## Need help
 
-If you need assistance or have questions:
+If you have questions or get stuck:
 
-- Check the individual documentation pages for detailed guides
-- Contact support through the dashboard
+- Browse the dedicated Docs pages from the sidebar
+- Open a support ticket from the dashboard
 - Visit the pricing page to upgrade your plan
 
 ---
 
-*Last updated: October 2024*`,
+*Last updated: ${new Date().toLocaleDateString()}*`,
   
   dashboard: `# Dashboard
 
@@ -128,9 +138,9 @@ const DocPage: React.FC = () => {
   const location = useLocation();
   
   const getContent = () => {
-    // Get full path from location
-    const fullPath = location.pathname.replace('/docs/', '');
-    const docPage = fullPath || 'index';
+    // Normalize path so "/docs" and "/docs/" both resolve to index
+    const fullPath = location.pathname.replace(/^\/docs\/?/, '');
+    const docPage = fullPath === '' ? 'index' : fullPath;
     
     // Check if we have specific content for this page
     if (contentMap[docPage]) {

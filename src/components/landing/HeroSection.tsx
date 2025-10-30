@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { Play, CheckCircle2 } from 'lucide-react';
-import LogoImage from '../../assets/LogoFiverFlow.png';
 
 interface HeroSectionProps {
   onGetStarted?: () => void;
@@ -37,9 +36,13 @@ export const HeroSection = ({ onGetStarted }: HeroSectionProps = {}) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="text-neutral-400 uppercase tracking-wider text-[10px] md:text-xs font-medium"
+            className="text-neutral-300 tracking-wide text-[11px] md:text-sm font-medium"
             >
-              <img src={LogoImage} alt="FiverFlow Logo" className="h-3 w-auto inline-block" />
+            Made for {""}
+            <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
+              Freelancers
+            </span>{" "}
+            by Freelancers
             </motion.div>
 
             {/* Headline */}
