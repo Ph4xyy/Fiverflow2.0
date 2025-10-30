@@ -125,6 +125,7 @@ Access common tasks directly from the dashboard:
 
 const DocPage: React.FC = () => {
   const { page } = useParams<{ page: string }>();
+  const location = useLocation();
   
   const getContent = () => {
     const docPage = page || 'index';
@@ -132,14 +133,31 @@ const DocPage: React.FC = () => {
   };
 
   const content = getContent();
+  const getBreadcrumbPath = () => {
+    const currentPath = location.pathname;
+    const parts = currentPath.split('/').filter(Boolean);
+    const breadcrumbs = parts.map((part, index) => ({
+      label: part.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      path: '/' + parts.slice(0, index + 1).join('/')
+    }));
+    return breadcrumbs;
+  };
+
+  const breadcrumbs = getBreadcrumbPath();
+
   return (
     <div className="prose prose-invert max-w-none text-[#A6A6A6]">
       {/* Breadcrumb */}
-      {page && (
+      {breadcrumbs.length > 1 && (
         <div className="flex items-center gap-2 text-sm text-[#A6A6A6] mb-6">
-          <span>Docs</span>
-          <ChevronRight size={14} />
-          <span className="text-[#FAFAFA]">{page.charAt(0).toUpperCase() + page.slice(1)}</span>
+          {breadcrumbs.map((crumb, index) => (
+            <React.Fragment key={crumb.path}>
+              {index > 0 && <ChevronRight size={14} />}
+              <span className={index === breadcrumbs.length - 1 ? 'text-[#FAFAFA]' : 'text-[#A6A6A6]'}>
+                {crumb.label}
+              </span>
+            </React.Fragment>
+          ))}
         </div>
       )}
 

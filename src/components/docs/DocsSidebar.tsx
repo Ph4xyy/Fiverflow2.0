@@ -11,37 +11,118 @@ interface CategoryItem {
 
 const categories: CategoryItem[] = [
   {
-    label: 'Overview',
-    path: '/docs/overview',
+    label: 'Dashboard',
+    path: '/docs/dashboard',
     subpages: [
-      { label: 'Dashboard', path: '/docs/dashboard' },
-      { label: 'Calendar', path: '/docs/calendar' },
-      { label: 'Statistics', path: '/docs/statistics' },
-      { label: 'Referrals', path: '/docs/referrals' },
+      { label: 'Overview', path: '/docs/dashboard/overview' },
+      { label: 'Widgets', path: '/docs/dashboard/widgets' },
+      { label: 'Reports', path: '/docs/dashboard/reports' },
+      { label: 'Quick Actions', path: '/docs/dashboard/quick-actions' },
     ],
   },
   {
-    label: 'AI',
-    path: '/docs/ai',
-    subpages: [{ label: 'Assistant', path: '/docs/assistant' }],
-  },
-  {
-    label: 'Workspace',
-    path: '/docs/workspace',
+    label: 'Calendar',
+    path: '/docs/calendar',
     subpages: [
-      { label: 'Clients', path: '/docs/clients' },
-      { label: 'Orders', path: '/docs/orders' },
-      { label: 'Invoices', path: '/docs/invoices' },
-      { label: 'Workboard', path: '/docs/workboard' },
+      { label: 'Overview', path: '/docs/calendar/overview' },
+      { label: 'Create Event', path: '/docs/calendar/create-event' },
+      { label: 'Sync Integrations', path: '/docs/calendar/sync-integrations' },
     ],
   },
   {
-    label: 'More',
-    path: '/docs/more',
+    label: 'Statistics',
+    path: '/docs/statistics',
     subpages: [
-      { label: 'Profile', path: '/docs/profile' },
-      { label: 'Admin', path: '/docs/admin' },
-      { label: 'Upgrade', path: '/docs/upgrade' },
+      { label: 'Overview', path: '/docs/statistics/overview' },
+      { label: 'Performance Reports', path: '/docs/statistics/performance-reports' },
+      { label: 'Exporting Data', path: '/docs/statistics/exporting-data' },
+    ],
+  },
+  {
+    label: 'Referrals',
+    path: '/docs/referrals',
+    subpages: [
+      { label: 'Overview', path: '/docs/referrals/overview' },
+      { label: 'Invite & Tracking', path: '/docs/referrals/invite-tracking' },
+      { label: 'Rewards & Payouts', path: '/docs/referrals/rewards-payouts' },
+    ],
+  },
+  {
+    label: 'Assistant',
+    path: '/docs/assistant',
+    subpages: [
+      { label: 'Overview', path: '/docs/assistant/overview' },
+      { label: 'Tasks Automation', path: '/docs/assistant/tasks-automation' },
+      { label: 'Custom Prompts', path: '/docs/assistant/custom-prompts' },
+      { label: 'Integrations', path: '/docs/assistant/integrations' },
+    ],
+  },
+  {
+    label: 'Clients',
+    path: '/docs/clients',
+    subpages: [
+      { label: 'Overview', path: '/docs/clients/overview' },
+      { label: 'Adding Clients', path: '/docs/clients/adding-clients' },
+      { label: 'Managing Data', path: '/docs/clients/managing-data' },
+      { label: 'Exporting Clients', path: '/docs/clients/exporting-clients' },
+    ],
+  },
+  {
+    label: 'Orders',
+    path: '/docs/orders',
+    subpages: [
+      { label: 'Overview', path: '/docs/orders/overview' },
+      { label: 'Creating Orders', path: '/docs/orders/creating-orders' },
+      { label: 'Managing Orders', path: '/docs/orders/managing-orders' },
+      { label: 'Order Statuses', path: '/docs/orders/order-statuses' },
+    ],
+  },
+  {
+    label: 'Invoices',
+    path: '/docs/invoices',
+    subpages: [
+      { label: 'Overview', path: '/docs/invoices/overview' },
+      { label: 'Creating Invoices', path: '/docs/invoices/creating-invoices' },
+      { label: 'Payment Tracking', path: '/docs/invoices/payment-tracking' },
+      { label: 'Exporting Invoices', path: '/docs/invoices/exporting-invoices' },
+    ],
+  },
+  {
+    label: 'Workboard',
+    path: '/docs/workboard',
+    subpages: [
+      { label: 'Overview', path: '/docs/workboard/overview' },
+      { label: 'Creating Boards', path: '/docs/workboard/creating-boards' },
+      { label: 'Task Management', path: '/docs/workboard/task-management' },
+      { label: 'Collaboration', path: '/docs/workboard/collaboration' },
+    ],
+  },
+  {
+    label: 'Profile',
+    path: '/docs/profile',
+    subpages: [
+      { label: 'Overview', path: '/docs/profile/overview' },
+      { label: 'Settings & Preferences', path: '/docs/profile/settings-preferences' },
+      { label: 'Security & Sessions', path: '/docs/profile/security-sessions' },
+    ],
+  },
+  {
+    label: 'Admin',
+    path: '/docs/admin',
+    subpages: [
+      { label: 'Overview', path: '/docs/admin/overview' },
+      { label: 'User Management', path: '/docs/admin/user-management' },
+      { label: 'Permissions', path: '/docs/admin/permissions' },
+      { label: 'Platform Settings', path: '/docs/admin/platform-settings' },
+    ],
+  },
+  {
+    label: 'Upgrade',
+    path: '/docs/upgrade',
+    subpages: [
+      { label: 'Overview', path: '/docs/upgrade/overview' },
+      { label: 'Plans & Pricing', path: '/docs/upgrade/plans-pricing' },
+      { label: 'Billing', path: '/docs/upgrade/billing' },
     ],
   },
 ];
