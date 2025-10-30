@@ -128,7 +128,9 @@ const DocPage: React.FC = () => {
   const location = useLocation();
   
   const getContent = () => {
-    const docPage = page || 'index';
+    // Get full path from location
+    const fullPath = location.pathname.replace('/docs/', '');
+    const docPage = fullPath || 'index';
     
     // Check if we have specific content for this page
     if (contentMap[docPage]) {
@@ -138,7 +140,7 @@ const DocPage: React.FC = () => {
     // Generate content based on the page path
     const pathParts = docPage.split('/');
     const pageName = pathParts[pathParts.length - 1];
-    const category = pathParts[0];
+    const category = pathParts[0] || docPage;
     
     // Format the title nicely
     const title = pageName
@@ -165,7 +167,6 @@ Stay tuned for detailed instructions and examples.
 
 ---
 
-*Page: ${docPage}*
 *Last updated: ${new Date().toLocaleDateString()}*`;
   };
 

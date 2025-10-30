@@ -108,7 +108,7 @@ function AppContent() {
           {/* Documentation - Sépare complètement du Layout */}
           <Route path="/docs" element={<DocsLayout />}>
             <Route index element={<DocPage />} />
-            <Route path=":page" element={<DocPage />} />
+            <Route path=":page/*" element={<DocPage />} />
           </Route>
           
           {/* Pages publiques */}
