@@ -148,9 +148,9 @@ const DocPage: React.FC = () => {
   const location = useLocation();
   
   const getContent = () => {
-    // Get full path from location
-    const fullPath = location.pathname.replace('/docs/', '');
-    const docPage = fullPath || 'index';
+    // Normalize path so "/docs" and "/docs/" both resolve to index
+    const fullPath = location.pathname.replace(/^\/docs\/?/, '');
+    const docPage = fullPath === '' ? 'index' : fullPath;
     
     // Check if we have specific content for this page
     if (contentMap[docPage]) {
