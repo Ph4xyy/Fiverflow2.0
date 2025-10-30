@@ -25,11 +25,11 @@ export const Navbar = ({ onTryNow }: NavbarProps = {}) => {
   };
 
   const navLinks = [
-    { label: "Features", href: "#features" },
-    { label: "Benefits", href: "#benefits" },
-    { label: "Testimonials", href: "#testimonials" },
-    { label: "Pricing", href: "#pricing" },
-    { label: "FAQ", href: "#faq" },
+    { label: "Features", href: "/home#features" },
+    { label: "Benefits", href: "/home#benefits" },
+    { label: "Testimonials", href: "/home#testimonials" },
+    { label: "Pricing", href: "/home#pricing" },
+    { label: "FAQ", href: "/home#faq" },
     { label: "Docs", href: "/docs" }
   ];
 
@@ -39,6 +39,9 @@ export const Navbar = ({ onTryNow }: NavbarProps = {}) => {
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
+    } else if (href === '/docs') {
+      // Navigate to docs page
+      window.location.href = href;
     }
     setIsMobileMenuOpen(false);
   };
@@ -53,7 +56,7 @@ export const Navbar = ({ onTryNow }: NavbarProps = {}) => {
       <div className="max-w-[1300px] mx-auto px-4 md:px-8 py-4">
         <div className="flex items-center justify-between">
           {/* Brand */}
-          <a href="/">
+          <a href="/home">
             <img src={LogoImage} alt="FiverFlow Logo" className="h-6 w-auto" />
           </a>
 
@@ -64,8 +67,10 @@ export const Navbar = ({ onTryNow }: NavbarProps = {}) => {
                 key={link.label}
                 href={link.href}
                 onClick={(e) => {
-                  e.preventDefault();
-                  handleScroll(link.href);
+                  if (link.href.startsWith('#') || link.href === '/docs') {
+                    e.preventDefault();
+                    handleScroll(link.href);
+                  }
                 }}
                 className="text-neutral-300 hover:text-white transition-colors"
                 initial={{ opacity: 0, y: -20 }}
@@ -111,8 +116,10 @@ export const Navbar = ({ onTryNow }: NavbarProps = {}) => {
                 key={link.label}
                 href={link.href}
                 onClick={(e) => {
-                  e.preventDefault();
-                  handleScroll(link.href);
+                  if (link.href.startsWith('#') || link.href === '/docs') {
+                    e.preventDefault();
+                    handleScroll(link.href);
+                  }
                 }}
                 className="block py-2 text-neutral-300 hover:text-white transition-colors"
               >

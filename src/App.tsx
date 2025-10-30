@@ -24,7 +24,6 @@ import InstantProtectedRoute from './components/InstantProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import AnalyticsWrapper from './components/AnalyticsWrapper';
-import LoadingDiagnostic from './components/LoadingDiagnostic';
 import SubscriptionGuard from './components/SubscriptionGuard';
 import TempSubscriptionGuard from './components/TempSubscriptionGuard';
 import Layout from './components/Layout';
@@ -42,7 +41,6 @@ import CreateUsername from './pages/CreateUsername';
 import OAuthDebug from './pages/OAuthDebug';
 import LandingPage from './pages/LandingPage';
 import ReferralLandingModern from './pages/ReferralLandingModern';
-import DocsPage from './pages/DocsPage';
 import DashboardExample from './pages/DashboardExample';
 import PageCalendar from './pages/PageCalendar';
 import PagePricing from './pages/PagePricing';
@@ -74,6 +72,10 @@ import PrivacyPolicy from "./components/PrivacyPolicy";
 import CookiePolicy from "./components/CookiePolicy";
 import TermsOfService from "./components/TermsOfService";
 
+// Pages de documentation
+import DocsLayout from './components/DocsLayout';
+import DocPage from './pages/docs/DocPage';
+
 // Pages de facturation (lazy loading pour optimiser les performances)
 const InvoicesLayout = lazy(() => import('./pages/InvoicesLayout'));
 const PageInvoices = lazy(() => import('./pages/PageInvoices'));
@@ -90,20 +92,24 @@ function AppContent() {
   usePreloadData();
 
   return (
-    <Layout>
+    <>
       <Suspense fallback={null}>
         <Routes>
           {/* Redirection racine intelligente */}
           <Route path="/" element={<RootRedirect />} />
           
           {/* Landing page - has its own Navbar */}
+          <Route path="/home" element={<LandingPage />} />
           <Route path="/landing" element={<LandingPage />} />
           
           {/* Referral landing page with modern design - /app/:username */}
           <Route path="/app/:username" element={<ReferralLandingModern />} />
           
-          {/* Documentation */}
-          <Route path="/docs" element={<DocsPage />} />
+          {/* Documentation - Sépare complètement du Layout */}
+          <Route path="/docs" element={<DocsLayout />}>
+            <Route index element={<DocPage />} />
+            <Route path=":page/*" element={<DocPage />} />
+          </Route>
           
           {/* Pages publiques */}
           <Route path="/pricing" element={<PagePricing />} />
@@ -117,76 +123,78 @@ function AppContent() {
           <Route path="/create-username" element={<CreateUsername />} />
           <Route path="/oauth-debug" element={<OAuthDebug />} />
 
-          {/* Dashboard principal - Accessible à tous les abonnements */}
-          <Route path="/dashboard" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Lunch" pageName="dashboard">
-                <DashboardExample />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
-          } />
+          {/* Routes protégées avec Layout du dashboard */}
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={
+              <InstantProtectedRoute>
+                <SubscriptionGuard requiredPlan="Lunch" pageName="dashboard">
+                  <DashboardExample />
+                </SubscriptionGuard>
+              </InstantProtectedRoute>
+            } />
 
-          {/* Pages internes du dashboard avec protection par abonnement */}
-          <Route path="/clients" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Lunch" pageName="clients" description="Gestion des clients (max 5 avec Lunch)">
-                <PageClients />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
-          } />
-          <Route path="/orders" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Lunch" pageName="orders" description="Gestion des commandes (max 10 avec Lunch)">
-                <PageOrders />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
-          } />
-          <Route path="/calendar" element={
+            {/* Pages internes du dashboard avec protection par abonnement */}
+            <Route path="/clients" element={
+              <InstantProtectedRoute>
+                <SubscriptionGuard requiredPlan="Lunch" pageName="clients" description="Gestion des clients (max 5 avec Lunch)">
+                  <PageClients />
+                </SubscriptionGuard>
+              </InstantProtectedRoute>
+            } />
+            <Route path="/orders" element={
+              <InstantProtectedRoute>
+                <SubscriptionGuard requiredPlan="Lunch" pageName="orders" description="Gestion des commandes (max 10 avec Lunch)">
+                  <PageOrders />
+                </SubscriptionGuard>
+              </InstantProtectedRoute>
+            } />
+            <Route path="/calendar" element={
             <InstantProtectedRoute>
               <TempSubscriptionGuard requiredPlan="Boost" pageName="calendar" description="Calendrier disponible avec Boost">
                 <PageCalendar />
               </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          <Route path="/tasks" element={
+            <Route path="/tasks" element={
             <InstantProtectedRoute>
               <TempSubscriptionGuard requiredPlan="Boost" pageName="workboard" description="Tableau de travail disponible avec Boost">
                 <WorkboardPage />
               </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
-          <Route path="/stats" element={
+            <Route path="/templates" element={<InstantProtectedRoute><TemplatesPage /></InstantProtectedRoute>} />
+            <Route path="/stats" element={
             <InstantProtectedRoute>
               <TempSubscriptionGuard requiredPlan="Scale" pageName="stats" description="Statistiques avancées disponibles avec Scale">
                 <StatsPage />
               </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          {/* Système de profil universel */}
-          <Route path="/profile" element={<InstantProtectedRoute><ProfileRedirect /></InstantProtectedRoute>} />
-          <Route path="/profile/:username" element={<InstantProtectedRoute><ProfileUsername /></InstantProtectedRoute>} />
-          <Route path="/settings" element={<InstantProtectedRoute><PageSettings /></InstantProtectedRoute>} />
-          <Route path="/project/:projectId" element={<InstantProtectedRoute><ProjectDetailPage /></InstantProtectedRoute>} />
-          <Route path="/network" element={
+            {/* Système de profil universel */}
+            <Route path="/profile" element={<InstantProtectedRoute><ProfileRedirect /></InstantProtectedRoute>} />
+            <Route path="/profile/:username" element={<InstantProtectedRoute><ProfileUsername /></InstantProtectedRoute>} />
+            <Route path="/settings" element={<InstantProtectedRoute><PageSettings /></InstantProtectedRoute>} />
+            <Route path="/project/:projectId" element={<InstantProtectedRoute><ProjectDetailPage /></InstantProtectedRoute>} />
+            <Route path="/network" element={
             <InstantProtectedRoute>
               <TempSubscriptionGuard requiredPlan="Boost" pageName="referrals" description="Système de parrainage disponible avec Boost">
                 <NetworkPage />
               </TempSubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          <Route path="/upgrade" element={<InstantProtectedRoute><PagePricing /></InstantProtectedRoute>} />
-          <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
-          <Route path="/referrals" element={<InstantProtectedRoute><PageReferrals /></InstantProtectedRoute>} />
+            <Route path="/upgrade" element={<InstantProtectedRoute><PagePricing /></InstantProtectedRoute>} />
+            <Route path="/success" element={<InstantProtectedRoute><SuccessPage /></InstantProtectedRoute>} />
+            <Route path="/referrals" element={<InstantProtectedRoute><PageReferrals /></InstantProtectedRoute>} />
 
-          {/* Assistant AI */}
-          <Route path="/assistant" element={
+            {/* Assistant AI */}
+            <Route path="/assistant" element={
             <InstantProtectedRoute>
               <SubscriptionGuard requiredPlan="Lunch" pageName="assistant" description="AI Assistant available on Lunch plan">
                 <AssistantPage />
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
+          </Route>
 
           {/* Administration - Accès libre pour les admins */}
           <Route path="/admin/dashboard" element={
@@ -239,7 +247,7 @@ function AppContent() {
           <Route path="/onboarding" element={<InstantProtectedRoute><OnboardingPage /></InstantProtectedRoute>} />
         </Routes>
       </Suspense>
-    </Layout>
+    </>
   );
 }
 
