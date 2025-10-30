@@ -20,15 +20,6 @@ Welcome! FiverFlow is your all‑in‑one cockpit to manage clients, orders, inv
 3. Real‑time data: all screens sync with the database (Supabase). Actions update instantly across the app.
 4. AI Assistant: available depending on plan; speeds up input, search, and automation.
 
-## Syllabus (learning path)
-
-- Week 1: Dashboard basics, onboarding, initial configuration.
-- Week 2: Clients and Orders — end‑to‑end flow from offer to delivery.
-- Week 3: Invoices and payments — templates, sending, tracking, export.
-- Week 4: Workboard and Calendar — tasks, priorities, deadlines, sync.
-- Week 5: Statistics and growth — KPIs, reports, decisions.
-- Bonus: AI Assistant, automations, and advanced integrations.
-
 ## Video placeholder (coming soon)
 
 A short walkthrough video will be embedded here to tour the interface and essential gestures.
@@ -64,7 +55,6 @@ Organize your work and clients:
 Additional features:
 
 - **Profile**: settings, appearance, and security
-- **Admin**: administration tools (role‑based)
 - **Upgrade**: plans and billing
 
 ## Need help
