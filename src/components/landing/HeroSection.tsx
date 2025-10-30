@@ -38,7 +38,11 @@ export const HeroSection = ({ onGetStarted }: HeroSectionProps = {}) => {
               transition={{ duration: 0.6 }}
             className="text-neutral-300 tracking-wide text-[11px] md:text-sm font-medium"
             >
-            Made for Freelancers by Freelancers
+            Made for {""}
+            <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
+              Freelancers
+            </span>{" "}
+            by Freelancers
             </motion.div>
 
             {/* Headline */}
