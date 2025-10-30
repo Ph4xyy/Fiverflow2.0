@@ -317,7 +317,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className={`min-h-screen ${pageBgClass} transition-colors duration-300`}>
+    <div className={`min-h-screen ${pageBgClass} transition-colors duration-300 no-x-overflow`}>
       {/* Topbar - Nouveau style professionnel */}
       <header className="bg-[#1e2938] backdrop-blur-xl border-b border-[#35414e] shadow-lg fixed w-full top-0 z-50">
         <div className="flex items-center justify-between px-3 sm:px-4 py-3">
@@ -327,7 +327,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               className="lg:hidden p-2 rounded-lg text-gray-300 hover:text-white hover:bg-[#35414e] transition-all duration-200"
             >
-              {isSidebarOpen ? <X size={40} /> : <Menu size={20} />}
+              {isSidebarOpen ? <X size={24} /> : <Menu size={20} />}
             </button>
             <Link to="/dashboard" className="text-2xl font-extrabold leading-none">
               <div className="flex items-center space-x-3">
@@ -455,8 +455,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }) => {
           />
         )}
 
-        <main className="flex-1 lg:ml-64 min-h-screen">
-          <div className={`p-0 sm:p-6 min-h-screen transition-colors duration-300`}>
+        <main className="flex-1 lg:ml-64 min-h-screen no-x-overflow">
+          <div className={`p-0 sm:p-6 min-h-screen transition-colors duration-300 no-x-overflow`}>
             <LocalErrorBoundary>{children}</LocalErrorBoundary>
           </div>
         </main>
