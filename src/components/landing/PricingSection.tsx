@@ -273,17 +273,7 @@ const PricingSection = () => {
           })}
         </div>
 
-        {/* Additional Info */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="mt-16 text-center"
-        >
-          <p className="text-sm text-neutral-400">
-            All plans include a 14-day free trial. No credit card required. Cancel anytime.
-          </p>
-        </motion.div>
+        {/* Additional Info removed as requested */}
       </div>
     </section>
   );
