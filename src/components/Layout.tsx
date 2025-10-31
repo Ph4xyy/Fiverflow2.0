@@ -439,13 +439,8 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }: LayoutProps) => {
           />
         )}
 
-<<<<<<< HEAD
-        <main className="flex-1 lg:ml-64 min-h-screen bg-[#111726]">
-          <div className={`p-0 sm:p-6 min-h-screen transition-colors duration-300 bg-[#111726]`}>
-=======
-        <main className="flex-1 lg:ml-64 min-h-screen no-x-overflow">
-          <div className={`p-0 sm:p-6 min-h-screen transition-colors duration-300 no-x-overflow`}>
->>>>>>> 6b0ec7564b4ddec48a8d016c58fb6540c9f22dd7
+        <main className="flex-1 lg:ml-64 min-h-screen bg-[#111726] no-x-overflow">
+          <div className={`p-0 sm:p-6 min-h-screen transition-colors duration-300 bg-[#111726] no-x-overflow`}>
             <LocalErrorBoundary>{children}</LocalErrorBoundary>
           </div>
         </main>
