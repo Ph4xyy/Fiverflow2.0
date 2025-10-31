@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 
 // Import logo
 import LogoImage from '../assets/LogoFiverFlow.png';
@@ -40,7 +40,7 @@ import {
 } from 'lucide-react';
 
 interface LayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 /* ---------- Nouveau thème visuel professionnel ---------- */
@@ -125,7 +125,7 @@ class LocalErrorBoundary extends React.Component<LocalErrorBoundaryProps, LocalE
   }
 }
 
-const LayoutInner: React.FC<LayoutProps> = ({ children }: LayoutProps) => {
+const LayoutInner: React.FC<LayoutProps> = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   // theme context not used here; keeping UI identical while removing unused refs
 
@@ -441,7 +441,7 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }: LayoutProps) => {
 
         <main className="flex-1 lg:ml-64 min-h-screen bg-[#111726] no-x-overflow">
           <div className={`p-0 sm:p-6 min-h-screen transition-colors duration-300 bg-[#111726] no-x-overflow`}>
-            <LocalErrorBoundary>{children}</LocalErrorBoundary>
+            <LocalErrorBoundary><Outlet /></LocalErrorBoundary>
           </div>
         </main>
         
@@ -593,17 +593,17 @@ const LayoutInner: React.FC<LayoutProps> = ({ children }: LayoutProps) => {
   );
 };
 
-const Layout: React.FC<LayoutProps> = ({ children }: LayoutProps) => {
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   
   // Skip Layout for landing page only
   if (location.pathname === '/landing') {
-    return <>{children}</>;
+    return <>{children || <Outlet />}</>;
   }
   
   return (
     <LocalErrorBoundary>
-      <LayoutInner>{children}</LayoutInner>
+      <LayoutInner />
     </LocalErrorBoundary>
   );
 };
