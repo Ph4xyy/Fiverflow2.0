@@ -132,7 +132,7 @@ async function handleCheckoutSessionCompleted(supabase: any, session: any) {
   // Find user by customer ID
   const { data: user, error: userError } = await supabase
     .from('user_profiles')
-    .select('user_id')
+    .select('user_id, id, referred_by')
     .eq('stripe_customer_id', customerId)
     .single()
 
@@ -175,6 +175,28 @@ async function handleCheckoutSessionCompleted(supabase: any, session: any) {
     console.error('Failed to update user profile:', updateError)
   }
 
+  // 🎯 CREATE REFERRAL COMMISSION
+  if (user.referred_by) {
+    console.log('Creating referral commission for user:', user.user_id, 'Referrer:', user.referred_by)
+    
+    const subscriptionAmount = amount / 100 // Convert cents to dollars
+    const commissionPercentage = 20 // 20% commission
+
+    const { data: commissionId, error: commissionError } = await supabase.rpc('create_referral_commission', {
+      p_referrer_id: user.referred_by,
+      p_referred_id: user.id,
+      p_amount: subscriptionAmount,
+      p_percentage: commissionPercentage,
+      p_subscription_id: session.subscription || null
+    })
+
+    if (commissionError) {
+      console.error('Failed to create referral commission:', commissionError)
+    } else {
+      console.log('Referral commission created successfully:', commissionId)
+    }
+  }
+
   // Log admin action
   await supabase
     .from('admin_actions_log')
@@ -201,7 +223,7 @@ async function handleInvoicePaymentSucceeded(supabase: any, invoice: any) {
   // Find user by customer ID
   const { data: user, error: userError } = await supabase
     .from('user_profiles')
-    .select('user_id')
+    .select('user_id, id, referred_by')
     .eq('stripe_customer_id', customerId)
     .single()
 
@@ -226,6 +248,28 @@ async function handleInvoicePaymentSucceeded(supabase: any, invoice: any) {
 
   if (transactionError) {
     console.error('Failed to create transaction:', transactionError)
+  }
+
+  // 🎯 CREATE REFERRAL COMMISSION FOR RECURRING PAYMENT
+  if (user.referred_by) {
+    console.log('Creating referral commission for recurring payment:', user.user_id, 'Referrer:', user.referred_by)
+    
+    const subscriptionAmount = amount / 100 // Convert cents to dollars
+    const commissionPercentage = 20 // 20% commission
+
+    const { data: commissionId, error: commissionError } = await supabase.rpc('create_referral_commission', {
+      p_referrer_id: user.referred_by,
+      p_referred_id: user.id,
+      p_amount: subscriptionAmount,
+      p_percentage: commissionPercentage,
+      p_subscription_id: invoice.subscription || null
+    })
+
+    if (commissionError) {
+      console.error('Failed to create referral commission:', commissionError)
+    } else {
+      console.log('Referral commission created successfully:', commissionId)
+    }
   }
 }
 
