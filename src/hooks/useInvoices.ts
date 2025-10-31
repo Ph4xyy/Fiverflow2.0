@@ -27,6 +27,8 @@ export interface Invoice {
     id: string;
     name: string;
     platform?: string;
+    email_primary?: string;
+    email_secondary?: string;
   };
 }
 
@@ -99,7 +101,7 @@ export function useInvoices() {
           template_id,
           created_at,
           updated_at,
-          clients!inner(id, name, platform)
+          clients!inner(id, name, platform, email_primary, email_secondary)
         `)
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
@@ -200,7 +202,9 @@ export function useInvoices() {
           clients!inner(
             id,
             name,
-            platform
+            platform,
+            email_primary,
+            email_secondary
           )
         `)
         .eq('id', createdId as unknown as string)
@@ -327,7 +331,9 @@ export function useInvoices() {
           clients!inner(
             id,
             name,
-            platform
+            platform,
+            email_primary,
+            email_secondary
           )
         `)
         .eq("id", id)

@@ -30,7 +30,8 @@ const PageInvoices: React.FC = () => {
     updateInvoice, 
     deleteInvoice, 
     markAsPaid, 
-    sendInvoice 
+    sendInvoice,
+    fetchInvoices
   } = useInvoices();
 
   const [search, setSearch] = useState("");
@@ -431,6 +432,7 @@ const PageInvoices: React.FC = () => {
           onSuccess={() => {
             setFormOpen(false);
             setEditingInvoice(null);
+            fetchInvoices(); // Refresh the invoice list
           }}
         />
       )}
