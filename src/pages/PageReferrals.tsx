@@ -36,6 +36,8 @@ const PageReferrals: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [requestPayoutLoading, setRequestPayoutLoading] = useState(false);
+  const [userReferralCode, setUserReferralCode] = useState<string>('');
+  const [generatingCode, setGeneratingCode] = useState(false);
 
   // Fetch referral data
   const fetchReferralData = useCallback(async () => {
@@ -47,7 +49,7 @@ const PageReferrals: React.FC = () => {
       // Fetch stats from user_profiles
       const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
-        .select('total_referrals, referral_earnings')
+        .select('total_referrals, referral_earnings, referral_code')
         .eq('user_id', user.id)
         .single();
 
@@ -58,6 +60,11 @@ const PageReferrals: React.FC = () => {
         totalEarnings: parseFloat(profile?.referral_earnings || '0'),
         pendingEarnings: 0
       });
+
+      // Set user's referral code
+      if (profile?.referral_code) {
+        setUserReferralCode(profile.referral_code);
+      }
 
       // Get user's profile ID
       const { data: userProfile } = await supabase
@@ -108,9 +115,9 @@ const PageReferrals: React.FC = () => {
     }
   }, [user, fetchReferralData]);
 
-  // Generate referral link
-  const referralLink = referralCode
-    ? `https://fiverflow.com/?ref=${referralCode}`
+  // Generate referral link (use userReferralCode instead of referralCode from context)
+  const referralLink = userReferralCode
+    ? `https://fiverflow.com/?ref=${userReferralCode}`
     : '';
 
   // Copy referral link
@@ -158,6 +165,36 @@ const PageReferrals: React.FC = () => {
         return 'bg-red-500/20 text-red-400 border border-red-500/30';
       default:
         return 'bg-gray-500/20 text-gray-400 border border-gray-500/30';
+    }
+  };
+
+  // Generate referral code if missing
+  const handleGenerateReferralCode = async () => {
+    if (!user) return;
+
+    setGeneratingCode(true);
+    try {
+      // Generate a unique code
+      const { data: newCode, error: generateError } = await supabase.rpc('generate_referral_code');
+      
+      if (generateError) throw generateError;
+      if (!newCode) throw new Error('Failed to generate code');
+      
+      // Update user's referral code
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .update({ referral_code: newCode })
+        .eq('user_id', user.id);
+
+      if (updateError) throw updateError;
+
+      toast.success('Referral code generated!');
+      await fetchReferralData();
+    } catch (error: any) {
+      console.error('Error generating referral code:', error);
+      toast.error(error.message || 'Failed to generate referral code');
+    } finally {
+      setGeneratingCode(false);
     }
   };
 
@@ -259,28 +296,52 @@ const PageReferrals: React.FC = () => {
         <div className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-2xl p-8 border border-purple-700/30 backdrop-blur-sm">
           <h2 className="text-xl font-semibold text-white mb-4">Your Referral Link</h2>
           <div className="bg-gray-900/50 rounded-xl p-4 border border-gray-700/50 mb-4">
-            <p className="text-white font-mono text-sm break-all">{referralLink || 'Loading...'}</p>
+            <p className="text-white font-mono text-sm break-all">
+              {referralLink || (!loading && !userReferralCode ? 'No referral code yet' : 'Loading...')}
+            </p>
           </div>
-          <button
-            onClick={copyReferralLink}
-            disabled={!referralLink}
-            className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-medium hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-          >
-            {copied ? (
-              <>
-                <CheckCircle className="w-5 h-5 mr-2" />
-                Copied!
-              </>
-            ) : (
-              <>
-                <Copy className="w-5 h-5 mr-2" />
-                Copy Link
-              </>
-            )}
-          </button>
-          <p className="text-gray-400 text-sm mt-4 text-center">
-            Share this link with your friends. When they subscribe, you earn 20% commission!
-          </p>
+          {!userReferralCode && !loading ? (
+            <button
+              onClick={handleGenerateReferralCode}
+              disabled={generatingCode}
+              className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-medium hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              {generatingCode ? (
+                <>
+                  <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Gift className="w-5 h-5 mr-2" />
+                  Generate Referral Code
+                </>
+              )}
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={copyReferralLink}
+                disabled={!referralLink}
+                className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-medium hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {copied ? (
+                  <>
+                    <CheckCircle className="w-5 h-5 mr-2" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-5 h-5 mr-2" />
+                    Copy Link
+                  </>
+                )}
+              </button>
+              <p className="text-gray-400 text-sm mt-4 text-center">
+                Share this link with your friends. When they subscribe, you earn 20% commission!
+              </p>
+            </>
+          )}
         </div>
 
         {/* Commission History */}
