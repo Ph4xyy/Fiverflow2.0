@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-import AdminLayout from '../../components/AdminLayout'
-import AdminNavigation from '../../components/AdminNavigation'
 import { useAdminAI } from '../../hooks/useAdminAI'
 import { AIResponse } from '../../services/adminService'
 import {
@@ -97,8 +95,7 @@ const AdminAIPage: React.FC = () => {
   }
 
   return (
-    <AdminLayout>
-      <div className="space-y-6 p-4 sm:p-6">
+    <div className="space-y-6 p-4 sm:p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center space-x-3">
@@ -320,7 +317,7 @@ const AdminAIPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   )
 }
 

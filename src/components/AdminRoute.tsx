@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { Shield, AlertCircle } from 'lucide-react'
-import AdminLayout from './AdminLayout'
 
 interface AdminRouteProps {
   children: React.ReactNode
@@ -67,43 +66,39 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
 
   if (authLoading || loading) {
     return (
-      <AdminLayout>
-        <div className="space-y-4 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 text-center">
-            <div className="flex items-center justify-center mb-4">
-              <Shield className="animate-pulse text-indigo-600" size={48} />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Vérification des permissions...
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Vérification de votre accès administrateur en cours.
-            </p>
+      <div className="space-y-4 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 text-center">
+          <div className="flex items-center justify-center mb-4">
+            <Shield className="animate-pulse text-indigo-600" size={48} />
           </div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Vérification des permissions...
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Vérification de votre accès administrateur en cours.
+          </p>
         </div>
-      </AdminLayout>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <AdminLayout>
-        <div className="space-y-4 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-lg border border-red-200 dark:border-red-800 p-6 text-center">
-            <AlertCircle className="mx-auto mb-4 text-red-500" size={48} />
-            <h2 className="text-xl font-semibold text-red-800 dark:text-red-200 mb-2">
-              Accès non autorisé
-            </h2>
-            <p className="text-red-600 dark:text-red-400 mb-4">
-              {error}
-            </p>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              <p>Rôles autorisés: Admin, Moderator</p>
-              <p>Votre rôle actuel: {userProfile?.role || 'Non défini'}</p>
-            </div>
+      <div className="space-y-4 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-red-200 dark:border-red-800 p-6 text-center">
+          <AlertCircle className="mx-auto mb-4 text-red-500" size={48} />
+          <h2 className="text-xl font-semibold text-red-800 dark:text-red-200 mb-2">
+            Accès non autorisé
+          </h2>
+          <p className="text-red-600 dark:text-red-400 mb-4">
+            {error}
+          </p>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            <p>Rôles autorisés: Admin, Moderator</p>
+            <p>Votre rôle actuel: {userProfile?.role || 'Non défini'}</p>
           </div>
         </div>
-      </AdminLayout>
+      </div>
     )
   }
 

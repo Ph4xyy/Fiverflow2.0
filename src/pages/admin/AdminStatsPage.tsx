@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import AdminLayout from '../../components/AdminLayout'
 import { useAdvancedStats } from '../../hooks/useAdvancedStats'
 import { ExportService } from '../../services/exportService'
 import { adminUserService } from '../../services/adminUserService'
@@ -89,18 +88,16 @@ const AdminStatsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <AdminLayout>
-        <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
-      </AdminLayout>
+      </div>
     )
   }
 
   if (error || !stats) {
     return (
-      <AdminLayout>
-        <div className="text-center py-12">
+      <div className="text-center py-12">
           <div className="text-red-500 mb-4">
             <Activity className="w-12 h-12 mx-auto mb-2" />
             <p className="text-lg font-semibold">Erreur de chargement</p>
@@ -114,13 +111,12 @@ const AdminStatsPage: React.FC = () => {
             Réessayer
           </button>
         </div>
-      </AdminLayout>
+      </div>
     )
   }
 
   return (
-    <AdminLayout>
-      <div className="space-y-6 p-4 sm:p-6">
+    <div className="space-y-6 p-4 sm:p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -425,7 +421,7 @@ const AdminStatsPage: React.FC = () => {
           </ResponsiveContainer>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   )
 }
 

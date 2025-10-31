@@ -194,29 +194,44 @@ function AppContent() {
               </SubscriptionGuard>
             </InstantProtectedRoute>
           } />
-          </Route>
 
-          {/* Administration - Accès libre pour les admins */}
-          <Route path="/admin/dashboard" element={
-            <InstantProtectedRoute>
-              <AdminRoute><AdminDashboard /></AdminRoute>
-            </InstantProtectedRoute>
-          } />
-          <Route path="/admin/users" element={
-            <InstantProtectedRoute>
-              <AdminRoute><AdminUsersPage /></AdminRoute>
-            </InstantProtectedRoute>
-          } />
-          <Route path="/admin/stats" element={
-            <InstantProtectedRoute>
-              <AdminRoute><AdminStatsPage /></AdminRoute>
-            </InstantProtectedRoute>
-          } />
-          <Route path="/admin/ai" element={
-            <InstantProtectedRoute>
-              <AdminRoute><AdminAIPage /></AdminRoute>
-            </InstantProtectedRoute>
-          } />
+            {/* Administration - Accès libre pour les admins */}
+            <Route path="/admin/dashboard" element={
+              <InstantProtectedRoute>
+                <AdminRoute><AdminDashboard /></AdminRoute>
+              </InstantProtectedRoute>
+            } />
+            <Route path="/admin/users" element={
+              <InstantProtectedRoute>
+                <AdminRoute><AdminUsersPage /></AdminRoute>
+              </InstantProtectedRoute>
+            } />
+            <Route path="/admin/stats" element={
+              <InstantProtectedRoute>
+                <AdminRoute><AdminStatsPage /></AdminRoute>
+              </InstantProtectedRoute>
+            } />
+            <Route path="/admin/ai" element={
+              <InstantProtectedRoute>
+                <AdminRoute><AdminAIPage /></AdminRoute>
+              </InstantProtectedRoute>
+            } />
+
+            {/* Système de facturation (lazy loaded) - Scale uniquement */}
+            <Route path="/invoices" element={
+              <InstantProtectedRoute>
+                <SubscriptionGuard requiredPlan="Scale" pageName="invoices" description="Système de facturation disponible avec Scale">
+                  <InvoicesLayout />
+                </SubscriptionGuard>
+              </InstantProtectedRoute>
+            }>
+              <Route index element={<PageInvoices />} />
+              <Route path="sent" element={<PageInvoices />} />
+              <Route path="create" element={<PageInvoices />} />
+              <Route path="templates" element={<InvoiceTemplatesPage />} />
+              <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
+            </Route>
+          </Route>
 
           {/* Diagnostic Erreur 406 (développement uniquement) */}
           {import.meta.env.DEV && (
@@ -227,21 +242,6 @@ function AppContent() {
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/cookie-policy" element={<CookiePolicy />} />
-
-          {/* Système de facturation (lazy loaded) - Scale uniquement */}
-          <Route path="/invoices" element={
-            <InstantProtectedRoute>
-              <SubscriptionGuard requiredPlan="Scale" pageName="invoices" description="Système de facturation disponible avec Scale">
-                <InvoicesLayout />
-              </SubscriptionGuard>
-            </InstantProtectedRoute>
-          }>
-            <Route index element={<PageInvoices />} />
-            <Route path="sent" element={<PageInvoices />} />
-            <Route path="create" element={<PageInvoices />} />
-            <Route path="templates" element={<InvoiceTemplatesPage />} />
-            <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
-          </Route>
 
           {/* Onboarding pour nouveaux utilisateurs */}
           <Route path="/onboarding" element={<InstantProtectedRoute><OnboardingPage /></InstantProtectedRoute>} />

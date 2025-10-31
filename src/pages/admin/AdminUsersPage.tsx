@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import AdminLayout from '../../components/AdminLayout'
 import UserDetailModal from '../../components/UserDetailModal'
 import { useAdminUsers } from '../../hooks/useAdminUsers'
 import { AdminUser } from '../../services/adminUserService'
@@ -254,8 +253,7 @@ const AdminUsersPage: React.FC = () => {
   }
 
   return (
-    <AdminLayout>
-      <div className="space-y-6 p-4 sm:p-6">
+    <div className="space-y-6 p-4 sm:p-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -677,7 +675,7 @@ const AdminUsersPage: React.FC = () => {
         roles={roles}
         subscriptionPlans={subscriptionPlans}
       />
-    </AdminLayout>
+    </div>
   )
 }
 

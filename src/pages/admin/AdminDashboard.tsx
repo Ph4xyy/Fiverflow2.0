@@ -1,6 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import AdminLayout from '../../components/AdminLayout';
-import AdminNavigation from '../../components/AdminNavigation';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAdminStats } from '../../hooks/useAdminStats';
 import UserDetailedStats from '../../components/UserDetailedStats';
@@ -95,25 +93,22 @@ const AdminDashboard: React.FC = () => {
 
   if (!user) {
     return (
-      <AdminLayout>
-        <div className="space-y-4 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 text-center">
-            <AlertCircle className="mx-auto mb-4 text-red-500" size={48} />
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Accès non autorisé
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Vous devez être connecté pour accéder au tableau de bord administrateur.
-            </p>
-          </div>
+      <div className="space-y-4 p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 text-center">
+          <AlertCircle className="mx-auto mb-4 text-red-500" size={48} />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Accès non autorisé
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Vous devez être connecté pour accéder au tableau de bord administrateur.
+          </p>
         </div>
-      </AdminLayout>
+      </div>
     );
   }
 
   return (
-    <AdminLayout>
-      <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+    <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center space-x-3">
@@ -678,7 +673,6 @@ const AdminDashboard: React.FC = () => {
               />
             )}
       </div>
-      </AdminLayout>
     );
   };
 
