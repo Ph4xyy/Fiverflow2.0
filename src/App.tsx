@@ -77,7 +77,6 @@ import DocsLayout from './components/DocsLayout';
 import DocPage from './pages/docs/DocPage';
 
 // Pages de facturation (lazy loading pour optimiser les performances)
-const InvoicesLayout = lazy(() => import('./pages/InvoicesLayout'));
 const PageInvoices = lazy(() => import('./pages/PageInvoices'));
 const InvoiceTemplatesPage = lazy(() => import('./pages/InvoiceTemplatesPage'));
 const InvoiceTemplateEditorPage = lazy(() => import('./pages/InvoiceTemplateEditorPage'));
@@ -221,16 +220,38 @@ function AppContent() {
             <Route path="/invoices" element={
               <InstantProtectedRoute>
                 <SubscriptionGuard requiredPlan="Scale" pageName="invoices" description="Système de facturation disponible avec Scale">
-                  <InvoicesLayout />
+                  <PageInvoices />
                 </SubscriptionGuard>
               </InstantProtectedRoute>
-            }>
-              <Route index element={<PageInvoices />} />
-              <Route path="sent" element={<PageInvoices />} />
-              <Route path="create" element={<PageInvoices />} />
-              <Route path="templates" element={<InvoiceTemplatesPage />} />
-              <Route path="templates/:id" element={<InvoiceTemplateEditorPage />} />
-            </Route>
+            } />
+            <Route path="/invoices/sent" element={
+              <InstantProtectedRoute>
+                <SubscriptionGuard requiredPlan="Scale" pageName="invoices" description="Système de facturation disponible avec Scale">
+                  <PageInvoices />
+                </SubscriptionGuard>
+              </InstantProtectedRoute>
+            } />
+            <Route path="/invoices/create" element={
+              <InstantProtectedRoute>
+                <SubscriptionGuard requiredPlan="Scale" pageName="invoices" description="Système de facturation disponible avec Scale">
+                  <PageInvoices />
+                </SubscriptionGuard>
+              </InstantProtectedRoute>
+            } />
+            <Route path="/invoices/templates" element={
+              <InstantProtectedRoute>
+                <SubscriptionGuard requiredPlan="Scale" pageName="invoices" description="Système de facturation disponible avec Scale">
+                  <InvoiceTemplatesPage />
+                </SubscriptionGuard>
+              </InstantProtectedRoute>
+            } />
+            <Route path="/invoices/templates/:id" element={
+              <InstantProtectedRoute>
+                <SubscriptionGuard requiredPlan="Scale" pageName="invoices" description="Système de facturation disponible avec Scale">
+                  <InvoiceTemplateEditorPage />
+                </SubscriptionGuard>
+              </InstantProtectedRoute>
+            } />
           </Route>
 
           {/* Diagnostic Erreur 406 (développement uniquement) */}
