@@ -4,11 +4,15 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 
 export type SmtpSettings = {
-  smtp_host: string;
-  smtp_port: number;
-  smtp_user: string;
-  smtp_pass: string;
-  use_tls: boolean;
+  host: string;
+  port: number;
+  secure: boolean;
+  username: string;
+  password: string;
+  from_name?: string;
+  from_email?: string;
+  reply_to?: string;
+  enabled?: boolean;
 };
 
 export function useSmtpSettings() {

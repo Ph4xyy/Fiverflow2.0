@@ -100,10 +100,10 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
           unit_price: order.budget.toString()
         }
       ]);
-      toast.success("Commande importée");
+      toast.success("Order imported");
       setShowImportOrders(false);
     } else {
-      toast.error("Cette commande n'a pas de montant défini");
+      toast.error("This order has no amount defined");
     }
   };
 
@@ -141,7 +141,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
 
     // Validation
     if (!form.client_id) {
-      toast.error("Sélectionnez un client");
+      toast.error("Select a client");
       return;
     }
 
@@ -150,16 +150,16 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
       const price = typeof item.unit_price === 'string' ? parseFloat(item.unit_price.replace(',', '.')) || 0 : item.unit_price;
       return !item.description || qty === 0 || price === 0;
     })) {
-      toast.error("Ajoutez au moins un article valide");
+      toast.error("Add at least one valid item");
       return;
     }
 
     setLoading(true);
-    const toastId = toast.loading("Création de la facture...");
+    const toastId = toast.loading("Creating invoice...");
 
     try {
       if (!isSupabaseConfigured || !supabase || !user) {
-        toast.error("Configuration base de données manquante", { id: toastId });
+        toast.error("Database configuration missing", { id: toastId });
         return;
       }
 
@@ -236,12 +236,12 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
         }
       }
 
-      toast.success("Facture créée avec succès", { id: toastId });
+      toast.success("Invoice created successfully", { id: toastId });
       onSuccess();
       onClose();
     } catch (err: any) {
-      console.error("Erreur création facture:", err);
-      toast.error(err.message || "Erreur lors de la création", { id: toastId });
+      console.error("Error creating invoice:", err);
+      toast.error(err.message || "Error during creation", { id: toastId });
     } finally {
       setLoading(false);
     }
@@ -254,7 +254,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
       <div className="bg-[#11151D] rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] overflow-y-auto border border-[#1C2230] my-8">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#1C2230] sticky top-0 bg-[#11151D] z-10">
-          <h2 className="text-xl font-semibold text-white">Nouvelle Facture</h2>
+          <h2 className="text-xl font-semibold text-white">New Invoice</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-200 transition-colors"
@@ -265,7 +265,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
 
         {/* Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Informations Client */}
+          {/* Client Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -277,7 +277,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                 className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D]"
                 required
               >
-                <option value="">Sélectionner un client</option>
+                <option value="">Select a client</option>
                 {clients.map(client => (
                   <option key={client.id} value={client.id}>
                     {client.name}
@@ -288,17 +288,17 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Modèle de facture
+                Invoice Template
               </label>
               <select
                 value={form.template_id}
                 onChange={(e) => setForm({ ...form, template_id: e.target.value })}
                 className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D]"
               >
-                <option value="">Par défaut</option>
+                <option value="">Default</option>
                 {templates.map(template => (
                   <option key={template.id} value={template.id}>
-                    {template.name} {template.is_default ? "(défaut)" : ""}
+                    {template.name} {template.is_default ? "(default)" : ""}
                   </option>
                 ))}
               </select>
@@ -308,7 +308,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Date d'émission *
+                Issue Date *
               </label>
               <input
                 type="date"
@@ -321,7 +321,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Date d'échéance *
+                Due Date *
               </label>
               <input
                 type="date"
@@ -333,10 +333,10 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
             </div>
           </div>
 
-          {/* Articles */}
+          {/* Items */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-white">Articles</h3>
+              <h3 className="text-lg font-medium text-white">Items</h3>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -344,7 +344,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                   className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
                 >
                   <ShoppingCart size={18} />
-                  Importer commandes
+                  Import Orders
                 </button>
                 <button
                   type="button"
@@ -352,16 +352,16 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                   className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
                 >
                   <Plus size={18} />
-                  Ajouter
+                  Add
                 </button>
               </div>
             </div>
 
-            {/* Modal d'import des commandes */}
+            {/* Order import modal */}
             {showImportOrders && (
               <div className="mb-4 p-4 bg-slate-800 rounded-lg border border-slate-700">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-white">Sélectionnez une commande à importer</h4>
+                  <h4 className="text-sm font-medium text-white">Select an order to import</h4>
                   <button
                     type="button"
                     onClick={() => setShowImportOrders(false)}
@@ -372,7 +372,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                 </div>
                 <div className="max-h-48 overflow-y-auto space-y-2">
                   {orders.length === 0 ? (
-                    <p className="text-sm text-slate-400">Aucune commande disponible</p>
+                    <p className="text-sm text-slate-400">No orders available</p>
                   ) : (
                     orders.map(order => (
                       <button
@@ -409,11 +409,11 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                   <div className="col-span-2">
                     <input
                       type="text"
-                      placeholder="Qté"
+                      placeholder="Qty"
                       value={item.quantity || ''}
                       onChange={(e) => {
                         const val = e.target.value;
-                        // Permettre les nombres avec . ou ,
+                        // Allow numbers with . or ,
                         if (val === '' || /^\d*[.,]?\d*$/.test(val)) {
                           updateItem(index, 'quantity', val);
                         }
@@ -424,11 +424,11 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
                   <div className="col-span-2">
                     <input
                       type="text"
-                      placeholder="Prix unit."
+                      placeholder="Unit Price"
                       value={item.unit_price || ''}
                       onChange={(e) => {
                         const val = e.target.value;
-                        // Permettre les nombres avec . ou ,
+                        // Allow numbers with . or ,
                         if (val === '' || /^\d*[.,]?\d*$/.test(val)) {
                           updateItem(index, 'unit_price', val);
                         }
@@ -461,11 +461,11 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
             </div>
           </div>
 
-          {/* Taxes et Remises */}
+          {/* Taxes and Discounts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Taxe (%)
+                Tax (%)
               </label>
               <input
                 type="text"
@@ -482,7 +482,7 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Remise (%)
+                Discount (%)
               </label>
               <input
                 type="text"
@@ -499,22 +499,22 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
             </div>
           </div>
 
-          {/* Totaux */}
+          {/* Totals */}
           <div className="bg-slate-800 rounded-lg p-4">
             <div className="space-y-2">
               <div className="flex justify-between text-slate-300">
-                <span>Sous-total:</span>
+                <span>Subtotal:</span>
                 <span>${totals.subtotal.toFixed(2)}</span>
               </div>
               {totals.discountAmount > 0 && (
                 <div className="flex justify-between text-slate-300">
-                  <span>Remise:</span>
+                  <span>Discount:</span>
                   <span>-${totals.discountAmount.toFixed(2)}</span>
                 </div>
               )}
               {totals.taxAmount > 0 && (
                 <div className="flex justify-between text-slate-300">
-                  <span>Taxe ({form.tax_rate}%):</span>
+                  <span>Tax ({form.tax_rate}%):</span>
                   <span>${totals.taxAmount.toFixed(2)}</span>
                 </div>
               )}
@@ -528,14 +528,14 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
           {/* Notes */}
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Notes (optionnel)
+              Notes (optional)
             </label>
             <textarea
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
               rows={3}
               className="w-full px-3 py-2 border rounded-lg border-[#1C2230] text-slate-100 bg-[#11151D] placeholder-slate-500"
-              placeholder="Ajoutez des notes ou instructions..."
+              placeholder="Add notes or instructions..."
             />
           </div>
 
@@ -546,14 +546,14 @@ const InvoiceFormSimple: React.FC<InvoiceFormSimpleProps> = ({
               onClick={onClose}
               className="px-6 py-2 text-slate-300 hover:text-white transition-colors"
             >
-              Annuler
+              Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
               className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Création..." : "Créer la facture"}
+              {loading ? "Creating..." : "Create Invoice"}
             </button>
           </div>
         </form>

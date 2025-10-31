@@ -28,11 +28,11 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, 
       ""; // selon ton schéma clients
 
     setTo(defaultEmail || "");
-    setSubject(`Facture ${invoice?.number || ""}`);
+    setSubject(`Invoice ${invoice?.number || ""}`);
     setMessage(
-      `Bonjour ${invoice?.clients?.name || ""},\n\nVeuillez trouver ci-joint votre facture ${
+      `Hello ${invoice?.clients?.name || ""},\n\nPlease find attached your invoice ${
         invoice?.number || ""
-      }.\n\nCordialement,\nFiverFlow`
+      }.\n\nBest regards,\nFiverFlow`
     );
   }, [isOpen, invoice]);
 
@@ -41,18 +41,18 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!to || !subject) {
-      toast.error("Destinataire et sujet requis");
+      toast.error("Recipient and subject required");
       return;
     }
 
     try {
       setSending(true);
-      const toastId = toast.loading("Génération du PDF…");
+      const toastId = toast.loading("Generating PDF…");
 
       let pdfBase64: string;
       const filename = `${invoice?.number || "invoice"}.pdf`;
 
-      // Générer le PDF selon le template
+      // Generate PDF according to template
       if (invoice?.template?.schema) {
         const doc = await renderInvoiceWithTemplateToPdf(invoice.template.schema, invoice);
         const dataUri = doc.output("datauristring");
@@ -61,7 +61,7 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, 
         pdfBase64 = await generateInvoicePdfBase64(invoice);
       }
 
-      toast.loading("Envoi de l'email…", { id: toastId });
+      toast.loading("Sending email…", { id: toastId });
 
       if (!isSupabaseConfigured || !supabase) {
         console.error('Supabase not configured - cannot send email');
@@ -83,11 +83,12 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, 
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
 
-      toast.success("Email envoyé", { id: toastId });
+      toast.success("Email sent", { id: toastId });
       onClose();
     } catch (e: any) {
       console.error("[EmailInvoiceModal] send error:", e);
-      toast.error("Échec de l'envoi");
+      const errorMsg = e.message || "Failed to send email";
+      toast.error(errorMsg);
     } finally {
       setSending(false);
     }
@@ -104,7 +105,7 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, 
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl w-full max-w-lg">
         <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-slate-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Envoyer la facture par email</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Send Invoice by Email</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
             <X size={22} />
           </button>
@@ -112,7 +113,7 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, 
 
         <form onSubmit={handleSend} className="p-5 space-y-4">
           <div>
-            <label className={labelBase}>Destinataire *</label>
+            <label className={labelBase}>Recipient *</label>
             <input
               value={to}
               onChange={(e) => setTo(e.target.value)}
@@ -122,7 +123,7 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, 
             />
           </div>
           <div>
-            <label className={labelBase}>Sujet *</label>
+            <label className={labelBase}>Subject *</label>
             <input value={subject} onChange={(e) => setSubject(e.target.value)} className={inputBase} />
           </div>
           <div>
@@ -141,7 +142,7 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, 
               onClick={onClose}
               className="px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800"
             >
-              Annuler
+              Cancel
             </button>
             <button
               type="submit"
@@ -151,12 +152,12 @@ const EmailInvoiceModal: React.FC<EmailInvoiceModalProps> = ({ isOpen, onClose, 
               {sending ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  Envoi…
+                  Sending…
                 </>
               ) : (
                 <>
                   <Send className="w-4 h-4 mr-2" />
-                  Envoyer
+                  Send
                 </>
               )}
             </button>
