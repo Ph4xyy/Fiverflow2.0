@@ -203,9 +203,9 @@ const AssistantPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-slate-950 flex flex-col">
       {/* Header */}
-      <div className="bg-slate-900 border-b border-slate-700">
+      <div className="bg-slate-900 border-b border-slate-700 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -244,8 +244,144 @@ const AssistantPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'features' ? (
+      {activeTab === 'chat' ? (
+        <div className="flex-1 flex flex-col overflow-hidden bg-slate-900">
+          {/* Chat Header */}
+          <div className="flex items-center justify-between p-4 border-b border-slate-700 flex-shrink-0">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#9c68f2] to-[#422ca5] rounded-lg flex items-center justify-center">
+                  <Bot className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white">Jett</h3>
+                  <p className="text-sm text-slate-400">AI to optimize your workflow</p>
+                </div>
+              </div>
+              <button
+                onClick={resetConversation}
+                className="flex items-center space-x-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors border border-slate-700 hover:border-slate-600"
+                title="New conversation - Clear history"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>New conversation</span>
+              </button>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-4 max-w-5xl mx-auto w-full">
+            {isLoadingHistory && (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-[#9c68f2] mx-auto mb-2" />
+                  <p className="text-slate-400">Loading conversation history...</p>
+                </div>
+              </div>
+            )}
+            {!isLoadingHistory && messages.length === 0 && showSuggestions && (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#9c68f2] to-[#422ca5] rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <Bot className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">Hello! I am Jett, your FiverFlow assistant</h3>
+                  <p className="text-slate-400 mb-6">How can I help you optimize your freelance workflow?</p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {quickQuestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="p-3 text-left bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors group"
+                    >
+                      <div className="flex items-start space-x-3">
+                        <Lightbulb className="w-4 h-4 text-[#9c68f2] mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-slate-300 group-hover:text-white">{suggestion}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!isLoadingHistory && messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div className={`flex space-x-3 max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    message.role === 'user' 
+                      ? 'bg-blue-600' 
+                      : 'bg-gradient-to-br from-[#9c68f2] to-[#422ca5]'
+                  }`}>
+                    {message.role === 'user' ? (
+                      <MessageSquare className="w-4 h-4 text-white" />
+                    ) : (
+                      <Bot className="w-4 h-4 text-white" />
+                    )}
+                  </div>
+                  <div className={`rounded-lg px-4 py-3 ${
+                    message.role === 'user'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-800 text-slate-200'
+                  }`}>
+                    <p className="whitespace-pre-wrap">{message.content}</p>
+                    <p className={`text-xs mt-2 ${
+                      message.role === 'user' ? 'text-blue-100' : 'text-slate-400'
+                    }`}>
+                      {message.timestamp.toLocaleTimeString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="flex space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center">
+                    <Bot className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="bg-slate-800 rounded-lg px-4 py-3">
+                    <div className="flex items-center space-x-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-[#9c68f2]" />
+                      <span className="text-slate-400">The assistant is thinking...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input */}
+          <div className="border-t border-slate-700 flex-shrink-0">
+            <div className="max-w-5xl mx-auto p-4 md:p-6 lg:p-8">
+              <div className="flex space-x-3">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Type your question..."
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-transparent disabled:opacity-50"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!input.trim() || isLoading}
+                  className="px-6 py-3 bg-[#9c68f2] hover:bg-[#8655e6] disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Send</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-8">
             {/* Features Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -315,144 +451,8 @@ const AssistantPage: React.FC = () => {
               </div>
             </div>
           </div>
-        ) : (
-          <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden" style={{ height: '600px' }}>
-            <div className="flex flex-col h-full bg-slate-900">
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-slate-700">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-[#9c68f2] to-[#422ca5] rounded-lg flex items-center justify-center">
-                    <Bot className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white">Jett</h3>
-                    <p className="text-sm text-slate-400">AI to optimize your workflow</p>
-                  </div>
-                </div>
-                <button
-                  onClick={resetConversation}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors border border-slate-700 hover:border-slate-600"
-                  title="New conversation - Clear history"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>New conversation</span>
-                </button>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {isLoadingHistory && (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                      <Loader2 className="w-8 h-8 animate-spin text-[#9c68f2] mx-auto mb-2" />
-                      <p className="text-slate-400">Loading conversation history...</p>
-                    </div>
-                  </div>
-                )}
-                {!isLoadingHistory && messages.length === 0 && showSuggestions && (
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-[#9c68f2] to-[#422ca5] rounded-full mx-auto mb-4 flex items-center justify-center">
-                        <Bot className="w-8 h-8 text-white" />
-                      </div>
-                      <h3 className="text-lg font-semibold text-white mb-2">Hello! I am Jett, your FiverFlow assistant</h3>
-                      <p className="text-slate-400 mb-6">How can I help you optimize your freelance workflow?</p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {quickQuestions.map((suggestion, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleSuggestionClick(suggestion)}
-                          className="p-3 text-left bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors group"
-                        >
-                          <div className="flex items-start space-x-3">
-                            <Lightbulb className="w-4 h-4 text-[#9c68f2] mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-slate-300 group-hover:text-white">{suggestion}</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {!isLoadingHistory && messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div className={`flex space-x-3 max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        message.role === 'user' 
-                          ? 'bg-blue-600' 
-                          : 'bg-gradient-to-br from-[#9c68f2] to-[#422ca5]'
-                      }`}>
-                        {message.role === 'user' ? (
-                          <MessageSquare className="w-4 h-4 text-white" />
-                        ) : (
-                          <Bot className="w-4 h-4 text-white" />
-                        )}
-                      </div>
-                      <div className={`rounded-lg px-4 py-3 ${
-                        message.role === 'user'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-800 text-slate-200'
-                      }`}>
-                        <p className="whitespace-pre-wrap">{message.content}</p>
-                        <p className={`text-xs mt-2 ${
-                          message.role === 'user' ? 'text-blue-100' : 'text-slate-400'
-                        }`}>
-                          {message.timestamp.toLocaleTimeString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="flex space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-[#9c68f2] to-[#422ca5] rounded-full flex items-center justify-center">
-                        <Bot className="w-4 h-4 text-white" />
-                      </div>
-                      <div className="bg-slate-800 rounded-lg px-4 py-3">
-                        <div className="flex items-center space-x-2">
-                          <Loader2 className="w-4 h-4 animate-spin text-[#9c68f2]" />
-                          <span className="text-slate-400">The assistant is thinking...</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Input */}
-              <div className="p-4 border-t border-slate-700">
-                <div className="flex space-x-3">
-                  <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Type your question..."
-                    disabled={isLoading}
-                    className="flex-1 px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-transparent disabled:opacity-50"
-                  />
-                  <button
-                    onClick={handleSendMessage}
-                    disabled={!input.trim() || isLoading}
-                    className="px-6 py-3 bg-[#9c68f2] hover:bg-[#8655e6] disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2"
-                  >
-                    <Send className="w-4 h-4" />
-                    <span>Send</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
