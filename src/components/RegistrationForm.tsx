@@ -266,7 +266,7 @@ const RegistrationForm: React.FC = () => {
     setLoading(true);
 
     try {
-      const { error } = await signUp(formData.email, formData.password, {
+      const { user, error } = await signUp(formData.email, formData.password, {
         username: formData.username,
         country: formData.country,
         services: formData.services,
@@ -276,7 +276,12 @@ const RegistrationForm: React.FC = () => {
       if (error) {
         console.error('Registration error:', error);
         toast.error(error.message || 'Registration failed');
-      } else {
+        setLoading(false);
+        return;
+      }
+
+      // Si l'inscription réussit (avec ou sans user immédiat - dépend de la config email)
+      if (user || !error) {
         // Store additional registration data in sessionStorage for onboarding
         sessionStorage.setItem('pendingRegistrationData', JSON.stringify({
           username: formData.username,

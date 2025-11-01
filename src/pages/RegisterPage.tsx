@@ -30,7 +30,7 @@ const RegisterPage: React.FC = () => {
   const [success, setSuccess] = useState(false);
 
   const { signUp } = useAuth();
-  const { referralCode, referrerInfo, applyReferralCode, loading: referralLoading, error: referralError, setReferralCode } = useReferral();
+  const { referralCode, referrerInfo, applyReferralCode, error: referralError, setReferralCode } = useReferral();
   const navigate = useNavigate();
 
   // Vérifier si un referralUsername est dans sessionStorage et l'appliquer
@@ -97,16 +97,26 @@ const RegisterPage: React.FC = () => {
 
       if (error) {
         setError(getErrorMessage(error.message));
-      } else if (user) {
+        setLoading(false);
+        return;
+      }
+
+      // Si l'inscription réussit (avec ou sans user immédiat - dépend de la config email)
+      if (user) {
         // 🎯 APPLIQUER LE CODE DE PARRAINAGE APRÈS INSCRIPTION RÉUSSIE
         if (referralCode) {
           console.log('🎯 Applying referral code after successful signup:', referralCode);
-          const referralApplied = await applyReferralCode(user.id);
-          
-          if (referralApplied) {
-            console.log('✅ Referral code applied successfully');
-          } else {
-            console.warn('⚠️ Failed to apply referral code, but signup was successful');
+          try {
+            const referralApplied = await applyReferralCode(user.id);
+            
+            if (referralApplied) {
+              console.log('✅ Referral code applied successfully');
+            } else {
+              console.warn('⚠️ Failed to apply referral code, but signup was successful');
+            }
+          } catch (referralErr) {
+            console.warn('⚠️ Error applying referral code:', referralErr);
+            // Ne pas bloquer l'inscription si le referral échoue
           }
         }
 
@@ -114,8 +124,17 @@ const RegisterPage: React.FC = () => {
         setTimeout(() => {
           navigate('/login');
         }, 2000);
+      } else {
+        // Cas où l'inscription réussit mais email confirmation requise (user = null, error = null)
+        // C'est un cas valide - Supabase a envoyé l'email de confirmation
+        console.log('✅ Signup successful - email confirmation required');
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
       }
     } catch (err) {
+      console.error('Registration error:', err);
       setError('Une erreur inattendue s\'est produite');
     } finally {
       setLoading(false);
