@@ -203,35 +203,36 @@ const AssistantPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="h-screen bg-slate-950 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-slate-900 border-b border-slate-700 flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#9c68f2] to-[#422ca5] rounded-xl flex items-center justify-center">
-                <Bot className="w-6 h-6 text-white" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
+            <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 min-w-0 flex-1">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-[#9c68f2] to-[#422ca5] rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                <Bot className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">Jett — FiverFlow AI Assistant</h1>
-                <p className="text-slate-400">Your intelligent partner to optimize your freelance workflow</p>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-sm sm:text-base md:text-xl lg:text-2xl font-bold text-white truncate">Jett — FiverFlow AI Assistant</h1>
+                <p className="text-xs sm:text-sm text-slate-400 hidden sm:block truncate">Your intelligent partner to optimize your freelance workflow</p>
               </div>
             </div>
             
-            <div className="flex space-x-2">
+            <div className="flex space-x-1 sm:space-x-2 flex-shrink-0">
               <button
                 onClick={() => setActiveTab('features')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
+                className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 text-xs sm:text-sm md:text-base rounded-lg transition-colors ${
                   activeTab === 'features'
                     ? 'bg-[#9c68f2] text-white'
                     : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                 }`}
               >
-                Features
+                <span className="hidden sm:inline">Features</span>
+                <span className="sm:hidden">Feat</span>
               </button>
               <button
                 onClick={() => setActiveTab('chat')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
+                className={`px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 text-xs sm:text-sm md:text-base rounded-lg transition-colors ${
                   activeTab === 'chat'
                     ? 'bg-[#9c68f2] text-white'
                     : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
@@ -242,11 +243,12 @@ const AssistantPage: React.FC = () => {
               {activeTab === 'chat' && (
                 <button
                   onClick={resetConversation}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors border border-slate-700 hover:border-slate-600"
+                  className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors border border-slate-700 hover:border-slate-600"
                   title="New conversation - Clear history"
                 >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>New conversation</span>
+                  <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden md:inline">New conversation</span>
+                  <span className="md:hidden hidden sm:inline">New</span>
                 </button>
               )}
             </div>
@@ -255,9 +257,9 @@ const AssistantPage: React.FC = () => {
       </div>
 
       {activeTab === 'chat' ? (
-        <div className="flex-1 flex flex-col overflow-hidden bg-slate-900">
+        <div className="flex-1 flex flex-col overflow-hidden bg-slate-900 min-h-0">
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-4 max-w-5xl mx-auto w-full">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 space-y-3 sm:space-y-4 max-w-5xl mx-auto w-full min-h-0">
             {isLoadingHistory && (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
@@ -346,8 +348,8 @@ const AssistantPage: React.FC = () => {
 
           {/* Input */}
           <div className="border-t border-slate-700 flex-shrink-0">
-            <div className="max-w-5xl mx-auto p-4 md:p-6 lg:p-8">
-              <div className="flex space-x-3">
+            <div className="max-w-5xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8">
+              <div className="flex space-x-2 sm:space-x-3">
                 <input
                   type="text"
                   value={input}
@@ -355,22 +357,23 @@ const AssistantPage: React.FC = () => {
                   onKeyPress={handleKeyPress}
                   placeholder="Type your question..."
                   disabled={isLoading}
-                  className="flex-1 px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-transparent disabled:opacity-50"
+                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#9c68f2] focus:border-transparent disabled:opacity-50"
                 />
                 <button
                   onClick={handleSendMessage}
                   disabled={!input.trim() || isLoading}
-                  className="px-6 py-3 bg-[#9c68f2] hover:bg-[#8655e6] disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-2"
+                  className="px-4 sm:px-6 py-2 sm:py-3 bg-[#9c68f2] hover:bg-[#8655e6] disabled:bg-slate-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center space-x-1 sm:space-x-2 text-sm sm:text-base"
                 >
-                  <Send className="w-4 h-4" />
-                  <span>Send</span>
+                  <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Send</span>
                 </button>
               </div>
             </div>
           </div>
         </div>
       ) : (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
           <div className="space-y-8">
             {/* Features Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -440,6 +443,7 @@ const AssistantPage: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
         </div>
       )}
     </div>
