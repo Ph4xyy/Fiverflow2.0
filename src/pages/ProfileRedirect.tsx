@@ -17,16 +17,29 @@ const ProfileRedirect: React.FC = () => {
         return;
       }
 
+      if (!supabase) {
+        console.error('Supabase not configured');
+        navigate('/dashboard');
+        return;
+      }
+
       try {
         // Récupérer le username de l'utilisateur connecté
         const { data: userProfile, error } = await supabase
           .from('user_profiles')
           .select('username')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle(); // Utiliser maybeSingle() au lieu de single() pour éviter les erreurs si le profil n'existe pas
 
-        if (error || !userProfile?.username) {
+        if (error) {
           console.error('Erreur lors de la récupération du profil:', error);
+          // Si erreur RLS ou autre, rediriger vers le dashboard au lieu de bloquer
+          navigate('/dashboard');
+          return;
+        }
+
+        if (!userProfile?.username) {
+          console.warn('Profil utilisateur sans username, redirection vers les paramètres');
           // Rediriger vers les paramètres pour définir un username
           navigate('/settings');
           return;
@@ -36,7 +49,8 @@ const ProfileRedirect: React.FC = () => {
         navigate(`/profile/${userProfile.username}`);
       } catch (err) {
         console.error('Erreur lors de la redirection:', err);
-        navigate('/settings');
+        // En cas d'erreur, rediriger vers le dashboard au lieu de bloquer
+        navigate('/dashboard');
       }
     };
 

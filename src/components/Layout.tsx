@@ -74,10 +74,10 @@ const useIsAdminFromRole = (user: any) => {
           .from('user_profiles')
           .select('role')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle(); // Utiliser maybeSingle() pour gérer le cas où le profil n'existe pas encore
 
         if (error) {
-          console.error('Erreur lors de la récupération du rôle:', error);
+          console.warn('Erreur lors de la récupération du rôle (profil peut ne pas exister encore):', error);
           setIsAdmin(false);
         } else {
           setIsAdmin(profile?.role === 'Admin' || profile?.role === 'Moderator');

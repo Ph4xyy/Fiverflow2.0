@@ -85,21 +85,36 @@ export const useDashboardStats = () => {
         .select('id, name, created_at')
         .eq('user_id', user.id);
 
-      if (clientsError) throw clientsError;
+      if (clientsError) {
+        console.warn('Error fetching clients (might be RLS issue or table missing):', clientsError);
+        // Ne pas bloquer, continuer avec des données vides
+      }
 
-      // Récupérer les commandes
+      // Récupérer les commandes (avec une requête plus simple qui ne dépend pas de clients)
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
-        .select(`
-          id, title, status, budget, created_at, start_date, completed_date,
-          clients!inner(name)
-        `)
-        .eq('clients.user_id', user.id);
+        .select('id, title, status, budget, created_at, start_date, completed_date, client_id')
+        .eq('user_id', user.id);
 
-      if (ordersError) throw ordersError;
+      if (ordersError) {
+        console.warn('Error fetching orders (might be RLS issue or table missing):', ordersError);
+        // Ne pas bloquer, continuer avec des données vides
+      }
+
+      // Récupérer les noms des clients pour les commandes si possible
+      let clientNames: Record<string, string> = {};
+      if (clientsData && clientsData.length > 0) {
+        clientsData.forEach(client => {
+          clientNames[client.id] = client.name;
+        });
+      }
 
       const clients = clientsData || [];
-      const orders = ordersData || [];
+      // Mapper les commandes avec les noms de clients
+      const orders = (ordersData || []).map(order => ({
+        ...order,
+        clients: { name: clientNames[order.client_id] || 'Unknown Client' }
+      }));
 
       // Calculer les statistiques
       const now = new Date();
@@ -193,7 +208,7 @@ export const useDashboardStats = () => {
         .map(o => ({
           id: o.id,
           title: o.title,
-          client_name: o.clients?.name || 'Unknown',
+          client_name: o.clients?.name || 'Unknown Client',
           status: o.status,
           created_at: o.created_at,
         }));
