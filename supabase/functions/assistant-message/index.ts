@@ -101,7 +101,9 @@ const FUNCTIONS = [
         status: { type: 'string', enum: ['pending', 'in_progress', 'completed', 'cancelled'], description: 'New status (optional)' },
         budget: { type: 'number', description: 'New budget amount (optional)' },
         currency: { type: 'string', description: 'Currency code (optional)' },
+        start_date: { type: 'string', description: 'New start date in ISO format YYYY-MM-DD (optional)' },
         due_date: { type: 'string', description: 'New due date in ISO format YYYY-MM-DD (optional)' },
+        completed_date: { type: 'string', description: 'New completed date in ISO format YYYY-MM-DD (optional)' },
         title: { type: 'string', description: 'New title (optional)' },
         description: { type: 'string', description: 'New description (optional)' }
       },
@@ -232,7 +234,9 @@ async function executeFunction(functionName: string, args: any, userId: string, 
         if (args.status) updateData.status = args.status;
         if (args.budget !== undefined) updateData.budget = args.budget;
         if (args.currency) updateData.currency = args.currency;
+        if (args.start_date) updateData.start_date = args.start_date;
         if (args.due_date) updateData.due_date = args.due_date;
+        if (args.completed_date) updateData.completed_date = args.completed_date;
         if (args.title) updateData.title = args.title;
         if (args.description !== undefined) updateData.description = args.description;
 

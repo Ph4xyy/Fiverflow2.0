@@ -323,10 +323,11 @@ const AssistantPage: React.FC = () => {
                 </div>
                 <button
                   onClick={resetConversation}
-                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-                  title="New conversation"
+                  className="flex items-center space-x-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors border border-slate-700 hover:border-slate-600"
+                  title="Nouvelle conversation - Supprimer l'historique"
                 >
                   <RotateCcw className="w-4 h-4" />
+                  <span>Nouvelle conversation</span>
                 </button>
               </div>
 

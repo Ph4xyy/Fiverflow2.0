@@ -83,7 +83,7 @@ export const FUNCTIONS_DEFINITIONS = [
   },
   {
     name: 'update_order',
-    description: 'Update an existing order status or details',
+    description: 'Update an existing order status or details including dates',
     parameters: {
       type: 'object',
       properties: {
@@ -91,6 +91,11 @@ export const FUNCTIONS_DEFINITIONS = [
         status: { type: 'string', enum: ['pending', 'in_progress', 'completed', 'cancelled'], description: 'New status (optional)' },
         amount: { type: 'number', description: 'Order amount (optional)' },
         currency: { type: 'string', description: 'Currency code (optional)' },
+        start_date: { type: 'string', description: 'Start date in ISO format YYYY-MM-DD (optional)' },
+        due_date: { type: 'string', description: 'Due date in ISO format YYYY-MM-DD (optional)' },
+        completed_date: { type: 'string', description: 'Completed date in ISO format YYYY-MM-DD (optional)' },
+        title: { type: 'string', description: 'New title (optional)' },
+        description: { type: 'string', description: 'New description (optional)' },
         notes: { type: 'string', description: 'Additional notes (optional)' }
       },
       required: ['id']

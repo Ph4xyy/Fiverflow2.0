@@ -194,7 +194,7 @@ export async function tool_update_order(user: User, args: any): Promise<ToolResu
   try {
     await assertAssistantEntitlement(user);
 
-    const { id, status, amount, currency, notes } = args;
+    const { id, status, amount, currency, notes, start_date, due_date, completed_date, title, description } = args;
 
     if (!id) {
       return {
@@ -208,6 +208,11 @@ export async function tool_update_order(user: User, args: any): Promise<ToolResu
     if (amount) updates.budget = amount;
     if (currency) updates.currency = currency;
     if (notes) updates.notes = notes;
+    if (start_date) updates.start_date = start_date;
+    if (due_date) updates.due_date = due_date;
+    if (completed_date) updates.completed_date = completed_date;
+    if (title) updates.title = title;
+    if (description !== undefined) updates.description = description;
 
     const { data, error } = await supabase
       .from('orders')
