@@ -78,9 +78,9 @@ export const AIPresentationSection = () => {
           >
             <div className="rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl shadow-[0_30px_120px_rgba(0,0,0,0.8)] overflow-hidden">
               <img
-                src="/jett-chat-preview.png"
+                src="/jett-assistant-preview.png"
                 alt="Jett AI Assistant Chat Interface"
-                className="w-full h-auto rounded-2xl"
+                className="w-full h-auto"
                 loading="lazy"
               />
             </div>
