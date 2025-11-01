@@ -42,6 +42,80 @@ interface Event {
   order_id?: string;
 }
 
+/**
+ * Génère les dates récurrentes pour une subscription basée sur le billing_cycle
+ * @param startDate Date de départ (next_renewal_date)
+ * @param billingCycle Cycle de facturation (monthly, yearly, weekly, quarterly)
+ * @param monthsAhead Nombre de mois à l'avance pour générer les occurrences (défaut: 12)
+ * @returns Array de dates au format YYYY-MM-DD
+ */
+const generateRecurringDates = (startDate: string, billingCycle: string, monthsAhead: number = 12): string[] => {
+  const dates: string[] = [];
+  const start = new Date(startDate + 'T00:00:00'); // Ajouter l'heure pour éviter les problèmes de timezone
+  const now = new Date();
+  now.setHours(0, 0, 0, 0); // Mettre à minuit pour comparer seulement les dates
+  
+  // Calculer combien d'occurrences générer selon le cycle
+  let occurrences = 0;
+  switch (billingCycle) {
+    case 'weekly':
+      occurrences = Math.ceil((monthsAhead * 30) / 7); // ~4 semaines par mois
+      break;
+    case 'monthly':
+      occurrences = monthsAhead;
+      break;
+    case 'quarterly':
+      occurrences = Math.ceil(monthsAhead / 3); // 3 mois = 1 trimestre
+      break;
+    case 'yearly':
+      occurrences = Math.ceil(monthsAhead / 12); // 12 mois = 1 an
+      break;
+    default:
+      occurrences = monthsAhead; // Par défaut, mensuel
+  }
+  
+  // Générer les dates récurrentes
+  for (let i = 0; i < occurrences; i++) {
+    const date = new Date(start);
+    
+    switch (billingCycle) {
+      case 'weekly':
+        date.setDate(date.getDate() + (i * 7));
+        break;
+      case 'monthly':
+        // Ajouter i mois en préservant le jour du mois
+        const dayOfMonth = date.getDate();
+        date.setMonth(date.getMonth() + i);
+        // Si le jour n'existe pas dans le nouveau mois (ex: 31 janvier -> 31 février), utiliser le dernier jour du mois
+        const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        if (dayOfMonth > lastDayOfMonth) {
+          date.setDate(lastDayOfMonth);
+        } else {
+          date.setDate(dayOfMonth);
+        }
+        break;
+      case 'quarterly':
+        date.setMonth(date.getMonth() + (i * 3));
+        break;
+      case 'yearly':
+        date.setFullYear(date.getFullYear() + i);
+        break;
+      default:
+        date.setMonth(date.getMonth() + i);
+    }
+    
+    // Ne générer que les dates futures ou aujourd'hui
+    const dateOnly = new Date(date);
+    dateOnly.setHours(0, 0, 0, 0);
+    if (dateOnly >= now || i === 0) {
+      const dateStr = date.toISOString().split('T')[0];
+      dates.push(dateStr);
+    }
+  }
+  
+  return dates;
+};
+
 const PageCalendar: React.FC = () => {
   const { user } = useAuth();
   const { tasks, loading: tasksLoading } = useTasks();
@@ -272,26 +346,40 @@ const PageCalendar: React.FC = () => {
           location: event.location
         }));
 
-        // Convertir les abonnements en événements de renouvellement
-        const subscriptionEvents: Event[] = subscriptions
+        // Convertir les abonnements en événements de renouvellement récurrents
+        const subscriptionEvents: Event[] = [];
+        subscriptions
           .filter(sub => sub.is_active && sub.next_renewal_date)
-          .map(sub => {
-            console.log('💳 Subscription renewal event:', {
+          .forEach(sub => {
+            // Générer les dates récurrentes (12 mois à l'avance)
+            const recurringDates = generateRecurringDates(
+              sub.next_renewal_date!,
+              sub.billing_cycle,
+              12
+            );
+            
+            // Créer un événement pour chaque date récurrente
+            recurringDates.forEach((date, index) => {
+              subscriptionEvents.push({
+                id: `subscription-${sub.id}-${index}`,
+                title: `💳 ${sub.name} - $${sub.amount}`,
+                date: date,
+                time: '09:00',
+                type: 'reminder' as const,
+                category: 'subscription' as const,
+                priority: 'medium' as const,
+                description: `Renouvellement ${sub.billing_cycle} - ${sub.provider}`
+              });
+            });
+            
+            console.log('💳 Subscription renewal events generated:', {
               id: sub.id,
               name: sub.name,
               renewal_date: sub.next_renewal_date,
-              amount: sub.amount
+              billing_cycle: sub.billing_cycle,
+              occurrences: recurringDates.length,
+              dates: recurringDates.slice(0, 3).join(', ') + (recurringDates.length > 3 ? '...' : '')
             });
-            return {
-              id: `subscription-${sub.id}`,
-              title: `💳 ${sub.name} - $${sub.amount}`,
-              date: sub.next_renewal_date!,
-              time: '09:00',
-              type: 'reminder' as const,
-              category: 'subscription' as const,
-              priority: 'medium' as const,
-              description: `Renouvellement ${sub.billing_cycle} - ${sub.provider}`
-            };
           });
 
         // Combiner tous les événements

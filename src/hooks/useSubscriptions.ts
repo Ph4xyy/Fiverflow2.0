@@ -141,6 +141,9 @@ export const useSubscriptions = () => {
       setSubscriptions(prev => [newSubscription, ...prev]);
       toast.success('Subscription created successfully!');
       
+      // Re-fetch pour s'assurer que toutes les données sont à jour
+      await fetchSubscriptions();
+      
       return newSubscription;
     } catch (err: any) {
       console.error('Error creating subscription:', err);
@@ -186,6 +189,10 @@ export const useSubscriptions = () => {
       // Retirer de la liste locale
       setSubscriptions(prev => prev.filter(sub => sub.id !== id));
       toast.success('Subscription deleted successfully!');
+      
+      // Re-fetch pour s'assurer que toutes les données sont à jour
+      await fetchSubscriptions();
+      
       return true;
     } catch (err: any) {
       console.error('Error deleting subscription:', err);
@@ -253,6 +260,10 @@ export const useSubscriptions = () => {
       );
 
       toast.success('Subscription marked as paid! Next renewal updated.');
+      
+      // Re-fetch pour s'assurer que toutes les données sont à jour
+      await fetchSubscriptions();
+      
       return true;
     } catch (err: any) {
       console.error('Error marking subscription as paid:', err);
