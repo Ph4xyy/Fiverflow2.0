@@ -203,7 +203,7 @@ const AssistantPage: React.FC = () => {
   };
 
   return (
-    <div className="h-screen bg-slate-950 flex flex-col overflow-hidden">
+    <div className="fixed inset-0 bg-slate-950 flex flex-col overflow-hidden z-50" style={{ height: '100vh', height: '100dvh' }}>
       {/* Header */}
       <div className="bg-slate-900 border-b border-slate-700 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6">
@@ -257,9 +257,9 @@ const AssistantPage: React.FC = () => {
       </div>
 
       {activeTab === 'chat' ? (
-        <div className="flex-1 flex flex-col overflow-hidden bg-slate-900 min-h-0">
+        <div className="flex-1 flex flex-col overflow-hidden bg-slate-900" style={{ minHeight: 0, height: 0 }}>
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 space-y-3 sm:space-y-4 max-w-5xl mx-auto w-full min-h-0">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 space-y-3 sm:space-y-4 max-w-5xl mx-auto w-full" style={{ minHeight: 0 }}>
             {isLoadingHistory && (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
@@ -347,8 +347,8 @@ const AssistantPage: React.FC = () => {
           </div>
 
           {/* Input */}
-          <div className="border-t border-slate-700 flex-shrink-0">
-            <div className="max-w-5xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8">
+          <div className="border-t border-slate-700 flex-shrink-0 bg-slate-900">
+            <div className="max-w-5xl mx-auto p-2 sm:p-3 md:p-4 lg:p-6">
               <div className="flex space-x-2 sm:space-x-3">
                 <input
                   type="text"
