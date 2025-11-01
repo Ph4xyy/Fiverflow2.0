@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Bot, Sparkles, Zap, MessageSquare, Brain, TrendingUp, BarChart } from 'lucide-react';
+import { Bot, Zap, MessageSquare, Brain, TrendingUp, BarChart } from 'lucide-react';
 
 const features = [
   {
@@ -58,7 +58,7 @@ export const AIPresentationSection = () => {
           </div>
 
           <h2 className="text-3xl md:text-4xl font-semibold text-white mb-4">
-            Your AI-Powered Assistant
+            Meet Jett! Your own AI assistant
           </h2>
           <p className="text-lg text-neutral-300 max-w-2xl mx-auto">
             Get instant answers, smart suggestions, and intelligent insights powered by advanced AI.
@@ -68,7 +68,7 @@ export const AIPresentationSection = () => {
 
         {/* Chat Interface Preview */}
         <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
-          {/* Left: Chat preview */}
+          {/* Left: Chat preview image */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -76,76 +76,13 @@ export const AIPresentationSection = () => {
             transition={{ duration: 0.6 }}
             className="space-y-4"
           >
-            <div className="rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl shadow-[0_30px_120px_rgba(0,0,0,0.8)] p-6">
-              {/* Chat messages */}
-              <div className="space-y-4">
-                {/* User message */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2 }}
-                  className="flex justify-end"
-                >
-                  <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl rounded-br-sm px-4 py-3 max-w-[80%]">
-                    <p className="text-white text-sm">What's my revenue this month?</p>
-                  </div>
-                </motion.div>
-
-                {/* AI response */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.4 }}
-                  className="flex gap-3"
-                >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center flex-shrink-0">
-                    <Bot className="text-white" size={16} />
-                  </div>
-                  <div className="bg-white/5 border border-white/10 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
-                    <p className="text-neutral-200 text-sm mb-2">
-                      Your revenue this month is $12,450, up 32% from last month! Your top earning source is client consultations.
-                    </p>
-                    <div className="flex items-center gap-2 text-xs text-green-400">
-                      <TrendingUp size={14} />
-                      <span>Great progress!</span>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* User follow-up */}
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.6 }}
-                  className="flex justify-end"
-                >
-                  <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl rounded-br-sm px-4 py-3 max-w-[80%]">
-                    <p className="text-white text-sm">Show me my analytics</p>
-                  </div>
-                </motion.div>
-              </div>
-
-              {/* Input area */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.8 }}
-                className="mt-6 flex gap-3"
-              >
-                <input
-                  type="text"
-                  placeholder="Ask anything..."
-                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:border-indigo-500/50 transition-colors"
-                  disabled
-                />
-                <button className="w-12 h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center hover:shadow-lg transition-shadow">
-                  <Sparkles className="text-white" size={18} />
-                </button>
-              </motion.div>
+            <div className="rounded-2xl border border-white/10 bg-[rgba(255,255,255,0.03)] backdrop-blur-xl shadow-[0_30px_120px_rgba(0,0,0,0.8)] overflow-hidden">
+              <img
+                src="/jett-chat-preview.png"
+                alt="Jett AI Assistant Chat Interface"
+                className="w-full h-auto rounded-2xl"
+                loading="lazy"
+              />
             </div>
           </motion.div>
 

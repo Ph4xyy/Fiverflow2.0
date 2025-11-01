@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Bot, Send, RotateCcw, Lightbulb, Loader2, MessageSquare, Zap, Users, TrendingUp, HelpCircle } from 'lucide-react';
 import { callLLM } from '../lib/assistant/llmService';
 import { useAuth } from '../contexts/AuthContext';
@@ -19,6 +19,7 @@ const AssistantPage: React.FC = () => {
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [activeTab, setActiveTab] = useState<'chat' | 'features'>('chat');
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Charger l'historique au montage du composant
   useEffect(() => {
@@ -73,6 +74,13 @@ const AssistantPage: React.FC = () => {
 
     return () => clearTimeout(timeoutId);
   }, [messages, user, isLoadingHistory]);
+
+  // Scroll automatique vers le bas quand les messages changent ou quand on charge
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isLoading, isLoadingHistory]);
 
   const features = [
     {
@@ -324,10 +332,10 @@ const AssistantPage: React.FC = () => {
                 <button
                   onClick={resetConversation}
                   className="flex items-center space-x-2 px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors border border-slate-700 hover:border-slate-600"
-                  title="Nouvelle conversation - Supprimer l'historique"
+                  title="New conversation - Clear history"
                 >
                   <RotateCcw className="w-4 h-4" />
-                  <span>Nouvelle conversation</span>
+                  <span>New conversation</span>
                 </button>
               </div>
 
@@ -416,6 +424,7 @@ const AssistantPage: React.FC = () => {
                     </div>
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Input */}
