@@ -37,7 +37,7 @@ export function useSmtpSettings() {
   }, [user?.id]); // 🔥 FIXED: Only depend on user.id to prevent infinite loops
 
   const save = async (newSettings: SmtpSettings) => {
-    if (!user) return;
+    if (!user || !supabase) return;
     const { error } = await supabase
       .from("user_smtp_settings")
       .upsert({
