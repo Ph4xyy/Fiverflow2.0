@@ -203,7 +203,7 @@ const AssistantPage: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950 flex flex-col overflow-hidden z-50" style={{ height: '100vh', height: '100dvh' }}>
+    <div className="flex flex-col overflow-hidden bg-slate-950 -m-6 sm:-m-6" style={{ height: '100vh', maxHeight: '100vh' }}>
       {/* Header */}
       <div className="bg-slate-900 border-b border-slate-700 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4 md:py-6">
