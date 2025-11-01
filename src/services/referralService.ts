@@ -62,14 +62,11 @@ export class ReferralService {
    */
   static async setReferrer(userId: string, referralCode: string): Promise<boolean> {
     try {
-      // Trouver le parrain par son code
-      const { data: referrer, error: referrerError } = await supabase
-        .from('user_profiles')
-        .select('id')
-        .eq('referral_code', referralCode)
-        .single();
+      // Get referrer ID using RPC function
+      const { data: referrerId, error: referrerError } = await supabase
+        .rpc('get_referrer_id_by_code', { p_code: referralCode });
 
-      if (referrerError || !referrer) {
+      if (referrerError || !referrerId) {
         console.warn('Referrer not found for code:', referralCode);
         return false;
       }
@@ -77,7 +74,7 @@ export class ReferralService {
       // Mettre à jour le profil du filleul
       const { error: updateError } = await supabase
         .from('user_profiles')
-        .update({ referred_by: referrer.id })
+        .update({ referred_by: referrerId })
         .eq('user_id', userId);
 
       if (updateError) throw updateError;

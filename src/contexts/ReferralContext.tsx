@@ -111,12 +111,11 @@ export const ReferralProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setLoading(true);
       setError(null);
 
-      // Vérifier que le code existe dans la base de données
-      const { data: referrer, error: referrerError } = await supabase
-        .from('user_profiles')
-        .select('id, full_name, email')
-        .eq('referral_code', code)
-        .single();
+      // Use RPC function to securely get referrer info
+      const { data: referrerArray, error: referrerError } = await supabase
+        .rpc('get_referrer_info_by_code', { p_code: code });
+      
+      const referrer = referrerArray && referrerArray.length > 0 ? referrerArray[0] : null;
 
       if (referrerError || !referrer) {
         console.warn('Invalid referral code:', code);
