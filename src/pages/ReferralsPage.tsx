@@ -91,9 +91,9 @@ const ReferralsPage: React.FC = () => {
       case 'cancelled':
         return { icon: XCircle, color: 'text-red-500', bg: 'bg-red-500/10', label: 'Annulée' };
       case 'refunded':
-        return { icon: XCircle, color: 'text-gray-500', bg: 'bg-gray-500/10', label: 'Remboursée' };
+        return { icon: XCircle, color: 'text-slate-400', bg: 'bg-slate-500/10', label: 'Remboursée' };
       default:
-        return { icon: Clock, color: 'text-gray-500', bg: 'bg-gray-500/10', label: 'Inconnu' };
+        return { icon: Clock, color: 'text-slate-400', bg: 'bg-slate-500/10', label: 'Inconnu' };
     }
   };
 
@@ -317,7 +317,7 @@ const ReferralsPage: React.FC = () => {
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <Gift className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+                      <Gift className="w-12 h-12 text-slate-400 mx-auto mb-4" />
                       <p className="text-slate-400">Loading referral link...</p>
                     </div>
                   )}
@@ -402,7 +402,7 @@ const ReferralsPage: React.FC = () => {
                             <div>
                               <p className="text-white font-medium">{referral.referred_name}</p>
                               <p className="text-slate-400 text-sm">{referral.referred_email}</p>
-                              <p className="text-slate-500 text-xs">
+                              <p className="text-slate-400 text-xs">
                                 Inscrit le {formatDate(referral.referred_joined_at)}
                               </p>
                             </div>
@@ -420,9 +420,9 @@ const ReferralsPage: React.FC = () => {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <Users className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+                      <Users className="w-16 h-16 text-slate-400 mx-auto mb-4" />
                       <p className="text-slate-400 text-lg mb-2">Aucun filleul pour le moment</p>
-                      <p className="text-slate-500 text-sm">
+                      <p className="text-slate-400 text-sm">
                         Partagez votre lien de parrainage pour commencer à gagner !
                       </p>
                     </div>
@@ -460,7 +460,7 @@ const ReferralsPage: React.FC = () => {
                                   {formatDate(commission.created_at)}
                                 </p>
                                 {commission.payment_reference && (
-                                  <p className="text-slate-500 text-xs">
+                                  <p className="text-slate-400 text-xs">
                                     Ref: {commission.payment_reference}
                                   </p>
                                 )}
@@ -473,7 +473,7 @@ const ReferralsPage: React.FC = () => {
                               <p className={`text-sm ${statusInfo.color}`}>
                                 {statusInfo.label}
                               </p>
-                              <p className="text-slate-500 text-xs">
+                              <p className="text-slate-400 text-xs">
                                 {commission.percentage}% de commission
                               </p>
                             </div>
@@ -483,9 +483,9 @@ const ReferralsPage: React.FC = () => {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <DollarSign className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+                      <DollarSign className="w-16 h-16 text-slate-400 mx-auto mb-4" />
                       <p className="text-slate-400 text-lg mb-2">Aucune commission pour le moment</p>
-                      <p className="text-slate-500 text-sm">
+                      <p className="text-slate-400 text-sm">
                         Les commissions apparaîtront ici quand vos filleuls effectueront des paiements.
                       </p>
                     </div>
