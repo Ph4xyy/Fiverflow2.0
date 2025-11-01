@@ -143,7 +143,7 @@ const ReferralsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 text-white">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -310,7 +310,7 @@ const ReferralsPage: React.FC = () => {
 
                       <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
                         <p className="text-blue-300 text-sm">
-                          💡 <strong>Comment ça marche :</strong> Partagez votre lien avec vos amis. 
+                          💡 <strong className="text-blue-200 font-semibold">Comment ça marche :</strong> Partagez votre lien avec vos amis. 
                           Quand ils s'inscrivent et effectuent un paiement, vous gagnez 20% de commission !
                         </p>
                       </div>
@@ -411,8 +411,8 @@ const ReferralsPage: React.FC = () => {
                             <p className="text-green-400 font-medium">
                               {formatAmount(referral.commission_amount)}
                             </p>
-                            <p className="text-slate-400 text-sm">
-                              Commission {referral.commission_status}
+                            <p className="text-slate-300 text-sm">
+                              Commission <span className="capitalize">{referral.commission_status}</span>
                             </p>
                           </div>
                         </div>
